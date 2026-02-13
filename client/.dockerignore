@@ -1,0 +1,16 @@
+# =============================================================
+#  .dockerignore – Frontend (React + Vite)
+# =============================================================
+.git
+.gitignore
+node_modules
+dist
+build
+*.md
+Dockerfile
+.dockerignore
+.env
+.env.local
+.env.production
+.idea
+.vscode

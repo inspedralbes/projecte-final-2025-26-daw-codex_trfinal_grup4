@@ -1,0 +1,31 @@
+# =============================================================
+#  .gitignore – Proyecto Monorepo TFG
+# =============================================================
+
+# --- Entorno ---
+.env
+.env.local
+.env.production
+!.env.dev
+!.env.prod.example
+
+# --- IDEs ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- Docker ---
+docker/mysql/data/
+
+# --- Node ---
+node_modules/
+
+# --- PHP / Laravel ---
+vendor/
+
+# --- Logs ---
+*.log

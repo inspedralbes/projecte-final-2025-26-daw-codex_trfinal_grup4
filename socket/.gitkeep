@@ -1,0 +1,2 @@
+# Este directorio contendrá el servidor Socket.io.
+# Archivos necesarios: package.json, index.js

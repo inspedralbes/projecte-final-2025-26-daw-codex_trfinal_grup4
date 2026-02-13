@@ -1,0 +1,12 @@
+# =============================================================
+#  .dockerignore – Socket (Node.js + Socket.io)
+# =============================================================
+.git
+.gitignore
+node_modules
+*.md
+Dockerfile
+.dockerignore
+.env
+.idea
+.vscode

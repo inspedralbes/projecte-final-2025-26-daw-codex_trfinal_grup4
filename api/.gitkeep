@@ -1,0 +1,3 @@
+# Este directorio contendrá el proyecto Laravel 11.
+# Será inicializado con: composer create-project laravel/laravel .
+# O manualmente añadiendo los archivos del framework.

@@ -1,0 +1,158 @@
+# =============================================================
+#  Docker Compose – PRODUCCIÓN (Prod)
+#  Levantar: docker compose -f docker-compose.prod.yml up --build -d
+# =============================================================
+
+services:
+
+  # -----------------------------------------------------------
+  #  Nginx – Punto de entrada (Reverse Proxy + Static Server)
+  # -----------------------------------------------------------
+  webserver:
+    image: nginx:1.25-alpine
+    container_name: tfg_webserver_prod
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/default.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - client_build:/var/www/html/client/dist:ro
+    depends_on:
+      api:
+        condition: service_started
+      client:
+        condition: service_completed_successfully
+      socket:
+        condition: service_started
+    networks:
+      - tfg_network
+
+  # -----------------------------------------------------------
+  #  Backend – Laravel 11 (PHP 8.3-FPM)
+  # -----------------------------------------------------------
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: production
+    container_name: tfg_api_prod
+    restart: always
+    volumes:
+      - ./docker/php/php.prod.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+      - api_storage:/var/www/html/storage
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - tfg_network
+
+  # -----------------------------------------------------------
+  #  Frontend – React Build (genera archivos estáticos)
+  #  Este contenedor se ejecuta una vez, copia el build
+  #  al volumen compartido y finaliza.
+  # -----------------------------------------------------------
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      target: production
+    container_name: tfg_client_prod
+    restart: "no"
+    volumes:
+      - client_build:/output
+    # Copiar los archivos del build al volumen compartido
+    command: ["sh", "-c", "cp -r /app/dist/* /output/ && echo 'Build copied successfully'"]
+    networks:
+      - tfg_network
+
+  # -----------------------------------------------------------
+  #  Socket – Node.js + Socket.io
+  # -----------------------------------------------------------
+  socket:
+    build:
+      context: ./socket
+      dockerfile: Dockerfile
+      target: production
+    container_name: tfg_socket_prod
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - tfg_network
+    # Sin puertos expuestos – solo accesible via red interna
+
+  # -----------------------------------------------------------
+  #  MySQL 8.0
+  # -----------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: tfg_mysql_prod
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - tfg_network
+    # Sin puertos expuestos – solo accesible via red interna
+
+  # -----------------------------------------------------------
+  #  Redis
+  # -----------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: tfg_redis_prod
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tfg_network
+    # Sin puertos expuestos – solo accesible via red interna
+
+# =============================================================
+#  Volumes (persistentes)
+# =============================================================
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  api_storage:
+    driver: local
+  client_build:
+    driver: local
+
+# =============================================================
+#  Networks
+# =============================================================
+networks:
+  tfg_network:
+    driver: bridge
