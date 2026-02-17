@@ -61,6 +61,61 @@ S'ha instal·lat el framework Laravel complet dins del directori `/api` i s'ha i
 - **Base de Dades:** Migració executada amb èxit (`php artisan migrate:fresh`).
 - **Taules creades:** `centers`, `users`, `follows`, `posts`, `comments`, `likes`, `bookmarks`, `tags`, `post_tag`, `tag_user`, `chat_messages`.
 
+### 2026-02-17 – 09:15 CET — Configuració Client React i Correcció Docker
+
+**Branca:** `dev`
+**Autor:** Iker Delgado
+
+#### Resum
+
+S'ha configurat l'aplicació React (Client) amb Vite i React Router Dom. També s'ha solucionat un error crític en l'entorn Docker on Vite no es trobava disponible.
+
+#### Fitxers creats/modificats
+
+##### Client (React + Vite)
+
+- `client/package.json`: Afegida dependència `react-router-dom`.
+- `client/src/App.jsx`: Component principal amb definició de rutes (`<Routes>`).
+- `client/src/pages/Home.jsx`: Pàgina d'inici (Landing Page).
+- `client/src/main.jsx`: Integració de `BrowserRouter`.
+
+#### Correccions (Troubleshooting)
+
+1.  **Error `vite: not found` en Docker:**
+    - **Problema:** El volum `client_node_modules` estava buit al muntar-se, ocultant els `node_modules` locals.
+    - **Solució:** S'ha executat `docker compose run --rm client npm install` per instal·lar les dependències directament dins del volum del contenidor.
+
+### 2026-02-17 – 09:05 CET — Implementació de Seeders i Models Eloquent
+
+**Branca:** `dev`
+**Autor:** Iker Delgado
+
+#### Resum
+
+S'han creat els models Eloquent bàsics i un sistema de _seeding_ complet per poblar la base de dades amb dades de prova inicials (Centre, Usuaris, Posts, Comentaris, etc.), permetent verificar el funcionament de les relacions i l'estructura de la BD.
+
+#### Fitxers creats/modificats
+
+##### Models Eloquent
+
+- `api/app/Models/User.php`: Relacions amb `posts`, `comments`, `center`.
+- `api/app/Models/Center.php`: Model per a centres educatius.
+- `api/app/Models/Post.php`: Model per a publicacions.
+- `api/app/Models/Comment.php`: Model per a comentaris.
+
+##### Seeders
+
+- `api/database/seeders/DatabaseSeeder.php`: Script principal que executa la inserció de dades en ordre.
+  1.  Crea un Centre ("Institut Pedralbes").
+  2.  Crea Usuaris: Admin (`admin`), Professor (`profx`), Alumne (`johndoe`).
+  3.  Crea Relacions: Alumne segueix a Professor.
+  4.  Crea Contingut: Tag ("Laravel"), Post (Pregunta), Comentari (Resposta).
+
+#### Comandes utilitzades
+
+- `php artisan make:model [Nom]`: Generació de models.
+- `php artisan db:seed`: Execució del poblament de dades.
+
 ### 2026-02-13 – 10:20 CET — Infraestructura Docker completa
 
 **Branca:** `dev`
