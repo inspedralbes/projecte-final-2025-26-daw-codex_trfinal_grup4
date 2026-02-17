@@ -222,13 +222,81 @@ S'ha creat tota la infraestructura Docker del projecte des de zero, configurant 
 
 ---
 
+### 2026-02-17 – 11:00 CET — Estructura base API + Client + Auditoria
+
+**Branca:** `dev`
+**Autor:** @chuclao (amb IA)
+
+#### Resum
+
+S'ha completat l'estructura base dels serveis API i Client amb models Eloquent, enums, middleware, trait de resposta, router centralitzat, sistema d'estils, servei HTTP i tooling (ESLint/Prettier). S'ha realitzat una auditoria completa de tots els apartats del projecte.
+
+#### Fitxers creats/modificats
+
+##### API (Laravel)
+
+| Fitxer | Descripció |
+| --- | --- |
+| `api/app/Enums/PostType.php` | Enum PHP: news, question |
+| `api/app/Enums/UserRole.php` | Enum PHP: admin, userNormal, student, teacher |
+| `api/app/Models/User.php` | Completat amb fillable, casts (UserRole), 8 relacions |
+| `api/app/Models/Center.php` | Completat amb fillable i relacions users/posts |
+| `api/app/Models/Post.php` | Completat amb SoftDeletes, casts (PostType), 8 relacions |
+| `api/app/Models/Comment.php` | Completat amb fillable, casts, 4 relacions |
+| `api/app/Models/Tag.php` | Creat amb fillable i relacions posts/users |
+| `api/app/Models/ChatMessage.php` | Creat amb fillable, casts, 3 relacions |
+| `api/app/Http/Middleware/ForceJsonResponse.php` | Middleware per forçar Accept: application/json |
+| `api/app/Traits/ApiResponse.php` | Trait amb mètodes success() i error() |
+| `api/bootstrap/app.php` | Configurat routing API i middleware ForceJsonResponse |
+| `api/routes/api.php` | Creat amb ruta /health |
+| `api/routes/web.php` | Netejat (API-only) |
+| `api/database/factories/UserFactory.php` | Actualitzat amb username, role, states |
+
+##### Client (React + Vite)
+
+| Fitxer | Descripció |
+| --- | --- |
+| `client/src/router/index.jsx` | Router centralitzat amb React Router DOM |
+| `client/src/App.jsx` | Refactoritzat per delegar al router |
+| `client/src/main.jsx` | Afegit import d'estils globals |
+| `client/src/services/api.js` | Servei HTTP base (fetch wrapper) |
+| `client/src/styles/index.css` | Entry point d'estils |
+| `client/src/styles/reset.css` | CSS reset modern |
+| `client/src/styles/variables.css` | Design tokens (colors, fonts, spacing) |
+| `client/src/styles/base.css` | Estils base globals |
+| `client/vite.config.js` | Afegit alias @ per imports absoluts |
+| `client/eslint.config.js` | ESLint flat config v9 |
+| `client/.prettierrc` | Configuració Prettier |
+| `client/.env.example` | Variables d'entorn documentades |
+| `client/package.json` | Actualitzat scripts i dependències |
+
+##### Altres
+
+| Fitxer | Descripció |
+| --- | --- |
+| `.gitignore` | Afegida exclusió de carpetes d'agents IA |
+
+#### Auditoria realitzada
+
+S'ha executat una auditoria amb agents especialitzats per a cada àrea del projecte:
+- ✅ API: Models, enums i migració correctes. Pendents: Sanctum, controladors, Form Requests, API Resources, rutes funcionals.
+- ✅ Client: Estructura de carpetes completa. Pendents: components, hooks, contextos, layouts, socket.io-client.
+- ✅ Socket: Esquelet funcional. Pendents: connexió Redis, handlers, middleware auth, carpetes d'estructura.
+- ✅ Docker: Infraestructura sòlida. Pendents menors: api/.dockerignore, REDIS_PASSWORD en prod.
+- ✅ BD: Esquema complet (11 taules). Pendents: taula personal_access_tokens, factories addicionals.
+
+---
+
 ## 🗺️ Pròxims passos suggerits
 
-- [ ] Instal·lar Laravel 11 complet dins `/api` (`composer create-project laravel/laravel .`)
-- [ ] Configurar l'aplicació React real dins `/client`
-- [ ] Definir models, migracions i endpoints de l'API
+- [x] Instal·lar Laravel 11 complet dins `/api` (`composer create-project laravel/laravel .`)
+- [x] Configurar l'aplicació React real dins `/client`
+- [x] Definir models, migracions i endpoints de l'API
 - [ ] Integrar autenticació (Laravel Sanctum / Passport)
+- [ ] Crear controladors, Form Requests i API Resources
+- [ ] Definir rutes API funcionals amb prefix v1
 - [ ] Implementar lògica de Socket.io amb Redis adapter
+- [ ] Crear components React (AuthContext, layouts, pàgines)
 - [ ] Configurar CI/CD (GitHub Actions)
 - [ ] Afegir certificat SSL (Let's Encrypt) per a producció
 - [ ] Completar documentació d'endpoints API (Swagger/OpenAPI)
