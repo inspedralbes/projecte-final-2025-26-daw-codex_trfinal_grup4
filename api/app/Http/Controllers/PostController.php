@@ -6,6 +6,7 @@ use App\Http\Requests\StorePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Services\SanitizationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,10 @@ use Illuminate\Support\Str;
 class PostController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private readonly SanitizationService $sanitizer
+    ) {}
 
     /**
      * GET /api/posts
@@ -49,9 +54,9 @@ class PostController extends Controller
             'user_id'       => $request->user()->id,
             'center_id'     => $request->user()->center_id, // null if global user
             'type'          => $request->input('type', 'news'),
-            'content'       => $request->input('content'),
-            'code_snippet'  => $request->input('code_snippet'),
-            'code_language' => $request->input('code_language'),
+            'content'       => $this->sanitizer->sanitizeHtml($request->input('content')),
+            'code_snippet'  => $this->sanitizer->sanitizeCode($request->input('code_snippet')),
+            'code_language' => $this->sanitizer->sanitizePlain($request->input('code_language')),
         ]);
 
         // Attach tags (create if they don't exist)

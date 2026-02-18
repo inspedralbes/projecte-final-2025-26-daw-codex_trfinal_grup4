@@ -204,6 +204,15 @@
   - Transforma posts amb user, center, tags, i comptadors (likes, comments, bookmarks)
 - Tags: es creen automàticament si no existeixen (firstOrCreate amb slug)
 
+### 2026-02-18 – US#3: Sanitització Markdown/XSS
+- **Autor:** @chuclao (amb IA)
+- Instal·lat **stevebauman/purify** (wrapper HTMLPurifier per Laravel)
+- Creat **`SanitizationService`** a `app/Services/`:
+  - `sanitizeHtml()`: neteja HTML perillós (scripts, events) però manté tags segurs (`<p>`, `<b>`, etc.)
+  - `sanitizeCode()`: escapa tot l'HTML amb `htmlspecialchars` (codi es guarda com text pla segur)
+  - `sanitizePlain()`: `strip_tags` per camps de text pla (com `code_language`)
+- Integrat al **`PostController@store`**: content, code_snippet i code_language es sanititzen abans de guardar
+
 ---
 
 ## 📚 Documentació Relacionada
