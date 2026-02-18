@@ -191,6 +191,19 @@
   - `LoginRequest`: email, password
 - Actualitzat `routes/api.php` amb rutes d'autenticació (públiques i protegides amb `auth:sanctum`)
 
+### 2026-02-18 – US#2: Feed Global i Publicació Simple
+- **Autor:** @chuclao (amb IA)
+- Creat **`PostController`** a `app/Http/Controllers/`:
+  - `GET /api/posts` — Feed global paginat (públic, sense auth)
+  - `GET /api/posts/{post}` — Detall d'un post (públic)
+  - `POST /api/posts` — Crear post (auth:sanctum), auto-assigna `center_id` de l'usuari
+  - `DELETE /api/posts/{post}` — Soft-delete, només l'autor pot eliminar
+- Creat **`StorePostRequest`** a `app/Http/Requests/`:
+  - Validació: content (requerit sense code), code_snippet (requerit sense content), code_language, type (enum), tags (array max 5)
+- Creat **`PostResource`** a `app/Http/Resources/`:
+  - Transforma posts amb user, center, tags, i comptadors (likes, comments, bookmarks)
+- Tags: es creen automàticament si no existeixen (firstOrCreate amb slug)
+
 ---
 
 ## 📚 Documentació Relacionada
