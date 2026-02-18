@@ -304,6 +304,18 @@
   - `GET /api/posts/{postId}/interactions` — Comptadors (likes, bookmarks) + estat de l'usuari autenticat
 - Suporta interaccions sobre `post` i `comment` (polimòrfic)
 
+### 2026-02-18 – Sprint 2 US#7: Reputació, Medalles i Top Tags al Perfil
+- **Autor:** @chuclao (amb IA)
+- Creat **`ReputationService`** a `app/Services/`:
+  - `calculateReputation()`: punts basats en likes rebuts (code posts ×2, regular ×1, solucions acceptades ×5)
+  - `getBadge()`: retorna la medalla actual segons puntuació
+  - `getAllBadges()`: retorna totes les medalles amb estat `unlocked`
+  - `getTopTags()`: top N etiquetes més usades per l'usuari
+- Medalles: 🌱 Newcomer (0), ⭐ Contributor (5), 🌟 Rising Star (25), 💎 Expert (100), 👑 Master (500), 🏆 Legend (1000)
+- Actualitzat **`ProfileController::show()`**:
+  - Ara retorna `reputation` (score, current_badge, all_badges) i `top_tags`
+  - Injecta `ReputationService` via constructor
+
 ---
 
 ## 📚 Documentació Relacionada

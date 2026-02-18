@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\ReputationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,9 +12,13 @@ class ProfileController extends Controller
 {
     use ApiResponse;
 
+    public function __construct(
+        private readonly ReputationService $reputationService
+    ) {}
+
     /**
      * GET /api/profile/{username}
-     * Public profile with aggregated stats.
+     * Public profile with aggregated stats, reputation, top tags and badges.
      */
     public function show(string $username): JsonResponse
     {
@@ -28,6 +33,14 @@ class ProfileController extends Controller
 
         // Count total likes received on user's posts
         $totalLikesReceived = $user->posts()->withCount('likedByUsers')->get()->sum('liked_by_users_count');
+
+        // Reputation system
+        $reputation = $this->reputationService->calculateReputation($user);
+        $currentBadge = $this->reputationService->getBadge($reputation);
+        $allBadges = $this->reputationService->getAllBadges($reputation);
+
+        // Top used tags
+        $topTags = $this->reputationService->getTopTags($user);
 
         return $this->success([
             'id'               => $user->id,
@@ -48,6 +61,12 @@ class ProfileController extends Controller
                 'following_count'      => $user->following_count,
                 'total_likes_received' => $totalLikesReceived,
             ],
+            'reputation'       => [
+                'score'         => $reputation,
+                'current_badge' => $currentBadge,
+                'all_badges'    => $allBadges,
+            ],
+            'top_tags'         => $topTags,
         ]);
     }
 
