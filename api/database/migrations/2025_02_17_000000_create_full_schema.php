@@ -161,6 +161,18 @@ return new class extends Migration
             $table->index(['sender_id', 'receiver_id']);
             $table->index('center_id');
         });
+
+        // 9. SANCTUM – Personal Access Tokens
+        Schema::create('personal_access_tokens', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('tokenable');
+            $table->text('name');
+            $table->string('token', 64)->unique();
+            $table->text('abilities')->nullable();
+            $table->timestamp('last_used_at')->nullable();
+            $table->timestamp('expires_at')->nullable()->index();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -169,6 +181,7 @@ return new class extends Migration
     public function down(): void
     {
         // Borrar en orden inverso para evitar errores de FK
+        Schema::dropIfExists('personal_access_tokens');
         Schema::dropIfExists('chat_messages');
         Schema::dropIfExists('tag_user');
         Schema::dropIfExists('post_tag');
