@@ -87,7 +87,7 @@
    }
    ```
 
-6. **Migracions:** Cada canvi a la BD ha de tenir la seva migració. Mai modificar migracions ja executades — crea'n una de nova.
+6. **Migracions (Entorn de testing):** Estem en fase de desenvolupament/testing. **NO crear migracions noves.** Modifica directament l'esquema principal a `database/migrations/2025_02_17_000000_create_full_schema.php` i executa `php artisan migrate:fresh --seed` per recrear la BD.
 
 7. **Execució de comandes Artisan:**
    ```bash
