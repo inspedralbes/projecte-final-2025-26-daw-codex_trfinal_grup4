@@ -237,6 +237,16 @@
 - Comentaris amb respostes anidades (replies) via relació `parent_id`
 - Integrat **SanitizationService** per netejar contingut dels comentaris
 
+### 2026-02-18 – US#7: Perfil d'Usuari amb Agregacions
+- **Autor:** @chuclao (amb IA)
+- Creat **`ProfileController`** a `app/Http/Controllers/`:
+  - `GET /api/profile/{username}` — Perfil públic amb stats agregades (posts, comments, followers, following, total likes rebuts)
+  - `GET /api/profile/{username}/posts` — Posts paginats d'un usuari (públic)
+  - `PUT /api/profile` — Actualitzar perfil de l'usuari autenticat (auth:sanctum)
+- Stats retornades: `posts_count`, `comments_count`, `followers_count`, `following_count`, `total_likes_received`
+- Inclou info del centre i dades de xarxes socials (bio, linkedin, portfolio, external_url)
+- Validació d'update: name, bio (max:1000), avatar, linkedin_url, portfolio_url, external_url (totes url vàlides)
+
 ---
 
 ## 📚 Documentació Relacionada
