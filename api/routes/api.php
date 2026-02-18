@@ -81,5 +81,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/centers/{center}', [CenterController::class, 'update']);
         Route::delete('/centers/{center}', [CenterController::class, 'destroy']);
         Route::patch('/centers/{center}/status', [CenterController::class, 'updateStatus']);
+        Route::patch('/centers/{center}/approve', [CenterController::class, 'approve']);
+        Route::patch('/centers/{center}/reject', [CenterController::class, 'reject']);
+        Route::get('/centers/{center}/justificante', [CenterController::class, 'downloadJustificante']);
     });
 });
