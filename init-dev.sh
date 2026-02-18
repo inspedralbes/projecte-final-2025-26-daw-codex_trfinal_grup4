@@ -134,12 +134,12 @@ divider "5/7 · Instalando dependencias"
 
 # Laravel – Composer
 log_info "Instalando dependencias de Laravel (composer install)..."
-docker compose -f docker-compose.dev.yml exec -T api composer install --no-interaction --prefer-dist
+docker compose -f docker-compose.dev.yml exec -u "$(id -u):$(id -g)" -T api composer install --no-interaction --prefer-dist
 log_success "Dependencias de Laravel instaladas"
 
 # Laravel – App Key
 log_info "Generando APP_KEY de Laravel..."
-docker compose -f docker-compose.dev.yml exec -T api php artisan key:generate --force 2>/dev/null || log_warn "No se pudo generar APP_KEY (¿Laravel no está configurado?)"
+docker compose -f docker-compose.dev.yml exec -u "$(id -u):$(id -g)" -T api php artisan key:generate --force 2>/dev/null || log_warn "No se pudo generar APP_KEY (¿Laravel no está configurado?)"
 
 # React – npm
 log_info "Instalando dependencias de React (npm install)..."
@@ -160,10 +160,10 @@ log_info "Esperando a que MySQL esté listo..."
 sleep 5
 
 log_info "Ejecutando migraciones de Laravel..."
-docker compose -f docker-compose.dev.yml exec -T api php artisan migrate --force 2>/dev/null || log_warn "No se pudieron ejecutar migraciones (¿Laravel no está configurado?)"
+docker compose -f docker-compose.dev.yml exec -u "$(id -u):$(id -g)" -T api php artisan migrate --force 2>/dev/null || log_warn "No se pudieron ejecutar migraciones (¿Laravel no está configurado?)"
 
 log_info "Ejecutando seeders..."
-docker compose -f docker-compose.dev.yml exec -T api php artisan db:seed 2>/dev/null || log_warn "No se pudieron ejecutar seeders"
+docker compose -f docker-compose.dev.yml exec -u "$(id -u):$(id -g)" -T api php artisan db:seed 2>/dev/null || log_warn "No se pudieron ejecutar seeders"
 
 # ---------------------------------------------------------
 #  7. Resumen final
