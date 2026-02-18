@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CenterController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TagController;
@@ -35,6 +36,7 @@ Route::post('/check-domain', [AuthController::class, 'checkDomain']);
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{post}', [PostController::class, 'show']);
 Route::get('/posts/{postId}/comments', [CommentController::class, 'index']);
+Route::get('/posts/{postId}/interactions', [InteractionController::class, 'postStatus']);
 Route::get('/tags', [TagController::class, 'index']);
 
 // Profile (US#7)
@@ -60,6 +62,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Comments (US#6)
     Route::post('/comments', [CommentController::class, 'store']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+
+    // Interactions – like/bookmark toggle (S2-US#6)
+    Route::post('/interactions', [InteractionController::class, 'toggle']);
 
     // Center Hub (US#5) – "Walled Garden"
     Route::get('/center/posts', [PostController::class, 'centerPosts']);

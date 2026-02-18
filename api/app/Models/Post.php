@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Post extends Model
@@ -98,5 +99,13 @@ class Post extends Model
     public function bookmarkedByUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'bookmarks');
+    }
+
+    /**
+     * Polymorphic interactions (likes, bookmarks) on this post.
+     */
+    public function interactions(): MorphMany
+    {
+        return $this->morphMany(Interaction::class, 'interactable');
     }
 }
