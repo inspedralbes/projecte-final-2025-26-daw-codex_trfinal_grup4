@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,10 @@ Route::get('/posts/{post}', [PostController::class, 'show']);
 Route::get('/posts/{postId}/comments', [CommentController::class, 'index']);
 Route::get('/tags', [TagController::class, 'index']);
 
+// Profile (US#7)
+Route::get('/profile/{username}', [ProfileController::class, 'show']);
+Route::get('/profile/{username}/posts', [ProfileController::class, 'posts']);
+
 /* ------------------------------------------------------------------ */
 /*  Protected Routes (auth:sanctum)                                    */
 /* ------------------------------------------------------------------ */
@@ -54,4 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Center Hub (US#5) – "Walled Garden"
     Route::get('/center/posts', [PostController::class, 'centerPosts']);
     Route::get('/center/tags', [TagController::class, 'centerTags']);
+
+    // Profile update (US#7)
+    Route::put('/profile', [ProfileController::class, 'update']);
 });
