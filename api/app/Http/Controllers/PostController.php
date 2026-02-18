@@ -26,14 +26,58 @@ class PostController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $posts = Post::with(['user', 'center', 'tags'])
+        $query = Post::with(['user', 'center', 'tags'])
             ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
-            ->latest()
-            ->paginate($request->input('per_page', 15));
+            ->whereNull('center_id') // Global posts only
+            ->latest();
+
+        // Optional tag filter
+        if ($request->has('tag')) {
+            $query->whereHas('tags', fn ($q) => $q->where('slug', $request->input('tag')));
+        }
+
+        $posts = $query->paginate($request->input('per_page', 15));
 
         return response()->json([
             'success' => true,
             'message' => 'Posts retrieved successfully',
+            'data'    => PostResource::collection($posts),
+            'meta'    => [
+                'current_page' => $posts->currentPage(),
+                'last_page'    => $posts->lastPage(),
+                'per_page'     => $posts->perPage(),
+                'total'        => $posts->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * GET /api/center/posts
+     * List posts from the authenticated user's center (Walled Garden).
+     */
+    public function centerPosts(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->center_id) {
+            return $this->error('You are not associated with any center', 403);
+        }
+
+        $query = Post::with(['user', 'center', 'tags'])
+            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
+            ->where('center_id', $user->center_id)
+            ->latest();
+
+        // Optional tag filter
+        if ($request->has('tag')) {
+            $query->whereHas('tags', fn ($q) => $q->where('slug', $request->input('tag')));
+        }
+
+        $posts = $query->paginate($request->input('per_page', 15));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Center posts retrieved successfully',
             'data'    => PostResource::collection($posts),
             'meta'    => [
                 'current_page' => $posts->currentPage(),

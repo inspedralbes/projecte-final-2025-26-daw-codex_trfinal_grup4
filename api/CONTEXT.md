@@ -213,6 +213,15 @@
   - `sanitizePlain()`: `strip_tags` per camps de text pla (com `code_language`)
 - Integrat al **`PostController@store`**: content, code_snippet i code_language es sanititzen abans de guardar
 
+### 2026-02-18 – US#5: Hub Privat (Walled Garden) i Etiquetes per Centre
+- **Autor:** @chuclao (amb IA)
+- Actualitzat **`PostController`**:
+  - `GET /api/posts` — Ara filtra només posts globals (`center_id IS NULL`), suporta filtre per `?tag=slug`
+  - `GET /api/center/posts` — Nou endpoint: feed exclusiu del centre de l'usuari (auth:sanctum), filtre per tag
+- Creat **`TagController`** a `app/Http/Controllers/`:
+  - `GET /api/tags` — Llista totes les etiquetes amb comptador de posts (públic)
+  - `GET /api/center/tags` — Etiquetes usades dins del centre de l'usuari (auth:sanctum)
+
 ---
 
 ## 📚 Documentació Relacionada
