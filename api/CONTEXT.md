@@ -171,3 +171,11 @@
 - Netejat `routes/web.php` (API-only)
 - Actualitzat `UserFactory.php` amb camps username, role i states (student, teacher, admin)
 - Creades carpetes amb `.gitkeep`: Exceptions, Requests, Resources, Services, Traits
+
+---
+
+## 📚 Documentació Relacionada
+
+*   **Visió Global del Projecte:** [../doc/PROJECT_CONCEPT.md](../doc/PROJECT_CONCEPT.md)
+*   **Frontend (Cliente):** [../client/CONTEXT.md](../client/CONTEXT.md)
+*   **Real-time (Socket):** [../socket/CONTEXT.md](../socket/CONTEXT.md)

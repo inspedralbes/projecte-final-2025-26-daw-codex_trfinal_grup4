@@ -158,3 +158,11 @@
 - Realitzada auditoria completa de l'estructura del servei
 - Identificats punts pendents: connexió Redis (ioredis importat però no usat), handlers d'events, middleware d'autenticació, carpetes handlers/middleware/config/utils
 - No s'han fet canvis funcionals — pendent d'implementació
+
+---
+
+## 📚 Documentació Relacionada
+
+*   **Visió Global del Projecte:** [../doc/PROJECT_CONCEPT.md](../doc/PROJECT_CONCEPT.md)
+*   **Backend (API):** [../api/CONTEXT.md](../api/CONTEXT.md)
+*   **Frontend (Cliente):** [../client/CONTEXT.md](../client/CONTEXT.md)

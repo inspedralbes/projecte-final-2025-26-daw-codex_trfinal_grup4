@@ -72,3 +72,12 @@ La plataforma reconoce diferentes niveles de autoridad y participación.
 
 ---
 
+
+---
+
+## 6. Documentación Técnica
+Para detalles específicos sobre la implementación técnica de cada microservicio, consulta los siguientes archivos de contexto:
+
+*   **Backend (API):** [api/CONTEXT.md](../api/CONTEXT.md)
+*   **Frontend (Cliente):** [client/CONTEXT.md](../client/CONTEXT.md)
+*   **Real-time (Socket):** [socket/CONTEXT.md](../socket/CONTEXT.md)

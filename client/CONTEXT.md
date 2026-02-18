@@ -132,3 +132,11 @@
 - Eliminades dependències TypeScript (`@types/react`, `@types/react-dom`), afegides ESLint + Prettier
 - Creat `.env.example` amb `VITE_API_URL` i `VITE_SOCKET_URL`
 - Creades carpetes amb `.gitkeep`: `components/`, `components/ui/`, `context/`, `hooks/`, `layouts/`, `utils/`, `assets/fonts/`, `assets/icons/`, `assets/images/`
+
+---
+
+## 📚 Documentació Relacionada
+
+*   **Visió Global del Projecte:** [../doc/PROJECT_CONCEPT.md](../doc/PROJECT_CONCEPT.md)
+*   **Backend (API):** [../api/CONTEXT.md](../api/CONTEXT.md)
+*   **Real-time (Socket):** [../socket/CONTEXT.md](../socket/CONTEXT.md)
