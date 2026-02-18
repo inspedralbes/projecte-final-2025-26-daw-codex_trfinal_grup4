@@ -265,6 +265,27 @@
 - Upload de justificant a `storage/app/public/justificantes/` via disc `public`
 - Creat symlink `public/storage` amb `php artisan storage:link`
 
+### 2026-02-18 – Sprint 2 US#5: Walled Garden – Seguretat, Global Scope i Índexs
+- **Autor:** @chuclao (amb IA)
+- Creat **`EnsureSameCenter`** middleware a `app/Http/Middleware/`:
+  - Compara `center_id` de l'usuari amb el `center_id` del post sol·licitat
+  - Retorna 403 si no coincideixen (alias `same-center`)
+- Creat **`CenterScope`** (Global Scope) a `app/Models/Scopes/`:
+  - Filtra automàticament posts pel `center_id` de l'usuari autenticat
+  - S'aplica via `Post::centerFiltered()` (scope local)
+- Actualitzat model **`Post`**:
+  - Afegit scope `scopeCenterFiltered()` que aplica `CenterScope`
+  - Afegit scope `scopeGlobal()` per filtrar posts sense centre
+- Actualitzat **`PostController`**:
+  - `centerPosts()` ara usa `Post::centerFiltered()` en lloc de filtre manual
+  - `index()` ara usa `Post::global()` en lloc de `whereNull`
+  - `show()` verifica accés: si el post té `center_id`, només usuaris del mateix centre hi poden accedir
+- Afegits **índexs** a la taula `posts` a l'esquema principal:
+  - `index('center_id')` — Filtre ràpid per centre
+  - `index(['center_id', 'created_at'])` — Feed del centre ordenat
+  - `index(['user_id', 'center_id'])` — Posts d'un usuari dins d'un centre
+- Registrat alias `same-center` a `bootstrap/app.php`
+
 ---
 
 ## 📚 Documentació Relacionada

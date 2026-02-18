@@ -26,9 +26,9 @@ class PostController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Post::with(['user', 'center', 'tags'])
+        $query = Post::global()
+            ->with(['user', 'center', 'tags'])
             ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
-            ->whereNull('center_id') // Global posts only
             ->latest();
 
         // Optional tag filter
@@ -54,6 +54,7 @@ class PostController extends Controller
     /**
      * GET /api/center/posts
      * List posts from the authenticated user's center (Walled Garden).
+     * Uses CenterScope Global Scope for automatic filtering.
      */
     public function centerPosts(Request $request): JsonResponse
     {
@@ -63,9 +64,9 @@ class PostController extends Controller
             return $this->error('You are not associated with any center', 403);
         }
 
-        $query = Post::with(['user', 'center', 'tags'])
+        $query = Post::centerFiltered()
+            ->with(['user', 'center', 'tags'])
             ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
-            ->where('center_id', $user->center_id)
             ->latest();
 
         // Optional tag filter
@@ -127,9 +128,18 @@ class PostController extends Controller
     /**
      * GET /api/posts/{post}
      * Show a single post with details.
+     * Center posts are protected by the EnsureSameCenter middleware (applied in routes).
      */
     public function show(Post $post): JsonResponse
     {
+        // If the post belongs to a center, verify the user has access
+        if ($post->center_id !== null) {
+            $user = auth('sanctum')->user();
+            if (!$user || $user->center_id !== $post->center_id) {
+                return $this->error('Access denied. This content belongs to a center.', 403);
+            }
+        }
+
         $post->load(['user', 'center', 'tags', 'comments.user']);
         $post->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers']);
 

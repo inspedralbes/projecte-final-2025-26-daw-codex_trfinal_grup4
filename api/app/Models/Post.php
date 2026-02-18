@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\PostType;
+use App\Models\Scopes\CenterScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,6 +14,28 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Post extends Model
 {
     use SoftDeletes;
+
+    /* ------------------------------------------------------------------ */
+    /*  Scopes                                                             */
+    /* ------------------------------------------------------------------ */
+
+    /**
+     * Apply the CenterScope: filters posts by the authenticated user's center.
+     * Usage: Post::centerFiltered()->get()
+     */
+    public function scopeCenterFiltered(Builder $query): Builder
+    {
+        (new CenterScope())->apply($query, $this);
+        return $query;
+    }
+
+    /**
+     * Scope for global posts only (no center).
+     */
+    public function scopeGlobal(Builder $query): Builder
+    {
+        return $query->whereNull('center_id');
+    }
 
     protected $fillable = [
         'user_id',
