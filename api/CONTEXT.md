@@ -247,6 +247,24 @@
 - Inclou info del centre i dades de xarxes socials (bio, linkedin, portfolio, external_url)
 - Validació d'update: name, bio (max:1000), avatar, linkedin_url, portfolio_url, external_url (totes url vàlides)
 
+### 2026-02-18 – US#8: CRUD Centres amb Estats i Upload de Justificant
+- **Autor:** @chuclao (amb IA)
+- Afegits camps `status` (enum: pending/active/rejected) i `justificante` (path fitxer) a la taula `centers` a l'esquema principal
+- Actualitzat model **`Center`**: nous fillable, scopes `active()` i `pending()`
+- Creat **`CenterController`** a `app/Http/Controllers/`:
+  - `GET /api/centers` — Llista pública (només actius) / Admin veu tots amb filtre `?status=`
+  - `GET /api/centers/{center}` — Detall (públic: només actius, admin: tots)
+  - `POST /api/centers` — Crear centre (admin → actiu, usuari normal → pending) amb upload justificant
+  - `PUT /api/centers/{center}` — Actualitzar centre (admin only)
+  - `DELETE /api/centers/{center}` — Eliminar centre i fitxer justificant (admin only)
+  - `PATCH /api/centers/{center}/status` — Canviar estat (approve/reject) (admin only)
+- Creat **`EnsureIsAdmin`** middleware a `app/Http/Middleware/` (alias `admin`, retorna 403)
+- Registrat alias `admin` a `bootstrap/app.php`
+- Creats **FormRequests**: `StoreCenterRequest` i `UpdateCenterRequest`
+  - Validació: name, domain (unique), city, logo, website (url), status, justificante (file: pdf/jpg/jpeg/png, max 5MB)
+- Upload de justificant a `storage/app/public/justificantes/` via disc `public`
+- Creat symlink `public/storage` amb `php artisan storage:link`
+
 ---
 
 ## 📚 Documentació Relacionada

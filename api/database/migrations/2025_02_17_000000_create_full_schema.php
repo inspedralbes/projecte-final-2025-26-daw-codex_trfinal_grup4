@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->string('logo')->nullable(); // URL imagen
             $table->string('website')->nullable();
+            $table->enum('status', ['pending', 'active', 'rejected'])->default('pending');
+            $table->string('justificante')->nullable(); // Path al fichero justificante
             $table->timestamps();
         });
 

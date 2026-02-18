@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             'domain' => 'inspedralbes.cat',
             'city' => 'Barcelona',
             'website' => 'https://agora.xtec.cat/iespedralbes/',
+            'status' => 'active',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
