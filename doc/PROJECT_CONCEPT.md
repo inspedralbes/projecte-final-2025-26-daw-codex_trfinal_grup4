@@ -7,9 +7,12 @@
 ---
 
 ## 1. Visión del Producto
-**DevNet FP** es una plataforma que fusiona la dinámica ágil de una red social pública (tipo Twitter/X) con la privacidad y utilidad de una intranet educativa.
+## 1. Visión del Producto
+**Codex** (anteriormente DevNet FP) es una Red Social Académica Vertical diseñada exclusivamente para el ecosistema de Formación Profesional en Informática (DAM, DAW, ASIX).
 
-Su propósito principal es romper el aislamiento de los centros de Formación Profesional. Permite que un alumno de un instituto pequeño conecte con la comunidad global de desarrolladores, al mismo tiempo que mantiene un canal de comunicación privado y seguro con sus compañeros de clase y profesores.
+A diferencia de las redes sociales generalistas, Codex prioriza la **identidad profesional** y la **colaboración académica**. No es un clon de Twitter/X; es una plataforma con personalidad propia, seria pero dinámica, inspirada en herramientas de productividad y entornos de desarrollo (como VS Code, GitHub o Linear) pero con el factor social de una comunidad viva.
+
+Su estética ("Academic Dark Mode") huye del "azul genérico" y apuesta por una interfaz sofisticada, limpia y orientada al código, utilizando paletas de colores profundos (Deep Slate, Teal, Purple) que reducen la fatiga visual durante largas sesiones de estudio o programación.
 
 ---
 
