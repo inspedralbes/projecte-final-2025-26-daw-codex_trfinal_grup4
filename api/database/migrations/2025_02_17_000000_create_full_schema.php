@@ -87,6 +87,11 @@ return new class extends Migration
 
             $table->timestamps();
             $table->softDeletes(); // Papelera de reciclaje
+
+            // Índices para optimizar consultas del Walled Garden
+            $table->index('center_id');
+            $table->index(['center_id', 'created_at']);
+            $table->index(['user_id', 'center_id']);
         });
 
         // 5. COMENTARIOS (Respuestas)
