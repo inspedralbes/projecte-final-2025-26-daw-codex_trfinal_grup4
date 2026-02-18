@@ -222,6 +222,21 @@
   - `GET /api/tags` — Llista totes les etiquetes amb comptador de posts (públic)
   - `GET /api/center/tags` — Etiquetes usades dins del centre de l'usuari (auth:sanctum)
 
+### 2026-02-18 – US#6: Broadcasting Redis + Comentaris
+- **Autor:** @chuclao (amb IA)
+- Creat **`CommentController`** a `app/Http/Controllers/`:
+  - `GET /api/posts/{postId}/comments` — Llista comentaris d'un post amb estructura threaded (públic)
+  - `POST /api/comments` — Crear comentari (auth:sanctum), sanititza contingut, llança event broadcast
+  - `DELETE /api/comments/{comment}` — Eliminar comentari, només l'autor pot fer-ho (auth:sanctum)
+- Creat **`StoreCommentRequest`** a `app/Http/Requests/`:
+  - Validació: post_id (required, exists), parent_id (nullable, exists, same post), content (required, max:5000)
+- Creat **`NewCommentEvent`** a `app/Events/`:
+  - Implementa `ShouldBroadcastNow` (dispatx síncron a Redis, sense cua)
+  - Broadcast al canal `post.{post_id}` amb nom d'event `new.comment`
+  - Payload: id, post_id, parent_id, content, created_at, user (id, name, username, avatar)
+- Comentaris amb respostes anidades (replies) via relació `parent_id`
+- Integrat **SanitizationService** per netejar contingut dels comentaris
+
 ---
 
 ## 📚 Documentació Relacionada
