@@ -171,3 +171,22 @@
 - Netejat `routes/web.php` (API-only)
 - Actualitzat `UserFactory.php` amb camps username, role i states (student, teacher, admin)
 - Creades carpetes amb `.gitkeep`: Exceptions, Requests, Resources, Services, Traits
+
+### 2026-02-18 – US#1: Sistema de Registre amb Detecció de Centre
+- **Autor:** @chuclao (amb IA)
+- Instal·lat **Laravel Sanctum v4** per a autenticació API per tokens
+- Afegit trait `HasApiTokens` al model `User`
+- Creat **`AuthService`** a `app/Services/`:
+  - `register()`: crea usuari, detecta domini email → assigna `center_id` i role (`student` si centre trobat, `userNormal` si no)
+  - `extractDomain()`: extreu el domini d'un email
+  - `detectCenter()`: comprova si un domini correspon a un centre registrat
+- Creat **`AuthController`** a `app/Http/Controllers/`:
+  - `POST /api/register` — Registre amb auto-detecció de centre
+  - `POST /api/login` — Login amb token Sanctum
+  - `POST /api/logout` — Logout (auth:sanctum)
+  - `GET /api/me` — Usuari autenticat amb info del centre
+  - `POST /api/check-domain` — Endpoint públic per verificar si un email pertany a un centre
+- Creats **FormRequests**:
+  - `RegisterRequest`: name, username (unique, alphanum_), email (unique), password (min:8, confirmed)
+  - `LoginRequest`: email, password
+- Actualitzat `routes/api.php` amb rutes d'autenticació (públiques i protegides amb `auth:sanctum`)
