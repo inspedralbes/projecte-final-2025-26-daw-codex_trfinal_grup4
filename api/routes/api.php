@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CenterController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
@@ -40,6 +41,10 @@ Route::get('/tags', [TagController::class, 'index']);
 Route::get('/profile/{username}', [ProfileController::class, 'show']);
 Route::get('/profile/{username}/posts', [ProfileController::class, 'posts']);
 
+// Centers (US#8) – public listing (active only), admins see all with filters
+Route::get('/centers', [CenterController::class, 'index']);
+Route::get('/centers/{center}', [CenterController::class, 'show']);
+
 /* ------------------------------------------------------------------ */
 /*  Protected Routes (auth:sanctum)                                    */
 /* ------------------------------------------------------------------ */
@@ -62,4 +67,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Profile update (US#7)
     Route::put('/profile', [ProfileController::class, 'update']);
+
+    // Centers – create request with justificante (any authenticated user)
+    Route::post('/centers', [CenterController::class, 'store']);
+
+    // Admin-only routes (US#8)
+    Route::middleware('admin')->group(function () {
+        Route::put('/centers/{center}', [CenterController::class, 'update']);
+        Route::delete('/centers/{center}', [CenterController::class, 'destroy']);
+        Route::patch('/centers/{center}/status', [CenterController::class, 'updateStatus']);
+    });
 });

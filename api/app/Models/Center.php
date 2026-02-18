@@ -13,7 +13,33 @@ class Center extends Model
         'city',
         'logo',
         'website',
+        'status',
+        'justificante',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => 'string',
+        ];
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Scopes                                                             */
+    /* ------------------------------------------------------------------ */
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
 
     /* ------------------------------------------------------------------ */
     /*  Relationships                                                      */
