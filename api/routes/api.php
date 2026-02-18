@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,7 @@ Route::post('/check-domain', [AuthController::class, 'checkDomain']);
 /* ------------------------------------------------------------------ */
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{post}', [PostController::class, 'show']);
+Route::get('/posts/{postId}/comments', [CommentController::class, 'index']);
 Route::get('/tags', [TagController::class, 'index']);
 
 /* ------------------------------------------------------------------ */
@@ -44,6 +46,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Posts (US#2)
     Route::post('/posts', [PostController::class, 'store']);
     Route::delete('/posts/{post}', [PostController::class, 'destroy']);
+
+    // Comments (US#6)
+    Route::post('/comments', [CommentController::class, 'store']);
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
 
     // Center Hub (US#5) – "Walled Garden"
     Route::get('/center/posts', [PostController::class, 'centerPosts']);
