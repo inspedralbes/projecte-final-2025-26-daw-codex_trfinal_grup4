@@ -286,6 +286,24 @@
   - `index(['user_id', 'center_id'])` — Posts d'un usuari dins d'un centre
 - Registrat alias `same-center` a `bootstrap/app.php`
 
+### 2026-02-18 – Sprint 2 US#6: Interaccions Polimòrfiques + Event NewInteraction
+- **Autor:** @chuclao (amb IA)
+- Afegida taula **`interactions`** polimòrfica a l'esquema principal:
+  - Camps: `id`, `user_id`, `interactable_id`, `interactable_type`, `type` (like/bookmark)
+  - Índex únic per evitar duplicats, índex morph per rendiment
+- Creat model **`Interaction`** a `app/Models/`:
+  - Relació `user()` (BelongsTo), `interactable()` (MorphTo)
+- Afegida relació `interactions(): MorphMany` als models **Post** i **Comment**
+- Creat **`NewInteractionEvent`** a `app/Events/`:
+  - Implementa `ShouldBroadcastNow` (Redis síncron)
+  - Broadcast al canal `user.{ownerId}` amb nom `new.interaction`
+  - Payload: id, type, interactable_type, interactable_id, user info
+  - Només notifica si l'autor del recurs és diferent de l'usuari que interactua
+- Creat **`InteractionController`** a `app/Http/Controllers/`:
+  - `POST /api/interactions` — Toggle like/bookmark (auth:sanctum). Si existeix, l'elimina; si no, el crea
+  - `GET /api/posts/{postId}/interactions` — Comptadors (likes, bookmarks) + estat de l'usuari autenticat
+- Suporta interaccions sobre `post` i `comment` (polimòrfic)
+
 ---
 
 ## 📚 Documentació Relacionada

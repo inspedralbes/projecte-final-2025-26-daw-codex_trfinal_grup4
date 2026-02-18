@@ -109,7 +109,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 6. INTERACCIONES (Likes y Guardados)
+        // 6. INTERACCIONES (Likes y Guardados) – Legacy pivot tables
         Schema::create('likes', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('post_id')->constrained()->onDelete('cascade');
@@ -122,6 +122,19 @@ return new class extends Migration
             $table->foreignId('post_id')->constrained()->onDelete('cascade');
             $table->primary(['user_id', 'post_id']);
             $table->timestamp('created_at');
+        });
+
+        // 6b. INTERACCIONES POLIMÓRFICAS (like/bookmark sobre posts, comments, etc.)
+        Schema::create('interactions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->morphs('interactable'); // interactable_id + interactable_type
+            $table->enum('type', ['like', 'bookmark'])->default('like');
+            $table->timestamps();
+
+            // Evitar duplicados: un usuario solo puede tener una interacción de cada tipo por recurso
+            $table->unique(['user_id', 'interactable_id', 'interactable_type', 'type'], 'interactions_unique');
+            $table->index(['interactable_id', 'interactable_type']);
         });
 
         // 7. ETIQUETAS (Tags)
@@ -193,6 +206,7 @@ return new class extends Migration
         Schema::dropIfExists('tag_user');
         Schema::dropIfExists('post_tag');
         Schema::dropIfExists('tags');
+        Schema::dropIfExists('interactions');
         Schema::dropIfExists('bookmarks');
         Schema::dropIfExists('likes');
         Schema::dropIfExists('comments');
