@@ -139,4 +139,62 @@ class CenterController extends Controller
 
         return $this->success($center, 'Center status updated to ' . $request->status);
     }
+
+    /**
+     * PATCH /api/centers/{center}/approve
+     * Convenience endpoint: change center from PENDING to ACTIVE.
+     */
+    public function approve(Center $center): JsonResponse
+    {
+        if ($center->status === 'active') {
+            return $this->error('Center is already active', 422);
+        }
+
+        $center->update(['status' => 'active']);
+
+        return $this->success($center, 'Center approved successfully');
+    }
+
+    /**
+     * PATCH /api/centers/{center}/reject
+     * Convenience endpoint: change center to REJECTED.
+     */
+    public function reject(Center $center): JsonResponse
+    {
+        if ($center->status === 'rejected') {
+            return $this->error('Center is already rejected', 422);
+        }
+
+        $center->update(['status' => 'rejected']);
+
+        return $this->success($center, 'Center rejected');
+    }
+
+    /**
+     * GET /api/centers/{center}/justificante
+     * Download the justificante file (admin only).
+     */
+    public function downloadJustificante(Center $center)
+    {
+        if (!$center->justificante) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No justificante file found for this center.',
+                'errors'  => null,
+            ], 404);
+        }
+
+        if (!Storage::disk('public')->exists($center->justificante)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File not found on disk.',
+                'errors'  => null,
+            ], 404);
+        }
+
+        return Storage::disk('public')->download(
+            $center->justificante,
+            'justificante_' . $center->domain . '.' . pathinfo($center->justificante, PATHINFO_EXTENSION)
+        );
+    }
 }

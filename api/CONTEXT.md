@@ -316,6 +316,15 @@
   - Ara retorna `reputation` (score, current_badge, all_badges) i `top_tags`
   - Injecta `ReputationService` via constructor
 
+### 2026-02-18 – Sprint 2 US#8: Approve/Reject Dedicat + Download Justificant
+- **Autor:** @chuclao (amb IA)
+- Actualitzat **`CenterController`** amb nous endpoints admin:
+  - `PATCH /api/centers/{center}/approve` — Canvia estat de PENDING a ACTIVE (error si ja actiu)
+  - `PATCH /api/centers/{center}/reject` — Canvia estat a REJECTED (error si ja rebutjat)
+  - `GET /api/centers/{center}/justificante` — Descarrega el fitxer justificant (admin only)
+- Download retorna el fitxer amb nom descriptiu: `justificante_{domain}.{ext}`
+- Gestió d'errors: 404 si no hi ha fitxer o no existeix al disc
+
 ---
 
 ## 📚 Documentació Relacionada
