@@ -102,6 +102,7 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
 
     // Comments (US#6)
     Route::post('/comments', [CommentController::class, 'store']);
+    Route::put('/comments/{comment}', [CommentController::class, 'update']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
     Route::patch('/comments/{comment}/solution', [CommentController::class, 'toggleSolution']);
 
