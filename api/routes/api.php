@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CenterController;
+use App\Http\Controllers\CenterMemberController;
+use App\Http\Controllers\CenterRequestController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\PostController;
@@ -48,9 +50,9 @@ Route::get('/centers', [CenterController::class, 'index']);
 Route::get('/centers/{center}', [CenterController::class, 'show']);
 
 /* ------------------------------------------------------------------ */
-/*  Protected Routes (auth:sanctum)                                    */
+/*  Protected Routes (auth:sanctum + not-blocked)                      */
 /* ------------------------------------------------------------------ */
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -73,12 +75,41 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile update (US#7)
     Route::put('/profile', [ProfileController::class, 'update']);
 
+    // Center Requests – any authenticated user can request to create a center
+    Route::post('/center-requests', [CenterRequestController::class, 'store']);
+    Route::get('/center-requests/my', [CenterRequestController::class, 'myRequests']);
+
     // Centers – create request with justificante (any authenticated user)
     Route::post('/centers', [CenterController::class, 'store']);
 
-    // Admin-only routes (US#8)
-    Route::middleware('admin')->group(function () {
+    /* -------------------------------------------------------------- */
+    /*  Teacher-only routes (teacher or admin)                         */
+    /* -------------------------------------------------------------- */
+    Route::middleware('teacher')->group(function () {
+        // Edit center portal (teacher edits own center)
         Route::put('/centers/{center}', [CenterController::class, 'update']);
+
+        // Center Members CRUD
+        Route::get('/center/members', [CenterMemberController::class, 'index']);
+        Route::get('/center/members/{user}', [CenterMemberController::class, 'show']);
+        Route::patch('/center/members/{user}/role', [CenterMemberController::class, 'updateRole']);
+        Route::patch('/center/members/{user}/block', [CenterMemberController::class, 'block']);
+        Route::patch('/center/members/{user}/unblock', [CenterMemberController::class, 'unblock']);
+        Route::delete('/center/members/{user}', [CenterMemberController::class, 'removeMember']);
+    });
+
+    /* -------------------------------------------------------------- */
+    /*  Admin-only routes (US#8)                                       */
+    /* -------------------------------------------------------------- */
+    Route::middleware('admin')->group(function () {
+        // Center Request management
+        Route::get('/center-requests', [CenterRequestController::class, 'index']);
+        Route::get('/center-requests/{centerRequest}', [CenterRequestController::class, 'show']);
+        Route::patch('/center-requests/{centerRequest}/approve', [CenterRequestController::class, 'approve']);
+        Route::patch('/center-requests/{centerRequest}/reject', [CenterRequestController::class, 'reject']);
+        Route::get('/center-requests/{centerRequest}/justificante', [CenterRequestController::class, 'downloadJustificante']);
+
+        // Center management
         Route::delete('/centers/{center}', [CenterController::class, 'destroy']);
         Route::patch('/centers/{center}/status', [CenterController::class, 'updateStatus']);
         Route::patch('/centers/{center}/approve', [CenterController::class, 'approve']);

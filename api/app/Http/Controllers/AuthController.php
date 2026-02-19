@@ -79,17 +79,14 @@ class AuthController extends Controller
     /**
      * POST /api/check-domain
      * Public endpoint: checks if an email domain matches a registered center.
+     * Returns: has_center, center_name, center_city, is_pending, can_request.
      */
     public function checkDomain(Request $request): JsonResponse
     {
         $request->validate(['email' => 'required|email']);
 
-        $center = $this->authService->detectCenter($request->email);
+        $result = $this->authService->detectCenter($request->email);
 
-        return $this->success([
-            'has_center'  => $center !== null,
-            'center_name' => $center?->name,
-            'center_city' => $center?->city,
-        ]);
+        return $this->success($result);
     }
 }
