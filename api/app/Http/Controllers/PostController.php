@@ -23,6 +23,7 @@ class PostController extends Controller
     /**
      * GET /api/posts
      * List all posts (global feed) with pagination.
+     * Supports filters: ?tag=slug, ?type=question|news
      */
     public function index(Request $request): JsonResponse
     {
@@ -34,6 +35,11 @@ class PostController extends Controller
         // Optional tag filter
         if ($request->has('tag')) {
             $query->whereHas('tags', fn ($q) => $q->where('slug', $request->input('tag')));
+        }
+
+        // Optional type filter (questions only, etc.)
+        if ($request->has('type')) {
+            $query->where('type', $request->input('type'));
         }
 
         $posts = $query->paginate($request->input('per_page', 15));
@@ -79,6 +85,56 @@ class PostController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Center posts retrieved successfully',
+            'data'    => PostResource::collection($posts),
+            'meta'    => [
+                'current_page' => $posts->currentPage(),
+                'last_page'    => $posts->lastPage(),
+                'per_page'     => $posts->perPage(),
+                'total'        => $posts->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * GET /api/feed/following
+     * Posts from users the authenticated user follows.
+     */
+    public function followingFeed(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $followingIds = $user->following()->pluck('followed_id');
+
+        if ($followingIds->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'You are not following anyone yet',
+                'data'    => [],
+                'meta'    => [
+                    'current_page' => 1,
+                    'last_page'    => 1,
+                    'per_page'     => 15,
+                    'total'        => 0,
+                ],
+            ]);
+        }
+
+        $query = Post::whereIn('user_id', $followingIds)
+            ->where(function ($q) use ($user) {
+                // Show global posts + posts from user's own center
+                $q->whereNull('center_id');
+                if ($user->center_id) {
+                    $q->orWhere('center_id', $user->center_id);
+                }
+            })
+            ->with(['user', 'center', 'tags'])
+            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
+            ->latest();
+
+        $posts = $query->paginate($request->input('per_page', 15));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Following feed retrieved successfully',
             'data'    => PostResource::collection($posts),
             'meta'    => [
                 'current_page' => $posts->currentPage(),
