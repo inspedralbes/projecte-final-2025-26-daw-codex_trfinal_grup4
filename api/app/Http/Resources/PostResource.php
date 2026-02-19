@@ -46,6 +46,24 @@ class PostResource extends JsonResource
             'likes_count'    => $this->whenCounted('likedByUsers'),
             'comments_count' => $this->whenCounted('comments'),
             'bookmarks_count'=> $this->whenCounted('bookmarkedByUsers'),
+            'reposts_count'  => $this->whenCounted('reposts'),
+
+            // Repost – original post data
+            'original_post' => $this->whenLoaded('originalPost', fn () => $this->originalPost ? [
+                'id'           => $this->originalPost->id,
+                'content'      => $this->originalPost->content,
+                'code_snippet' => $this->originalPost->code_snippet,
+                'code_language'=> $this->originalPost->code_language,
+                'type'         => $this->originalPost->type,
+                'created_at'   => $this->originalPost->created_at,
+                'user'         => $this->originalPost->user ? [
+                    'id'       => $this->originalPost->user->id,
+                    'name'     => $this->originalPost->user->name,
+                    'username' => $this->originalPost->user->username,
+                    'avatar'   => $this->originalPost->user->avatar,
+                ] : null,
+            ] : null),
+            'is_repost'      => $this->original_post_id !== null,
         ];
     }
 }
