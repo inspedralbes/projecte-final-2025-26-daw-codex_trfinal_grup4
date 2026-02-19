@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\NewCommentEvent;
 use App\Http\Requests\StoreCommentRequest;
 use App\Models\Comment;
+use App\Models\Post;
 use App\Services\SanitizationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -72,6 +73,54 @@ class CommentController extends Controller
         $comment->delete();
 
         return $this->success(null, 'Comment deleted successfully');
+    }
+
+    /**
+     * PATCH /api/comments/{comment}/solution
+     * Toggle a comment as the accepted solution for a question post.
+     * Only the post author can mark a solution.
+     */
+    public function toggleSolution(Request $request, Comment $comment): JsonResponse
+    {
+        $user = $request->user();
+        $post = $comment->post;
+
+        // Only the post author can mark solutions
+        if ($user->id !== $post->user_id) {
+            return $this->error('Only the post author can mark a solution.', 403);
+        }
+
+        // Only question posts can have solutions
+        if ($post->type->value !== 'question') {
+            return $this->error('Only question posts can have accepted solutions.', 422);
+        }
+
+        // If this comment is already the solution → unmark it
+        if ($comment->is_solution) {
+            $comment->update(['is_solution' => false]);
+            $post->update(['is_solved' => false]);
+
+            return $this->success([
+                'comment_id' => $comment->id,
+                'is_solution' => false,
+                'post_is_solved' => false,
+            ], 'Solution unmarked');
+        }
+
+        // Unmark any previously marked solution on this post
+        Comment::where('post_id', $post->id)
+            ->where('is_solution', true)
+            ->update(['is_solution' => false]);
+
+        // Mark this comment as solution
+        $comment->update(['is_solution' => true]);
+        $post->update(['is_solved' => true]);
+
+        return $this->success([
+            'comment_id' => $comment->id,
+            'is_solution' => true,
+            'post_is_solved' => true,
+        ], 'Comment marked as solution');
     }
 
     /**
