@@ -76,6 +76,32 @@ class CommentController extends Controller
     }
 
     /**
+     * PUT /api/comments/{comment}
+     * Update a comment. Only the author can edit.
+     */
+    public function update(Request $request, Comment $comment): JsonResponse
+    {
+        if ($request->user()->id !== $comment->user_id) {
+            return $this->error('Unauthorized', 403);
+        }
+
+        $validated = $request->validate([
+            'content' => 'required|string|max:5000',
+        ]);
+
+        $comment->update([
+            'content' => $this->sanitizer->sanitizeHtml($validated['content']),
+        ]);
+
+        $comment->load('user');
+
+        return $this->success(
+            $this->formatComment($comment),
+            'Comment updated successfully'
+        );
+    }
+
+    /**
      * PATCH /api/comments/{comment}/solution
      * Toggle a comment as the accepted solution for a question post.
      * Only the post author can mark a solution.
