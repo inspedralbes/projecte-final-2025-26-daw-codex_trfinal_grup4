@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Events\NewNotificationEvent;
 use App\Models\Notification;
 
 class NotificationService
 {
     /**
      * Create a notification (won't notify yourself).
+     * Persists to DB and broadcasts via Redis for real-time delivery.
      */
     public function create(
         int $userId,
@@ -22,7 +24,7 @@ class NotificationService
             return null;
         }
 
-        return Notification::create([
+        $notification = Notification::create([
             'user_id'         => $userId,
             'sender_id'       => $senderId,
             'type'            => $type,
@@ -30,5 +32,13 @@ class NotificationService
             'notifiable_id'   => $notifiableId,
             'message'         => $message,
         ]);
+
+        // Load sender for broadcast payload
+        $notification->load('sender');
+
+        // Broadcast to user's private channel for real-time delivery
+        broadcast(new NewNotificationEvent($notification));
+
+        return $notification;
     }
 }
