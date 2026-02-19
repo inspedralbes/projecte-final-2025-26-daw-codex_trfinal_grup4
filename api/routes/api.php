@@ -120,6 +120,11 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     Route::get('/center/tags', [TagController::class, 'centerTags']);
     Route::get('/center/search', [SearchController::class, 'centerSearch']);
 
+    // Tags – follow/unfollow + notifications
+    Route::post('/tags/{tag}/follow', [TagController::class, 'toggleFollow']);
+    Route::patch('/tags/{tag}/notify', [TagController::class, 'toggleNotify']);
+    Route::get('/tags/followed', [TagController::class, 'followed']);
+
     // Profile update (US#7)
     Route::put('/profile', [ProfileController::class, 'update']);
 
