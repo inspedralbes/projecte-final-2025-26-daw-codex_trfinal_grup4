@@ -1,0 +1,272 @@
+/* ============================================================
+   Center Hub – Institutional Dashboard
+   ============================================================ */
+
+.center-hub {
+  min-height: 100vh;
+}
+
+/* ── Banner ───────────────────────────────────────────────── */
+.center-hub__banner {
+  position: relative;
+  height: 200px;
+  background: linear-gradient(135deg, var(--codex-violet-dark), var(--codex-teal-dark));
+  overflow: hidden;
+}
+
+.center-hub__banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(20, 184, 166, 0.3) 0%, transparent 50%);
+}
+
+.center-hub__banner-content {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  height: 100%;
+  padding: var(--space-6);
+}
+
+.center-hub__school-badge {
+  width: 80px;
+  height: 80px;
+  background: var(--depth-1);
+  border: 4px solid var(--color-background);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  box-shadow: var(--shadow-lg);
+  flex-shrink: 0;
+  transform: translateY(30px);
+}
+
+.center-hub__school-info {
+  padding-bottom: var(--space-2);
+}
+
+.center-hub__school-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.center-hub__school-name {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.center-hub__private-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: white;
+}
+
+.center-hub__school-location {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: var(--space-2);
+}
+
+.center-hub__school-stats {
+  display: flex;
+  gap: var(--space-4);
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.center-hub__school-stats span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ── Channels ─────────────────────────────────────────────── */
+.center-hub__channels {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4) var(--space-3);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.center-hub__channels::-webkit-scrollbar {
+  display: none;
+}
+
+.center-hub__channel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--depth-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  color: var(--ink-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.center-hub__channel:hover {
+  background: var(--depth-3);
+  border-color: var(--border-strong);
+}
+
+.center-hub__channel--active {
+  background: var(--codex-teal);
+  border-color: var(--codex-teal);
+  color: white;
+}
+
+.center-hub__channel--teal.center-hub__channel--active {
+  background: var(--codex-teal);
+  border-color: var(--codex-teal);
+}
+
+.center-hub__channel--violet.center-hub__channel--active {
+  background: var(--codex-violet);
+  border-color: var(--codex-violet);
+}
+
+.center-hub__channel--amber.center-hub__channel--active {
+  background: var(--codex-amber);
+  border-color: var(--codex-amber);
+}
+
+.center-hub__channel--emerald.center-hub__channel--active {
+  background: var(--codex-emerald);
+  border-color: var(--codex-emerald);
+}
+
+.center-hub__channel--rose.center-hub__channel--active {
+  background: var(--codex-rose);
+  border-color: var(--codex-rose);
+}
+
+.center-hub__channel--cyan.center-hub__channel--active {
+  background: var(--codex-cyan);
+  border-color: var(--codex-cyan);
+}
+
+.center-hub__channel-count {
+  padding: var(--space-0-5) var(--space-2);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+}
+
+.center-hub__channel--active .center-hub__channel-count {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Navigation Tabs ──────────────────────────────────────── */
+.center-hub__nav {
+  display: flex;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.center-hub__nav-tab {
+  flex: 1;
+  padding: var(--space-4);
+  background: none;
+  border: none;
+  color: var(--ink-tertiary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.center-hub__nav-tab:hover {
+  color: var(--ink-secondary);
+  background: var(--depth-1);
+}
+
+.center-hub__nav-tab--active {
+  color: var(--ink-primary);
+  font-weight: 600;
+}
+
+.center-hub__nav-tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: var(--codex-violet);
+  border-radius: var(--radius-full);
+}
+
+/* ── Posts ────────────────────────────────────────────────── */
+.center-hub__posts {
+  display: flex;
+  flex-direction: column;
+}
+
+.center-hub__post-wrapper {
+  position: relative;
+}
+
+.center-hub__pinned-badge {
+  position: absolute;
+  top: var(--space-3);
+  left: calc(44px + var(--space-3) + var(--space-4));
+  padding: var(--space-1) var(--space-2);
+  background: var(--depth-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  z-index: 1;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .center-hub__banner {
+    height: 160px;
+  }
+
+  .center-hub__banner-content {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-4);
+  }
+
+  .center-hub__school-badge {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+    transform: none;
+    margin-bottom: var(--space-2);
+  }
+
+  .center-hub__school-name {
+    font-size: var(--text-xl);
+  }
+
+  .center-hub__school-stats {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+}

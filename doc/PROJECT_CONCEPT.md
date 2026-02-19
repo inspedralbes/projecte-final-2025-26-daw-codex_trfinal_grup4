@@ -1,15 +1,18 @@
 # PROJECT_CONCEPT.md
 
-> **Nombre del Proyecto:** Codex
-> **Tipo:** Red Social Académica Vertical
-> **Público Objetivo:** Estudiantes, Profesores y Alumni de FP Informática en España (DAM, DAW, ASIX).
+> **Nombre del Proyecto:** Codex  
+> **Tipo:** Red Social Académica Vertical  
+> **Público Objetivo:** Estudiantes, Profesores y Alumni de FP Informática en España (DAM, DAW, ASIX).  
+> **Estado:** Frontend UI implementado ✓
 
 ---
 
 ## 1. Visión del Producto
-**DevNet FP** es una plataforma que fusiona la dinámica ágil de una red social pública (tipo Twitter/X) con la privacidad y utilidad de una intranet educativa.
+**Codex** (anteriormente DevNet FP) es una Red Social Académica Vertical diseñada exclusivamente para el ecosistema de Formación Profesional en Informática (DAM, DAW, ASIX).
 
-Su propósito principal es romper el aislamiento de los centros de Formación Profesional. Permite que un alumno de un instituto pequeño conecte con la comunidad global de desarrolladores, al mismo tiempo que mantiene un canal de comunicación privado y seguro con sus compañeros de clase y profesores.
+A diferencia de las redes sociales generalistas, Codex prioriza la **identidad profesional** y la **colaboración académica**. No es un clon de Twitter/X; es una plataforma con personalidad propia, seria pero dinámica, inspirada en herramientas de productividad y entornos de desarrollo (como VS Code, GitHub o Linear) pero con el factor social de una comunidad viva.
+
+Su estética ("Academic Dark Mode") huye del "azul genérico" y apuesta por una interfaz sofisticada, limpia y orientada al código, utilizando paletas de colores profundos (Deep Slate, Teal, Purple) que reducen la fatiga visual durante largas sesiones de estudio o programación.
 
 ---
 
@@ -72,12 +75,85 @@ La plataforma reconoce diferentes niveles de autoridad y participación.
 
 ---
 
+## 6. Sistema de Diseño UI
+
+### Paleta de Colores ("Academic Dark Mode")
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `--codex-deep-slate` | `#0f1419` | Fondo base |
+| `--codex-teal` | `#14b8a6` | Acento primario |
+| `--codex-violet` | `#8b5cf6` | Acento secundario |
+| `--codex-amber` | `#f59e0b` | Avisos/Centro |
+| `--codex-emerald` | `#10b981` | Éxito/Puntos |
+
+### Tipografía
+- **UI:** Plus Jakarta Sans (sans-serif)
+- **Código:** JetBrains Mono (monospace)
+
+### Escala de Superficies
+Sistema de elevación con 6 niveles (`--surface-depth-0` a `--surface-depth-5`) para crear jerarquía visual mediante profundidad.
+
+### Componentes Principales
+- **Cards:** Bordes sutiles, hover con elevación
+- **Badges:** Pills redondeadas con colores semánticos (DAW=teal, DAM=violet)
+- **Code Blocks:** Fondo elevado con syntax highlighting
+- **Buttons:** Primary (teal gradient), Secondary (outline)
 
 ---
 
-## 6. Documentación Técnica
+## 7. Estructura de Pantallas
+
+### Rutas Implementadas
+| Ruta | Componente | Descripción |
+|------|------------|-------------|
+| `/welcome` | Landing | Página de bienvenida con autenticación |
+| `/` | Home → Feed | Feed Global con tabs (Para ti / Siguiendo / Dudas) |
+| `/center` | CenterHub | Dashboard del centro educativo |
+| `/explore` | Explore | Búsqueda y descubrimiento |
+| `/notifications` | Notifications | Stream de actividad |
+| `/profile` | Profile | Perfil de desarrollador |
+| `/messages` | Messages | Chat (pendiente) |
+
+### Arquitectura de Componentes
+```
+src/
+├── pages/
+│   ├── Landing.jsx          # Auth + Hero
+│   ├── Explore.jsx          # Search + Widgets
+│   ├── Notifications.jsx    # Activity stream
+│   └── CenterHub.jsx        # Hub institucional
+├── components/
+│   ├── layout/
+│   │   ├── MainLayout.jsx   # Shell 3-columnas
+│   │   ├── Sidebar.jsx      # Navegación principal
+│   │   └── RightSection.jsx # Widgets laterales
+│   ├── feed/
+│   │   ├── Feed.jsx         # Lista de posts
+│   │   ├── PostInput.jsx    # Editor de publicación
+│   │   └── PostCard.jsx     # Tarjeta de post
+│   └── profile/
+│       └── Profile.jsx      # Perfil de usuario
+└── styles/
+    ├── variables.css        # Design tokens
+    ├── base.css             # Reset + Typography
+    └── index.css            # Entry point
+```
+
+---
+
+## 8. Documentación Técnica
 Para detalles específicos sobre la implementación técnica de cada microservicio, consulta los siguientes archivos de contexto:
 
 *   **Backend (API):** [api/CONTEXT.md](../api/CONTEXT.md)
 *   **Frontend (Cliente):** [client/CONTEXT.md](../client/CONTEXT.md)
 *   **Real-time (Socket):** [socket/CONTEXT.md](../socket/CONTEXT.md)
+
+---
+
+## 9. Próximos Pasos
+- [ ] Integración con API real (reemplazar mockApi)
+- [ ] Sistema de autenticación con validación de dominios educativos
+- [ ] WebSocket para notificaciones en tiempo real
+- [ ] Chat/Mensajes directos
+- [ ] Sistema de puntos y gamificación
+- [ ] Moderación para profesores en Hub del Centro

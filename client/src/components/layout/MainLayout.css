@@ -1,0 +1,47 @@
+/* ============================================================
+   Main Layout – App Shell with Sidebar
+   ============================================================ */
+
+.app-layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr var(--widget-width);
+  min-height: 100vh;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+}
+
+/* ── Main Content Area ────────────────────────────────────── */
+.main-content {
+  min-height: 100vh;
+  border-left: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+}
+
+.main-content__container {
+  max-width: var(--feed-width);
+  margin: 0 auto;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 1280px) {
+  .app-layout {
+    grid-template-columns: var(--sidebar-collapsed) 1fr var(--widget-width);
+  }
+}
+
+@media (max-width: 1024px) {
+  .app-layout {
+    grid-template-columns: var(--sidebar-collapsed) 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+    padding-bottom: 72px;
+  }
+
+  .main-content {
+    border: none;
+  }
+}

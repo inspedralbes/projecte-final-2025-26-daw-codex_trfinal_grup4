@@ -1,0 +1,70 @@
+/* ============================================================
+   Feed – Main Content Area
+   ============================================================ */
+
+.feed {
+  min-height: 100vh;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.feed__header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.feed__title {
+  padding: var(--space-4) var(--space-4) var(--space-2);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--ink-primary);
+  margin: 0;
+}
+
+.feed__tabs {
+  display: flex;
+}
+
+.feed__tab {
+  flex: 1;
+  padding: var(--space-4);
+  background: none;
+  border: none;
+  color: var(--ink-tertiary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.feed__tab:hover {
+  color: var(--ink-secondary);
+  background: var(--depth-1);
+}
+
+.feed__tab--active {
+  color: var(--ink-primary);
+  font-weight: 600;
+}
+
+.feed__tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: var(--codex-teal);
+  border-radius: var(--radius-full);
+}
+
+/* ── Posts Container ──────────────────────────────────────── */
+.feed__posts {
+  display: flex;
+  flex-direction: column;
+}
