@@ -11,6 +11,7 @@ use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
@@ -67,6 +68,9 @@ Route::get('/profile/{username}/posts', [ProfileController::class, 'posts']);
 Route::get('/users/{user}/followers', [FollowController::class, 'followers']);
 Route::get('/users/{user}/following', [FollowController::class, 'following']);
 
+// Search (public)
+Route::get('/search', [SearchController::class, 'index']);
+
 // Centers (US#8) – public listing (active only), admins see all with filters
 Route::get('/centers', [CenterController::class, 'index']);
 Route::get('/centers/{center}', [CenterController::class, 'show']);
@@ -112,6 +116,7 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     // Center Hub (US#5) – "Walled Garden"
     Route::get('/center/posts', [PostController::class, 'centerPosts']);
     Route::get('/center/tags', [TagController::class, 'centerTags']);
+    Route::get('/center/search', [SearchController::class, 'centerSearch']);
 
     // Profile update (US#7)
     Route::put('/profile', [ProfileController::class, 'update']);
