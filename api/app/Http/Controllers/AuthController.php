@@ -22,17 +22,22 @@ class AuthController extends Controller
     /**
      * POST /api/register
      * Register a new user. Auto-detects center from email domain.
+     * Sends verification email.
      */
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = $this->authService->register($request->validated());
 
+        // Send verification email
+        $user->sendEmailVerificationNotification();
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->success([
-            'user'  => $user->load('center'),
-            'token' => $token,
-        ], 'User registered successfully', 201);
+            'user'           => $user->load('center'),
+            'token'          => $token,
+            'email_verified' => false,
+        ], 'User registered successfully. Please check your email to verify your account.', 201);
     }
 
     /**
@@ -49,8 +54,9 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->success([
-            'user'  => $user->load('center'),
-            'token' => $token,
+            'user'           => $user->load('center'),
+            'token'          => $token,
+            'email_verified' => $user->hasVerifiedEmail(),
         ], 'Logged in successfully');
     }
 
@@ -70,10 +76,12 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        return $this->success(
-            $request->user()->load('center'),
-            'Authenticated user'
-        );
+        $user = $request->user();
+
+        return $this->success([
+            'user'           => $user->load('center'),
+            'email_verified' => $user->hasVerifiedEmail(),
+        ], 'Authenticated user');
     }
 
     /**

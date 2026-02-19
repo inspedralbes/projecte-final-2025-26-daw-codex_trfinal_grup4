@@ -381,6 +381,41 @@
   6. Teacher pot gestionar alumnes: bloquejar, canviar rol, expulsar
   7. Teacher pot editar el portal del seu centre (nom, descripció, logo, etc.)
 
+### 2026-02-19 – Verificació d'Email
+- **Autor:** @chuclao (amb IA)
+- **Esquema BD** (`2025_02_17_000000_create_full_schema.php`):
+  - Afegit `email_verified_at` (timestamp, nullable) a la taula `users`
+- Actualitzat model **`User`**:
+  - Implementa interfície `MustVerifyEmail` (Illuminate\Contracts\Auth\MustVerifyEmail)
+  - Override `sendEmailVerificationNotification()` amb notificació personalitzada `VerifyEmailNotification`
+  - Afegit cast `email_verified_at` → datetime
+- Creada **`VerifyEmailNotification`** a `app/Notifications/`:
+  - Genera URL signada temporal (60 minuts) cap a `verification.verify`
+  - Email amb branding Codex: assumpte "Verify your email address – Codex"
+  - Conté botó de verificació + link alternatiu en text pla
+- Creat **`VerificationController`** a `app/Http/Controllers/`:
+  - `GET /api/email/verify/{id}/{hash}` — Verifica email via URL signada (pública, middleware `signed`)
+  - `POST /api/email/resend` — Reenvia email de verificació (auth:sanctum, throttle:6,1)
+  - `GET /api/email/status` — Retorna estat de verificació de l'usuari (auth:sanctum)
+- Actualitzat **`AuthController`**:
+  - `register()`: ara envia email de verificació automàticament i retorna `email_verified: false`
+  - `login()`: ara retorna `email_verified` al response
+  - `me()`: ara retorna `email_verified` al response
+- Actualitzat **`routes/api.php`**:
+  - `GET /api/email/verify/{id}/{hash}` — Ruta pública amb middleware `signed`, nom `verification.verify`
+  - `POST /api/email/resend` — Ruta protegida amb `auth:sanctum` i `throttle:6,1`
+  - `GET /api/email/status` — Ruta protegida amb `auth:sanctum`
+- Configurat **`.env`** del contenidor:
+  - `MAIL_FROM_ADDRESS=noreply@codex.dev`, `MAIL_FROM_NAME=Codex`
+  - `CACHE_STORE=redis` (necessari pel throttle middleware, que depèn del cache store)
+- Actualitzat **seeder**: tots els usuaris de seed tenen `email_verified_at` assignat (pre-verificats per a testing)
+- **Fluix de verificació d'email:**
+  1. Usuari es registra → rep email amb URL signada (vàlida 60 min)
+  2. Clic al link → `GET /api/email/verify/{id}/{hash}` marca `email_verified_at`
+  3. Si no ha rebut l'email → `POST /api/email/resend` (throttle: max 6 intents/minut)
+  4. Pot consultar estat amb `GET /api/email/status`
+  5. Login i /me retornen `email_verified` per al frontend
+
 ---
 
 ## 📚 Documentació Relacionada
