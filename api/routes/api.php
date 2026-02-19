@@ -7,6 +7,7 @@ use App\Http\Controllers\CenterRequestController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InteractionController;
+use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TagController;
@@ -43,6 +44,11 @@ Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'
     ->middleware('signed')
     ->name('verification.verify');
 
+// Password Reset (public – no auth needed)
+Route::post('/password/forgot', [PasswordController::class, 'forgot'])
+    ->middleware('throttle:5,1'); // Max 5 per minute
+Route::post('/password/reset', [PasswordController::class, 'reset']);
+
 /* ------------------------------------------------------------------ */
 /*  Public Routes                                                      */
 /* ------------------------------------------------------------------ */
@@ -72,6 +78,10 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     Route::post('/email/resend', [VerificationController::class, 'resend'])
         ->middleware('throttle:6,1'); // Max 6 per minute
     Route::get('/email/status', [VerificationController::class, 'status']);
+
+    // Password management (authenticated)
+    Route::post('/password/set', [PasswordController::class, 'set']);     // Google users set first password
+    Route::put('/password/update', [PasswordController::class, 'update']); // Change existing password
 
     // Posts (US#2)
     Route::post('/posts', [PostController::class, 'store']);

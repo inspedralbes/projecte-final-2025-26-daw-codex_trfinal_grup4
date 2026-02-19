@@ -89,6 +89,7 @@ class GoogleAuthController extends Controller
             'email_verified' => $user->hasVerifiedEmail(),
             'is_new_user'    => $isNew,
             'auth_provider'  => $user->auth_provider,
+            'needs_password' => $user->needsPassword(),
         ], $message, $isNew ? 201 : 200);
     }
 }

@@ -37,7 +37,8 @@ return new class extends Migration
             $table->string('username')->unique(); // @usuario
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password')->nullable(); // Nullable: Google OAuth users have no password
+            $table->string('password'); // Always set (Google users get a random temp password)
+            $table->timestamp('password_set_at')->nullable(); // NULL = user needs to set password (Google OAuth)
             
             // OAuth
             $table->string('google_id')->nullable()->unique(); // Google OAuth identifier
@@ -225,6 +226,13 @@ return new class extends Migration
             $table->timestamp('expires_at')->nullable()->index();
             $table->timestamps();
         });
+
+        // 10. PASSWORD RESET TOKENS
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
     }
 
     /**
@@ -233,6 +241,7 @@ return new class extends Migration
     public function down(): void
     {
         // Borrar en orden inverso para evitar errores de FK
+        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('personal_access_tokens');
         Schema::dropIfExists('chat_messages');
         Schema::dropIfExists('tag_user');

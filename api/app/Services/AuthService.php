@@ -33,13 +33,14 @@ class AuthService
         }
 
         $user = User::create([
-            'name'          => $data['name'],
-            'username'      => $data['username'],
-            'email'         => $data['email'],
-            'password'      => Hash::make($data['password']),
-            'role'          => $role,
-            'center_id'     => $centerId,
-            'auth_provider' => 'local',
+            'name'            => $data['name'],
+            'username'        => $data['username'],
+            'email'           => $data['email'],
+            'password'        => Hash::make($data['password']),
+            'password_set_at' => now(),
+            'role'            => $role,
+            'center_id'       => $centerId,
+            'auth_provider'   => 'local',
         ]);
 
         return $user;
@@ -110,6 +111,8 @@ class AuthService
             'name'              => $googleUser->getName(),
             'username'          => $this->generateUniqueUsername($googleUser),
             'email'             => $googleUser->getEmail(),
+            'password'          => Hash::make(Str::random(32)), // Temp random password
+            'password_set_at'   => null, // User needs to set their own password
             'google_id'         => $googleUser->getId(),
             'auth_provider'     => 'google',
             'avatar'            => $googleUser->getAvatar(),

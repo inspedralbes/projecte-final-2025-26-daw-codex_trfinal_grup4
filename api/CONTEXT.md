@@ -420,7 +420,7 @@
 - **Autor:** @chuclao (amb IA)
 - Instal·lat **Laravel Socialite v5** per a OAuth amb Google
 - **Esquema BD** (`2025_02_17_000000_create_full_schema.php`):
-  - `password` ara és **nullable** (usuaris Google no tenen password local)
+  - `password` continua sent **NOT NULL** (veure feature password-management per detalls)
   - Afegit `google_id` (string, nullable, unique) a la taula `users`
   - Afegit `auth_provider` (enum: local/google, default: local) a la taula `users`
 - Actualitzat model **`User`**:
@@ -459,6 +459,58 @@
   6. Retorna token Sanctum + dades d'usuari (incloent `is_new_user`, `auth_provider`)
   7. Si l'usuari és nou, l'email es marca com verificat automàticament
   8. Si l'usuari ja existia amb compte local, es vincula Google + manté avatar
+
+### 2026-02-19 – Gestió de Contrasenyes (Set, Update, Forgot, Reset)
+- **Autor:** @chuclao (amb IA)
+- **Esquema BD** (`2025_02_17_000000_create_full_schema.php`):
+  - `password` torna a ser **NOT NULL** (usuaris Google reben una contrasenya temporal aleatòria)
+  - Afegit `password_set_at` (timestamp, nullable) a la taula `users` — si és NULL, l'usuari necessita establir contrasenya
+  - Creada taula **`password_reset_tokens`**: email (primary), token (hashed), created_at
+- Actualitzat model **`User`**:
+  - Nou fillable: `password_set_at`
+  - Nou cast: `password_set_at` → datetime
+  - `google_id` afegit a `$hidden`
+  - Nou helper `needsPassword(): bool` — retorna `true` si `password_set_at === null`
+- Actualitzat **`AuthService`** a `app/Services/`:
+  - `register()`: ara estableix `password_set_at => now()` i `auth_provider => 'local'`
+  - `handleGoogleUser()`: nous usuaris Google reben `Hash::make(Str::random(32))` com a contrasenya temporal + `password_set_at => null`
+- Creat **`PasswordController`** a `app/Http/Controllers/`:
+  - `POST /api/password/set` — Usuaris Google estableixen la seva primera contrasenya (auth:sanctum)
+    - Verifica `needsPassword()`, retorna 409 si ja té contrasenya establerta
+    - Actualitza password + password_set_at
+  - `PUT /api/password/update` — Canviar contrasenya existent (auth:sanctum)
+    - Requereix `current_password` per verificar, retorna 422 si `needsPassword()` és true
+  - `POST /api/password/forgot` — Envia email de reset (públic, throttle:5,1)
+    - Genera token aleatori, guarda hash a `password_reset_tokens`
+    - Sempre retorna missatge d'èxit (anti-enumeració d'emails)
+  - `POST /api/password/reset` — Restableix contrasenya amb token (públic)
+    - Valida email + token + contrasenya, comprova expiració (60 min)
+    - Actualitza password + password_set_at, elimina token, revoca tots els tokens Sanctum
+- Creada **`ResetPasswordNotification`** a `app/Notifications/`:
+  - Email amb branding Codex: assumpte "Reset your password – Codex"
+  - Link al frontend: `{FRONTEND_URL}/reset-password?token=xxx&email=xxx`
+  - Expiració de 60 minuts indicada a l'email
+- Actualitzat **`AuthController`**:
+  - `login()`: detecta `needsPassword()` en lloc de comprovar si password és null
+  - `register()`, `login()`, `me()`: ara retornen `needs_password` al response
+- Actualitzat **`GoogleAuthController`**: `callback()` ara retorna `needs_password` al response
+- Actualitzat **`routes/api.php`**:
+  - Noves rutes públiques: `POST /api/password/forgot` (throttle:5,1), `POST /api/password/reset`
+  - Noves rutes protegides: `POST /api/password/set`, `PUT /api/password/update`
+- Actualitzat **`config/app.php`**: afegit `frontend_url` amb variable d'entorn `FRONTEND_URL`
+- Configurat **`.env`** del contenidor: `FRONTEND_URL=http://localhost:5173`
+- Actualitzat **seeder**: tots els usuaris de seed tenen `password_set_at => Carbon::now()`
+- **Fluix de contrasenya per a usuaris Google:**
+  1. Usuari es registra/login via Google → rep contrasenya temporal aleatòria + `password_set_at=null`
+  2. Response retorna `needs_password: true` → frontend redirigeix a pàgina "Estableix contrasenya"
+  3. `POST /api/password/set` amb nova contrasenya → `password_set_at` s'actualitza
+  4. A partir d'ara pot fer login amb email + contrasenya a més de Google
+- **Fluix de restabliment de contrasenya (forgot/reset):**
+  1. Usuari fa `POST /api/password/forgot` amb el seu email
+  2. Si l'email existeix, rep email amb link de reset (60 min expiració)
+  3. Frontend obté token i email de la URL → mostra formulari de nova contrasenya
+  4. `POST /api/password/reset` amb email + token + nova contrasenya
+  5. Contrasenya actualitzada, tots els tokens Sanctum revocats → l'usuari ha de fer login de nou
 
 ---
 

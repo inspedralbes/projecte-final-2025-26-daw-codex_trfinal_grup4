@@ -29,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'username',
         'email',
         'password',
+        'password_set_at',
         'role',
         'avatar',
         'bio',
@@ -49,6 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'google_id',
     ];
 
     /**
@@ -61,6 +63,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'password' => 'hashed',
             'email_verified_at' => 'datetime',
+            'password_set_at' => 'datetime',
             'role' => UserRole::class,
             'is_blocked' => 'boolean',
         ];
@@ -88,6 +91,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isTeacherOrAdmin(): bool
     {
         return $this->isTeacher() || $this->isAdmin();
+    }
+
+    /**
+     * Check if the user needs to set a password.
+     * Google OAuth users have a random temp password until they set their own.
+     */
+    public function needsPassword(): bool
+    {
+        return $this->password_set_at === null;
     }
 
     /**
