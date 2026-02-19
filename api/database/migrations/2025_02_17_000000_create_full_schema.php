@@ -233,6 +233,21 @@ return new class extends Migration
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
+
+        // 11. NOTIFICATIONS
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Recipient
+            $table->foreignId('sender_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->string('type'); // like, comment, follow, repost, mention
+            $table->morphs('notifiable'); // notifiable_id + notifiable_type (post, comment, user)
+            $table->text('message')->nullable();
+            $table->timestamp('read_at')->nullable();
+            $table->timestamps();
+
+            $table->index(['user_id', 'read_at']);
+            $table->index(['user_id', 'created_at']);
+        });
     }
 
     /**
@@ -241,6 +256,7 @@ return new class extends Migration
     public function down(): void
     {
         // Borrar en orden inverso para evitar errores de FK
+        Schema::dropIfExists('notifications');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('personal_access_tokens');
         Schema::dropIfExists('chat_messages');

@@ -8,6 +8,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InteractionController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
@@ -125,6 +126,13 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     Route::post('/tags/{tag}/follow', [TagController::class, 'toggleFollow']);
     Route::patch('/tags/{tag}/notify', [TagController::class, 'toggleNotify']);
     Route::get('/tags/followed', [TagController::class, 'followed']);
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/count', [NotificationController::class, 'count']);
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
 
     // Profile update (US#7)
     Route::put('/profile', [ProfileController::class, 'update']);

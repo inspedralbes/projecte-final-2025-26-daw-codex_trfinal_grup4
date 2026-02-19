@@ -6,6 +6,7 @@ use App\Events\NewInteractionEvent;
 use App\Http\Resources\PostResource;
 use App\Models\Interaction;
 use App\Models\Post;
+use App\Services\NotificationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,10 @@ use Illuminate\Http\Request;
 class InteractionController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private readonly NotificationService $notificationService
+    ) {}
 
     /**
      * POST /api/interactions
@@ -72,6 +77,22 @@ class InteractionController extends Controller
         $ownerId = $resource->user_id ?? null;
         if ($ownerId && $ownerId !== $user->id) {
             event(new NewInteractionEvent($interaction));
+        }
+
+        // Persist notification for likes (not bookmarks)
+        if ($request->type === 'like' && $ownerId) {
+            $notifiableType = $request->interactable_type === 'post'
+                ? \App\Models\Post::class
+                : \App\Models\Comment::class;
+
+            $this->notificationService->create(
+                $ownerId,
+                $user->id,
+                'like',
+                $notifiableType,
+                $request->interactable_id,
+                $user->name . ' ha dado like a tu ' . $request->interactable_type
+            );
         }
 
         return $this->success([

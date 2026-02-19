@@ -7,6 +7,7 @@ use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Services\NotificationService;
 use App\Services\SanitizationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -18,7 +19,8 @@ class PostController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private readonly SanitizationService $sanitizer
+        private readonly SanitizationService $sanitizer,
+        private readonly NotificationService $notificationService
     ) {}
 
     /**
@@ -302,6 +304,19 @@ class PostController extends Controller
                 ? $this->sanitizer->sanitizeHtml($request->input('content'))
                 : null,
         ]);
+
+        // Notify original post author
+        $originalPost = Post::find($originalId);
+        if ($originalPost) {
+            $this->notificationService->create(
+                $originalPost->user_id,
+                $user->id,
+                'repost',
+                Post::class,
+                $originalId,
+                $user->name . ' ha reposteado tu publicación'
+            );
+        }
 
         $repost->load(['user', 'center', 'tags', 'originalPost.user']);
         $repost->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts']);
