@@ -21,6 +21,7 @@ class UpdateCenterRequest extends FormRequest
             'city'          => 'sometimes|nullable|string|max:255',
             'logo'          => 'sometimes|nullable|string|max:500',
             'website'       => 'sometimes|nullable|url|max:500',
+            'description'   => 'sometimes|nullable|string|max:5000',
             'status'        => 'sometimes|in:pending,active,rejected',
             'justificante'  => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ];

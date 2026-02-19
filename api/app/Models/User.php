@@ -30,6 +30,7 @@ class User extends Authenticatable
         'role',
         'avatar',
         'bio',
+        'is_blocked',
         'linkedin_url',
         'portfolio_url',
         'external_url',
@@ -55,7 +56,32 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
             'role' => UserRole::class,
+            'is_blocked' => 'boolean',
         ];
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Helpers                                                            */
+    /* ------------------------------------------------------------------ */
+
+    public function isAdmin(): bool
+    {
+        return $this->role === UserRole::Admin;
+    }
+
+    public function isTeacher(): bool
+    {
+        return $this->role === UserRole::Teacher;
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->role === UserRole::Student;
+    }
+
+    public function isTeacherOrAdmin(): bool
+    {
+        return $this->isTeacher() || $this->isAdmin();
     }
 
     /* ------------------------------------------------------------------ */
@@ -100,5 +126,15 @@ class User extends Authenticatable
     public function followedTags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'tag_user')->withPivot('notify');
+    }
+
+    public function createdCenters(): HasMany
+    {
+        return $this->hasMany(Center::class, 'creator_id');
+    }
+
+    public function centerRequests(): HasMany
+    {
+        return $this->hasMany(CenterRequest::class);
     }
 }

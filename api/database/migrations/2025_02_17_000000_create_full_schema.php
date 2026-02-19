@@ -19,8 +19,10 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->string('logo')->nullable(); // URL imagen
             $table->string('website')->nullable();
+            $table->text('description')->nullable(); // Descripción/portal del centro
             $table->enum('status', ['pending', 'active', 'rejected'])->default('pending');
             $table->string('justificante')->nullable(); // Path al fichero justificante
+            $table->unsignedBigInteger('creator_id')->nullable(); // Profesor que solicitó el centro
             $table->timestamps();
         });
 
@@ -44,6 +46,7 @@ return new class extends Migration
             // Perfil
             $table->string('avatar')->nullable();
             $table->text('bio')->nullable();
+            $table->boolean('is_blocked')->default(false); // Bloqueado por profesor/admin
             
             // Redes Sociales
             $table->string('linkedin_url')->nullable();
@@ -52,6 +55,30 @@ return new class extends Migration
 
             $table->rememberToken();
             $table->timestamps();
+        });
+
+        // FK diferida: centers.creator_id → users.id
+        Schema::table('centers', function (Blueprint $table) {
+            $table->foreign('creator_id')->references('id')->on('users')->onDelete('set null');
+        });
+
+        // 2b. SOLICITUDES DE CENTRO (Profesor solicita crear centro)
+        Schema::create('center_requests', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('center_name');
+            $table->string('domain'); // Dominio propuesto
+            $table->string('city')->nullable();
+            $table->string('website')->nullable();
+            $table->string('full_name'); // Nombre completo del profesor
+            $table->string('justificante'); // Path al fichero justificante (obligatorio)
+            $table->text('message')->nullable(); // Mensaje opcional para el admin
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->text('admin_notes')->nullable(); // Notas del admin al aprobar/rechazar
+            $table->timestamps();
+
+            $table->index('status');
+            $table->index('domain');
         });
 
         // 3. SEGUIDORES (Usuario sigue a Usuario)
@@ -212,6 +239,10 @@ return new class extends Migration
         Schema::dropIfExists('comments');
         Schema::dropIfExists('posts');
         Schema::dropIfExists('follows');
+        Schema::dropIfExists('center_requests');
+        Schema::table('centers', function (Blueprint $table) {
+            $table->dropForeign(['creator_id']);
+        });
         Schema::dropIfExists('users');
         Schema::dropIfExists('centers');
     }

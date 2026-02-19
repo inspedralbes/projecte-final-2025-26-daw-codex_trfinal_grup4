@@ -18,7 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureIsAdmin::class,
+            'teacher' => \App\Http\Middleware\EnsureIsTeacher::class,
             'same-center' => \App\Http\Middleware\EnsureSameCenter::class,
+            'not-blocked' => \App\Http\Middleware\EnsureNotBlocked::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

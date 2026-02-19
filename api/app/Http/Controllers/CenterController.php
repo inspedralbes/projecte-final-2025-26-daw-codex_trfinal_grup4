@@ -88,10 +88,17 @@ class CenterController extends Controller
 
     /**
      * PUT /api/centers/{center}
-     * Update a center (admin only).
+     * Update a center (admin or teacher of that center).
      */
     public function update(UpdateCenterRequest $request, Center $center): JsonResponse
     {
+        $user = $request->user();
+
+        // Teachers can only update their own center
+        if ($user->role->value === 'teacher' && $user->center_id !== $center->id) {
+            return $this->error('You can only edit your own center.', 403);
+        }
+
         $data = $request->validated();
 
         // Handle justificante file upload
@@ -102,6 +109,11 @@ class CenterController extends Controller
             }
             $path = $request->file('justificante')->store('justificantes', 'public');
             $data['justificante'] = $path;
+        }
+
+        // Teachers cannot change status
+        if ($user->role->value === 'teacher') {
+            unset($data['status']);
         }
 
         $center->update($data);

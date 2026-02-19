@@ -12,19 +12,22 @@ class AuthService
     /**
      * Register a new user.
      * Detects the email domain to auto-assign a center and role.
+     *
+     * Flow:
+     * - If domain matches an ACTIVE center → student role + center_id
+     * - If domain matches NO center → userNormal role (can request center creation)
+     * - Pending/rejected centers are not matched
      */
     public function register(array $data): User
     {
         $domain = $this->extractDomain($data['email']);
-        $center = Center::where('domain', $domain)->first();
+        $center = Center::where('domain', $domain)->where('status', 'active')->first();
 
         $role = UserRole::UserNormal;
         $centerId = null;
 
         if ($center) {
             $centerId = $center->id;
-            // Users from a recognized center default to 'student'.
-            // Teachers can be promoted later by an admin.
             $role = UserRole::Student;
         }
 
@@ -50,12 +53,22 @@ class AuthService
     }
 
     /**
-     * Check if a given email domain matches a registered center.
+     * Check if a given email domain matches a registered active center.
+     * Also indicates if the user can request creating a center for that domain.
      */
-    public function detectCenter(string $email): ?Center
+    public function detectCenter(string $email): array
     {
         $domain = $this->extractDomain($email);
 
-        return Center::where('domain', $domain)->first();
+        $activeCenter = Center::where('domain', $domain)->where('status', 'active')->first();
+        $pendingCenter = Center::where('domain', $domain)->where('status', 'pending')->first();
+
+        return [
+            'has_center'      => $activeCenter !== null,
+            'center_name'     => $activeCenter?->name,
+            'center_city'     => $activeCenter?->city,
+            'is_pending'      => $pendingCenter !== null,
+            'can_request'     => $activeCenter === null && $pendingCenter === null,
+        ];
     }
 }

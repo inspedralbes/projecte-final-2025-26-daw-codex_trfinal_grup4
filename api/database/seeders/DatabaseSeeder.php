@@ -14,12 +14,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Create a Center
+        // 1. Create a Center (without creator_id initially)
         $centerId = DB::table('centers')->insertGetId([
             'name' => 'Institut Pedralbes',
             'domain' => 'inspedralbes.cat',
             'city' => 'Barcelona',
             'website' => 'https://agora.xtec.cat/iespedralbes/',
+            'description' => 'Centre educatiu de referència en DAW/DAM a Barcelona.',
             'status' => 'active',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
@@ -34,6 +35,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@codex.com',
             'password' => Hash::make('password'),
             'role' => 'admin',
+            'is_blocked' => false,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
@@ -48,11 +50,17 @@ class DatabaseSeeder extends Seeder
             'email' => 'profx@inspedralbes.cat',
             'password' => Hash::make('password'),
             'role' => 'teacher',
+            'is_blocked' => false,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
 
         echo "Teacher User created: ID $teacherId\n";
+
+        // Link teacher as center creator
+        DB::table('centers')->where('id', $centerId)->update([
+            'creator_id' => $teacherId,
+        ]);
 
         // 4. Create a Student User (Linked to Center)
         $studentId = DB::table('users')->insertGetId([
@@ -62,11 +70,26 @@ class DatabaseSeeder extends Seeder
             'email' => 'john@inspedralbes.cat',
             'password' => Hash::make('password'),
             'role' => 'student',
+            'is_blocked' => false,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
 
         echo "Student User created: ID $studentId\n";
+
+        // 4b. Create a normal user (no center)
+        $normalId = DB::table('users')->insertGetId([
+            'name' => 'Normal User',
+            'username' => 'normaluser',
+            'email' => 'user@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => 'userNormal',
+            'is_blocked' => false,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        echo "Normal User created: ID $normalId\n";
 
         // 5. Create a Follow
         DB::table('follows')->insert([

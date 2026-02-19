@@ -325,6 +325,62 @@
 - Download retorna el fitxer amb nom descriptiu: `justificante_{domain}.{ext}`
 - Gestió d'errors: 404 si no hi ha fitxer o no existeix al disc
 
+### 2026-02-19 – Fluix de Registre de Professor + Gestió de Centre
+- **Autor:** @chuclao (amb IA)
+- **Esquema BD** (`2025_02_17_000000_create_full_schema.php`):
+  - Afegit `creator_id` (FK → users) i `description` (text) a la taula `centers`
+  - Afegit `is_blocked` (boolean, default false) a la taula `users`
+  - Creada taula **`center_requests`**: id, user_id (FK), center_name, domain, city, website, full_name, justificante, message, status (pending/approved/rejected), admin_notes, timestamps, índexs (status, domain)
+  - FK diferida `centers.creator_id` → `users.id` (onDelete set null)
+- Creat model **`CenterRequest`** a `app/Models/`:
+  - Scopes: `pending()`, `approved()`, `rejected()`
+  - Relació: `user()` BelongsTo
+- Actualitzat model **`Center`**:
+  - Nous fillable: `creator_id`, `description`
+  - Nova relació: `creator()` BelongsTo (professor que va sol·licitar el centre)
+  - Noves relacions: `teachers()` i `students()` (HasMany amb filtre per role)
+- Actualitzat model **`User`**:
+  - Nou fillable: `is_blocked`
+  - Nou cast: `is_blocked` → boolean
+  - Nous helpers: `isAdmin()`, `isTeacher()`, `isStudent()`, `isTeacherOrAdmin()`
+  - Noves relacions: `createdCenters()` HasMany, `centerRequests()` HasMany
+- Creat **`CenterRequestController`** a `app/Http/Controllers/`:
+  - `GET /api/center-requests` — Admin: llista totes les sol·licituds amb filtre `?status=`
+  - `GET /api/center-requests/{id}` — Admin: detall d'una sol·licitud
+  - `POST /api/center-requests` — Usuari autenticat sol·licita crear centre (requereix `full_name` + `justificante` PDF/imatge)
+  - `GET /api/center-requests/my` — Usuari veu les seves sol·licituds
+  - `PATCH /api/center-requests/{id}/approve` — Admin aprova: crea centre actiu + promou sol·licitant a teacher + l'assigna al centre (transacció DB)
+  - `PATCH /api/center-requests/{id}/reject` — Admin rebutja amb notes opcionals
+  - `GET /api/center-requests/{id}/justificante` — Admin descarrega justificant
+- Creat **`CenterMemberController`** a `app/Http/Controllers/`:
+  - `GET /api/center/members` — Teacher: llista membres del seu centre (filtre per role, is_blocked, search)
+  - `GET /api/center/members/{user}` — Teacher: detall d'un membre
+  - `PATCH /api/center/members/{user}/role` — Teacher: canvia rol (student ↔ teacher), no pot canviar-se a si mateix
+  - `PATCH /api/center/members/{user}/block` — Teacher: bloqueja un alumne (no pot bloquejar altres teachers ni admins)
+  - `PATCH /api/center/members/{user}/unblock` — Teacher: desbloqueja un alumne
+  - `DELETE /api/center/members/{user}` — Teacher: expulsa un membre del centre (center_id=null, role=userNormal)
+- Creat **`EnsureIsTeacher`** middleware a `app/Http/Middleware/` (alias `teacher`, permet teacher + admin)
+- Creat **`EnsureNotBlocked`** middleware a `app/Http/Middleware/` (alias `not-blocked`, retorna 403 si `is_blocked=true`)
+- Registrats nous alias a `bootstrap/app.php`: `teacher`, `not-blocked`
+- Totes les rutes protegides ara inclouen middleware `not-blocked` (usuaris bloquejats no poden interactuar)
+- Creat **`StoreCenterRequestRequest`** a `app/Http/Requests/`:
+  - Validació: center_name (required), domain (required, unique:centers), full_name (required), justificante (required, file: pdf/jpg/jpeg/png, max 5MB), message (optional)
+- Actualitzat **`AuthService`**:
+  - `register()`: ara només detecta centres **actius** (no pending/rejected)
+  - `detectCenter()`: retorna objecte amb `has_center`, `is_pending`, `can_request`
+- Actualitzat **`AuthController::checkDomain()`**: retorna `can_request` (indica si l'usuari pot sol·licitar crear un centre per a aquest domini)
+- Actualitzat **`CenterController::update()`**: ara permite teachers editar el seu propi centre (no poden canviar `status`)
+- Actualitzat **`UpdateCenterRequest`**: afegit camp `description`
+- Actualitzat **seeder**: afegit `is_blocked=false` a tots els users, `description` al centre, vinculat `creator_id`, afegit usuari `normaluser` per testing
+- **Fluix complet del professor:**
+  1. Usuari es registra amb email d'un domini sense centre → `role=userNormal`
+  2. Fa `POST /api/center-requests` amb `full_name` + `justificante`
+  3. Admin revisa sol·licituds a `GET /api/center-requests?status=pending`
+  4. Admin aprova → es crea centre actiu + usuari promogut a `teacher` + vinculat al centre
+  5. Futurs registres amb aquell domini → `role=student` al centre
+  6. Teacher pot gestionar alumnes: bloquejar, canviar rol, expulsar
+  7. Teacher pot editar el portal del seu centre (nom, descripció, logo, etc.)
+
 ---
 
 ## 📚 Documentació Relacionada
