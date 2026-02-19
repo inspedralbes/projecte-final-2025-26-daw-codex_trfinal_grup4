@@ -159,6 +159,29 @@
 - Identificats punts pendents: connexió Redis (ioredis importat però no usat), handlers d'events, middleware d'autenticació, carpetes handlers/middleware/config/utils
 - No s'han fet canvis funcionals — pendent d'implementació
 
+### 2026-02-19 – Integració Real-time amb Laravel Broadcasting
+- **Autor:** @chuclao (amb IA)
+- Reescrit **`index.js`** completament per integrar-se amb el broadcasting de Laravel via Redis:
+  - **Redis Pub/Sub**: utilitza `psubscribe('tfg-database-*')` per capturar tots els canals que Laravel publica
+  - **Parsing**: extreu el canal original (strip prefix `tfg-database-`) i el nom de l'event del payload JSON de Laravel
+  - **Routing**: emet cada event a la room Socket.io corresponent (`user.{id}`, `post.{id}`)
+- **Events del client Socket.io:**
+  - `join` → `{ userId: N }` — El client s'uneix a la seva room personal `user.N` per rebre notificacions i interaccions
+  - `join-post` → `{ postId: N }` — El client s'uneix a `post.N` per rebre comentaris en temps real
+  - `leave-post` → `{ postId: N }` — El client abandona la room del post
+- **Events emesos cap al client:**
+  - `new.notification` — Notificació nova (like, follow, comment, reply, repost)
+  - `new.interaction` — Interacció like/bookmark
+  - `new.comment` — Comentari nou a un post
+- **Health check millorat**: `GET /health` ara retorna `subscribedChannels` (llista de canals que han rebut missatges, útil per debugging)
+- **Prefix Redis configurable**: via variable d'entorn `REDIS_PREFIX` (default: `tfg-database-`)
+- **Flux complet:**
+  ```
+  Laravel (API)  ──PUBLISH──▶  Redis  ──pmessage──▶  Node (Socket.io)  ──emit──▶  React (Client)
+       │                         │                        │                          │
+   broadcast()            tfg-database-user.3      io.to('user.3')          on('new.notification')
+  ```
+
 ---
 
 ## 📚 Documentació Relacionada

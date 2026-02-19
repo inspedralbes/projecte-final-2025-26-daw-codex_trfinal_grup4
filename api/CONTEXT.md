@@ -606,6 +606,29 @@
   - **FollowController**: notifica l'usuari quan algú el comença a seguir
   - **PostController**: notifica l'autor del post original quan algú el reposteja
 
+### 2026-02-19 – Notificacions en Temps Real (Redis Pub/Sub → Socket.io)
+- **Autor:** @chuclao (amb IA)
+- Afegit `BROADCAST_CONNECTION=redis` al `.env`
+- Creat **`config/broadcasting.php`**: driver `redis` usant la connexió `default` de `database.redis`
+  - Prefix Redis: `tfg-database-` (generat per Str::slug d'APP_NAME)
+- Creat **`NewNotificationEvent`** a `app/Events/`:
+  - Implementa `ShouldBroadcastNow` (publicació síncrona a Redis, sense cua)
+  - Broadcast al canal `user.{userId}` amb nom d'event `new.notification`
+  - Payload: id, type, message, read_at, created_at, sender (id, name, username, avatar), notifiable (type, id)
+- Actualitzat **`NotificationService`**:
+  - Ara crida `broadcast(new NewNotificationEvent($notification))` després de crear cada notificació
+  - Carrega la relació `sender` abans del broadcast per tenir les dades completes
+- **Flux complet Laravel → Node → Client:**
+  1. Una acció (like, comment, follow, repost, reply) crea una notificació via `NotificationService`
+  2. `NotificationService` persiste a BD i fa `broadcast()` → Laravel publica a Redis canal `tfg-database-user.{id}`
+  3. Node (Socket.io) rep el missatge via `psubscribe('tfg-database-*')`
+  4. Node extreu el canal (`user.{id}`) i l'event (`new.notification`) i emet a la room Socket.io corresponent
+  5. El client React que està a la room `user.{id}` rep l'event en temps real
+- **Events broadcasts disponibles:**
+  - `new.notification` → canal `user.{id}` — Notificacions (like, follow, comment, reply, repost)
+  - `new.interaction` → canal `user.{id}` — Interaccions like/bookmark (ja existent)
+  - `new.comment` → canal `post.{id}` — Comentaris nous a un post (ja existent)
+
 ---
 
 ## 📚 Documentació Relacionada
