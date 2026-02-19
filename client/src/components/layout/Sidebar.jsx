@@ -1,273 +1,141 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
-import { mockApi } from '@/services/mockApi';
-import {
-    IconLogo, IconHome, IconHashtag, IconBell, IconMail, IconUser, IconMore, IconFeather
-} from '@/components/ui/Icons';
+import React from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import './Sidebar.css';
 
-const NavItem = ({ to, icon: Icon, label, end }) => (
-    <NavLink
-        to={to}
-        end={end}
-        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-    >
-        {({ isActive }) => (
-            <>
-                <div className="nav-icon-wrapper">
-                    <Icon className="nav-icon" active={isActive} />
-                </div>
-                <span className="nav-label">{label}</span>
-            </>
-        )}
-    </NavLink>
+// Navigation icons
+const HomeIcon = ({ active }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    <polyline points="9 22 9 12 15 12 15 22" />
+  </svg>
 );
 
-const Sidebar = () => {
-    const [user, setUser] = useState(null);
+const ExploreIcon = ({ active }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.35-4.35" />
+  </svg>
+);
 
-    useEffect(() => {
-        mockApi.getCurrentUser().then(setUser);
-    }, []);
+const CenterIcon = ({ active }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+  </svg>
+);
 
-    return (
-        <nav className="sidebar-nav">
-            <div className="logo-container">
-                <NavLink to="/" className="logo-link">
-                    <IconLogo className="logo-icon" />
-                </NavLink>
-            </div>
+const NotificationsIcon = ({ active }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </svg>
+);
 
-            <div className="nav-list">
-                <NavItem to="/" icon={IconHome} label="Inici" end />
-                <NavItem to="/explore" icon={IconHashtag} label="Explorar" />
-                <NavItem to="/notifications" icon={IconBell} label="Notificacions" />
-                <NavItem to="/messages" icon={IconMail} label="Missatges" />
-                <NavItem to="/profile" icon={IconUser} label="Perfil" />
-                <NavItem to="/more" icon={IconMore} label="Més opcions" />
-            </div>
+const MessagesIcon = ({ active }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
 
-            <button className="tweet-button">
-                <span className="tweet-label">Publicar</span>
-                <IconFeather className="tweet-icon" />
-            </button>
+const ProfileIcon = ({ active }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
 
-            {user && (
-                <div className="user-pill">
-                    <img src={user.avatar} alt={user.name} className="user-avatar" />
-                    <div className="user-info">
-                        <div className="user-name">{user.name}</div>
-                        <div className="user-handle">@{user.handle}</div>
-                    </div>
-                    <div className="user-more">
-                        <IconMore className="small-icon" />
-                    </div>
-                </div>
-            )}
+const MoreIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="1" />
+    <circle cx="19" cy="12" r="1" />
+    <circle cx="5" cy="12" r="1" />
+  </svg>
+);
 
-            <style>{`
-        .sidebar-nav {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding-bottom: var(--space-4);
-            padding-right: var(--space-4); /* Add some spacing from the feed */
-        }
-        
-        .logo-container {
-            padding: 8px 0;
-            margin-bottom: 8px;
-            padding-left: 12px;
-        }
-        
-        .logo-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-md); /* Square-ish */
-            transition: all var(--transition-fast);
-        }
-        
-        .logo-link:hover {
-            background-color: var(--color-surface-hover);
-            color: var(--color-primary);
-        }
-        
-        .logo-icon {
-            width: 28px;
-            height: 28px;
-            color: currentColor;
-        }
-        
-        .nav-list {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        
-        .nav-item {
-            display: inline-flex;
-            align-items: center;
-            padding: 12px 16px;
-            border-radius: var(--radius-md); /* Tech look */
-            color: var(--color-text-secondary); /* Muted by default */
-            text-decoration: none;
-            transition: all var(--transition-fast);
-            width: 100%;
-            margin-bottom: 2px;
-        }
-        
-        .nav-item:hover {
-            background-color: var(--color-surface-hover);
-            color: var(--color-text);
-            text-decoration: none;
-        }
-        
-        .nav-item.active {
-            background-color: rgba(14, 165, 233, 0.15); /* Primary Alpha */
-            color: var(--color-primary);
-            font-weight: var(--font-weight-medium);
-        }
-        
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-        }
-        
-        .nav-label {
-            margin-left: 16px;
-            font-size: 19px;
-            line-height: 24px;
-        }
-        
-        .tweet-button {
-            background-color: var(--color-primary);
-            color: #fff;
-            border: none;
-            border-radius: var(--radius-md);
-            height: 48px;
-            width: 100%;
-            font-size: 16px;
-            font-weight: var(--font-weight-bold);
-            margin-top: 24px;
-            cursor: pointer;
-            transition: background-color var(--transition-fast);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-md);
-        }
-        
-        .tweet-button:hover {
-            background-color: var(--color-primary-hover);
-        }
-        
-        .tweet-icon {
-            display: none;
-            width: 24px;
-            height: 24px;
-        }
-        
-        .user-pill {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: background-color var(--transition-fast);
-            margin-top: auto;
-            border: 1px solid transparent;
-        }
-        
-        .user-pill:hover {
-            background-color: var(--color-surface);
-            border-color: var(--color-border);
-        }
-        
-        .user-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: var(--radius-sm); /* Square avatar */
-            margin-right: 12px;
-            background-color: var(--color-surface);
-        }
-        
-        .user-info {
-            flex-grow: 1;
-            margin-right: 12px;
-            line-height: 1.25;
-            overflow: hidden;
-        }
-        
-        .user-name {
-            font-weight: var(--font-weight-bold);
-            font-size: 15px;
-            color: var(--color-text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .user-handle {
-            color: var(--color-text-tertiary);
-            font-size: 14px;
-        }
-        
-        .user-more {
-            color: var(--color-text-secondary);
-        }
-        
-        .small-icon {
-            width: 18px;
-            height: 18px;
-        }
-        
-        /* Tablet/Mobile Adjustments */
-        @media (max-width: 1020px) {
-            .sidebar-nav {
-                align-items: center;
-                padding-right: 0;
-            }
-            .nav-label {
-                display: none;
-            }
-            .nav-item {
-                width: 50px;
-                height: 50px;
-                justify-content: center;
-                padding: 0;
-            }
-            .logo-container {
-                padding-left: 0;
-            }
-            .tweet-button {
-                width: 50px;
-                height: 50px;
-                border-radius: 50%; /* Rounded on mobile/tablet for compactness */
-                margin-top: 16px;
-            }
-            .tweet-label {
-                display: none;
-            }
-            .tweet-icon {
-                display: block;
-            }
-            .user-info, .user-more {
-                display: none;
-            }
-            .user-avatar {
-                margin-right: 0;
-            }
-            .user-pill {
-                padding: 8px;
-                justify-content: center;
-            }
-        }
-      `}</style>
+const TerminalIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="4 17 10 11 4 5" />
+    <line x1="12" y1="19" x2="20" y2="19" />
+  </svg>
+);
+
+const PenIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 19l7-7 3 3-7 7-3-3z" />
+    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+    <path d="M2 2l7.586 7.586" />
+    <circle cx="11" cy="11" r="2" />
+  </svg>
+);
+
+const navItems = [
+  { path: '/', label: 'Feed Global', Icon: HomeIcon },
+  { path: '/explore', label: 'Explorar', Icon: ExploreIcon },
+  { path: '/center', label: 'Mi Centro', Icon: CenterIcon },
+  { path: '/notifications', label: 'Notificaciones', Icon: NotificationsIcon },
+  { path: '/messages', label: 'Mensajes', Icon: MessagesIcon },
+  { path: '/profile', label: 'Perfil', Icon: ProfileIcon },
+  { path: '/more', label: 'Más', Icon: MoreIcon },
+];
+
+export default function Sidebar() {
+  const location = useLocation();
+
+  return (
+    <aside className="sidebar">
+      <div className="sidebar__container">
+        {/* Logo */}
+        <NavLink to="/" className="sidebar__logo">
+          <span className="sidebar__logo-icon">
+            <TerminalIcon />
+          </span>
+          <span className="sidebar__logo-text">Codex</span>
+        </NavLink>
+
+        {/* Navigation */}
+        <nav className="sidebar__nav">
+          {navItems.map(({ path, label, Icon }) => {
+            const isActive = location.pathname === path;
+            return (
+              <NavLink
+                key={path}
+                to={path}
+                className={`sidebar__nav-item ${isActive ? 'sidebar__nav-item--active' : ''}`}
+              >
+                <span className="sidebar__nav-icon">
+                  <Icon active={isActive} />
+                </span>
+                <span className="sidebar__nav-label">{label}</span>
+              </NavLink>
+            );
+          })}
         </nav>
-    );
-};
 
-export default Sidebar;
+        {/* Post Button */}
+        <button className="sidebar__post-btn">
+          <span className="sidebar__post-btn-icon">
+            <PenIcon />
+          </span>
+          <span className="sidebar__post-btn-text">Publicar</span>
+        </button>
+
+        {/* User Profile */}
+        <div className="sidebar__user">
+          <div className="sidebar__user-avatar">
+            <img 
+              src="https://api.dicebear.com/7.x/avataaars/svg?seed=developer" 
+              alt="Avatar"
+            />
+          </div>
+          <div className="sidebar__user-info">
+            <span className="sidebar__user-name">Marc Pérez</span>
+            <span className="sidebar__user-handle">@marcperez</span>
+          </div>
+          <button className="sidebar__user-menu">
+            <MoreIcon />
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+}

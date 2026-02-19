@@ -1,220 +1,135 @@
-import React, { useEffect, useState } from 'react';
-import { mockApi } from '@/services/mockApi';
-import { IconSearch, IconMore } from '@/components/ui/Icons';
+import React from 'react';
+import './RightSection.css';
 
-const SearchBar = () => (
-    <div className="search-container">
-        <div className="search-icon-wrapper">
-            <IconSearch className="search-icon" />
-        </div>
-        <input type="text" placeholder="Buscar" className="search-input" />
-        <style>{`
-        .search-container {
-            background-color: #202327;
-            border-radius: 9999px;
-            padding: 10px 12px;
-            display: flex;
-            align-items: center;
-            margin-bottom: var(--space-3);
-            border: 1px solid transparent;
-        }
-        .search-container:focus-within {
-            background-color: var(--color-background);
-            border-color: var(--color-primary);
-        }
-        .search-icon-wrapper {
-            margin-right: 12px;
-            color: var(--color-text-secondary);
-            display: flex;
-            align-items: center;
-        }
-        .search-icon {
-            width: 18px;
-            height: 18px;
-        }
-        .search-input {
-            background: transparent;
-            border: none;
-            color: var(--color-text);
-            font-size: 15px;
-            width: 100%;
-        }
-        .search-input:focus {
-            outline: none;
-        }
-        .search-container:focus-within .search-icon-wrapper {
-            color: var(--color-primary);
-        }
-    `}</style>
-    </div>
+const SearchIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.35-4.35" />
+  </svg>
 );
 
-const TrendItem = ({ topic, name, posts }) => (
-    <div className="trend-item">
-        <div className="trend-meta">
-            <span className="trend-topic">{topic}</span>
-            <IconMore className="trend-more" />
-        </div>
-        <div className="trend-name">{name}</div>
-        <div className="trend-posts">{posts}</div>
-        <style>{`
-        .trend-item {
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: background-color var(--transition-fast);
-        }
-        .trend-item:hover {
-            background-color: rgba(255, 255, 255, 0.03);
-        }
-        .trend-meta {
-            display: flex;
-            justify-content: space-between;
-            color: var(--color-text-secondary);
-            font-size: 13px;
-            margin-bottom: 2px;
-        }
-        .trend-more {
-            width: 16px;
-            height: 16px;
-            color: var(--color-text-secondary);
-        }
-        .trend-name {
-            font-weight: var(--font-weight-bold);
-            font-size: 15px;
-            margin-bottom: 2px;
-        }
-        .trend-posts {
-            font-size: 13px;
-            color: var(--color-text-secondary);
-        }
-    `}</style>
+const TrendingTags = () => {
+  const trends = [
+    { tag: '#Laravel', category: 'Backend', posts: 1245 },
+    { tag: '#ReactHooks', category: 'Frontend', posts: 892 },
+    { tag: '#Docker', category: 'DevOps', posts: 756 },
+    { tag: '#TypeScript', category: 'Frontend', posts: 634 },
+    { tag: '#PostgreSQL', category: 'Databases', posts: 512 },
+  ];
+
+  return (
+    <div className="widget">
+      <h3 className="widget__title">Tendencias</h3>
+      <div className="widget__list">
+        {trends.map((trend, index) => (
+          <a key={trend.tag} href="#" className="trend-item">
+            <span className="trend-item__rank">{index + 1}</span>
+            <div className="trend-item__content">
+              <span className="trend-item__category">{trend.category}</span>
+              <span className="trend-item__tag">{trend.tag}</span>
+              <span className="trend-item__posts">{trend.posts} publicaciones</span>
+            </div>
+          </a>
+        ))}
+      </div>
+      <a href="/explore" className="widget__more">Ver más</a>
     </div>
-);
-
-const RightSection = () => {
-    const [trends, setTrends] = useState([]);
-    const [whoToFollow, setWhoToFollow] = useState([]);
-
-    useEffect(() => {
-        mockApi.getTrends().then(setTrends);
-        mockApi.getWhoToFollow().then(setWhoToFollow);
-    }, []);
-
-    return (
-        <div className="right-section">
-            <SearchBar />
-
-            <div className="card">
-                <h2 className="card-title">Tendències per a tu</h2>
-                <div className="card-content">
-                    {trends.map((t, i) => (
-                        <TrendItem key={i} {...t} />
-                    ))}
-                </div>
-                <div className="card-footer">Show more</div>
-            </div>
-
-            <div className="card">
-                <h2 className="card-title">A qui seguir</h2>
-                <div className="card-content">
-                    {whoToFollow.map(user => (
-                        <div key={user.id} className="follow-item">
-                            <img src={user.avatar} className="follow-avatar" />
-                            <div className="follow-info">
-                                <div className="follow-name">{user.name}</div>
-                                <div className="follow-handle">@{user.handle}</div>
-                            </div>
-                            <button className="follow-btn">Seguir</button>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <style>{`
-        .right-section {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        
-        .card {
-            background-color: #16181c;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid transparent; 
-        }
-        
-        .card-title {
-            padding: 12px 16px;
-            font-size: 20px;
-            font-weight: 800;
-            margin: 0;
-        }
-        
-        .card-footer {
-            padding: 16px;
-            color: var(--color-primary);
-            font-size: 15px;
-            cursor: pointer;
-            transition: background-color var(--transition-fast);
-        }
-        
-        .card-footer:hover {
-            background-color: rgba(255, 255, 255, 0.03);
-        }
-
-        .follow-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: background-color var(--transition-fast);
-        }
-        .follow-item:hover {
-            background-color: rgba(255, 255, 255, 0.03);
-        }
-        .follow-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 12px;
-        }
-        .follow-info {
-            flex-grow: 1;
-            margin-right: 10px;
-            overflow: hidden;
-        }
-        .follow-name {
-            font-weight: bold;
-            font-size: 15px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .follow-handle {
-            color: var(--color-text-secondary);
-            font-size: 15px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .follow-btn {
-            background-color: #eff3f4;
-            color: #0f1419;
-            border: none;
-            border-radius: 9999px;
-            padding: 6px 16px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .follow-btn:hover {
-            background-color: #d7dbdc;
-        }
-      `}</style>
-        </div>
-    );
+  );
 };
 
-export default RightSection;
+const TopContributors = () => {
+  const contributors = [
+    { name: 'Ana García', handle: '@anagarcia', avatar: 'ana', points: 2450, badge: '👑' },
+    { name: 'Carlos López', handle: '@carlosdev', avatar: 'carlos', points: 1890, badge: '⭐' },
+    { name: 'María Ruiz', handle: '@mariaruiz', avatar: 'maria', points: 1654, badge: '🔥' },
+  ];
+
+  return (
+    <div className="widget">
+      <h3 className="widget__title">Top Contribuidores</h3>
+      <div className="widget__list">
+        {contributors.map((user) => (
+          <a key={user.handle} href="#" className="user-item">
+            <div className="user-item__avatar">
+              <img 
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatar}`} 
+                alt={user.name}
+              />
+            </div>
+            <div className="user-item__info">
+              <span className="user-item__name">
+                {user.name} {user.badge}
+              </span>
+              <span className="user-item__handle">{user.handle}</span>
+            </div>
+            <span className="user-item__points">{user.points} pts</span>
+          </a>
+        ))}
+      </div>
+      <a href="/explore" className="widget__more">Ver ranking</a>
+    </div>
+  );
+};
+
+const RecentQuestions = () => {
+  const questions = [
+    { title: '¿Cómo implementar JWT en Laravel?', author: '@devjuan', solved: true },
+    { title: 'Error CORS con React y Express', author: '@webdev23', solved: false },
+    { title: 'Optimizar queries en PostgreSQL', author: '@datamaster', solved: true },
+  ];
+
+  return (
+    <div className="widget">
+      <h3 className="widget__title">Dudas Recientes</h3>
+      <div className="widget__list">
+        {questions.map((q, index) => (
+          <a key={index} href="#" className="question-item">
+            <span className={`question-item__status ${q.solved ? 'question-item__status--solved' : ''}`}>
+              {q.solved ? '✓' : '?'}
+            </span>
+            <div className="question-item__content">
+              <span className="question-item__title">{q.title}</span>
+              <span className="question-item__author">{q.author}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+      <a href="/explore" className="widget__more">Ver todas</a>
+    </div>
+  );
+};
+
+export default function RightSection() {
+  return (
+    <aside className="right-section">
+      <div className="right-section__container">
+        {/* Search */}
+        <div className="search-box">
+          <span className="search-box__icon">
+            <SearchIcon />
+          </span>
+          <input 
+            type="text" 
+            className="search-box__input" 
+            placeholder="Buscar en Codex..."
+          />
+          <span className="search-box__shortcut">⌘K</span>
+        </div>
+
+        {/* Widgets */}
+        <TrendingTags />
+        <TopContributors />
+        <RecentQuestions />
+
+        {/* Footer Links */}
+        <footer className="right-section__footer">
+          <a href="#">Términos</a>
+          <a href="#">Privacidad</a>
+          <a href="#">Cookies</a>
+          <a href="#">Ayuda</a>
+          <span>© 2026 Codex</span>
+        </footer>
+      </div>
+    </aside>
+  );
+}

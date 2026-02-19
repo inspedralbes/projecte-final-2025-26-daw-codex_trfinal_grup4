@@ -1,65 +1,178 @@
 /* ============================================================
-   CSS Custom Properties (Design Tokens)
-   Theme: Codex "Academic Dark" (Deep Slate & Teal)
+   Codex Design System
+   Theme: "Academic Dark Mode" - Deep Slate, Teal & Violet
+   A SaaS-inspired interface for code-focused academics
    ============================================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
 :root {
-  /* ── Colors ─────────────────────────────────────────────── */
-  /* Brand Colors */
-  --color-primary: #0ea5e9;
-  /* Sky 500 - Vibrant but professional */
-  --color-primary-hover: #0284c7;
-  /* Sky 600 */
-  --color-accent: #8b5cf6;
-  /* Violet 500 - For community/special highlights */
+  /* ── Typography ─────────────────────────────────────────── */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
+  --text-4xl: 2.5rem;
+  --text-5xl: 3.5rem;
 
-  /* Backgrounds (Deep Slate / Gunmetal) */
-  --color-background: #0f172a;
-  /* Slate 900 - Rich dark blue-gray */
-  --color-surface: #1e293b;
-  /* Slate 800 - Cards/Sidebar */
-  --color-surface-hover: #334155;
-  /* Slate 700 */
-  --color-surface-active: #475569;
-  /* Slate 600 */
+  /* ── Brand Colors ───────────────────────────────────────── */
+  --codex-teal: #14b8a6;
+  --codex-teal-light: #2dd4bf;
+  --codex-teal-dark: #0d9488;
+  --codex-violet: #8b5cf6;
+  --codex-violet-light: #a78bfa;
+  --codex-violet-dark: #7c3aed;
+  --codex-cyan: #06b6d4;
+  --codex-emerald: #10b981;
+  --codex-amber: #f59e0b;
+  --codex-rose: #f43f5e;
 
-  /* Typography */
-  --color-text: #f1f5f9;
-  /* Slate 100 - High contrast text */
-  --color-text-secondary: #94a3b8;
-  /* Slate 400 - Muted text */
-  --color-text-tertiary: #64748b;
-  /* Slate 500 - De-emphasized */
+  /* ── Primary Actions ────────────────────────────────────── */
+  --color-primary: var(--codex-teal);
+  --color-primary-hover: var(--codex-teal-light);
+  --color-primary-active: var(--codex-teal-dark);
+  --color-accent: var(--codex-violet);
+  --color-accent-hover: var(--codex-violet-light);
 
-  /* Borders */
-  /* ── Spacing (4px grid) ─────────────────────────────────── */
+  /* ── Surface Elevation Stack (Dark) ─────────────────────── */
+  --void: #05080f;
+  --depth-0: #0a0e17;
+  --depth-1: #0f1520;
+  --depth-2: #151c2a;
+  --depth-3: #1c2535;
+  --depth-4: #232d40;
+  --depth-5: #2a364a;
+
+  /* ── Semantic Surfaces ──────────────────────────────────── */
+  --color-background: var(--depth-0);
+  --color-surface: var(--depth-1);
+  --color-surface-raised: var(--depth-2);
+  --color-surface-overlay: var(--depth-3);
+  --color-surface-hover: var(--depth-4);
+  --color-surface-active: var(--depth-5);
+
+  /* ── Typography Colors ──────────────────────────────────── */
+  --ink-primary: #f4f4f5;
+  --ink-secondary: #a1a1aa;
+  --ink-tertiary: #71717a;
+  --ink-quaternary: #52525b;
+  --ink-inverse: #09090b;
+
+  --color-text: var(--ink-primary);
+  --color-text-secondary: var(--ink-secondary);
+  --color-text-tertiary: var(--ink-tertiary);
+
+  /* ── Borders & Dividers ─────────────────────────────────── */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-focus: var(--codex-teal);
+
+  /* ── Semantic States ────────────────────────────────────── */
+  --state-success: #22c55e;
+  --state-success-bg: rgba(34, 197, 94, 0.12);
+  --state-warning: #eab308;
+  --state-warning-bg: rgba(234, 179, 8, 0.12);
+  --state-error: #ef4444;
+  --state-error-bg: rgba(239, 68, 68, 0.12);
+  --state-info: #3b82f6;
+  --state-info-bg: rgba(59, 130, 246, 0.12);
+
+  /* ── Code Syntax (VSCode-inspired) ──────────────────────── */
+  --syntax-bg: var(--depth-1);
+  --syntax-keyword: #c678dd;
+  --syntax-string: #98c379;
+  --syntax-number: #d19a66;
+  --syntax-function: #61afef;
+  --syntax-variable: #e5c07b;
+  --syntax-comment: #5c6370;
+  --syntax-operator: #56b6c2;
+
+  /* ── Spacing (4px base) ─────────────────────────────────── */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 2px;
   --space-1: 4px;
+  --space-1-5: 6px;
   --space-2: 8px;
+  --space-2-5: 10px;
   --space-3: 12px;
+  --space-3-5: 14px;
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+  --space-7: 28px;
   --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
   --space-12: 48px;
+  --space-14: 56px;
   --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
 
   /* ── Layout ─────────────────────────────────────────────── */
-  --layout-max-width: 1265px;
-  --sidebar-width: 275px;
-  --feed-width: 600px;
-  --widget-width: 350px;
-  --header-height: 53px;
+  --layout-max-width: 1400px;
+  --sidebar-width: 260px;
+  --sidebar-collapsed: 72px;
+  --feed-width: 680px;
+  --widget-width: 340px;
+  --header-height: 56px;
 
-  /* ── Border radius ──────────────────────────────────────── */
-  --radius-sm: 4px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+  /* ── Border Radius ──────────────────────────────────────── */
+  --radius-none: 0;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
   --radius-full: 9999px;
 
-  /* ── Shadows (Subtle for dark mode) ─────────────────────── */
-  --shadow-sm: 0 0 2px rgba(255, 255, 255, 0.1);
-  --shadow-md: 0 0 8px rgba(255, 255, 255, 0.1);
+  /* ── Shadows (Dark Mode Glow) ───────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.7);
+  --shadow-glow-teal: 0 0 20px rgba(20, 184, 166, 0.3);
+  --shadow-glow-violet: 0 0 20px rgba(139, 92, 246, 0.3);
+  --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+
+  /* ── Z-Index Scale ──────────────────────────────────────── */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
 
   /* ── Transitions ────────────────────────────────────────── */
-  --transition-fast: 0.2s ease-out;
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  --duration-instant: 50ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+
+  --transition-fast: var(--duration-fast) var(--ease-out);
+  --transition-normal: var(--duration-normal) var(--ease-out);
+  --transition-slow: var(--duration-slow) var(--ease-out);
+
+  /* ── Glassmorphism ──────────────────────────────────────── */
+  --glass-bg: rgba(15, 21, 32, 0.8);
+  --glass-blur: 12px;
+  --glass-border: rgba(255, 255, 255, 0.08);
 }

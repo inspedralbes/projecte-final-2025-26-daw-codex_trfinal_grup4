@@ -104,20 +104,30 @@
 
 ## 📅 Registre de canvis
 
-### 2026-02-13 – Infraestructura inicial
-- **Autor:** @chuclao
-- Creat `Dockerfile` multi-stage (dev/prod)
-- Creat `package.json` amb React 18 + Vite 5
-- Creat `vite.config.js` configurat per Docker
-- Creat `index.html` base
-- Creat `src/main.jsx` amb ReactDOM.createRoot
-
-### 2026-02-17 – Estructura base React Router
-- **Autor:** @chuclao
-- Afegit `react-router-dom` v7
-- Creat `src/App.jsx` amb Routes
-- Creat `src/pages/Home.jsx` com a pàgina inicial
-- Configurat `BrowserRouter` a `main.jsx`
+### 2026-02-19 – Implementació completa UI "Academic Dark Mode"
+- **Autor:** @copilot (IA)
+- **Sistema de disseny:**
+  - Refactoritzat `variables.css` amb paleta Codex (Deep Slate, Teal, Violet)
+  - Escala de superfícies amb 6 nivells de profunditat
+  - Tipografia: Plus Jakarta Sans (UI) + JetBrains Mono (codi)
+  - Variables semàntiques per colors, ombres i animacions
+- **Pàgines creades:**
+  - `Landing.jsx` + `Landing.css` — Pàgina de benvinguda amb auth
+  - `Explore.jsx` + `Explore.css` — Cerca i descobriment amb widgets
+  - `Notifications.jsx` + `Notifications.css` — Stream d'activitats filtrable
+  - `CenterHub.jsx` + `CenterHub.css` — Dashboard del centre educatiu
+- **Components creats:**
+  - `layout/MainLayout.jsx` + CSS — Shell 3-columnes (sidebar / main / widgets)
+  - `layout/Sidebar.jsx` + CSS — Navegació principal amb icones
+  - `layout/RightSection.jsx` + CSS — Widgets laterals (trending, contributors)
+  - `feed/Feed.jsx` + CSS — Feed amb tabs (Para ti / Siguiendo / Dudas)
+  - `feed/PostInput.jsx` + CSS — Editor de publicacions amb suport codi
+  - `feed/PostCard.jsx` + CSS — Tarjeta de post amb syntax highlighting
+  - `profile/Profile.jsx` + CSS — Perfil developeramb tech stack i snippets
+- **Rutes noves:**
+  - `/welcome` → Landing
+  - `/center` → CenterHub
+- **MockApi:** Dades de prova integrades per a previsualització sense backend
 
 ### 2026-02-17 – Estructura completa del projecte, tooling i serveis
 - **Autor:** @chuclao (amb IA)
@@ -132,6 +142,61 @@
 - Eliminades dependències TypeScript (`@types/react`, `@types/react-dom`), afegides ESLint + Prettier
 - Creat `.env.example` amb `VITE_API_URL` i `VITE_SOCKET_URL`
 - Creades carpetes amb `.gitkeep`: `components/`, `components/ui/`, `context/`, `hooks/`, `layouts/`, `utils/`, `assets/fonts/`, `assets/icons/`, `assets/images/`
+
+### 2026-02-17 – Estructura base React Router
+- **Autor:** @chuclao
+- Afegit `react-router-dom` v7
+- Creat `src/App.jsx` amb Routes
+- Creat `src/pages/Home.jsx` com a pàgina inicial
+- Configurat `BrowserRouter` a `main.jsx`
+
+### 2026-02-13 – Infraestructura inicial
+- **Autor:** @chuclao
+- Creat `Dockerfile` multi-stage (dev/prod)
+- Creat `package.json` amb React 18 + Vite 5
+- Creat `vite.config.js` configurat per Docker
+- Creat `index.html` base
+- Creat `src/main.jsx` amb ReactDOM.createRoot
+
+---
+
+## 🎨 Estructura actual de components
+
+```
+src/
+├── components/
+│   ├── feed/
+│   │   ├── Feed.jsx / Feed.css         # Llista de posts amb tabs
+│   │   ├── PostCard.jsx / PostCard.css # Tarjeta de publicació
+│   │   └── PostInput.jsx / PostInput.css # Editor de posts
+│   ├── layout/
+│   │   ├── MainLayout.jsx / MainLayout.css # Shell principal
+│   │   ├── Sidebar.jsx / Sidebar.css       # Nav esquerra
+│   │   └── RightSection.jsx / RightSection.css # Widgets dreta
+│   ├── profile/
+│   │   └── Profile.jsx / Profile.css       # Perfil d'usuari
+│   └── ui/
+│       └── Icons.jsx                # Icones SVG reutilitzables
+├── pages/
+│   ├── Landing.jsx / Landing.css    # Welcome + Auth
+│   ├── Home.jsx                     # Wrapper per Feed
+│   ├── Explore.jsx / Explore.css    # Cerca + Descobriment
+│   ├── Notifications.jsx / Notifications.css # Activitat
+│   ├── CenterHub.jsx / CenterHub.css # Hub institucional
+│   ├── ProfilePage.jsx              # Wrapper per Profile
+│   ├── Messages.jsx                 # (Pendent)
+│   └── More.jsx                     # Menú addicional
+├── router/
+│   └── index.jsx                    # Definició de rutes
+├── services/
+│   ├── api.js                       # Client HTTP
+│   └── mockApi.js                   # Dades de prova
+└── styles/
+    ├── index.css                    # Entry point
+    ├── variables.css                # Design tokens
+    ├── base.css                     # Reset + Typography
+    └── reset.css                    # CSS reset
+```
 
 ---
 
