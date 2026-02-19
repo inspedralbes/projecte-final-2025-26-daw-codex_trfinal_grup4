@@ -34,6 +34,10 @@ class ProfileController extends Controller
         // Count total likes received on user's posts
         $totalLikesReceived = $user->posts()->withCount('likedByUsers')->get()->sum('liked_by_users_count');
 
+        // Check if auth user is following this profile
+        $authUser = auth('sanctum')->user();
+        $isFollowing = $authUser ? $authUser->following()->where('followed_id', $user->id)->exists() : false;
+
         // Reputation system
         $reputation = $this->reputationService->calculateReputation($user);
         $currentBadge = $this->reputationService->getBadge($reputation);
@@ -53,6 +57,7 @@ class ProfileController extends Controller
             'portfolio_url'    => $user->portfolio_url,
             'external_url'     => $user->external_url,
             'center'           => $user->center,
+            'is_following'     => $isFollowing,
             'created_at'       => $user->created_at,
             'stats'            => [
                 'posts_count'          => $user->posts_count,

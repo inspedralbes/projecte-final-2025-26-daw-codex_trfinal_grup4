@@ -5,6 +5,7 @@ use App\Http\Controllers\CenterController;
 use App\Http\Controllers\CenterMemberController;
 use App\Http\Controllers\CenterRequestController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\FollowController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\PasswordController;
@@ -62,6 +63,10 @@ Route::get('/tags', [TagController::class, 'index']);
 Route::get('/profile/{username}', [ProfileController::class, 'show']);
 Route::get('/profile/{username}/posts', [ProfileController::class, 'posts']);
 
+// Follow – public lists (anyone can view followers/following)
+Route::get('/users/{user}/followers', [FollowController::class, 'followers']);
+Route::get('/users/{user}/following', [FollowController::class, 'following']);
+
 // Centers (US#8) – public listing (active only), admins see all with filters
 Route::get('/centers', [CenterController::class, 'index']);
 Route::get('/centers/{center}', [CenterController::class, 'show']);
@@ -93,6 +98,10 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
 
     // Interactions – like/bookmark toggle (S2-US#6)
     Route::post('/interactions', [InteractionController::class, 'toggle']);
+
+    // Follow – toggle + status (auth required)
+    Route::post('/users/{user}/follow', [FollowController::class, 'toggle']);
+    Route::get('/users/{user}/follow-status', [FollowController::class, 'status']);
 
     // Center Hub (US#5) – "Walled Garden"
     Route::get('/center/posts', [PostController::class, 'centerPosts']);
