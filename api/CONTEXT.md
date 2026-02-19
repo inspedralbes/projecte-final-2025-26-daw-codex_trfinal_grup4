@@ -416,6 +416,50 @@
   4. Pot consultar estat amb `GET /api/email/status`
   5. Login i /me retornen `email_verified` per al frontend
 
+### 2026-02-19 – Login amb Google (OAuth 2.0)
+- **Autor:** @chuclao (amb IA)
+- Instal·lat **Laravel Socialite v5** per a OAuth amb Google
+- **Esquema BD** (`2025_02_17_000000_create_full_schema.php`):
+  - `password` ara és **nullable** (usuaris Google no tenen password local)
+  - Afegit `google_id` (string, nullable, unique) a la taula `users`
+  - Afegit `auth_provider` (enum: local/google, default: local) a la taula `users`
+- Actualitzat model **`User`**:
+  - Nous fillable: `google_id`, `auth_provider`, `email_verified_at`
+- Actualitzat **`AuthService`** a `app/Services/`:
+  - Nou mètode `handleGoogleUser()`: gestiona login/registre via Google amb 3 escenaris:
+    1. Usuari existent per `google_id` → login directe (actualitza nom si ha canviat)
+    2. Usuari existent per `email` (compte local) → vincula Google, manté avatar existent
+    3. Usuari nou → crea amb dades de Google, avatar de Google, email auto-verificat
+  - Nou mètode `generateUniqueUsername()`: genera username únic a partir de l'email de Google
+  - **Política d'avatar:**
+    - Usuari nou des de Google → usa avatar de Google
+    - Usuari existent amb avatar → **el manté** (no sobreescriu)
+    - Usuari existent sense avatar → usa avatar de Google
+- Creat **`GoogleAuthController`** a `app/Http/Controllers/`:
+  - `GET /api/auth/google/redirect` — Retorna la URL de redirecció OAuth de Google (stateless per SPA)
+  - `POST /api/auth/google/callback` — Rep el codi d'autorització, intercanvia per dades d'usuari, crea/login
+    - Retorna token Sanctum + `is_new_user` + `auth_provider` + `email_verified`
+    - Verifica si l'usuari està bloquejat (403)
+- Actualitzat **`AuthController`**:
+  - `login()`: detecta usuaris Google sense password → retorna error 422 indicant que han d'usar Google login
+  - `register()`, `login()`, `me()`: ara retornen `auth_provider` al response
+- Actualitzat **`routes/api.php`**:
+  - `GET /api/auth/google/redirect` — Ruta pública (obté URL OAuth)
+  - `POST /api/auth/google/callback` — Ruta pública (intercanvi de codi per token)
+- Configurat **`config/services.php`**: afegit bloc `google` amb `client_id`, `client_secret`, `redirect` des de `.env`
+- Configurat **`.env`** del contenidor:
+  - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`
+- Actualitzat **seeder**: tots els usuaris de seed tenen `auth_provider=local`
+- **Fluix de login amb Google (SPA):**
+  1. Frontend crida `GET /api/auth/google/redirect` → obté URL de Google
+  2. Frontend redirigeix el navegador a la URL de Google
+  3. Usuari autoritza → Google redirigeix al frontend amb `?code=xxx`
+  4. Frontend envia el codi a `POST /api/auth/google/callback`
+  5. Backend intercanvia codi per dades d'usuari → crea o vincula compte
+  6. Retorna token Sanctum + dades d'usuari (incloent `is_new_user`, `auth_provider`)
+  7. Si l'usuari és nou, l'email es marca com verificat automàticament
+  8. Si l'usuari ja existia amb compte local, es vincula Google + manté avatar
+
 ---
 
 ## 📚 Documentació Relacionada

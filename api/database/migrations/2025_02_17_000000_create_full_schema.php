@@ -37,7 +37,11 @@ return new class extends Migration
             $table->string('username')->unique(); // @usuario
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable(); // Nullable: Google OAuth users have no password
+            
+            // OAuth
+            $table->string('google_id')->nullable()->unique(); // Google OAuth identifier
+            $table->enum('auth_provider', ['local', 'google'])->default('local');
             
             // ROLES: 
             // - admin/userNormal (Globales, sin centro)
