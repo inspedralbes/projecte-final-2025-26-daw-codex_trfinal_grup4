@@ -3,15 +3,17 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
@@ -55,6 +57,7 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'email_verified_at' => 'datetime',
             'role' => UserRole::class,
             'is_blocked' => 'boolean',
         ];
@@ -82,6 +85,14 @@ class User extends Authenticatable
     public function isTeacherOrAdmin(): bool
     {
         return $this->isTeacher() || $this->isAdmin();
+    }
+
+    /**
+     * Send the email verification notification (custom).
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification());
     }
 
     /* ------------------------------------------------------------------ */

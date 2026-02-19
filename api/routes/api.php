@@ -9,6 +9,7 @@ use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,6 +32,11 @@ Route::get('/health', function () {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/check-domain', [AuthController::class, 'checkDomain']);
+
+// Email Verification (public – signed URL)
+Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
+    ->middleware('signed')
+    ->name('verification.verify');
 
 /* ------------------------------------------------------------------ */
 /*  Public Routes                                                      */
@@ -56,6 +62,11 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+
+    // Email Verification (authenticated)
+    Route::post('/email/resend', [VerificationController::class, 'resend'])
+        ->middleware('throttle:6,1'); // Max 6 per minute
+    Route::get('/email/status', [VerificationController::class, 'status']);
 
     // Posts (US#2)
     Route::post('/posts', [PostController::class, 'store']);
