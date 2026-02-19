@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\Tag;
@@ -215,5 +216,51 @@ class PostController extends Controller
         $post->delete();
 
         return $this->success(null, 'Post deleted successfully');
+    }
+
+    /**
+     * PUT /api/posts/{post}
+     * Update a post. Only the author can edit.
+     */
+    public function update(UpdatePostRequest $request, Post $post): JsonResponse
+    {
+        if ($request->user()->id !== $post->user_id) {
+            return $this->error('Unauthorized', 403);
+        }
+
+        $data = [];
+
+        if ($request->has('content')) {
+            $data['content'] = $this->sanitizer->sanitizeHtml($request->input('content'));
+        }
+        if ($request->has('code_snippet')) {
+            $data['code_snippet'] = $this->sanitizer->sanitizeCode($request->input('code_snippet'));
+        }
+        if ($request->has('code_language')) {
+            $data['code_language'] = $this->sanitizer->sanitizePlain($request->input('code_language'));
+        }
+
+        if (!empty($data)) {
+            $post->update($data);
+        }
+
+        // Update tags if provided
+        if ($request->has('tags')) {
+            $tagIds = collect($request->input('tags'))->map(function ($tagName) {
+                return Tag::firstOrCreate(
+                    ['slug' => Str::slug($tagName)],
+                    ['name' => $tagName]
+                )->id;
+            });
+            $post->tags()->sync($tagIds);
+        }
+
+        $post->load(['user', 'center', 'tags']);
+        $post->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers']);
+
+        return $this->success(
+            new PostResource($post),
+            'Post updated successfully'
+        );
     }
 }
