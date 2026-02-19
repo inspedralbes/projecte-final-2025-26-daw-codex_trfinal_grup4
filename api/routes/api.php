@@ -96,6 +96,7 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{post}', [PostController::class, 'update']);
     Route::delete('/posts/{post}', [PostController::class, 'destroy']);
+    Route::post('/posts/{post}/repost', [PostController::class, 'repost']);
 
     // Following feed
     Route::get('/feed/following', [PostController::class, 'followingFeed']);

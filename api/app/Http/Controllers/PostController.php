@@ -29,8 +29,8 @@ class PostController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Post::global()
-            ->with(['user', 'center', 'tags'])
-            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
+            ->with(['user', 'center', 'tags', 'originalPost.user'])
+            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts'])
             ->latest();
 
         // Optional tag filter
@@ -72,8 +72,8 @@ class PostController extends Controller
         }
 
         $query = Post::centerFiltered()
-            ->with(['user', 'center', 'tags'])
-            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
+            ->with(['user', 'center', 'tags', 'originalPost.user'])
+            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts'])
             ->latest();
 
         // Optional tag filter
@@ -127,8 +127,8 @@ class PostController extends Controller
                     $q->orWhere('center_id', $user->center_id);
                 }
             })
-            ->with(['user', 'center', 'tags'])
-            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
+            ->with(['user', 'center', 'tags', 'originalPost.user'])
+            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts'])
             ->latest();
 
         $posts = $query->paginate($request->input('per_page', 15));
@@ -172,8 +172,8 @@ class PostController extends Controller
             $post->tags()->sync($tagIds);
         }
 
-        $post->load(['user', 'center', 'tags']);
-        $post->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers']);
+        $post->load(['user', 'center', 'tags', 'originalPost.user']);
+        $post->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts']);
 
         return $this->success(
             new PostResource($post),
@@ -197,8 +197,8 @@ class PostController extends Controller
             }
         }
 
-        $post->load(['user', 'center', 'tags', 'comments.user']);
-        $post->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers']);
+        $post->load(['user', 'center', 'tags', 'comments.user', 'originalPost.user']);
+        $post->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts']);
 
         return $this->success(new PostResource($post));
     }
@@ -255,12 +255,61 @@ class PostController extends Controller
             $post->tags()->sync($tagIds);
         }
 
-        $post->load(['user', 'center', 'tags']);
-        $post->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers']);
+        $post->load(['user', 'center', 'tags', 'originalPost.user']);
+        $post->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts']);
 
         return $this->success(
             new PostResource($post),
             'Post updated successfully'
+        );
+    }
+
+    /**
+     * POST /api/posts/{post}/repost
+     * Repost an existing post. Optionally add commentary.
+     */
+    public function repost(Request $request, Post $post): JsonResponse
+    {
+        $user = $request->user();
+
+        // Can't repost your own post
+        if ($user->id === $post->user_id) {
+            return $this->error('You cannot repost your own post.', 422);
+        }
+
+        // Can't repost a repost — always repost the original
+        $originalId = $post->original_post_id ?? $post->id;
+
+        // Check if already reposted
+        $existing = Post::where('user_id', $user->id)
+            ->where('original_post_id', $originalId)
+            ->first();
+
+        if ($existing) {
+            return $this->error('You have already reposted this.', 409);
+        }
+
+        $request->validate([
+            'content' => 'nullable|string|max:5000',
+        ]);
+
+        $repost = Post::create([
+            'user_id'          => $user->id,
+            'center_id'        => $user->center_id,
+            'original_post_id' => $originalId,
+            'type'             => 'news',
+            'content'          => $request->input('content')
+                ? $this->sanitizer->sanitizeHtml($request->input('content'))
+                : null,
+        ]);
+
+        $repost->load(['user', 'center', 'tags', 'originalPost.user']);
+        $repost->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts']);
+
+        return $this->success(
+            new PostResource($repost),
+            'Reposted successfully',
+            201
         );
     }
 }
