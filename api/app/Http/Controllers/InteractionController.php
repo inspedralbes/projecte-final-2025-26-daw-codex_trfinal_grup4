@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Events\NewInteractionEvent;
+use App\Http\Resources\PostResource;
 use App\Models\Interaction;
+use App\Models\Post;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -116,6 +118,70 @@ class InteractionController extends Controller
             'likes_count'     => $likesCount,
             'bookmarks_count' => $bookmarksCount,
             'user_status'     => $userStatus,
+        ]);
+    }
+
+    /**
+     * GET /api/bookmarks
+     * List the authenticated user's bookmarked posts.
+     */
+    public function bookmarks(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $postIds = Interaction::where('user_id', $user->id)
+            ->where('interactable_type', Post::class)
+            ->where('type', 'bookmark')
+            ->orderByDesc('created_at')
+            ->pluck('interactable_id');
+
+        $posts = Post::whereIn('id', $postIds)
+            ->with(['user', 'center', 'tags'])
+            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
+            ->paginate($request->input('per_page', 15));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bookmarked posts retrieved successfully',
+            'data'    => PostResource::collection($posts),
+            'meta'    => [
+                'current_page' => $posts->currentPage(),
+                'last_page'    => $posts->lastPage(),
+                'per_page'     => $posts->perPage(),
+                'total'        => $posts->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * GET /api/liked
+     * List the authenticated user's liked posts.
+     */
+    public function liked(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $postIds = Interaction::where('user_id', $user->id)
+            ->where('interactable_type', Post::class)
+            ->where('type', 'like')
+            ->orderByDesc('created_at')
+            ->pluck('interactable_id');
+
+        $posts = Post::whereIn('id', $postIds)
+            ->with(['user', 'center', 'tags'])
+            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
+            ->paginate($request->input('per_page', 15));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Liked posts retrieved successfully',
+            'data'    => PostResource::collection($posts),
+            'meta'    => [
+                'current_page' => $posts->currentPage(),
+                'last_page'    => $posts->lastPage(),
+                'per_page'     => $posts->perPage(),
+                'total'        => $posts->total(),
+            ],
         ]);
     }
 }

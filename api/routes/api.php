@@ -99,6 +99,8 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
 
     // Interactions – like/bookmark toggle (S2-US#6)
     Route::post('/interactions', [InteractionController::class, 'toggle']);
+    Route::get('/bookmarks', [InteractionController::class, 'bookmarks']);
+    Route::get('/liked', [InteractionController::class, 'liked']);
 
     // Follow – toggle + status (auth required)
     Route::post('/users/{user}/follow', [FollowController::class, 'toggle']);
