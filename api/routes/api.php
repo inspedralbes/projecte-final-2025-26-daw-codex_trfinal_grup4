@@ -94,6 +94,7 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
 
     // Posts (US#2)
     Route::post('/posts', [PostController::class, 'store']);
+    Route::put('/posts/{post}', [PostController::class, 'update']);
     Route::delete('/posts/{post}', [PostController::class, 'destroy']);
 
     // Following feed
