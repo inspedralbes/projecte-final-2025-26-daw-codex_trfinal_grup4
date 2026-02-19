@@ -95,6 +95,7 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     // Comments (US#6)
     Route::post('/comments', [CommentController::class, 'store']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+    Route::patch('/comments/{comment}/solution', [CommentController::class, 'toggleSolution']);
 
     // Interactions – like/bookmark toggle (S2-US#6)
     Route::post('/interactions', [InteractionController::class, 'toggle']);
