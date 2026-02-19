@@ -37,6 +37,7 @@ class AuthController extends Controller
             'user'           => $user->load('center'),
             'token'          => $token,
             'email_verified' => false,
+            'auth_provider'  => 'local',
         ], 'User registered successfully. Please check your email to verify your account.', 201);
     }
 
@@ -47,7 +48,16 @@ class AuthController extends Controller
     {
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!$user) {
+            return $this->error('Invalid credentials', 401);
+        }
+
+        // If user registered via Google and has no password, they must use Google login
+        if ($user->auth_provider === 'google' && !$user->password) {
+            return $this->error('This account uses Google login. Please sign in with Google.', 422);
+        }
+
+        if (!Hash::check($request->password, $user->password)) {
             return $this->error('Invalid credentials', 401);
         }
 
@@ -57,6 +67,7 @@ class AuthController extends Controller
             'user'           => $user->load('center'),
             'token'          => $token,
             'email_verified' => $user->hasVerifiedEmail(),
+            'auth_provider'  => $user->auth_provider,
         ], 'Logged in successfully');
     }
 
@@ -81,6 +92,7 @@ class AuthController extends Controller
         return $this->success([
             'user'           => $user->load('center'),
             'email_verified' => $user->hasVerifiedEmail(),
+            'auth_provider'  => $user->auth_provider,
         ], 'Authenticated user');
     }
 

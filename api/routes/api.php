@@ -5,6 +5,7 @@ use App\Http\Controllers\CenterController;
 use App\Http\Controllers\CenterMemberController;
 use App\Http\Controllers\CenterRequestController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
@@ -32,6 +33,10 @@ Route::get('/health', function () {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/check-domain', [AuthController::class, 'checkDomain']);
+
+// Google OAuth
+Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect']);
+Route::post('/auth/google/callback', [GoogleAuthController::class, 'callback']);
 
 // Email Verification (public – signed URL)
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
