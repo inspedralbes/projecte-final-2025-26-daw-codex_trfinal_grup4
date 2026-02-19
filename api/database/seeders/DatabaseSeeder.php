@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
             'is_blocked' => false,
             'auth_provider' => 'local',
             'email_verified_at' => Carbon::now(),
+            'password_set_at' => Carbon::now(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
@@ -55,6 +56,7 @@ class DatabaseSeeder extends Seeder
             'is_blocked' => false,
             'auth_provider' => 'local',
             'email_verified_at' => Carbon::now(),
+            'password_set_at' => Carbon::now(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
@@ -77,6 +79,7 @@ class DatabaseSeeder extends Seeder
             'is_blocked' => false,
             'auth_provider' => 'local',
             'email_verified_at' => Carbon::now(),
+            'password_set_at' => Carbon::now(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
@@ -93,6 +96,7 @@ class DatabaseSeeder extends Seeder
             'is_blocked' => false,
             'auth_provider' => 'local',
             'email_verified_at' => Carbon::now(),
+            'password_set_at' => Carbon::now(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
