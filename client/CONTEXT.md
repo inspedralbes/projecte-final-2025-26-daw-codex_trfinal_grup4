@@ -7,14 +7,14 @@
 
 ## 📌 Informació del servei
 
-| Camp | Valor |
-|---|---|
-| **Framework** | React 18 (JS pur, sense TypeScript) |
-| **Bundler** | Vite 5 |
-| **Routing** | React Router DOM v7 |
-| **Port dev** | 5173 (directe) / 8080 (via Nginx) |
-| **Contenidor** | `tfg_client_dev` |
-| **Directori al contenidor** | `/app` |
+| Camp                        | Valor                               |
+| --------------------------- | ----------------------------------- |
+| **Framework**               | React 18 (JS pur, sense TypeScript) |
+| **Bundler**                 | Vite 5                              |
+| **Routing**                 | React Router DOM v7                 |
+| **Port dev**                | 5173 (directe) / 8080 (via Nginx)   |
+| **Contenidor**              | `tfg_client_dev`                    |
+| **Directori al contenidor** | `/app`                              |
 
 ---
 
@@ -46,13 +46,13 @@
 
 ## ⚠️ REGLES IMPORTANTS
 
-1. **Crides a l'API:** Utilitza sempre la variable `VITE_API_URL` per construir les URLs: 
+1. **Crides a l'API:** Utilitza sempre la variable `VITE_API_URL` per construir les URLs:
    ```js
-   const API = import.meta.env.VITE_API_URL || '/api';
+   const API = import.meta.env.VITE_API_URL || "/api";
    ```
 2. **Socket.io:** Connecta sempre via la variable `VITE_SOCKET_URL`:
    ```js
-   const SOCKET = import.meta.env.VITE_SOCKET_URL || '';
+   const SOCKET = import.meta.env.VITE_SOCKET_URL || "";
    ```
 3. **Estructura de carpetes recomanada:**
    ```
@@ -78,6 +78,7 @@
 ## 🔧 Configuració actual
 
 ### package.json
+
 ```json
 {
   "dependencies": {
@@ -89,22 +90,52 @@
 ```
 
 ### vite.config.js
+
 - Plugin: `@vitejs/plugin-react`
 - Host: `0.0.0.0` (obligatori per Docker)
 - Port: `5173` (strictPort)
 - Watch: polling activat (obligatori per HMR dins Docker)
 
 ### Variables d'entorn disponibles
-| Variable | Valor (dev) | Descripció |
-|---|---|---|
-| `VITE_API_URL` | `http://localhost:8080/api` | URL base de l'API |
-| `VITE_SOCKET_URL` | `http://localhost:8080` | URL base de Socket.io |
+
+| Variable          | Valor (dev)                 | Descripció            |
+| ----------------- | --------------------------- | --------------------- |
+| `VITE_API_URL`    | `http://localhost:8080/api` | URL base de l'API     |
+| `VITE_SOCKET_URL` | `http://localhost:8080`     | URL base de Socket.io |
 
 ---
 
 ## 📅 Registre de canvis
 
+### 2026-02-19 – Sistema d'autenticació complet + Feedback UX
+
+- **Autor:** @iker
+- **Autenticació (Sanctum):**
+  - Creat `src/context/AuthContext.jsx` — Provider global amb `login()`, `register()`, `logout()`
+    - Restauració automàtica de sessió al muntar (`/api/me`)
+    - Parsing correcte de la resposta API (`{ data: { user, token } }`)
+    - Missatges de feedback (`authMessage`) amb auto-clear als 6 segons
+    - Exporta constant `PASSWORD_REQUIREMENTS` per validació client-side
+    - Funció `parseApiError()` per errors de validació Laravel (422)
+  - Creat `src/hooks/useAuth.js` — Hook custom per consumir `AuthContext`
+  - Creat `src/components/auth/ProtectedRoute.jsx` — Redirigeix a `/welcome` si no autenticat
+  - Creat `src/components/auth/PublicOnlyRoute.jsx` — Redirigeix a `/` si ja autenticat
+  - Modificat `src/services/api.js`:
+    - Header `Authorization: Bearer <token>` automàtic des de `localStorage`
+    - Headers per defecte: `Content-Type: application/json`, `Accept: application/json`
+  - Modificat `src/App.jsx` — Embolcallat amb `<AuthProvider>`
+  - Modificat `src/router/index.jsx` — Rutes protegides amb `ProtectedRoute` i `PublicOnlyRoute`
+- **Landing page – Feedback UX:**
+  - Requisistos de contrasenya en temps real (8 chars, majúscula, minúscula, número) amb ✓/✗
+  - Indicador de coincidència de contrasenyes (borde verd/vermell)
+  - Missatges d'èxit (banner verd) i error (banner vermell) animats
+  - Botó de registre desactivat fins complir tots els requisits
+  - Classes CSS noves: `auth-card__message--success/error`, `auth-card__password-reqs`, `auth-card__match-indicator`, `auth-card__input--valid/invalid`
+- **Sidebar:** Afegit botó de Logout i informació d'usuari dinàmica
+- **Configuració backend:** `.env` del client creat amb `VITE_API_URL=http://localhost:8080/api`
+
 ### 2026-02-19 – Implementació completa UI "Academic Dark Mode"
+
 - **Autor:** @copilot (IA)
 - **Sistema de disseny:**
   - Refactoritzat `variables.css` amb paleta Codex (Deep Slate, Teal, Violet)
@@ -130,6 +161,7 @@
 - **MockApi:** Dades de prova integrades per a previsualització sense backend
 
 ### 2026-02-17 – Estructura completa del projecte, tooling i serveis
+
 - **Autor:** @chuclao (amb IA)
 - Refactoritzat **router**: rutes extretes a `src/router/index.jsx`, `App.jsx` ara delega a `<AppRouter />`
 - Configurat **alias `@`** a `vite.config.js` per imports absoluts (`@/components/...`)
@@ -144,6 +176,7 @@
 - Creades carpetes amb `.gitkeep`: `components/`, `components/ui/`, `context/`, `hooks/`, `layouts/`, `utils/`, `assets/fonts/`, `assets/icons/`, `assets/images/`
 
 ### 2026-02-17 – Estructura base React Router
+
 - **Autor:** @chuclao
 - Afegit `react-router-dom` v7
 - Creat `src/App.jsx` amb Routes
@@ -151,6 +184,7 @@
 - Configurat `BrowserRouter` a `main.jsx`
 
 ### 2026-02-13 – Infraestructura inicial
+
 - **Autor:** @chuclao
 - Creat `Dockerfile` multi-stage (dev/prod)
 - Creat `package.json` amb React 18 + Vite 5
@@ -165,20 +199,27 @@
 ```
 src/
 ├── components/
+│   ├── auth/
+│   │   ├── ProtectedRoute.jsx       # Redirigeix si no autenticat
+│   │   └── PublicOnlyRoute.jsx      # Redirigeix si ja autenticat
 │   ├── feed/
 │   │   ├── Feed.jsx / Feed.css         # Llista de posts amb tabs
 │   │   ├── PostCard.jsx / PostCard.css # Tarjeta de publicació
 │   │   └── PostInput.jsx / PostInput.css # Editor de posts
 │   ├── layout/
 │   │   ├── MainLayout.jsx / MainLayout.css # Shell principal
-│   │   ├── Sidebar.jsx / Sidebar.css       # Nav esquerra
+│   │   ├── Sidebar.jsx / Sidebar.css       # Nav esquerra + Logout
 │   │   └── RightSection.jsx / RightSection.css # Widgets dreta
 │   ├── profile/
 │   │   └── Profile.jsx / Profile.css       # Perfil d'usuari
 │   └── ui/
 │       └── Icons.jsx                # Icones SVG reutilitzables
+├── context/
+│   └── AuthContext.jsx              # Provider auth global (login/register/logout)
+├── hooks/
+│   └── useAuth.js                   # Hook per consumir AuthContext
 ├── pages/
-│   ├── Landing.jsx / Landing.css    # Welcome + Auth
+│   ├── Landing.jsx / Landing.css    # Welcome + Auth + Feedback UX
 │   ├── Home.jsx                     # Wrapper per Feed
 │   ├── Explore.jsx / Explore.css    # Cerca + Descobriment
 │   ├── Notifications.jsx / Notifications.css # Activitat
@@ -187,9 +228,9 @@ src/
 │   ├── Messages.jsx                 # (Pendent)
 │   └── More.jsx                     # Menú addicional
 ├── router/
-│   └── index.jsx                    # Definició de rutes
+│   └── index.jsx                    # Rutes protegides + públiques
 ├── services/
-│   ├── api.js                       # Client HTTP
+│   ├── api.js                       # Client HTTP (amb Bearer token auto)
 │   └── mockApi.js                   # Dades de prova
 └── styles/
     ├── index.css                    # Entry point
@@ -202,6 +243,6 @@ src/
 
 ## 📚 Documentació Relacionada
 
-*   **Visió Global del Projecte:** [../doc/PROJECT_CONCEPT.md](../doc/PROJECT_CONCEPT.md)
-*   **Backend (API):** [../api/CONTEXT.md](../api/CONTEXT.md)
-*   **Real-time (Socket):** [../socket/CONTEXT.md](../socket/CONTEXT.md)
+- **Visió Global del Projecte:** [../doc/PROJECT_CONCEPT.md](../doc/PROJECT_CONCEPT.md)
+- **Backend (API):** [../api/CONTEXT.md](../api/CONTEXT.md)
+- **Real-time (Socket):** [../socket/CONTEXT.md](../socket/CONTEXT.md)

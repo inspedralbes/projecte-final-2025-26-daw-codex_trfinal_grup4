@@ -42,7 +42,7 @@
 .landing__grid {
   position: absolute;
   inset: 0;
-  background-image: 
+  background-image:
     linear-gradient(var(--border-subtle) 1px, transparent 1px),
     linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
   background-size: 60px 60px;
@@ -51,8 +51,13 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(30px, 30px) scale(1.1); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, 30px) scale(1.1);
+  }
 }
 
 /* ── Navigation ───────────────────────────────────────────── */
@@ -368,7 +373,7 @@
 
 .auth-card__divider::before,
 .auth-card__divider::after {
-  content: '';
+  content: "";
   flex: 1;
   height: 1px;
   background: var(--border-subtle);
@@ -458,9 +463,15 @@
   background: var(--depth-4);
 }
 
-.code-preview__dots span:first-child { background: #ff5f56; }
-.code-preview__dots span:nth-child(2) { background: #ffbd2e; }
-.code-preview__dots span:last-child { background: #27ca40; }
+.code-preview__dots span:first-child {
+  background: #ff5f56;
+}
+.code-preview__dots span:nth-child(2) {
+  background: #ffbd2e;
+}
+.code-preview__dots span:last-child {
+  background: #27ca40;
+}
 
 .code-preview__filename {
   font-family: var(--font-mono);
@@ -481,13 +492,28 @@
 }
 
 /* Syntax highlighting */
-.syntax-keyword { color: var(--syntax-keyword); }
-.syntax-string { color: var(--syntax-string); }
-.syntax-number { color: var(--syntax-number); }
-.syntax-function { color: var(--syntax-function); }
-.syntax-variable { color: var(--syntax-variable); }
-.syntax-comment { color: var(--syntax-comment); font-style: italic; }
-.syntax-operator { color: var(--syntax-operator); }
+.syntax-keyword {
+  color: var(--syntax-keyword);
+}
+.syntax-string {
+  color: var(--syntax-string);
+}
+.syntax-number {
+  color: var(--syntax-number);
+}
+.syntax-function {
+  color: var(--syntax-function);
+}
+.syntax-variable {
+  color: var(--syntax-variable);
+}
+.syntax-comment {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+.syntax-operator {
+  color: var(--syntax-operator);
+}
 
 /* ── Footer ───────────────────────────────────────────────── */
 .landing__footer {
@@ -515,6 +541,142 @@
 .landing__footer-text {
   font-size: var(--text-sm);
   color: var(--ink-quaternary);
+}
+
+/* ── Auth Feedback Messages ──────────────────────────────── */
+.auth-card__message {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  animation: fadeSlideIn 0.3s ease-out;
+}
+
+.auth-card__message--success {
+  color: #22c55e;
+  background-color: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.auth-card__message--error {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* ── Password Requirements ───────────────────────────────── */
+.auth-card__password-reqs {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  animation: fadeSlideIn 0.25s ease-out;
+}
+
+.auth-card__password-reqs-title {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--ink-tertiary);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.auth-card__password-reqs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.auth-card__password-req {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  transition: color 0.2s ease;
+}
+
+.auth-card__password-req--met {
+  color: #22c55e;
+}
+
+.auth-card__password-req--unmet {
+  color: var(--ink-quaternary);
+}
+
+.auth-card__password-req-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ── Password Match Indicator ────────────────────────────── */
+.auth-card__match-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  animation: fadeSlideIn 0.25s ease-out;
+}
+
+.auth-card__match-indicator--match {
+  color: #22c55e;
+}
+
+.auth-card__match-indicator--no-match {
+  color: #ef4444;
+}
+
+.auth-card__match-icon {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Input Validation States ─────────────────────────────── */
+.auth-card__input--valid {
+  border-color: rgba(34, 197, 94, 0.5) !important;
+}
+
+.auth-card__input--valid:focus {
+  border-color: #22c55e !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15) !important;
+}
+
+.auth-card__input--invalid {
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+.auth-card__input--invalid:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+/* ── Submit disabled state ───────────────────────────────── */
+.auth-card__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Responsive ───────────────────────────────────────────── */
