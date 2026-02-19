@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\NotificationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,6 +11,10 @@ use Illuminate\Http\Request;
 class FollowController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(
+        private readonly NotificationService $notificationService
+    ) {}
 
     /**
      * POST /api/users/{user}/follow
@@ -35,6 +40,16 @@ class FollowController extends Controller
         }
 
         $authUser->following()->attach($user->id);
+
+        // Notify the followed user
+        $this->notificationService->create(
+            $user->id,
+            $authUser->id,
+            'follow',
+            User::class,
+            $authUser->id,
+            $authUser->name . ' ha comenzado a seguirte'
+        );
 
         return $this->success([
             'following' => true,

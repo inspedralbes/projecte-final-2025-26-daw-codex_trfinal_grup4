@@ -6,6 +6,7 @@ use App\Events\NewCommentEvent;
 use App\Http\Requests\StoreCommentRequest;
 use App\Models\Comment;
 use App\Models\Post;
+use App\Services\NotificationService;
 use App\Services\SanitizationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -16,7 +17,8 @@ class CommentController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private readonly SanitizationService $sanitizer
+        private readonly SanitizationService $sanitizer,
+        private readonly NotificationService $notificationService
     ) {}
 
     /**
@@ -49,6 +51,32 @@ class CommentController extends Controller
         ]);
 
         $comment->load('user');
+
+        // Persist notification for post owner
+        $post = $comment->post;
+        $this->notificationService->create(
+            $post->user_id,
+            $request->user()->id,
+            'comment',
+            Post::class,
+            $post->id,
+            $request->user()->username . ' commented on your post'
+        );
+
+        // If replying, also notify parent comment author
+        if ($comment->parent_id) {
+            $parentComment = Comment::find($comment->parent_id);
+            if ($parentComment) {
+                $this->notificationService->create(
+                    $parentComment->user_id,
+                    $request->user()->id,
+                    'reply',
+                    Comment::class,
+                    $parentComment->id,
+                    $request->user()->username . ' replied to your comment'
+                );
+            }
+        }
 
         // Fire broadcast event to Redis → Socket.io picks it up
         broadcast(new NewCommentEvent($comment))->toOthers();
