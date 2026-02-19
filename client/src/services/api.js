@@ -21,9 +21,13 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api"
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
 
+  // Check for token in localStorage
+  const token = localStorage.getItem("token");
+
   const defaultHeaders = {
     "Content-Type": "application/json",
     Accept: "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
   };
 
   const config = {
