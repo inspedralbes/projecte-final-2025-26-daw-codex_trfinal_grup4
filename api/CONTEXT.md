@@ -512,6 +512,100 @@
   4. `POST /api/password/reset` amb email + token + nova contrasenya
   5. Contrasenya actualitzada, tots els tokens Sanctum revocats → l'usuari ha de fer login de nou
 
+### 2026-02-19 – Follow/Unfollow Usuaris
+- **Autor:** @chuclao (amb IA)
+- Creat **`FollowController`** a `app/Http/Controllers/`:
+  - `POST /api/users/{user}/follow` — Toggle follow/unfollow (auth:sanctum), no permet seguir-se a si mateix (422)
+  - `GET /api/users/{user}/followers` — Llista de seguidors d'un usuari (públic), paginada, amb flag `is_following` i `is_self`
+  - `GET /api/users/{user}/following` — Llista d'usuaris que segueix (públic), paginada, amb flag `is_following` i `is_self`
+  - `GET /api/users/{user}/follow-status` — Estat de follow per a l'usuari autenticat (auth:sanctum)
+- Actualitzat **`ProfileController::show()`**: afegit flag `is_following` al response del perfil
+
+### 2026-02-19 – Marcar Comentari com a Solució
+- **Autor:** @chuclao (amb IA)
+- Actualitzat **`CommentController`**:
+  - `PATCH /api/comments/{comment}/solution` — Toggle mark/unmark solució (auth:sanctum)
+  - Només l'autor del post pot marcar solucions, només en posts tipus `question`
+  - Comportament toggle: si ja hi ha una solució, la desmarca i marca la nova
+  - Actualitza `comment.is_solution` i `post.is_solved` simultàniament
+
+### 2026-02-19 – Llistat de Posts Guardats i Posts amb Like
+- **Autor:** @chuclao (amb IA)
+- Actualitzat **`InteractionController`**:
+  - `GET /api/bookmarks` — Llista paginada de posts guardats (bookmark) de l'usuari autenticat
+  - `GET /api/liked` — Llista paginada de posts amb like de l'usuari autenticat
+- Ambdós endpoints usen `PostResource` i retornen comptadors agregats
+
+### 2026-02-19 – Feed de Seguiment + Filtre per Tipus
+- **Autor:** @chuclao (amb IA)
+- Actualitzat **`PostController`**:
+  - `GET /api/feed/following` — Feed de posts d'usuaris seguits (auth:sanctum)
+  - Mostra posts globals + posts del centre de l'usuari dels users seguits
+  - Retorna missatge informatiu si no segueix ningú
+  - Afegit filtre `?type=question|news` al feed global (`GET /api/posts`)
+
+### 2026-02-19 – Cerca Global i per Centre
+- **Autor:** @chuclao (amb IA)
+- Creat **`SearchController`** a `app/Http/Controllers/`:
+  - `GET /api/search` — Cerca pública en posts globals, usuaris i tags, amb filtre `?type=posts|users|tags`
+  - `GET /api/center/search` — Cerca dins del centre de l'usuari: posts i membres (auth:sanctum)
+- Validació: query mínim 2 caràcters, màxim 100
+
+### 2026-02-19 – Edició de Posts
+- **Autor:** @chuclao (amb IA)
+- Actualitzat **`PostController`**:
+  - `PUT /api/posts/{post}` — Actualitzar post (auth:sanctum), només l'autor pot editar
+  - Sanititza contingut, sincronitza tags
+- Creat **`UpdatePostRequest`** a `app/Http/Requests/`:
+  - Validació parcial amb tots els camps `sometimes` (no requerits)
+
+### 2026-02-19 – Edició de Comentaris
+- **Autor:** @chuclao (amb IA)
+- Actualitzat **`CommentController`**:
+  - `PUT /api/comments/{comment}` — Actualitzar comentari (auth:sanctum), només l'autor pot editar
+  - Validació inline: content required, max 5000 caràcters
+  - Sanititza contingut amb SanitizationService
+
+### 2026-02-19 – Follow/Unfollow Etiquetes amb Notificacions
+- **Autor:** @chuclao (amb IA)
+- Actualitzat **`TagController`**:
+  - `POST /api/tags/{tag}/follow` — Toggle follow/unfollow etiqueta (auth:sanctum)
+  - `PATCH /api/tags/{tag}/notify` — Toggle notificacions d'una etiqueta seguida (auth:sanctum)
+  - `GET /api/tags/followed` — Llista d'etiquetes seguides per l'usuari (auth:sanctum)
+- Llistes de tags (`index`, `centerTags`) ara inclouen flag `is_following` per a usuaris autenticats
+- Utilitza taula pivot `tag_user` amb columna `notify`
+
+### 2026-02-19 – Repost
+- **Autor:** @chuclao (amb IA)
+- Actualitzat **`PostController`**:
+  - `POST /api/posts/{post}/repost` — Repost d'un post existent (auth:sanctum)
+  - No permet repostejar el propi post (422) ni duplicar reposts (409)
+  - Repost d'un repost apunta sempre a l'original
+- Actualitzat **`PostResource`**:
+  - Nous camps: `original_post` (amb user aniuat), `is_repost`, `reposts_count`
+- Actualitzades totes les queries de feed (index, centerPosts, followingFeed, show, store, update) per incloure `originalPost.user` i `reposts` count
+
+### 2026-02-19 – Notificacions REST
+- **Autor:** @chuclao (amb IA)
+- **Esquema BD** (`2025_02_17_000000_create_full_schema.php`):
+  - Creada taula **`notifications`**: id, user_id (FK), sender_id (FK), type, morphs(notifiable), message, read_at, timestamps
+  - Índexs: (user_id, read_at) per consultes d'unread, (user_id, created_at) per llistat ordenat
+- Creat model **`Notification`** a `app/Models/`:
+  - Scope `unread()`, relacions `user()`, `sender()`, `notifiable()` (MorphTo)
+- Creat **`NotificationService`** a `app/Services/`:
+  - `create()`: crea notificació, salta si sender === receiver (no auto-notificar)
+- Creat **`NotificationController`** a `app/Http/Controllers/`:
+  - `GET /api/notifications` — Llista paginada amb filtre `?unread_only=true`, inclou `unread_count` a meta
+  - `GET /api/notifications/count` — Comptador d'unread
+  - `PATCH /api/notifications/{notification}/read` — Marcar com a llegida
+  - `PATCH /api/notifications/read-all` — Marcar totes com a llegides
+  - `DELETE /api/notifications/{notification}` — Eliminar notificació
+- Integrat **NotificationService** als controllers existents:
+  - **CommentController**: notifica l'autor del post quan rep un comentari, notifica l'autor del comentari pare quan rep una reply
+  - **InteractionController**: notifica l'autor del recurs quan rep un like (no bookmarks)
+  - **FollowController**: notifica l'usuari quan algú el comença a seguir
+  - **PostController**: notifica l'autor del post original quan algú el reposteja
+
 ---
 
 ## 📚 Documentació Relacionada
