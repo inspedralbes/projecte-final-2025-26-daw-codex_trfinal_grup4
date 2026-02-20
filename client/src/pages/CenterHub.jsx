@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PostCard from '@/components/feed/PostCard';
 import PostInput from '@/components/feed/PostInput';
+import { usePosts } from '@/hooks/usePosts';
+import { useTags } from '@/hooks/useTags';
+import { useAuth } from '@/hooks/useAuth';
+import centerService from '@/services/centerService';
 import './CenterHub.css';
 
 // Icons
@@ -25,71 +29,131 @@ const LockIcon = () => (
   </svg>
 );
 
-// Mock data for center posts
-const centerPosts = [
-  {
-    id: 101,
-    type: 'post',
-    author: {
-      name: 'Prof. García',
-      handle: '@profgarcia',
-      avatar: 'profgarcia',
-      verified: true,
-      badge: 'Profesor'
-    },
-    content: '📢 AVISO IMPORTANTE: Las prácticas de empresa (FCT) para 2DAW comenzarán el 15 de marzo. Recordad revisar el documento de requisitos en la plataforma del centro. Cualquier duda, consultar en horario de tutorías.',
-    tags: ['#FCT', '#2DAW', '#Importante'],
-    timestamp: '1h',
-    stats: { likes: 45, reposts: 12, comments: 8 },
-    pinned: true
-  },
-  {
-    id: 102,
-    type: 'question',
-    author: {
-      name: 'Laura Fernández',
-      handle: '@laurafernandez',
-      avatar: 'laura2',
-      verified: false,
-      badge: '1DAM'
-    },
-    content: '¿Alguien de 2º tiene apuntes de la optativa de Desarrollo de Videojuegos? Quiero ir adelantando para el próximo curso.',
-    tags: ['#1DAM', '#Videojuegos'],
-    timestamp: '3h',
-    stats: { likes: 8, reposts: 0, comments: 4 },
-    solved: false
-  },
-  {
-    id: 103,
-    type: 'post',
-    author: {
-      name: 'Delegación Estudiantil',
-      handle: '@delegacion',
-      avatar: 'delegacion',
-      verified: true,
-      badge: 'Oficial'
-    },
-    content: '🎮 TORNEO DE ESPORTS del IES Jaume Balmes!\n\n📅 Fecha: 28 de febrero\n🕐 Hora: 16:00h\n📍 Aula de informática principal\n\nJuegos: League of Legends, Valorant, Rocket League\n\nInscripciones abiertas hasta el 25 de febrero. ¡Apuntaos!',
-    tags: ['#Esports', '#Torneo', '#Evento'],
-    timestamp: '5h',
-    stats: { likes: 89, reposts: 34, comments: 23 }
-  }
-];
+const LoadingSpinner = () => (
+  <div className="center-hub__spinner">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
+      <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/>
+    </svg>
+  </div>
+);
 
-// Channel tags for the center
-const channels = [
-  { tag: '#Anuncios', posts: 45, color: 'rose' },
-  { tag: '#1DAM', posts: 234, color: 'teal' },
-  { tag: '#2DAM', posts: 189, color: 'teal' },
-  { tag: '#1DAW', posts: 312, color: 'violet' },
-  { tag: '#2DAW', posts: 278, color: 'violet' },
-  { tag: '#ASIX', posts: 156, color: 'amber' },
-  { tag: '#FCT', posts: 89, color: 'emerald' },
-  { tag: '#OfertasEmpleo', posts: 67, color: 'cyan' },
-];
+// Map tag colors based on tag name patterns
+const getTagColor = (tagName) => {
+  const name = tagName.toLowerCase();
+  if (name.includes('anuncio') || name.includes('importante')) return 'rose';
+  if (name.includes('dam')) return 'teal';
+  if (name.includes('daw')) return 'violet';
+  if (name.includes('asix') || name.includes('smx')) return 'amber';
+  if (name.includes('fct') || name.includes('practicas')) return 'emerald';
+  if (name.includes('empleo') || name.includes('trabajo')) return 'cyan';
+  return 'teal';
+};
 
 export default function CenterHub() {
+  const { user } = useAuth();
   const [activeChannel, setActiveChannel] = useState('all');
+  const [activeTab, setActiveTab] = useState('posts');
+  const [centerInfo, setCenterInfo] = useState(null);
+  const [loadingCenter, setLoadingCenter] = useState(true);
+  
+  const centerId = user?.center_id;
+  
+  // Fetch posts for this center
+  const { 
+    posts, 
+    loading: loadingPosts, 
+    error: postsError, 
+    hasMore, 
+    loadMore, 
+    createPost,
+    deletePost 
+  } = usePosts({ 
+    feedType: 'center', 
+    centerId,
+    enabled: !!centerId 
+  });
+  
+  // Fetch center-specific tags
+  const { tags: channels, loading: loadingTags } = useTags(centerId);
+
+  // Fetch center info
+  useEffect(() => {
+    if (!centerId) {
+      setLoadingCenter(false);
+      return;
+    }
+    
+    const fetchCenterInfo = async () => {
+      try {
+        setLoadingCenter(true);
+        const response = await centerService.getCenter(centerId);
+        setCenterInfo(response.data || response);
+      } catch (err) {
+        console.error('Error fetching center info:', err);
+      } finally {
+        setLoadingCenter(false);
+      }
+    };
+    
+    fetchCenterInfo();
+  }, [centerId]);
+
+  // Filter posts by active channel
+  const filteredPosts = posts.filter(post => {
+    if (activeChannel === 'all') return true;
+    const postTags = post.tags || [];
+    return postTags.some(tag => {
+      const tagName = typeof tag === 'string' ? tag : tag.name;
+      return tagName.toLowerCase() === activeChannel.toLowerCase() || 
+             `#${tagName}`.toLowerCase() === activeChannel.toLowerCase();
+    });
+  }).filter(post => {
+    // Filter by tab
+    if (activeTab === 'posts') return post.type !== 'question';
+    if (activeTab === 'questions') return post.type === 'question';
+    return true;
+  });
+
+  // Handle post creation
+  const handleCreatePost = async (postData) => {
+    await createPost({
+      ...postData,
+      center_id: centerId,
+      visibility: 'center'
+    });
+  };
+
+  // No center assigned
+  if (!centerId) {
+    return (
+      <div className="center-hub">
+        <div className="center-hub__no-center">
+          <span className="center-hub__no-center-icon">🏫</span>
+          <h2>No perteneces a ningún centro</h2>
+          <p>Contacta con tu administrador para unirte a un centro educativo.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (loadingCenter && !centerInfo) {
+    return (
+      <div className="center-hub">
+        <div className="center-hub__loading">
+          <LoadingSpinner />
+          <p>Cargando centro...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Center display values
+  const centerName = centerInfo?.name || user?.center?.name || 'Centro Educativo';
+  const centerLocation = centerInfo?.location || user?.center?.location || '';
+  const memberCount = centerInfo?.member_count || centerInfo?.members_count || 0;
+  const createdYear = centerInfo?.created_at ? new Date(centerInfo.created_at).getFullYear() : 2024;
 
   return (
     <div className="center-hub">
@@ -102,16 +166,18 @@ export default function CenterHub() {
           </div>
           <div className="center-hub__school-info">
             <div className="center-hub__school-header">
-              <h1 className="center-hub__school-name">IES Jaume Balmes</h1>
+              <h1 className="center-hub__school-name">{centerName}</h1>
               <span className="center-hub__private-badge">
                 <LockIcon />
                 Privado
               </span>
             </div>
-            <p className="center-hub__school-location">Barcelona, Catalunya</p>
+            {centerLocation && (
+              <p className="center-hub__school-location">{centerLocation}</p>
+            )}
             <div className="center-hub__school-stats">
-              <span><UsersIcon /> 487 miembros</span>
-              <span><CalendarIcon /> Desde 2023</span>
+              <span><UsersIcon /> {memberCount} miembros</span>
+              <span><CalendarIcon /> Desde {createdYear}</span>
             </div>
           </div>
         </div>
@@ -125,40 +191,74 @@ export default function CenterHub() {
         >
           Todos
         </button>
-        {channels.map(channel => (
-          <button
-            key={channel.tag}
-            className={`center-hub__channel center-hub__channel--${channel.color} ${activeChannel === channel.tag ? 'center-hub__channel--active' : ''}`}
-            onClick={() => setActiveChannel(channel.tag)}
-          >
-            {channel.tag}
-            <span className="center-hub__channel-count">{channel.posts}</span>
-          </button>
-        ))}
+        {channels.map(channel => {
+          const tagName = channel.name || channel.tag;
+          const displayName = tagName.startsWith('#') ? tagName : `#${tagName}`;
+          const postCount = channel.posts_count || channel.posts || 0;
+          const color = getTagColor(displayName);
+          
+          return (
+            <button
+              key={channel.id || displayName}
+              className={`center-hub__channel center-hub__channel--${color} ${activeChannel === displayName ? 'center-hub__channel--active' : ''}`}
+              onClick={() => setActiveChannel(displayName)}
+            >
+              {displayName}
+              <span className="center-hub__channel-count">{postCount}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Navigation Tabs */}
       <nav className="center-hub__nav">
-        <button className="center-hub__nav-tab center-hub__nav-tab--active">
+        <button 
+          className={`center-hub__nav-tab ${activeTab === 'posts' ? 'center-hub__nav-tab--active' : ''}`}
+          onClick={() => setActiveTab('posts')}
+        >
           Publicaciones
         </button>
-        <button className="center-hub__nav-tab">
+        <button 
+          className={`center-hub__nav-tab ${activeTab === 'questions' ? 'center-hub__nav-tab--active' : ''}`}
+          onClick={() => setActiveTab('questions')}
+        >
           Dudas
         </button>
-        <button className="center-hub__nav-tab">
+        <button 
+          className={`center-hub__nav-tab ${activeTab === 'resources' ? 'center-hub__nav-tab--active' : ''}`}
+          onClick={() => setActiveTab('resources')}
+        >
           Recursos
         </button>
-        <button className="center-hub__nav-tab">
+        <button 
+          className={`center-hub__nav-tab ${activeTab === 'members' ? 'center-hub__nav-tab--active' : ''}`}
+          onClick={() => setActiveTab('members')}
+        >
           Miembros
         </button>
       </nav>
 
       {/* Post Input */}
-      <PostInput />
+      <PostInput onSubmit={handleCreatePost} />
+
+      {/* Error State */}
+      {postsError && (
+        <div className="center-hub__error">
+          <p>Error al cargar publicaciones: {postsError}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loadingPosts && posts.length === 0 && (
+        <div className="center-hub__loading">
+          <LoadingSpinner />
+          <p>Cargando publicaciones...</p>
+        </div>
+      )}
 
       {/* Posts */}
       <div className="center-hub__posts">
-        {centerPosts.map((post, index) => (
+        {filteredPosts.map((post, index) => (
           <div key={post.id} className="center-hub__post-wrapper">
             {post.pinned && (
               <div className="center-hub__pinned-badge">
@@ -167,11 +267,30 @@ export default function CenterHub() {
             )}
             <PostCard 
               post={post} 
+              onDelete={() => deletePost(post.id)}
               className={`animate-slideUp stagger-${Math.min(index + 1, 5)}`}
             />
           </div>
         ))}
       </div>
+
+      {/* Empty State */}
+      {!loadingPosts && filteredPosts.length === 0 && (
+        <div className="center-hub__empty">
+          <p>No hay publicaciones en esta categoría</p>
+        </div>
+      )}
+
+      {/* Load More */}
+      {hasMore && posts.length > 0 && (
+        <button 
+          className="center-hub__load-more"
+          onClick={loadMore}
+          disabled={loadingPosts}
+        >
+          {loadingPosts ? 'Cargando...' : 'Cargar más'}
+        </button>
+      )}
     </div>
   );
 }

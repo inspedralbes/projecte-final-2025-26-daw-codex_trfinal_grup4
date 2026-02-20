@@ -300,3 +300,37 @@
     margin-top: var(--space-2);
   }
 }
+
+/* ── Loading and Error States ───────────────────────────────── */
+.notif__loading,
+.notif__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-4);
+  gap: var(--space-4);
+  color: var(--text-secondary);
+}
+
+.notif__spinner {
+  animation: spin 1s linear infinite;
+}
+
+.notif__spinner svg {
+  color: var(--codex-teal);
+}
+
+.notif__error {
+  color: var(--status-error);
+}
+
+.notif__error p {
+  max-width: 400px;
+  text-align: center;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

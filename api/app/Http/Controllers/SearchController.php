@@ -34,9 +34,12 @@ class SearchController extends Controller
         if (!$type || $type === 'posts') {
             $postsQuery = Post::where(function ($q) use ($query) {
                     $q->where('content', 'LIKE', "%{$query}%")
-                      ->orWhere('code_snippet', 'LIKE', "%{$query}%");
+                      ->orWhere('code_snippet', 'LIKE', "%{$query}%")
+                      ->orWhereHas('tags', function ($tagQuery) use ($query) {
+                          $tagQuery->where('name', 'LIKE', "%{$query}%")
+                                   ->orWhere('slug', 'LIKE', "%{$query}%");
+                      });
                 })
-                ->whereNull('center_id') // Only global posts for public search
                 ->with(['user', 'center', 'tags'])
                 ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
                 ->latest()

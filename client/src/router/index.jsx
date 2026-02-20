@@ -71,6 +71,7 @@ export default function AppRouter() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/:username" element={<ProfilePage />} />
           <Route path="/center" element={<CenterHub />} />
           <Route path="/more" element={<More />} />
         </Route>

@@ -163,3 +163,201 @@
     max-width: 100%;
   }
 }
+
+/* ── Stats ──────────────────────────────────────────────── */
+.profile__stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-4) 0;
+  margin-bottom: var(--space-4);
+  border-top: 1px solid var(--border-subtle, #2f3336);
+  border-bottom: 1px solid var(--border-subtle, #2f3336);
+}
+
+.profile__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.profile__stat-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--ink-primary, #e7e9ea);
+}
+
+.profile__stat-label {
+  font-size: 0.75rem;
+  color: var(--ink-tertiary, #71767b);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Bio ────────────────────────────────────────────────── */
+.profile__bio {
+  font-size: 0.9rem;
+  color: var(--ink-secondary, #a1a7b3);
+  line-height: 1.5;
+  text-align: center;
+  margin-bottom: var(--space-4);
+  max-width: 400px;
+}
+
+/* ── Follow Button ──────────────────────────────────────── */
+.profile__follow-btn {
+  padding: 8px 28px;
+  border-radius: 24px;
+  border: none;
+  background: var(--codex-teal, #14b8a6);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile__follow-btn:hover {
+  background: var(--codex-teal-light, #2dd4bf);
+  box-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
+}
+
+.profile__follow-btn--following {
+  background: transparent;
+  border: 1px solid var(--border-default, #2f3336);
+  color: var(--ink-primary, #e7e9ea);
+}
+
+.profile__follow-btn--following:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+  box-shadow: none;
+}
+
+/* ── Tabs ───────────────────────────────────────────────── */
+.profile__tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-subtle, #2f3336);
+  margin-top: var(--space-4);
+}
+
+.profile__tab {
+  flex: 1;
+  padding: var(--space-4);
+  background: none;
+  border: none;
+  color: var(--ink-tertiary, #71767b);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.profile__tab:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink-secondary, #a1a7b3);
+}
+
+.profile__tab--active {
+  color: var(--ink-primary, #e7e9ea);
+}
+
+.profile__tab--active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: var(--codex-teal, #14b8a6);
+  border-radius: 2px 2px 0 0;
+}
+
+/* ── Posts Section ──────────────────────────────────────── */
+.profile__posts {
+  border-top: 1px solid var(--border-subtle, #2f3336);
+}
+
+.profile__posts-loading,
+.profile__posts-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-4);
+  color: var(--ink-tertiary, #71767b);
+}
+
+.profile__load-more {
+  display: block;
+  width: 100%;
+  padding: var(--space-4);
+  background: var(--depth-2, #1a1f26);
+  border: none;
+  border-top: 1px solid var(--border-subtle, #2f3336);
+  color: var(--codex-teal, #14b8a6);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile__load-more:hover:not(:disabled) {
+  background: var(--depth-3, #242d35);
+}
+
+.profile__load-more:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Loading & Error States ─────────────────────────────── */
+.profile__loading,
+.profile__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: var(--space-4);
+  color: var(--ink-tertiary, #71767b);
+}
+
+.profile__spinner {
+  animation: spin 1s linear infinite;
+}
+
+.profile__spinner svg {
+  color: var(--codex-teal, #14b8a6);
+}
+
+.profile__error {
+  color: var(--status-error, #ef4444);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Responsive – Mobile ────────────────────────────────── */
+@media (max-width: 640px) {
+  .profile__stats {
+    gap: var(--space-4);
+  }
+  
+  .profile__stat-value {
+    font-size: 1rem;
+  }
+  
+  .profile__tab {
+    font-size: 0.8rem;
+    padding: var(--space-3);
+  }
+}

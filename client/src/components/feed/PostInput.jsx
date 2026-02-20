@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import './PostInput.css';
 
 const CodeIcon = () => (
@@ -39,32 +40,83 @@ const GlobeIcon = () => (
   </svg>
 );
 
-export default function PostInput() {
+export default function PostInput({ onSubmit }) {
+  const { user } = useAuth();
   const [content, setContent] = useState('');
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [code, setCode] = useState('');
+  const [codeLanguage, setCodeLanguage] = useState('javascript');
+  const [isQuestion, setIsQuestion] = useState(false);
+  const [tags, setTags] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-    // Handle post submission
-    console.log({ content, code });
-    setContent('');
-    setCode('');
-    setShowCodeEditor(false);
-  };
+    
+    if (!content.trim() && !code.trim()) return;
+    if (submitting) return;
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      // Parse tags from input (comma or space separated)
+      const parsedTags = tags
+        .split(/[,\s]+/)
+        .map(t => t.replace(/^#/, '').trim())
+        .filter(t => t.length > 0)
+        .slice(0, 5);
+
+      const postData = {
+        content: content.trim() || null,
+        code_snippet: code.trim() || null,
+        code_language: code.trim() ? codeLanguage : null,
+        type: isQuestion ? 'question' : 'news',
+        tags: parsedTags.length > 0 ? parsedTags : undefined,
+      };
+
+      if (onSubmit) {
+        const result = await onSubmit(postData);
+        if (result.success) {
+          // Reset form
+          setContent('');
+          setCode('');
+          setTags('');
+          setShowCodeEditor(false);
+          setIsQuestion(false);
+        } else {
+          setError(result.error || 'Error al publicar');
+        }
+      }
+    } catch (err) {
+      console.error('Error submitting post:', err);
+      setError(err.message || 'Error al publicar');
+    } finally {
+      setSubmitting(false);
+    }
+  }, [content, code, codeLanguage, isQuestion, tags, submitting, onSubmit]);
+
+  const avatarUrl = user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || 'developer'}`;
 
   return (
     <div className="post-input">
       <div className="post-input__avatar">
         <img 
-          src="https://api.dicebear.com/7.x/avataaars/svg?seed=developer" 
+          src={avatarUrl} 
           alt="Tu avatar"
         />
       </div>
       <form className="post-input__form" onSubmit={handleSubmit}>
+        {error && (
+          <div className="post-input__error">
+            {error}
+          </div>
+        )}
+        
         <textarea
           className="post-input__textarea"
-          placeholder="¿Qué quieres compartir hoy?"
+          placeholder={isQuestion ? "¿Qué duda técnica tienes?" : "¿Qué quieres compartir hoy?"}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={content.length > 100 ? 4 : 2}
@@ -76,13 +128,22 @@ export default function PostInput() {
               <span className="post-input__code-dots">
                 <span /><span /><span />
               </span>
-              <select className="post-input__code-lang">
+              <select 
+                className="post-input__code-lang"
+                value={codeLanguage}
+                onChange={(e) => setCodeLanguage(e.target.value)}
+              >
                 <option value="javascript">JavaScript</option>
                 <option value="python">Python</option>
                 <option value="java">Java</option>
                 <option value="php">PHP</option>
                 <option value="bash">Bash</option>
                 <option value="sql">SQL</option>
+                <option value="html">HTML</option>
+                <option value="css">CSS</option>
+                <option value="typescript">TypeScript</option>
+                <option value="csharp">C#</option>
+                <option value="plaintext">Plain Text</option>
               </select>
               <button 
                 type="button" 
@@ -102,6 +163,17 @@ export default function PostInput() {
           </div>
         )}
 
+        {/* Tags Input */}
+        <div className="post-input__tags-row">
+          <input
+            type="text"
+            className="post-input__tags-input"
+            placeholder="Etiquetas (separadas por coma o espacio)"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+          />
+        </div>
+
         <div className="post-input__actions">
           <div className="post-input__tools">
             <button 
@@ -118,7 +190,12 @@ export default function PostInput() {
             <button type="button" className="post-input__tool" title="Añadir enlace">
               <LinkIcon />
             </button>
-            <button type="button" className="post-input__tool post-input__tool--question" title="Publicar duda">
+            <button 
+              type="button" 
+              className={`post-input__tool post-input__tool--question ${isQuestion ? 'post-input__tool--active' : ''}`}
+              onClick={() => setIsQuestion(!isQuestion)}
+              title="Publicar duda"
+            >
               <QuestionIcon />
             </button>
           </div>
@@ -130,9 +207,9 @@ export default function PostInput() {
             <button 
               type="submit" 
               className="post-input__submit"
-              disabled={!content.trim()}
+              disabled={(!content.trim() && !code.trim()) || submitting}
             >
-              Publicar
+              {submitting ? 'Publicando...' : (isQuestion ? 'Publicar Duda' : 'Publicar')}
             </button>
           </div>
         </div>

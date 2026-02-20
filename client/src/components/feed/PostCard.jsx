@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useInteractions } from '@/hooks/useInteractions';
+import postsService from '@/services/postsService';
+import { useAuth } from '@/hooks/useAuth';
 import './PostCard.css';
 
 // Icons
@@ -57,15 +60,96 @@ const QuestionBadge = ({ solved }) => (
   </span>
 );
 
-export default function PostCard({ post, className = '' }) {
-  const [liked, setLiked] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
-  const [likesCount, setLikesCount] = useState(post.stats.likes);
+// Helper to format relative time
+const formatTimestamp = (timestamp) => {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
 
-  const handleLike = () => {
-    setLiked(!liked);
-    setLikesCount(prev => liked ? prev - 1 : prev + 1);
-  };
+  if (diffMins < 1) return 'ahora';
+  if (diffMins < 60) return `${diffMins}m`;
+  if (diffHours < 24) return `${diffHours}h`;
+  if (diffDays < 7) return `${diffDays}d`;
+  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+};
+
+// Map API role to display badge
+const getRoleBadge = (user) => {
+  if (!user) return null;
+  if (user.role === 'teacher') return 'Profesor';
+  if (user.role === 'admin') return 'Admin';
+  if (user.role === 'student' && user.center) {
+    // Try to detect course from email or just show center
+    return user.center?.name?.substring(0, 8) || 'Estudiante';
+  }
+  return null;
+};
+
+export default function PostCard({ post, className = '', onInteractionUpdate, onDelete }) {
+  const { user: currentUser } = useAuth();
+  const [showMenu, setShowMenu] = useState(false);
+  const [reposting, setReposting] = useState(false);
+
+  // Extract user from post (API returns user object)
+  const author = post.user || post.author || {};
+  const isVerified = author.role === 'teacher' || author.role === 'admin';
+  const badge = getRoleBadge(author);
+
+  // Use interactions hook for API calls
+  const {
+    liked,
+    bookmarked,
+    likesCount,
+    toggleLike,
+    toggleBookmark,
+  } = useInteractions({
+    postId: post.id,
+    likesCount: post.likes_count || post.stats?.likes || 0,
+    bookmarksCount: post.bookmarks_count || post.stats?.bookmarks || 0,
+    userLiked: post.user_liked || false,
+    userBookmarked: post.user_bookmarked || false,
+  });
+
+  const commentsCount = post.comments_count || post.stats?.comments || 0;
+  const repostsCount = post.reposts_count || post.stats?.reposts || 0;
+
+  const handleLike = useCallback(async () => {
+    await toggleLike();
+    if (onInteractionUpdate) {
+      onInteractionUpdate(post.id, { 
+        likes_count: liked ? likesCount - 1 : likesCount + 1,
+        user_liked: !liked
+      });
+    }
+  }, [toggleLike, onInteractionUpdate, post.id, liked, likesCount]);
+
+  const handleBookmark = useCallback(async () => {
+    await toggleBookmark();
+  }, [toggleBookmark]);
+
+  const handleRepost = useCallback(async () => {
+    if (reposting) return;
+    setReposting(true);
+    try {
+      await postsService.repost(post.id);
+      // Could show success toast here
+    } catch (err) {
+      console.error('Error reposting:', err);
+    } finally {
+      setReposting(false);
+    }
+  }, [post.id, reposting]);
+
+  const handleDelete = useCallback(async () => {
+    if (onDelete && window.confirm('¿Estás seguro de que quieres eliminar esta publicación?')) {
+      await onDelete(post.id);
+    }
+    setShowMenu(false);
+  }, [onDelete, post.id]);
 
   const formatNumber = (num) => {
     if (num >= 1000) {
@@ -74,12 +158,27 @@ export default function PostCard({ post, className = '' }) {
     return num;
   };
 
+  const isOwner = currentUser?.id === author.id;
+  const postType = post.type || 'news';
+  const avatarUrl = author.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${author.username || author.name || 'user'}`;
+
+  // Handle repost display
+  const isRepost = post.is_repost || !!post.original_post;
+  const originalPost = post.original_post;
+
   return (
     <article className={`post-card ${className}`}>
+      {/* Repost indicator */}
+      {isRepost && originalPost && (
+        <div className="post-card__repost-indicator">
+          <RepostIcon /> <span>{author.name} ha reposteado</span>
+        </div>
+      )}
+
       <div className="post-card__avatar">
         <img 
-          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.author.avatar}`}
-          alt={post.author.name}
+          src={avatarUrl}
+          alt={author.name || 'Usuario'}
         />
       </div>
 
@@ -88,64 +187,67 @@ export default function PostCard({ post, className = '' }) {
         <header className="post-card__header">
           <div className="post-card__author">
             <span className="post-card__name">
-              {post.author.name}
-              {post.author.verified && <VerifiedIcon />}
+              {author.name || 'Usuario'}
+              {isVerified && <VerifiedIcon />}
             </span>
-            <span className="post-card__handle">{post.author.handle}</span>
-            {post.author.badge && (
-              <span className="post-card__badge">{post.author.badge}</span>
+            <span className="post-card__handle">@{author.username || 'user'}</span>
+            {badge && (
+              <span className="post-card__badge">{badge}</span>
             )}
             <span className="post-card__dot">·</span>
-            <span className="post-card__time">{post.timestamp}</span>
+            <span className="post-card__time">{formatTimestamp(post.created_at)}</span>
           </div>
-          <button className="post-card__more">
-            <MoreIcon />
-          </button>
+          <div className="post-card__menu-wrapper">
+            <button className="post-card__more" onClick={() => setShowMenu(!showMenu)}>
+              <MoreIcon />
+            </button>
+            {showMenu && (
+              <div className="post-card__dropdown">
+                {isOwner && (
+                  <button onClick={handleDelete} className="post-card__dropdown-item post-card__dropdown-item--danger">
+                    Eliminar
+                  </button>
+                )}
+                <button onClick={() => setShowMenu(false)} className="post-card__dropdown-item">
+                  Cerrar
+                </button>
+              </div>
+            )}
+          </div>
         </header>
 
         {/* Question Badge */}
-        {post.type === 'question' && (
-          <QuestionBadge solved={post.solved} />
+        {postType === 'question' && (
+          <QuestionBadge solved={post.is_solved || post.solved} />
         )}
 
         {/* Text Content */}
         <p className="post-card__text">{post.content}</p>
 
         {/* Code Block */}
-        {post.code && (
+        {post.code_snippet && (
           <div className="post-card__code">
             <div className="post-card__code-header">
               <div className="post-card__code-dots">
                 <span /><span /><span />
               </div>
-              <span className="post-card__code-lang">{post.language}</span>
+              <span className="post-card__code-lang">{post.code_language || 'code'}</span>
             </div>
             <pre className="post-card__code-content">
-              <code>{post.code}</code>
+              <code>{post.code_snippet}</code>
             </pre>
           </div>
-        )}
-
-        {/* Link Preview */}
-        {post.link && (
-          <a href={post.link.url} className="post-card__link" target="_blank" rel="noopener noreferrer">
-            <div className="post-card__link-image">
-              <div className="post-card__link-icon">🔗</div>
-            </div>
-            <div className="post-card__link-content">
-              <span className="post-card__link-title">{post.link.title}</span>
-              <span className="post-card__link-desc">{post.link.description}</span>
-              <span className="post-card__link-url">{new URL(post.link.url).hostname}</span>
-            </div>
-          </a>
         )}
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
           <div className="post-card__tags">
-            {post.tags.map(tag => (
-              <a key={tag} href="#" className="post-card__tag">{tag}</a>
-            ))}
+            {post.tags.map(tag => {
+              const tagName = typeof tag === 'string' ? tag : (tag.name || tag.slug);
+              return (
+                <a key={tagName} href="#" className="post-card__tag">#{tagName}</a>
+              );
+            })}
           </div>
         )}
 
@@ -153,11 +255,15 @@ export default function PostCard({ post, className = '' }) {
         <div className="post-card__actions">
           <button className="post-card__action">
             <CommentIcon />
-            <span>{formatNumber(post.stats.comments)}</span>
+            <span>{formatNumber(commentsCount)}</span>
           </button>
-          <button className="post-card__action post-card__action--repost">
+          <button 
+            className={`post-card__action post-card__action--repost ${reposting ? 'post-card__action--loading' : ''}`}
+            onClick={handleRepost}
+            disabled={reposting}
+          >
             <RepostIcon />
-            <span>{formatNumber(post.stats.reposts)}</span>
+            <span>{formatNumber(repostsCount)}</span>
           </button>
           <button 
             className={`post-card__action post-card__action--like ${liked ? 'post-card__action--liked' : ''}`}
@@ -168,7 +274,7 @@ export default function PostCard({ post, className = '' }) {
           </button>
           <button 
             className={`post-card__action ${bookmarked ? 'post-card__action--bookmarked' : ''}`}
-            onClick={() => setBookmarked(!bookmarked)}
+            onClick={handleBookmark}
           >
             <BookmarkIcon filled={bookmarked} />
           </button>

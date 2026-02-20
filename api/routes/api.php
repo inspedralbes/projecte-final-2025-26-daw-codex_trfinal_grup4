@@ -72,6 +72,9 @@ Route::get('/users/{user}/following', [FollowController::class, 'following']);
 // Search (public)
 Route::get('/search', [SearchController::class, 'index']);
 
+// Leaderboard (public)
+Route::get('/leaderboard', [ProfileController::class, 'leaderboard']);
+
 // Centers (US#8) – public listing (active only), admins see all with filters
 Route::get('/centers', [CenterController::class, 'index']);
 Route::get('/centers/{center}', [CenterController::class, 'show']);

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useSocket } from '@/context/SocketContext';
 import './Notifications.css';
 
 // Notification Icons
@@ -58,97 +60,52 @@ const CheckIcon = () => (
   </svg>
 );
 
-// Mock notifications
-const mockNotifications = [
-  {
-    id: 1,
-    type: 'school',
-    title: 'Nuevo anuncio del centro',
-    message: 'Las fechas de los exámenes finales de M06 ya están disponibles.',
-    timestamp: 'Hace 10 min',
-    read: false,
-    center: 'IES Jaume Balmes'
-  },
-  {
-    id: 2,
-    type: 'like',
-    user: { name: 'Laura García', handle: '@lauradev', avatar: 'laura' },
-    message: 'le gustó tu snippet de Docker',
-    timestamp: 'Hace 25 min',
-    read: false
-  },
-  {
-    id: 3,
-    type: 'answer',
-    user: { name: 'Jordi Mas', handle: '@jordi_code', avatar: 'jordi' },
-    message: 'respondió tu duda sobre JWT',
-    preview: '"Para refrescar el token puedes usar un middleware que..."',
-    timestamp: 'Hace 1h',
-    read: false
-  },
-  {
-    id: 4,
-    type: 'follow',
-    user: { name: 'Anna Puig', handle: '@annapuig', avatar: 'anna', badge: '2DAW' },
-    message: 'empezó a seguirte',
-    timestamp: 'Hace 2h',
-    read: true
-  },
-  {
-    id: 5,
-    type: 'mention',
-    user: { name: 'Marc Serra', handle: '@marcserra', avatar: 'marc' },
-    message: 'te mencionó en un post',
-    preview: '"@marcperez tienes razón, el hook useEffect..."',
-    timestamp: 'Hace 3h',
-    read: true
-  },
-  {
-    id: 6,
-    type: 'repost',
-    user: { name: 'Elena Ruiz', handle: '@elena_dev', avatar: 'elena' },
-    message: 'repostó tu snippet',
-    timestamp: 'Hace 5h',
-    read: true
-  },
-  {
-    id: 7,
-    type: 'snippet-saved',
-    user: { name: 'Pau Ferrer', handle: '@pauferrer', avatar: 'pau' },
-    message: 'guardó tu snippet "Custom Hook useDebounce"',
-    timestamp: 'Ayer',
-    read: true
-  },
-  {
-    id: 8,
-    type: 'accepted',
-    message: 'Tu respuesta fue marcada como solución',
-    preview: 'Duda: "¿Cómo optimizar consultas en Laravel?"',
-    points: 15,
-    timestamp: 'Ayer',
-    read: true
-  },
-  {
-    id: 9,
-    type: 'school',
-    title: 'Entrega disponible',
-    message: 'Ya puedes entregar la práctica del módulo M07. Fecha límite: 15 Ene.',
-    timestamp: 'Hace 2 días',
-    read: true,
-    center: 'IES Jaume Balmes'
-  },
-  {
-    id: 10,
-    type: 'milestone',
-    message: '¡Has alcanzado 500 puntos!',
-    description: 'Sigue compartiendo y ayudando a la comunidad.',
-    timestamp: 'Hace 3 días',
-    read: true
-  }
-];
+const LoadingSpinner = () => (
+  <div className="notif__spinner">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
+      <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/>
+    </svg>
+  </div>
+);
+
+// Map API notification types to icon types
+const mapNotificationType = (type) => {
+  const typeMap = {
+    'like': 'like',
+    'comment': 'comment',
+    'reply': 'answer',
+    'follow': 'follow',
+    'mention': 'mention',
+    'repost': 'repost',
+    'solution': 'accepted',
+    'center': 'school',
+    'milestone': 'milestone',
+    'bookmark': 'snippet-saved'
+  };
+  return typeMap[type] || 'comment';
+};
+
+// Format timestamp to relative time
+const formatTimestamp = (dateString) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Ahora';
+  if (diffMins < 60) return `Hace ${diffMins} min`;
+  if (diffHours < 24) return `Hace ${diffHours}h`;
+  if (diffDays === 1) return 'Ayer';
+  if (diffDays < 7) return `Hace ${diffDays} días`;
+  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+};
 
 const getNotificationIcon = (type) => {
-  switch (type) {
+  const mappedType = mapNotificationType(type);
+  switch (mappedType) {
     case 'like': return <HeartIcon />;
     case 'comment':
     case 'answer': return <CommentIcon />;
@@ -164,7 +121,8 @@ const getNotificationIcon = (type) => {
 };
 
 const getIconClass = (type) => {
-  switch (type) {
+  const mappedType = mapNotificationType(type);
+  switch (mappedType) {
     case 'like': return 'notif__icon--like';
     case 'follow': return 'notif__icon--follow';
     case 'mention': return 'notif__icon--mention';
@@ -178,7 +136,25 @@ const getIconClass = (type) => {
 
 export default function Notifications() {
   const [filter, setFilter] = useState('all');
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const { 
+    notifications, 
+    unreadCount, 
+    loading, 
+    error, 
+    markAsRead, 
+    markAllAsRead, 
+    deleteNotification,
+    addNotification 
+  } = useNotifications();
+  const { onNewNotification } = useSocket();
+
+  // Listen for real-time notifications
+  useEffect(() => {
+    const unsubscribe = onNewNotification((newNotif) => {
+      addNotification(newNotif);
+    });
+    return unsubscribe;
+  }, [onNewNotification, addNotification]);
 
   const filters = [
     { id: 'all', label: 'Todo' },
@@ -187,19 +163,64 @@ export default function Notifications() {
     { id: 'code', label: 'Código' }
   ];
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-
   const filteredNotifications = notifications.filter(n => {
+    const mappedType = mapNotificationType(n.type);
     if (filter === 'all') return true;
-    if (filter === 'social') return ['like', 'follow', 'repost', 'mention'].includes(n.type);
-    if (filter === 'school') return n.type === 'school';
-    if (filter === 'code') return ['answer', 'snippet-saved', 'accepted'].includes(n.type);
+    if (filter === 'social') return ['like', 'follow', 'repost', 'mention'].includes(mappedType);
+    if (filter === 'school') return mappedType === 'school';
+    if (filter === 'code') return ['answer', 'snippet-saved', 'accepted', 'comment'].includes(mappedType);
     return true;
   });
 
-  const markAllRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllAsRead();
+    } catch (err) {
+      console.error('Error marking all as read:', err);
+    }
   };
+
+  const handleNotificationClick = async (notif) => {
+    if (!notif.read_at) {
+      try {
+        await markAsRead(notif.id);
+      } catch (err) {
+        console.error('Error marking as read:', err);
+      }
+    }
+    // TODO: Navigate to relevant content based on notification type
+  };
+
+  if (loading) {
+    return (
+      <div className="notifications">
+        <header className="notif__header">
+          <div className="notif__header-top">
+            <h1 className="notif__title">Notificaciones</h1>
+          </div>
+        </header>
+        <div className="notif__loading">
+          <LoadingSpinner />
+          <p>Cargando notificaciones...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="notifications">
+        <header className="notif__header">
+          <div className="notif__header-top">
+            <h1 className="notif__title">Notificaciones</h1>
+          </div>
+        </header>
+        <div className="notif__error">
+          <p>Error al cargar notificaciones: {error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="notifications">
@@ -212,7 +233,7 @@ export default function Notifications() {
           )}
         </div>
         {unreadCount > 0 && (
-          <button className="notif__mark-read" onClick={markAllRead}>
+          <button className="notif__mark-read" onClick={handleMarkAllRead}>
             Marcar todo como leído
           </button>
         )}
@@ -233,63 +254,73 @@ export default function Notifications() {
 
       {/* Notifications List */}
       <div className="notif__list">
-        {filteredNotifications.map(notif => (
-          <article
-            key={notif.id}
-            className={`notif__item ${!notif.read ? 'notif__item--unread' : ''}`}
-          >
-            <div className={`notif__icon ${getIconClass(notif.type)}`}>
-              {getNotificationIcon(notif.type)}
-            </div>
-
-            <div className="notif__content">
-              {notif.user && (
-                <div className="notif__user">
-                  <img
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${notif.user.avatar}`}
-                    alt={notif.user.name}
-                    className="notif__avatar"
-                  />
-                </div>
-              )}
-
-              <div className="notif__body">
-                {notif.type === 'school' ? (
-                  <>
-                    <span className="notif__center">{notif.center}</span>
-                    <p className="notif__headline">{notif.title}</p>
-                    <p className="notif__text">{notif.message}</p>
-                  </>
-                ) : notif.type === 'milestone' ? (
-                  <>
-                    <p className="notif__headline">{notif.message}</p>
-                    <p className="notif__text">{notif.description}</p>
-                  </>
-                ) : notif.type === 'accepted' ? (
-                  <>
-                    <p className="notif__headline">{notif.message}</p>
-                    <p className="notif__preview">{notif.preview}</p>
-                    <span className="notif__points">+{notif.points} puntos</span>
-                  </>
-                ) : (
-                  <>
-                    <p className="notif__headline">
-                      <strong>{notif.user?.name}</strong> {notif.message}
-                    </p>
-                    {notif.preview && (
-                      <p className="notif__preview">{notif.preview}</p>
-                    )}
-                    {notif.user?.badge && (
-                      <span className="notif__user-badge">{notif.user.badge}</span>
-                    )}
-                  </>
-                )}
+        {filteredNotifications.map(notif => {
+          const mappedType = mapNotificationType(notif.type);
+          const isRead = !!notif.read_at;
+          
+          return (
+            <article
+              key={notif.id}
+              className={`notif__item ${!isRead ? 'notif__item--unread' : ''}`}
+              onClick={() => handleNotificationClick(notif)}
+            >
+              <div className={`notif__icon ${getIconClass(notif.type)}`}>
+                {getNotificationIcon(notif.type)}
               </div>
 
-              <span className="notif__time">{notif.timestamp}</span>
-            </div>
-          </article>
-        ))}
+              <div className="notif__content">
+                {notif.sender && (
+                  <div className="notif__user">
+                    <img
+                      src={notif.sender.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${notif.sender.username}`}
+                      alt={notif.sender.name}
+                      className="notif__avatar"
+                    />
+                  </div>
+                )}
+
+                <div className="notif__body">
+                  {mappedType === 'school' ? (
+                    <>
+                      <span className="notif__center">{notif.data?.center_name || 'Centro'}</span>
+                      <p className="notif__headline">{notif.data?.title || notif.title}</p>
+                      <p className="notif__text">{notif.message || notif.data?.message}</p>
+                    </>
+                  ) : mappedType === 'milestone' ? (
+                    <>
+                      <p className="notif__headline">{notif.message}</p>
+                      <p className="notif__text">{notif.data?.description}</p>
+                    </>
+                  ) : mappedType === 'accepted' ? (
+                    <>
+                      <p className="notif__headline">{notif.message}</p>
+                      {notif.data?.preview && (
+                        <p className="notif__preview">{notif.data.preview}</p>
+                      )}
+                      {notif.data?.points && (
+                        <span className="notif__points">+{notif.data.points} puntos</span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <p className="notif__headline">
+                        {notif.sender && <strong>{notif.sender.name}</strong>} {notif.message}
+                      </p>
+                      {notif.data?.preview && (
+                        <p className="notif__preview">{notif.data.preview}</p>
+                      )}
+                      {notif.sender?.badge && (
+                        <span className="notif__user-badge">{notif.sender.badge}</span>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                <span className="notif__time">{formatTimestamp(notif.created_at)}</span>
+              </div>
+            </article>
+          );
+        })}
       </div>
 
       {filteredNotifications.length === 0 && (

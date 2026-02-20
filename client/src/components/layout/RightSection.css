@@ -100,6 +100,25 @@
   background: var(--depth-2);
 }
 
+.widget__spinner {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-4);
+  color: var(--codex-teal);
+}
+
+.widget__spinner svg {
+  animation: spin 1s linear infinite;
+}
+
+.widget__empty {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--ink-tertiary);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
 /* ── Trend Item ───────────────────────────────────────────── */
 .trend-item {
   display: flex;
@@ -108,6 +127,11 @@
   padding: var(--space-3) var(--space-4);
   text-decoration: none;
   transition: background var(--transition-fast);
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
 }
 
 .trend-item:hover {
@@ -158,6 +182,11 @@
   padding: var(--space-3) var(--space-4);
   text-decoration: none;
   transition: background var(--transition-fast);
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
 }
 
 .user-item:hover {
@@ -218,6 +247,11 @@
   padding: var(--space-3) var(--space-4);
   text-decoration: none;
   transition: background var(--transition-fast);
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
 }
 
 .question-item:hover {

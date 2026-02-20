@@ -127,4 +127,50 @@ class ProfileController extends Controller
             'external_url'  => $user->external_url,
         ], 'Profile updated successfully');
     }
+
+    /**
+     * GET /api/leaderboard
+     * Top contributors ranked by reputation.
+     */
+    public function leaderboard(Request $request): JsonResponse
+    {
+        $limit = min($request->input('limit', 10), 50);
+
+        $users = User::withCount(['posts', 'comments', 'followers'])
+            ->with('center:id,name')
+            ->orderByDesc('posts_count')
+            ->take($limit)
+            ->get();
+
+        $leaderboard = $users->map(function ($user, $index) {
+            $reputation = $this->reputationService->calculateReputation($user);
+            $badge = $this->reputationService->getBadge($reputation);
+
+            return [
+                'rank'       => $index + 1,
+                'id'         => $user->id,
+                'name'       => $user->name,
+                'username'   => $user->username,
+                'avatar'     => $user->avatar,
+                'role'       => $user->role,
+                'center'     => $user->center?->name,
+                'score'      => $reputation,
+                'badge'      => $badge['emoji'] ?? '🔰',
+                'badge_name' => $badge['name'] ?? 'Novato',
+                'stats'      => [
+                    'posts'     => $user->posts_count,
+                    'comments'  => $user->comments_count,
+                    'followers' => $user->followers_count,
+                ],
+            ];
+        })->sortByDesc('score')->values();
+
+        // Re-rank after sorting by score
+        $leaderboard = $leaderboard->map(function ($user, $index) {
+            $user['rank'] = $index + 1;
+            return $user;
+        });
+
+        return $this->success($leaderboard, 'Leaderboard retrieved successfully');
+    }
 }

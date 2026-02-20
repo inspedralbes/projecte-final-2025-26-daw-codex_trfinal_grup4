@@ -68,3 +68,111 @@
   display: flex;
   flex-direction: column;
 }
+
+/* ── Loading State ────────────────────────────────────────── */
+.feed__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12);
+  color: var(--ink-tertiary);
+  gap: var(--space-4);
+}
+
+.feed__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-subtle);
+  border-top-color: var(--codex-teal);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Empty State ──────────────────────────────────────────── */
+.feed__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12);
+  text-align: center;
+}
+
+.feed__empty p {
+  font-size: var(--text-lg);
+  color: var(--ink-secondary);
+  margin: 0 0 var(--space-2);
+}
+
+.feed__empty span {
+  color: var(--ink-tertiary);
+  font-size: var(--text-sm);
+}
+
+/* ── Error State ──────────────────────────────────────────── */
+.feed__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  margin: var(--space-4);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-lg);
+  gap: var(--space-4);
+}
+
+.feed__error p {
+  color: #ef4444;
+  margin: 0;
+}
+
+.feed__error button {
+  padding: var(--space-2) var(--space-4);
+  background: var(--codex-teal);
+  color: var(--ink-inverse);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 500;
+  transition: background var(--transition-fast);
+}
+
+.feed__error button:hover {
+  background: var(--codex-teal-hover);
+}
+
+/* ── Load More ────────────────────────────────────────────── */
+.feed__load-more {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.feed__load-more-btn {
+  padding: var(--space-3) var(--space-6);
+  background: var(--depth-2);
+  color: var(--ink-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.feed__load-more-btn:hover:not(:disabled) {
+  background: var(--depth-3);
+  color: var(--ink-primary);
+  border-color: var(--codex-teal);
+}
+
+.feed__load-more-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
