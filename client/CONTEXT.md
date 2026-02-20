@@ -154,7 +154,7 @@
   - `feed/Feed.jsx` + CSS — Feed amb tabs (Para ti / Siguiendo / Dudas)
   - `feed/PostInput.jsx` + CSS — Editor de publicacions amb suport codi
   - `feed/PostCard.jsx` + CSS — Tarjeta de post amb syntax highlighting
-  - `profile/Profile.jsx` + CSS — Perfil developeramb tech stack i snippets
+  - `profile/Profile.jsx` + CSS — Perfil d'usuari minimalista
 - **Rutes noves:**
   - `/welcome` → Landing
   - `/center` → CenterHub
@@ -218,6 +218,32 @@
   5. On confirma → `POST /api/register` + `POST /api/center-requests` seqüencials
   6. Usuari redirigit a home amb missatge d'èxit
 
+### 2026-02-20 – Perfil minimalista + Layout full-width + Verificació email
+
+- **Autor:** @iker
+- **Perfil redissenyat (minimalista):**
+  - Reescrit `src/components/profile/Profile.jsx` — eliminat tot mock data, ara usa `useAuth()` per mostrar dades reals
+    - Mostra: nom, @username, rol (Estudiante/Profesor), centre (si té), email, data de registre
+    - Avatar generat amb DiceBear basat en username
+  - Reescrit `src/components/profile/Profile.css` — disseny centrat amb cover gradient, layout net i responsive
+- **Layout full-width:**
+  - Modificat `src/components/layout/MainLayout.css`:
+    - Eliminat `max-width: 1400px` i `margin: 0 auto` del `.app-layout` → ara ocupa tot l'ample del viewport
+    - Eliminat `max-width: var(--feed-width)` del `.main-content__container`
+- **Verificació email integrada:**
+  - Creat `src/pages/EmailVerification.jsx` + `.css` — pantalla de verificació pendent
+    - Mostra email de l'usuari, botó "Reenviar" amb cooldown de 60s
+    - Polling automàtic cada 5s via `refreshUser()` per detectar verificació
+    - Redirigeix a home automàticament quan email es verifica
+    - Botó de logout disponible
+  - Modificat `src/context/AuthContext.jsx`:
+    - Nou estat `emailVerified` — es sincronitza amb la resposta de `/me`, login, register
+    - Nou mètode `refreshUser()` — re-fetch `/me` per comprovar `email_verified`
+  - Modificat `src/router/index.jsx`:
+    - Nova guarda `VerifiedRoute` — bloqueja usuaris no verificats i redirigeix a `/verify-email`
+    - Nova ruta `/verify-email` → `EmailVerification` (protegida però no requereix verificació)
+- **Fix config mail backend:** `api/.env` corregit de `MAIL_MAILER=log` a `smtp`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025`
+
 ---
 
 ## 🎨 Estructura actual de components
@@ -238,11 +264,11 @@ src/
 │   │   ├── Sidebar.jsx / Sidebar.css       # Nav esquerra + Logout
 │   │   └── RightSection.jsx / RightSection.css # Widgets dreta
 │   ├── profile/
-│   │   └── Profile.jsx / Profile.css       # Perfil d'usuari
+│   │   └── Profile.jsx / Profile.css       # Perfil d'usuari (minimalista, dades reals)
 │   └── ui/
 │       └── Icons.jsx                # Icones SVG reutilitzables
 ├── context/
-│   └── AuthContext.jsx              # Provider auth global (login/register/logout)
+│   └── AuthContext.jsx              # Provider auth global (login/register/logout/emailVerified/refreshUser)
 ├── hooks/
 │   └── useAuth.js                   # Hook per consumir AuthContext
 ├── pages/
@@ -251,11 +277,12 @@ src/
 │   ├── Explore.jsx / Explore.css    # Cerca + Descobriment
 │   ├── Notifications.jsx / Notifications.css # Activitat
 │   ├── CenterHub.jsx / CenterHub.css # Hub institucional
+│   ├── EmailVerification.jsx / .css # Pantalla verificació email pendent
 │   ├── ProfilePage.jsx              # Wrapper per Profile
 │   ├── Messages.jsx                 # (Pendent)
 │   └── More.jsx                     # Menú addicional
 ├── router/
-│   └── index.jsx                    # Rutes protegides + públiques
+│   └── index.jsx                    # Rutes protegides + públiques + VerifiedRoute
 ├── services/
 │   ├── api.js                       # Client HTTP (amb Bearer token auto + upload)
 │   └── mockApi.js                   # Dades de prova
