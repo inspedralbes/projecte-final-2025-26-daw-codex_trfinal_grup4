@@ -6,8 +6,6 @@
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr var(--widget-width);
   min-height: 100vh;
-  max-width: var(--layout-max-width);
-  margin: 0 auto;
 }
 
 /* ── Main Content Area ────────────────────────────────────── */
@@ -18,8 +16,7 @@
 }
 
 .main-content__container {
-  max-width: var(--feed-width);
-  margin: 0 auto;
+  width: 100%;
 }
 
 /* ── Responsive ───────────────────────────────────────────── */

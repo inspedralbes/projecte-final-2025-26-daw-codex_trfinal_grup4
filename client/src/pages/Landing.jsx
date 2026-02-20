@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { PASSWORD_REQUIREMENTS } from "@/context/AuthContext";
+import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal";
 import "./Landing.css";
 
 // Icons as inline SVGs for a minimal approach
@@ -102,7 +103,8 @@ const XIcon = () => (
 );
 
 export default function Landing() {
-  const { login, register, authMessage, clearAuthMessage } = useAuth();
+  const { login, register, registerWithCenterRequest, checkDomain, authMessage, clearAuthMessage } =
+    useAuth();
   const navigate = useNavigate();
 
   // State
@@ -118,9 +120,14 @@ export default function Landing() {
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [showPasswordReqs, setShowPasswordReqs] = useState(false);
 
-  // School detection
-  const [isStudentEmail, setIsStudentEmail] = useState(false);
-  const [detectedSchool, setDetectedSchool] = useState("");
+  // School detection (real API)
+  const [domainInfo, setDomainInfo] = useState(null); // { has_center, center_name, can_request, ... }
+  const [checkingDomain, setCheckingDomain] = useState(false);
+  const debounceRef = useRef(null);
+
+  // Teacher verification modal
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [pendingRegistrationData, setPendingRegistrationData] = useState(null);
 
   // Auto-clear success message after 4s
   useEffect(() => {
@@ -139,13 +146,19 @@ export default function Landing() {
     const value = e.target.value;
     setEmail(value);
 
-    // Simulate detection (Backend does real validation)
-    if (value.includes("@alu.") || value.includes("@edu.") || value.includes("inspedralbes.cat")) {
-      setIsStudentEmail(true);
-      setDetectedSchool("Centro Educativo Detectado");
-    } else {
-      setIsStudentEmail(false);
-      setDetectedSchool("");
+    // Reset domain info when email changes
+    setDomainInfo(null);
+
+    // Debounced check-domain API call (only in register mode)
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (!isLogin && value.includes("@") && value.split("@")[1]?.includes(".")) {
+      debounceRef.current = setTimeout(async () => {
+        setCheckingDomain(true);
+        const result = await checkDomain(value);
+        setDomainInfo(result);
+        setCheckingDomain(false);
+      }, 600);
     }
   };
 
@@ -186,13 +199,24 @@ export default function Landing() {
         // Generate username from email part
         const username = email.split("@")[0] + Math.floor(Math.random() * 1000);
 
-        const result = await register({
+        const userData = {
           name,
           email,
           username,
           password,
           password_confirmation: passwordConfirmation,
-        });
+        };
+
+        // If domain has no center and can request → show verification modal
+        if (domainInfo && domainInfo.can_request) {
+          setPendingRegistrationData(userData);
+          setShowVerificationModal(true);
+          setLoading(false);
+          return;
+        }
+
+        // Normal registration (domain has center, or no domain info)
+        const result = await register(userData);
 
         if (result.success) {
           setSuccessMsg("🎉 ¡Cuenta creada correctamente!");
@@ -208,12 +232,36 @@ export default function Landing() {
     }
   };
 
+  // Handle verification modal confirm
+  const handleVerificationConfirm = async (centerData) => {
+    setLoading(true);
+    setError("");
+
+    const result = await registerWithCenterRequest(pendingRegistrationData, centerData);
+
+    if (result.success) {
+      setShowVerificationModal(false);
+      setSuccessMsg("🎉 ¡Cuenta creada! Tu solicitud de centro está en revisión.");
+      setTimeout(() => navigate("/"), 1200);
+    } else {
+      setError(result.message);
+    }
+
+    setLoading(false);
+  };
+
+  const handleVerificationCancel = () => {
+    setShowVerificationModal(false);
+    setPendingRegistrationData(null);
+  };
+
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setError("");
     setSuccessMsg("");
     setPassword("");
     setPasswordConfirmation("");
+    setDomainInfo(null);
     clearAuthMessage();
   };
 
@@ -320,15 +368,31 @@ export default function Landing() {
                   type="email"
                   id="email"
                   required
-                  className={`auth-card__input ${isStudentEmail && !isLogin ? "auth-card__input--verified" : ""}`}
+                  className={`auth-card__input ${!isLogin && domainInfo?.has_center ? "auth-card__input--verified" : ""}`}
                   placeholder="tu.nombre@alu.iesjaume.es"
                   value={email}
                   onChange={handleEmailChange}
                 />
-                {!isLogin && isStudentEmail && (
-                  <div className="auth-card__verified">
+                {!isLogin && checkingDomain && (
+                  <div className="auth-card__verified" style={{ color: "var(--ink-tertiary)" }}>
+                    <span>Comprobando dominio...</span>
+                  </div>
+                )}
+                {!isLogin && domainInfo && !checkingDomain && (
+                  <div
+                    className="auth-card__verified"
+                    style={domainInfo.has_center ? {} : { color: "var(--codex-violet-light)" }}
+                  >
                     <ShieldIcon />
-                    <span>{detectedSchool} detectado - Acceso completo</span>
+                    <span>
+                      {domainInfo.has_center
+                        ? `${domainInfo.center_name || "Centro"} detectado – Acceso completo`
+                        : domainInfo.is_pending
+                          ? "Centro en revisión – Tu solicitud está pendiente"
+                          : domainInfo.can_request
+                            ? "No hay centro para este dominio – Se te pedirá verificación"
+                            : "Dominio no reconocido"}
+                    </span>
                   </div>
                 )}
               </div>
@@ -449,6 +513,16 @@ export default function Landing() {
           </p>
         </div>
       </footer>
+
+      {/* Teacher Verification Modal */}
+      {showVerificationModal && (
+        <TeacherVerificationModal
+          email={email}
+          loading={loading}
+          onConfirm={handleVerificationConfirm}
+          onCancel={handleVerificationCancel}
+        />
+      )}
     </div>
   );
 }

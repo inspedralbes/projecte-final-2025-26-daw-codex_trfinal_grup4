@@ -192,6 +192,32 @@
 - Creat `index.html` base
 - Creat `src/main.jsx` amb ReactDOM.createRoot
 
+### 2026-02-20 – Verificació de Professor al Registre (Modal)
+
+- **Autor:** @iker
+- **Verificació de professor:**
+  - Creat `src/components/auth/TeacherVerificationModal.jsx` + `.css` — Modal amb upload de justificant
+    - Camps: nom complet, nom del centre, ciutat (opcional), justificant (PDF/JPG/PNG, max 5MB)
+    - Drag & drop + validació de fitxer + preview amb mida
+    - Estil glassmorphism Codex amb animacions d'entrada
+  - Modificat `src/services/api.js`:
+    - Nou mètode `upload(endpoint, formData)` per a peticions `multipart/form-data` (no estableix Content-Type)
+  - Modificat `src/context/AuthContext.jsx`:
+    - Nou mètode `checkDomain(email)` — crida `POST /api/check-domain` per detectar centre
+    - Nou mètode `registerWithCenterRequest(userData, centerRequestData)` — registra + envia sol·licitud de centre
+  - Modificat `src/pages/Landing.jsx`:
+    - Substituïda detecció de domini hardcoded per crida real a `POST /api/check-domain` (debounced 600ms)
+    - Mostra missatges dinàmics: centre detectat, sol·licitud pendent, o verificació requerida
+    - Si `can_request=true` al registrar → mostra `TeacherVerificationModal`
+    - Modal confirma → `registerWithCenterRequest()` registra usuari + envia center request amb justificant
+- **Flux complet:**
+  1. Usuari escriu email al formulari de registre → frontend crida check-domain (debounced)
+  2. Si domini té centre actiu → mostra "Centro detectado" + registre normal com a student
+  3. Si domini no té centre (`can_request=true`) → mostra avís + al enviar registre apareix modal
+  4. Modal demana: nom complet, nom del centre, justificant (fitxer)
+  5. On confirma → `POST /api/register` + `POST /api/center-requests` seqüencials
+  6. Usuari redirigit a home amb missatge d'èxit
+
 ---
 
 ## 🎨 Estructura actual de components
@@ -201,7 +227,8 @@ src/
 ├── components/
 │   ├── auth/
 │   │   ├── ProtectedRoute.jsx       # Redirigeix si no autenticat
-│   │   └── PublicOnlyRoute.jsx      # Redirigeix si ja autenticat
+│   │   ├── PublicOnlyRoute.jsx      # Redirigeix si ja autenticat
+│   │   ├── TeacherVerificationModal.jsx / .css # Modal verificació professor
 │   ├── feed/
 │   │   ├── Feed.jsx / Feed.css         # Llista de posts amb tabs
 │   │   ├── PostCard.jsx / PostCard.css # Tarjeta de publicació
@@ -230,7 +257,7 @@ src/
 ├── router/
 │   └── index.jsx                    # Rutes protegides + públiques
 ├── services/
-│   ├── api.js                       # Client HTTP (amb Bearer token auto)
+│   ├── api.js                       # Client HTTP (amb Bearer token auto + upload)
 │   └── mockApi.js                   # Dades de prova
 └── styles/
     ├── index.css                    # Entry point

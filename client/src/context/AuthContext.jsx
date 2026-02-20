@@ -13,6 +13,7 @@ export const PASSWORD_REQUIREMENTS = [
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Feedback message state: { type: 'success' | 'error' | 'info', text: string }
@@ -33,12 +34,15 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const response = await api.get("/me");
-          const userData = response.data?.user || response.user || response.data;
+          const data = response.data || response;
+          const userData = data.user || data;
           setUser(userData);
+          setEmailVerified(data.email_verified ?? !!userData.email_verified_at);
         } catch (error) {
           console.error("Session expired or invalid token", error);
           localStorage.removeItem("token");
           setUser(null);
+          setEmailVerified(false);
         }
       }
       setLoading(false);
@@ -66,6 +70,7 @@ export const AuthProvider = ({ children }) => {
 
       // Update state
       setUser(userData);
+      setEmailVerified(data.email_verified ?? !!userData.email_verified_at);
 
       setAuthMessage({
         type: "success",
@@ -102,6 +107,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("token", token);
       setUser(newUser);
+      setEmailVerified(data.email_verified ?? false);
 
       setAuthMessage({
         type: "success",
@@ -129,7 +135,84 @@ export const AuthProvider = ({ children }) => {
     } finally {
       localStorage.removeItem("token");
       setUser(null);
+      setEmailVerified(false);
       setAuthMessage({ type: "info", text: "Sesión cerrada correctamente." });
+    }
+  };
+
+  /**
+   * Check if an email domain has a registered center.
+   * Returns: { has_center, center_name, center_city, is_pending, can_request }
+   */
+  const checkDomain = async (email) => {
+    try {
+      const response = await api.post("/check-domain", { email });
+      return response.data || response;
+    } catch (error) {
+      console.error("Check domain error", error);
+      return { has_center: false, can_request: false };
+    }
+  };
+
+  /**
+   * Register a new user AND submit a center request in one flow.
+   * 1. Registers the user normally → gets token
+   * 2. Uses the token to upload the center request with justificante
+   */
+  const registerWithCenterRequest = async (userData, centerRequestData) => {
+    try {
+      // Step 1: Register the user
+      const regResponse = await api.post("/register", userData);
+      const data = regResponse.data || regResponse;
+      const token = data.token;
+      const newUser = data.user;
+
+      if (!token) {
+        setAuthMessage({ type: "error", text: "Error: no se recibió token de autenticación." });
+        return { success: false, message: "No token received" };
+      }
+
+      // Save token so the next request is authenticated
+      localStorage.setItem("token", token);
+      setUser(newUser);
+
+      // Step 2: Submit center request with file
+      const formData = new FormData();
+      formData.append("center_name", centerRequestData.center_name);
+      formData.append("domain", centerRequestData.domain);
+      formData.append("full_name", centerRequestData.full_name);
+      formData.append("justificante", centerRequestData.justificante);
+      if (centerRequestData.city) {
+        formData.append("city", centerRequestData.city);
+      }
+
+      await api.upload("/center-requests", formData);
+
+      setAuthMessage({
+        type: "success",
+        text: "🎉 ¡Cuenta creada! Tu solicitud de centro ha sido enviada. Un administrador la revisará pronto.",
+      });
+      return { success: true };
+    } catch (error) {
+      console.error("Register with center request error", error);
+      const errorMsg = parseApiError(error, "Error en el registro. Inténtalo de nuevo.");
+      setAuthMessage({ type: "error", text: errorMsg });
+      return { success: false, message: errorMsg };
+    }
+  };
+
+  /**
+   * Re-fetch user data from /me to check if email has been verified.
+   */
+  const refreshUser = async () => {
+    try {
+      const response = await api.get("/me");
+      const data = response.data || response;
+      const userData = data.user || data;
+      setUser(userData);
+      setEmailVerified(data.email_verified ?? !!userData.email_verified_at);
+    } catch (error) {
+      console.error("refreshUser failed", error);
     }
   };
 
@@ -139,9 +222,13 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
+    emailVerified,
     login,
     register,
+    registerWithCenterRequest,
+    checkDomain,
     logout,
+    refreshUser,
     isAuthenticated: !!user,
     authMessage,
     setAuthMessage,

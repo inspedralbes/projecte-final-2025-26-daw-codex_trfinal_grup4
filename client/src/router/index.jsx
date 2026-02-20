@@ -17,6 +17,7 @@ import Messages from "@/pages/Messages";
 import More from "@/pages/More";
 import Landing from "@/pages/Landing";
 import CenterHub from "@/pages/CenterHub";
+import EmailVerification from "@/pages/EmailVerification";
 
 // Layouts
 import MainLayout from "@/components/layout/MainLayout";
@@ -27,6 +28,14 @@ const PublicOnlyRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (user) return <Navigate to="/" replace />;
+  return children;
+};
+
+// Require verified email – redirect to verification screen if not verified
+const VerifiedRoute = ({ children }) => {
+  const { user, emailVerified, loading } = useAuth();
+  if (loading) return null;
+  if (user && !emailVerified) return <Navigate to="/verify-email" replace />;
   return children;
 };
 
@@ -43,9 +52,20 @@ export default function AppRouter() {
         }
       />
 
-      {/* Authenticated routes */}
+      {/* Email verification screen (authenticated but unverified) */}
       <Route element={<ProtectedRoute />}>
-        <Route element={<MainLayout />}>
+        <Route path="/verify-email" element={<EmailVerification />} />
+      </Route>
+
+      {/* Authenticated + verified routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route
+          element={
+            <VerifiedRoute>
+              <MainLayout />
+            </VerifiedRoute>
+          }
+        >
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/notifications" element={<Notifications />} />

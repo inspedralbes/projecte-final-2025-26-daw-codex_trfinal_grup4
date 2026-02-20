@@ -58,6 +58,32 @@ const api = {
   patch: (endpoint, body, options = {}) =>
     request(endpoint, { ...options, method: "PATCH", body: JSON.stringify(body) }),
   delete: (endpoint, options = {}) => request(endpoint, { ...options, method: "DELETE" }),
+
+  /**
+   * Upload files via FormData (multipart/form-data).
+   * Do NOT set Content-Type – the browser sets it automatically with the boundary.
+   */
+  upload: (endpoint, formData, options = {}) => {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const token = localStorage.getItem("token");
+
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
+      body: formData,
+      ...options,
+    }).then(async (response) => {
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw error;
+      }
+      return response.json();
+    });
+  },
 };
 
 export default api;
