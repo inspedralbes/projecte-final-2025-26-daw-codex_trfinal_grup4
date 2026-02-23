@@ -229,7 +229,10 @@ export default function Sidebar() {
         <div className="sidebar__user">
           <div className="sidebar__user-avatar">
             <img
-              src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=developer"}
+              src={
+                user?.avatar ||
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || "developer"}`
+              }
               alt="Avatar"
             />
           </div>

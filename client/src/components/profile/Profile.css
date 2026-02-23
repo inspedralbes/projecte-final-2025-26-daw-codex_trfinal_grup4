@@ -342,8 +342,278 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Social Links ──────────────────────────────────────── */
+.profile__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.profile__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--depth-2);
+  color: var(--codex-teal);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.profile__link:hover {
+  background: rgba(20, 184, 166, 0.12);
+}
+
+/* ── Edit Profile Modal ────────────────────────────────── */
+.edit-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  animation: editModalFadeIn 0.2s ease-out;
+}
+
+.edit-modal {
+  background: var(--depth-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+  animation: editModalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.edit-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.edit-modal__title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--ink-primary);
+  margin: 0;
+}
+
+.edit-modal__close {
+  background: none;
+  border: none;
+  color: var(--ink-tertiary);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+}
+
+.edit-modal__close:hover {
+  background: var(--depth-2);
+  color: var(--ink-primary);
+}
+
+.edit-modal__form {
+  padding: var(--space-5) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.edit-modal__avatar-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-2);
+}
+
+.edit-modal__avatar {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  border: 3px solid var(--codex-teal);
+}
+
+.edit-modal__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.edit-modal__avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.edit-modal__avatar:hover .edit-modal__avatar-overlay {
+  opacity: 1;
+}
+
+.edit-modal__file-input {
+  display: none;
+}
+
+.edit-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  position: relative;
+}
+
+.edit-modal__label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.edit-modal__input,
+.edit-modal__textarea {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--depth-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--ink-primary);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  transition: all var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.edit-modal__input:focus,
+.edit-modal__textarea:focus {
+  outline: none;
+  border-color: var(--codex-teal);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+.edit-modal__input::placeholder,
+.edit-modal__textarea::placeholder {
+  color: var(--ink-quaternary);
+}
+
+.edit-modal__textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.edit-modal__char-count {
+  position: absolute;
+  bottom: var(--space-2);
+  right: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--ink-quaternary);
+}
+
+.edit-modal__error {
+  color: var(--codex-rose, #f43f5e);
+  font-size: var(--text-sm);
+  background: rgba(244, 63, 94, 0.08);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  margin: 0;
+}
+
+.edit-modal__actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.edit-modal__cancel {
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.edit-modal__cancel:hover {
+  background: var(--depth-2);
+}
+
+.edit-modal__save {
+  padding: var(--space-2) var(--space-6);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  background: var(--codex-teal);
+  border: none;
+  color: var(--depth-1);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.edit-modal__save:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+}
+
+.edit-modal__save:disabled,
+.edit-modal__cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes editModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes editModalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ── Responsive – Mobile ────────────────────────────────── */
@@ -351,13 +621,27 @@
   .profile__stats {
     gap: var(--space-4);
   }
-  
+
   .profile__stat-value {
     font-size: 1rem;
   }
-  
+
   .profile__tab {
     font-size: 0.8rem;
     padding: var(--space-3);
+  }
+
+  .edit-modal {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: var(--radius-lg);
+  }
+
+  .edit-modal__form {
+    padding: var(--space-4);
+  }
+
+  .edit-modal__header {
+    padding: var(--space-4);
   }
 }

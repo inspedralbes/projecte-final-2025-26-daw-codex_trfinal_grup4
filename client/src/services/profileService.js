@@ -23,7 +23,7 @@ const profileService = {
    */
   getUserPosts: async (usernameOrId, params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    const endpoint = queryString 
+    const endpoint = queryString
       ? `/profile/${usernameOrId}/posts?${queryString}`
       : `/profile/${usernameOrId}/posts`;
     return api.get(endpoint);
@@ -49,7 +49,10 @@ const profileService = {
    * @returns {Promise<Object>} Updated user
    */
   updateProfileWithAvatar: async (formData) => {
-    return api.upload("/profile", formData, { method: "POST" });
+    // Laravel doesn't support PUT with multipart/form-data natively.
+    // Use method spoofing: send POST but include _method=PUT in the FormData.
+    formData.append("_method", "PUT");
+    return api.upload("/profile", formData);
   },
 
   /**

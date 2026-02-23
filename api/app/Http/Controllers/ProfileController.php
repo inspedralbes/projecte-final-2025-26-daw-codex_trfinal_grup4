@@ -99,6 +99,7 @@ class ProfileController extends Controller
     /**
      * PUT /api/profile
      * Update authenticated user's profile.
+     * Accepts both JSON (text fields only) and multipart/form-data (with avatar file).
      */
     public function update(Request $request): JsonResponse
     {
@@ -107,13 +108,32 @@ class ProfileController extends Controller
         $validated = $request->validate([
             'name'          => 'sometimes|string|max:255',
             'bio'           => 'sometimes|nullable|string|max:1000',
-            'avatar'        => 'sometimes|nullable|string|max:500',
+            'avatar'        => 'sometimes|nullable|image|max:5120', // 5 MB max when file
             'linkedin_url'  => 'sometimes|nullable|url|max:500',
             'portfolio_url' => 'sometimes|nullable|url|max:500',
             'external_url'  => 'sometimes|nullable|url|max:500',
         ]);
 
+        // Handle avatar file upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if it was a locally stored file
+            if ($user->avatar && str_contains($user->avatar, '/storage/avatars/')) {
+                $oldPath = str_replace('/storage/', '', parse_url($user->avatar, PHP_URL_PATH));
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+
+            // Store new avatar in public/avatars
+            $path = $request->file('avatar')->store('avatars', 'public');
+
+            // Build the full public URL
+            $validated['avatar'] = url('storage/' . $path);
+        } else {
+            // If avatar is not a file, remove it from validated to avoid overwriting with null
+            unset($validated['avatar']);
+        }
+
         $user->update($validated);
+        $user->refresh();
 
         return $this->success([
             'id'            => $user->id,
@@ -127,6 +147,7 @@ class ProfileController extends Controller
             'external_url'  => $user->external_url,
         ], 'Profile updated successfully');
     }
+
 
     /**
      * GET /api/leaderboard
