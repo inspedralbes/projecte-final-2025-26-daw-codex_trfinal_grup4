@@ -85,6 +85,11 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.13.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.x",
+    "@testing-library/react": "^16.x",
+    "jsdom": "^26.x"
   }
 }
 ```
@@ -95,6 +100,7 @@
 - Host: `0.0.0.0` (obligatori per Docker)
 - Port: `5173` (strictPort)
 - Watch: polling activat (obligatori per HMR dins Docker)
+- **Testing**: Vitest configurat amb `jsdom` i globals.
 
 ### Variables d'entorn disponibles
 
@@ -106,6 +112,19 @@
 ---
 
 ## 📅 Registre de canvis
+
+### 2026-02-23 – Sustitució del Logo (XC) i Entorn de Testing
+
+- **Autor:** @iker
+- **Identitat Visual:**
+  - Substituït el logo anterior (forma de terminal) pel nou logo "XC" en format imatge.
+  - Actualitzat `Sidebar.jsx` i el footer de `Landing.jsx` per utilitzar `/logo-transparent.png`.
+- **Testing (Vitest):**
+  - Configurat entorn de proves amb **Vitest** + **React Testing Library** + **jsdom**.
+  - Actualitzat `vite.config.js` amb bloc `test` i setup de globals i jsdom.
+  - Creat `src/test/setup.js` per a la configuració global de tests (`jest-dom`).
+  - Creat `src/components/layout/Sidebar.test.jsx` — Prova automatitzada per verificar la correcta visualització del logo.
+- **Accions:** Instal·lats paquets `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`.
 
 ### 2026-02-19 – Sistema d'autenticació complet + Feedback UX
 

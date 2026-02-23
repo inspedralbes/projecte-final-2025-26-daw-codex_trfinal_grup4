@@ -116,22 +116,6 @@ const MoreIcon = () => (
   </svg>
 );
 
-const TerminalIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="4 17 10 11 4 5" />
-    <line x1="12" y1="19" x2="20" y2="19" />
-  </svg>
-);
-
 const PenIcon = () => (
   <svg
     width="20"
@@ -193,7 +177,12 @@ export default function Sidebar() {
         {/* Logo */}
         <NavLink to="/" className="sidebar__logo">
           <span className="sidebar__logo-icon">
-            <TerminalIcon />
+            <img
+              src="/logo-transparent.png"
+              alt="XC Logo"
+              className="sidebar__logo-img"
+              style={{ width: "32px", height: "32px", objectFit: "contain" }}
+            />
           </span>
           <span className="sidebar__logo-text">Codex</span>
         </NavLink>

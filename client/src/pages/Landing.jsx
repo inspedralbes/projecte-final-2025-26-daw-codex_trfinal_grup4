@@ -55,22 +55,6 @@ const ShieldIcon = () => (
   </svg>
 );
 
-const TerminalIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="4 17 10 11 4 5" />
-    <line x1="12" y1="19" x2="20" y2="19" />
-  </svg>
-);
-
 const CheckIcon = () => (
   <svg
     width="14"
@@ -504,7 +488,12 @@ export default function Landing() {
         <div className="landing__footer-container">
           <div className="landing__footer-brand">
             <span className="landing__logo-icon">
-              <TerminalIcon />
+              <img
+                src="/logo-transparent.png"
+                alt="XC Logo"
+                className="landing__logo-img"
+                style={{ width: "24px", height: "24px", objectFit: "contain" }}
+              />
             </span>
             <span>Codex</span>
           </div>
