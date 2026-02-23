@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ProfileUpdatedEvent;
 use App\Models\User;
 use App\Services\NotificationService;
 use App\Traits\ApiResponse;
@@ -33,6 +34,10 @@ class FollowController extends Controller
         if ($authUser->following()->where('followed_id', $user->id)->exists()) {
             $authUser->following()->detach($user->id);
 
+            // Broadcast real-time profile update for both users
+            broadcast(new ProfileUpdatedEvent($user));
+            broadcast(new ProfileUpdatedEvent($authUser));
+
             return $this->success([
                 'following' => false,
                 'followers_count' => $user->followers()->count(),
@@ -50,6 +55,10 @@ class FollowController extends Controller
             $authUser->id,
             $authUser->name . ' ha comenzado a seguirte'
         );
+
+        // Broadcast real-time profile update for both users
+        broadcast(new ProfileUpdatedEvent($user));
+        broadcast(new ProfileUpdatedEvent($authUser));
 
         return $this->success([
             'following' => true,

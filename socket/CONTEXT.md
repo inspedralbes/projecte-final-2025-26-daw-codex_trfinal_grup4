@@ -7,17 +7,17 @@
 
 ## 📌 Informació del servei
 
-| Camp | Valor |
-|---|---|
-| **Runtime** | Node.js 20 (Alpine) |
-| **Framework HTTP** | Express 4 |
-| **WebSockets** | Socket.io 4 |
-| **Redis client** | ioredis 5 |
-| **Port** | 3000 (intern, no exposat) |
-| **Accés** | `ws://localhost:8080/socket.io/` (via Nginx) |
-| **Contenidor** | `tfg_socket_dev` |
-| **Directori al contenidor** | `/app` |
-| **Hot reload** | nodemon (dev) |
+| Camp                        | Valor                                        |
+| --------------------------- | -------------------------------------------- |
+| **Runtime**                 | Node.js 20 (Alpine)                          |
+| **Framework HTTP**          | Express 4                                    |
+| **WebSockets**              | Socket.io 4                                  |
+| **Redis client**            | ioredis 5                                    |
+| **Port**                    | 3000 (intern, no exposat)                    |
+| **Accés**                   | `ws://localhost:8080/socket.io/` (via Nginx) |
+| **Contenidor**              | `tfg_socket_dev`                             |
+| **Directori al contenidor** | `/app`                                       |
+| **Hot reload**              | nodemon (dev)                                |
 
 ---
 
@@ -56,18 +56,19 @@
    - Laravel publica events a Redis → Socket.io els escolta i els reenvia als clients.
    - Utilitza `ioredis` per subscriure't a canals Redis:
      ```js
-     const Redis = require('ioredis');
+     const Redis = require("ioredis");
      const subscriber = new Redis({
        host: process.env.REDIS_HOST,
-       port: process.env.REDIS_PORT
+       port: process.env.REDIS_PORT,
      });
-     subscriber.subscribe('channel-name');
-     subscriber.on('message', (channel, message) => {
-       io.emit('event-name', JSON.parse(message));
+     subscriber.subscribe("channel-name");
+     subscriber.on("message", (channel, message) => {
+       io.emit("event-name", JSON.parse(message));
      });
      ```
 
 4. **Estructura de carpetes recomanada:**
+
    ```
    socket/
    ├── index.js           # Punt d'entrada (Express + Socket.io)
@@ -84,12 +85,14 @@
    ```
 
 5. **Namespaces:** Per organitzar events, utilitza namespaces de Socket.io:
+
    ```js
-   const chatNamespace = io.of('/chat');
-   const gameNamespace = io.of('/game');
+   const chatNamespace = io.of("/chat");
+   const gameNamespace = io.of("/game");
    ```
 
 6. **Autenticació:** Valida tokens JWT al middleware de Socket.io:
+
    ```js
    io.use((socket, next) => {
      const token = socket.handshake.auth.token;
@@ -107,6 +110,7 @@
 ## 🔧 Configuració actual
 
 ### package.json – Dependències
+
 ```json
 {
   "dependencies": {
@@ -123,16 +127,18 @@
 ```
 
 ### Variables d'entorn (`.env`)
-| Variable | Valor (dev) | Descripció |
-|---|---|---|
-| `NODE_ENV` | `development` | Entorn |
-| `PORT` | `3000` | Port del servidor |
-| `REDIS_HOST` | `redis` | Host Redis (nom del contenidor) |
-| `REDIS_PORT` | `6379` | Port Redis |
-| `REDIS_PASSWORD` | *(buit)* | Password Redis (buit en dev) |
-| `CORS_ORIGIN` | `http://localhost:8080` | Origen permès per CORS |
+
+| Variable         | Valor (dev)             | Descripció                      |
+| ---------------- | ----------------------- | ------------------------------- |
+| `NODE_ENV`       | `development`           | Entorn                          |
+| `PORT`           | `3000`                  | Port del servidor               |
+| `REDIS_HOST`     | `redis`                 | Host Redis (nom del contenidor) |
+| `REDIS_PORT`     | `6379`                  | Port Redis                      |
+| `REDIS_PASSWORD` | _(buit)_                | Password Redis (buit en dev)    |
+| `CORS_ORIGIN`    | `http://localhost:8080` | Origen permès per CORS          |
 
 ### Flux de comunicació
+
 ```
 ┌──────────┐    Redis Pub/Sub    ┌──────────┐    WebSocket    ┌──────────┐
 │  Laravel  │ ──────────────────▶│ Socket.io│ ──────────────▶│  React   │
@@ -145,6 +151,7 @@
 ## 📅 Registre de canvis
 
 ### 2026-02-13 – Infraestructura inicial
+
 - **Autor:** @chuclao
 - Creat `Dockerfile` multi-stage Node 20 (dev amb nodemon / prod amb node)
 - Creat `package.json` amb express, socket.io, ioredis, dotenv, cors
@@ -154,12 +161,14 @@
 - Verificat que el servidor arrenca i respon correctament
 
 ### 2026-02-17 – Auditoria d'estructura
+
 - **Autor:** @chuclao (amb IA)
 - Realitzada auditoria completa de l'estructura del servei
 - Identificats punts pendents: connexió Redis (ioredis importat però no usat), handlers d'events, middleware d'autenticació, carpetes handlers/middleware/config/utils
 - No s'han fet canvis funcionals — pendent d'implementació
 
 ### 2026-02-19 – Integració Real-time amb Laravel Broadcasting
+
 - **Autor:** @chuclao (amb IA)
 - Reescrit **`index.js`** completament per integrar-se amb el broadcasting de Laravel via Redis:
   - **Redis Pub/Sub**: utilitza `psubscribe('tfg-database-*')` per capturar tots els canals que Laravel publica
@@ -182,10 +191,21 @@
    broadcast()            tfg-database-user.3      io.to('user.3')          on('new.notification')
   ```
 
+### 2026-02-23 – Temps real de perfil (Profile Rooms)
+
+- **Autor:** Antigravity (IA)
+- **Routing d'events de perfil:**
+  - `index.js` actualitzat per escoltar events `ProfileUpdatedEvent` de Laravel (canals `profile.{id}`).
+  - Els events es reenvien al client amb el nom `profile.updated`.
+- **Nous events del client Socket.io:**
+  - `join-profile` → `{ profileId: N }` — El client s'uneix a la room del perfil `profile.N` per rebre actualitzacions de dades (avatar, nom, bio, stats) en temps real.
+  - `leave-profile` → `{ profileId: N }` — El client abandona la room del perfil.
+- **Payload `profile.updated`:** `user_id`, `name`, `avatar`, `bio`, `followers_count`, `following_count`.
+
 ---
 
 ## 📚 Documentació Relacionada
 
-*   **Visió Global del Projecte:** [../doc/PROJECT_CONCEPT.md](../doc/PROJECT_CONCEPT.md)
-*   **Backend (API):** [../api/CONTEXT.md](../api/CONTEXT.md)
-*   **Frontend (Cliente):** [../client/CONTEXT.md](../client/CONTEXT.md)
+- **Visió Global del Projecte:** [../doc/PROJECT_CONCEPT.md](../doc/PROJECT_CONCEPT.md)
+- **Backend (API):** [../api/CONTEXT.md](../api/CONTEXT.md)
+- **Frontend (Cliente):** [../client/CONTEXT.md](../client/CONTEXT.md)

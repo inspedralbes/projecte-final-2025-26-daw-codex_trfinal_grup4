@@ -68,7 +68,7 @@ const api = {
     const token = localStorage.getItem("token");
 
     return fetch(url, {
-      method: "POST",
+      method: options.method || "POST",
       headers: {
         Accept: "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),

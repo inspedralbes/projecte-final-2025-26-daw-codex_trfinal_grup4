@@ -64,7 +64,7 @@ const socketService = {
    * @param {number} userId - User ID
    */
   joinUserRoom: (userId) => {
-    if (socket && socket.connected) {
+    if (socket) {
       socket.emit("join", { userId });
       console.log("[Socket.io] Joined room: user." + userId);
     }
@@ -75,7 +75,7 @@ const socketService = {
    * @param {number} postId - Post ID
    */
   joinPostRoom: (postId) => {
-    if (socket && socket.connected) {
+    if (socket) {
       socket.emit("join-post", { postId });
       console.log("[Socket.io] Joined room: post." + postId);
     }
@@ -86,7 +86,7 @@ const socketService = {
    * @param {number} postId - Post ID
    */
   leavePostRoom: (postId) => {
-    if (socket && socket.connected) {
+    if (socket) {
       socket.emit("leave-post", { postId });
       console.log("[Socket.io] Left room: post." + postId);
     }
@@ -119,6 +119,38 @@ const socketService = {
   onComment: (callback) => {
     if (socket) {
       socket.on("new.comment", callback);
+    }
+  },
+
+  /**
+   * Join a profile room for live follower/stat updates
+   * @param {number} userId - User ID whose profile to watch
+   */
+  joinProfileRoom: (userId) => {
+    if (socket) {
+      socket.emit("join-profile", { userId });
+      console.log("[Socket.io] Joined room: profile." + userId);
+    }
+  },
+
+  /**
+   * Leave a profile room
+   * @param {number} userId - User ID
+   */
+  leaveProfileRoom: (userId) => {
+    if (socket) {
+      socket.emit("leave-profile", { userId });
+      console.log("[Socket.io] Left room: profile." + userId);
+    }
+  },
+
+  /**
+   * Listen for profile updates (follower count changes, profile edits)
+   * @param {Function} callback - Handler function
+   */
+  onProfileUpdate: (callback) => {
+    if (socket) {
+      socket.on("profile.updated", callback);
     }
   },
 
