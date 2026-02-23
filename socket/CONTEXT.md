@@ -201,6 +201,17 @@
 - **Hook `useSocketAuth`**: gestiona connexió automàtica basada en estat d'autenticació
 - Integrat als hooks d'aplicació per actualitzacions real-time
 
+### 2026-02-23 – Temps real de perfil (Profile Rooms)
+
+- **Autor:** @iker
+- **Routing d'events de perfil:**
+  - `index.js` actualitzat per escoltar events `ProfileUpdatedEvent` de Laravel (canals `profile.{id}`).
+  - Els events es reenvien al client amb el nom `profile.updated`.
+- **Nous events del client Socket.io:**
+  - `join-profile` → `{ profileId: N }` — El client s'uneix a la room del perfil `profile.N` per rebre actualitzacions de dades (avatar, nom, bio, stats) en temps real.
+  - `leave-profile` → `{ profileId: N }` — El client abandona la room del perfil.
+- **Payload `profile.updated`:** `user_id`, `name`, `avatar`, `bio`, `followers_count`, `following_count`.
+
 ---
 
 ## 📚 Documentació Relacionada

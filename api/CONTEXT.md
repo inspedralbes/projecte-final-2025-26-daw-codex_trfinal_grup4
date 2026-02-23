@@ -685,6 +685,24 @@
 - Actualitzat **`routes/api.php`**:
     - Nova ruta pública: `GET /api/leaderboard?limit=N`
 
+### 2026-02-23 – Temps real de Perfil, Àvatars i Taula de Notificacions
+
+- **Autor:** @iker
+- Creat **`ProfileUpdatedEvent`** a `app/Events/`:
+    - Broadcast al canal `profile.{userId}` quan un usuari actualitza el seu perfil.
+    - Payload: `user_id`, `name`, `avatar`, `bio`, `followers_count`, `following_count`.
+- **Gestió d'Àvatars (Carga de fitxers):**
+    - `ProfileController@update` actualitzat per acceptar `multipart/form-data`.
+    - Guarda l'àvatar al disc públic (`storage/app/public/avatars`) i borra l'anterior si existia.
+    - Retorna la URL completa de la imatge.
+- **Corregit error 500 en Follow:**
+    - Creada la migració de la taula `notifications` que faltava i que bloquejava el `NotificationService`.
+- **Configuració de Servidor:**
+    - Canviat `FILESYSTEM_DISK=public` al `.env`.
+    - Fixat `APP_URL=http://localhost:8080` per a URLs d'àvatar correctes.
+    - Creat symlink de `storage` dins del contenidor.
+    - Configurat Nginx per servir `/storage/` directament des del disc des de la carpeta `public`.
+
 ---
 
 ## 📚 Documentació Relacionada

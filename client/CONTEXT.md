@@ -244,6 +244,22 @@
     - Nova ruta `/verify-email` → `EmailVerification` (protegida però no requereix verificació)
 - **Fix config mail backend:** `api/.env` corregit de `MAIL_MAILER=log` a `smtp`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025`
 
+### 2026-02-23 – Temps real de perfil, Càrrega d'àvatars i Sync d'Estat Global
+
+- **Autor:** @iker
+- **Perfil en temps real:**
+  - `src/hooks/useProfile.js` actualitzat per escoltar `profile.updated` a través de Socket.io.
+  - Sincronització automàtica de dades (nom, àvatar, bio, stats) sense recarregar la pàgina.
+- **Càrrega d'Àvatars:**
+  - Modificat `src/services/api.js`: l'upload ara accepta opcions per sobreescriure el mètode HTTP.
+  - Modificat `src/services/profileService.js`: implementat **Method Spoofing** enviant `_method=PUT` dins del `FormData` per compatibilitat amb el backend Laravel i `multipart/form-data`.
+- **Sincronització d'Estat Global:**
+  - `useProfile` ara crida a `refreshUser()` del `AuthContext` quan l'usuari actualitza el seu propi perfil.
+  - Això garanteix que la barra lateral (Sidebar) i altres components vegin el nou àvatar a l'instant.
+- **Barra Lateral (Sidebar):**
+  - Àvatar de la barra lateral ara fa servir `user.username` com a seed per a Dicebear (consistent amb la pàgina de perfil).
+  - Botó de logout completament funcional.
+
 ---
 
 ## 🎨 Estructura actual de components
