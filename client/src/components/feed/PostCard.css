@@ -320,13 +320,43 @@
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 640px) {
+  .post-card {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .post-card__avatar {
+    width: 38px;
+    height: 38px;
+  }
+
   .post-card__author {
     flex-wrap: nowrap;
     overflow: hidden;
   }
 
+  .post-card__name {
+    font-size: var(--text-sm);
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .post-card__badge {
     display: none;
+  }
+
+  .post-card__handle {
+    font-size: var(--text-xs);
+  }
+
+  .post-card__time {
+    font-size: var(--text-xs);
+  }
+
+  .post-card__text {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
   }
 
   .post-card__link {
@@ -336,6 +366,48 @@
   .post-card__link-image {
     width: 100%;
     height: 120px;
+  }
+
+  .post-card__code-content {
+    font-size: var(--text-xs);
+    padding: var(--space-3);
+  }
+
+  .post-card__actions {
+    max-width: 100%;
+    margin-left: -4px;
+  }
+
+  .post-card__action {
+    gap: var(--space-1);
+    padding: var(--space-2);
+    font-size: var(--text-xs);
+    min-height: 36px;
+    min-width: 36px;
+  }
+
+  .post-card__action svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .post-card__tags {
+    gap: var(--space-1);
+    margin-bottom: var(--space-2);
+  }
+
+  .post-card__tag {
+    font-size: var(--text-xs);
+  }
+
+  .post-card__repost-indicator {
+    margin-left: 44px;
+    font-size: 11px;
+  }
+
+  .post-card__dropdown {
+    min-width: 130px;
+    right: -8px;
   }
 }
 

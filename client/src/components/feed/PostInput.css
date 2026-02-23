@@ -297,11 +297,46 @@
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 640px) {
+  .post-input {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .post-input__avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .post-input__textarea {
+    font-size: var(--text-base);
+    min-height: 40px;
+  }
+
   .post-input__visibility {
     display: none;
   }
-  
+
+  .post-input__submit {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+  }
+
   .post-input__tags {
     flex-wrap: wrap;
+  }
+
+  .post-input__tool {
+    width: 32px;
+    height: 32px;
+  }
+
+  .post-input__tool svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .post-input__code-textarea {
+    font-size: var(--text-xs);
+    padding: var(--space-3);
   }
 }

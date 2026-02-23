@@ -348,16 +348,81 @@
 
 /* ── Responsive – Mobile ────────────────────────────────── */
 @media (max-width: 640px) {
+  .profile__cover {
+    height: 120px;
+  }
+
+  .profile__card {
+    padding: 0 var(--space-4) var(--space-6);
+    margin-top: -48px;
+  }
+
+  .profile__avatar {
+    width: 88px;
+    height: 88px;
+    border-width: 3px;
+  }
+
+  .profile__name {
+    font-size: 1.25rem;
+  }
+
+  .profile__username {
+    font-size: 0.85rem;
+  }
+
+  .profile__details {
+    max-width: 100%;
+  }
+
+  .profile__detail {
+    font-size: 0.8rem;
+  }
+
   .profile__stats {
     gap: var(--space-4);
+    padding: var(--space-3) 0;
   }
-  
+
   .profile__stat-value {
     font-size: 1rem;
   }
-  
+
+  .profile__stat-label {
+    font-size: 0.7rem;
+  }
+
+  .profile__bio {
+    font-size: 0.85rem;
+    max-width: 100%;
+    text-align: left;
+    padding: 0 var(--space-2);
+  }
+
+  .profile__edit-btn,
+  .profile__follow-btn {
+    width: 100%;
+    max-width: 280px;
+    padding: 10px 24px;
+  }
+
+  .profile__tabs {
+    margin-top: var(--space-2);
+  }
+
   .profile__tab {
     font-size: 0.8rem;
     padding: var(--space-3);
+  }
+
+  .profile__tab--active::after {
+    width: 48px;
+    height: 3px;
+  }
+
+  .profile__role {
+    font-size: 0.7rem;
+    padding: 3px 12px;
+    margin-bottom: var(--space-4);
   }
 }

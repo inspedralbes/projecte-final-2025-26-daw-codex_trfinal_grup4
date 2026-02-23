@@ -244,30 +244,63 @@
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 640px) {
   .center-hub__banner {
-    height: 160px;
+    height: 140px;
   }
 
   .center-hub__banner-content {
     flex-direction: column;
     align-items: flex-start;
-    padding: var(--space-4);
+    padding: var(--space-3);
+    gap: var(--space-2);
   }
 
   .center-hub__school-badge {
-    width: 60px;
-    height: 60px;
+    width: 52px;
+    height: 52px;
     font-size: 1.5rem;
     transform: none;
-    margin-bottom: var(--space-2);
+    margin-bottom: 0;
+    border-width: 3px;
+    border-radius: var(--radius-lg);
   }
 
   .center-hub__school-name {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
+  }
+
+  .center-hub__school-location {
+    font-size: var(--text-xs);
   }
 
   .center-hub__school-stats {
     flex-wrap: wrap;
     gap: var(--space-2);
+    font-size: var(--text-xs);
+  }
+
+  .center-hub__private-badge {
+    font-size: 10px;
+    padding: var(--space-0-5) var(--space-2);
+  }
+
+  .center-hub__channels {
+    padding: var(--space-4) var(--space-3) var(--space-2);
+    gap: var(--space-1);
+  }
+
+  .center-hub__channel {
+    padding: var(--space-1-5) var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  .center-hub__nav-tab {
+    padding: var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  .center-hub__nav-tab--active::after {
+    width: 40px;
+    height: 2px;
   }
 }
 

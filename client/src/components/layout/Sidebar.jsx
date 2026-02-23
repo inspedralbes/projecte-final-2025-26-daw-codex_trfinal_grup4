@@ -168,12 +168,12 @@ const LogoutIcon = () => (
 );
 
 const navItems = [
-  { path: "/", label: "Feed Global", Icon: HomeIcon },
+  { path: "/", label: "Feed", Icon: HomeIcon },
   { path: "/explore", label: "Explorar", Icon: ExploreIcon },
-  { path: "/center", label: "Mi Centro", Icon: CenterIcon },
-  { path: "/notifications", label: "Notificaciones", Icon: NotificationsIcon },
-  { path: "/messages", label: "Mensajes", Icon: MessagesIcon },
+  { path: "/center", label: "Centro", Icon: CenterIcon },
+  { path: "/notifications", label: "Alertas", Icon: NotificationsIcon },
   { path: "/profile", label: "Perfil", Icon: ProfileIcon },
+  { path: "/messages", label: "Mensajes", Icon: MessagesIcon },
   { path: "/more", label: "Más", Icon: MoreIcon },
 ];
 

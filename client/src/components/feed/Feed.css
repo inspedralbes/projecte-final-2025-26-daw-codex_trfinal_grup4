@@ -176,3 +176,40 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* ── Mobile Feed ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .feed__header {
+    position: sticky;
+    top: var(--mobile-header-height);
+  }
+
+  .feed__title {
+    font-size: var(--text-lg);
+    padding: var(--space-3) var(--space-4) var(--space-1);
+  }
+
+  .feed__tab {
+    padding: var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  .feed__tab--active::after {
+    width: 40px;
+    height: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .feed__title {
+    display: none;
+  }
+
+  .feed__header {
+    top: var(--mobile-header-height);
+  }
+
+  .feed__tab {
+    padding: var(--space-3) var(--space-2);
+  }
+}

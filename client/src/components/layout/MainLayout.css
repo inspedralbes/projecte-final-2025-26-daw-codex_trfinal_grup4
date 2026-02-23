@@ -8,6 +8,11 @@
   min-height: 100vh;
 }
 
+/* ── Mobile Header (hidden on desktop) ────────────────────── */
+.mobile-header {
+  display: none;
+}
+
 /* ── Main Content Area ────────────────────────────────────── */
 .main-content {
   min-height: 100vh;
@@ -35,7 +40,92 @@
 @media (max-width: 768px) {
   .app-layout {
     grid-template-columns: 1fr;
-    padding-bottom: 72px;
+    grid-template-rows: var(--mobile-header-height) 1fr;
+    padding-bottom: calc(var(--mobile-nav-height) + var(--safe-bottom));
+  }
+
+  /* Show mobile header */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-fixed);
+    height: var(--mobile-header-height);
+    padding: 0 var(--space-4);
+    padding-top: var(--safe-top);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .mobile-header__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--depth-3);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .mobile-header__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mobile-header__logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+  }
+
+  .mobile-header__logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, var(--codex-teal), var(--codex-violet));
+    border-radius: var(--radius-md);
+    color: white;
+  }
+
+  .mobile-header__logo-text {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--ink-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .mobile-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .mobile-header__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: none;
+    border: none;
+    color: var(--ink-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .mobile-header__action:hover,
+  .mobile-header__action:active {
+    background: var(--depth-2);
+    color: var(--ink-primary);
   }
 
   .main-content {
