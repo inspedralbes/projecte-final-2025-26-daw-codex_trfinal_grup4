@@ -244,6 +244,44 @@
     - Nova ruta `/verify-email` → `EmailVerification` (protegida però no requereix verificació)
 - **Fix config mail backend:** `api/.env` corregit de `MAIL_MAILER=log` a `smtp`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025`
 
+### 2026-02-20 – Integració Completa Frontend-Backend
+
+- **Autor:** @copilot (IA)
+- **Serveis API creats:** (`src/services/`)
+    - `postsService.js` — CRUD de posts: getFeed, getById, create, update, delete, getPostInteractions, toggleInteraction, repost
+    - `commentsService.js` — CRUD de comentaris: getComments, create, update, delete, toggleSolution
+    - `profileService.js` — Perfil: getProfile, updateProfile, getPosts, getFollowers, getFollowing, toggleFollow, getLeaderboard
+    - `tagsService.js` — Tags: getAllTags, getCenterTags, getFollowedTags, toggleFollow, toggleNotify
+    - `notificationsService.js` — Notificacions: getNotifications, getCount, markAsRead, markAllAsRead, delete
+    - `searchService.js` — Cerca: searchGlobal, searchCenter
+    - `centersService.js` — Centres: getCenters, getCenterDetails, getCenterPosts, getCenterMembers
+    - `interactionsService.js` — Interaccions: toggleInteraction, getBookmarks, getLiked
+- **Hooks personalitzats creats:** (`src/hooks/`)
+    - `usePosts.js` — Gestió d'estat per al feed de posts amb paginació infinita
+    - `usePost.js` — Detall d'un post amb comentaris i interaccions
+    - `useProfile.js` — Perfil d'usuari amb stats i accions follow/unfollow
+    - `useComments.js` — Comentaris d'un post amb respostes i solucions
+    - `useTags.js` — Tags amb follow/notify
+    - `useNotifications.js` — Notificacions amb comptador d'unread i mark as read
+    - `useSearch.js` — Cerca amb debounce i filtre per tipus
+- **Integració Socket.io:**
+    - Creat `src/services/socketService.js` — Client Socket.io amb gestió d'autenticació
+    - Configurat `useSocketAuth.js` per connectar/desconnectar segons estat d'auth
+    - Integrat a hooks per actualitzacions en temps real
+- **Millores d'error handling:**
+    - Modificat `src/services/api.js`:
+        - Detecta errors SQL/tècnics (SQLSTATE, Table, Column, undefined in query)
+        - Substitueix per missatges genèrics "Error del servidor. Por favor, inténtalo más tarde."
+        - Sanititza errors per no exposar detalls de la BD
+    - Modificat `src/context/AuthContext.jsx`:
+        - `parseApiError()` filtra errors tècnics i retorna missatges user-friendly
+- **Fixes de components:**
+    - `Profile.jsx` — Corregit `user.reputation?.score || 0` (era objecte, no primitiu)
+    - `CenterHub.jsx` — Afegit `enabled: !!centerId` a usePosts per evitar 403 sense centre
+    - `Explore.jsx` — Eliminat mock data `topContributors`, ara usa `/api/leaderboard` real
+    - `RightSection.jsx` — Canviat `postsService.getPosts` a `postsService.getFeed` (mètode correcte)
+    - `RightSection.css` — Afegits estils per spinner i estat buit als widgets
+
 ---
 
 ## 🎨 Estructura actual de components

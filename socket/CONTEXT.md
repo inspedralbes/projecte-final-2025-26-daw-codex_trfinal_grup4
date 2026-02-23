@@ -182,6 +182,16 @@
    broadcast()            tfg-database-user.3      io.to('user.3')          on('new.notification')
   ```
 
+### 2026-02-20 – Verificació Integració Frontend
+
+- **Autor:** @copilot (IA)
+- Verificat funcionament correcte de la integració Frontend ↔ Socket.io ↔ Laravel
+- **Client Socket.io creat** a `client/src/services/socketService.js`:
+    - Connexió automàtica amb autenticació via token (handshake.auth.token)
+    - Mètodes: `connect()`, `disconnect()`, `joinUserRoom()`, `joinPost()`, `leavePost()`, `on()`, `off()`
+- **Hook `useSocketAuth`**: gestiona connexió automàtica basada en estat d'autenticació
+- Integrat als hooks d'aplicació per actualitzacions real-time
+
 ---
 
 ## 📚 Documentació Relacionada

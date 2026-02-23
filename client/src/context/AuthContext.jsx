@@ -241,6 +241,7 @@ export const AuthProvider = ({ children }) => {
 /**
  * Parse API error responses into user-friendly messages.
  * Handles Laravel validation errors (422) and generic messages.
+ * Hides technical/SQL errors from users.
  */
 function parseApiError(error, fallback) {
   // If error has a response body with validation errors
@@ -250,9 +251,20 @@ function parseApiError(error, fallback) {
     return messages.join(" · ");
   }
 
-  // If it's a simple message
+  // If it's a simple message (but not a technical error)
   if (error?.message && error.message !== "Error") {
-    return error.message;
+    const msg = error.message;
+    
+    // Don't show technical errors to users
+    if (msg.includes('SQLSTATE') || 
+        msg.includes('Connection:') ||
+        msg.includes('Table') ||
+        msg.includes('Column') ||
+        msg.includes('SQL:')) {
+      return fallback;
+    }
+    
+    return msg;
   }
 
   return fallback;

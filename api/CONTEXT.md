@@ -672,6 +672,19 @@
     - `new.interaction` → canal `user.{id}` — Interaccions like/bookmark (ja existent)
     - `new.comment` → canal `post.{id}` — Comentaris nous a un post (ja existent)
 
+### 2026-02-20 – Cerca per Tags i Leaderboard
+
+- **Autor:** @copilot (IA)
+- Actualitzat **`SearchController`**:
+    - `GET /api/search` — Ara cerca posts per títol, contingut I per nom de tags relacionats
+    - Afegit `orWhereHas('tags', ...)` per incloure posts que tenen tags coincidents amb la query
+- Actualitzat **`ProfileController`**:
+    - `GET /api/leaderboard` — Nou endpoint públic que retorna els top N usuaris per reputació (default 5)
+    - Utilitza `ReputationService` per calcular puntuació
+    - Retorna: id, name, username, avatar, reputation (score, current_badge)
+- Actualitzat **`routes/api.php`**:
+    - Nova ruta pública: `GET /api/leaderboard?limit=N`
+
 ---
 
 ## 📚 Documentació Relacionada
