@@ -15,6 +15,12 @@ class AdminTestSeeder extends Seeder
 {
     public function run(): void
     {
+        // Cleanup old test data to avoid unique constraint errors
+        DB::table('centers')->where('domain', '!=', 'inspedralbes.cat')->delete();
+        DB::table('users')->where('username', 'toxic_user')->delete();
+        DB::table('users')->where('username', 'banned_user')->delete();
+        DB::table('users')->where('username', 'like', 'student_test_%')->delete();
+
         // 1. Centers with different statuses
         $centers = [
             [
@@ -40,6 +46,62 @@ class AdminTestSeeder extends Seeder
                 'status' => 'active',
                 'description' => 'Centro activo y verificado.',
                 'created_at' => Carbon::now()->subMonths(1),
+            ],
+            [
+                'name' => 'IES Politecnic de Llevant',
+                'domain' => 'politecnicllevant.cat',
+                'city' => 'Manacor',
+                'status' => 'active',
+                'description' => 'Especialistas en Informática y Comunicaciones.',
+                'created_at' => Carbon::now()->subDays(15),
+            ],
+            [
+                'name' => 'IES Sabadell',
+                'domain' => 'iessabadell.cat',
+                'city' => 'Sabadell',
+                'status' => 'pending',
+                'description' => 'Pendiente de validación de dominio.',
+                'created_at' => Carbon::now()->subDays(1),
+            ],
+            [
+                'name' => 'Institut TIC de Barcelona',
+                'domain' => 'itb.cat',
+                'city' => 'Barcelona',
+                'status' => 'active',
+                'description' => 'Centro especializado 100% en TIC.',
+                'created_at' => Carbon::now()->subMonths(2),
+            ],
+            [
+                'name' => 'CIFP Pere de Son Gall',
+                'domain' => 'peresongall.cat',
+                'city' => 'Llucmajor',
+                'status' => 'active',
+                'description' => 'Ciclos de DAM y DAW.',
+                'created_at' => Carbon::now()->subDays(20),
+            ],
+            [
+                'name' => 'IES Mare de Deu de la Merce',
+                'domain' => 'lamerce.cat',
+                'city' => 'Barcelona',
+                'status' => 'pending',
+                'description' => 'Esperando respuesta del coordinador.',
+                'created_at' => Carbon::now()->subDays(3),
+            ],
+            [
+                'name' => 'IES Campanar',
+                'domain' => 'iescampanar.es',
+                'city' => 'Valencia',
+                'status' => 'active',
+                'description' => 'Gran oferta formativa en ciclos de informática.',
+                'created_at' => Carbon::now()->subMonths(3),
+            ],
+            [
+                'name' => 'IES Ramon Llull',
+                'domain' => 'ramonllull.cat',
+                'city' => 'Palma',
+                'status' => 'rejected',
+                'description' => 'Dominio no corporativo.',
+                'created_at' => Carbon::now()->subDays(10),
             ],
         ];
 
