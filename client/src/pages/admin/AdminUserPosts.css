@@ -1,0 +1,67 @@
+.admin-user-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.admin-sub-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.audit-posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.audit-post-card {
+    background: var(--codex-surface, #15202b);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.audit-post-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.8rem;
+}
+
+.post-type.badge {
+    background: rgba(20, 184, 166, 0.1);
+    color: var(--codex-teal, #14b8a6);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 700;
+}
+
+.post-date {
+    color: var(--codex-gray, #8899a6);
+}
+
+.audit-post-content {
+    color: white;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.text-italic {
+    font-style: italic;
+    color: var(--codex-gray);
+}

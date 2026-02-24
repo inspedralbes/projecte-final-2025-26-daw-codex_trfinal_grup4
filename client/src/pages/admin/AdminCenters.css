@@ -1,0 +1,77 @@
+.admin-centers {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.admin-select {
+    background: var(--depth-1, #0f1520);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-md, 8px);
+    padding: 0.75rem 1.25rem;
+    color: var(--ink-primary, white);
+    font-size: var(--text-sm, 0.9rem);
+    width: 280px;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.admin-select:focus {
+    outline: none;
+    border-color: var(--codex-teal);
+    box-shadow: var(--shadow-glow-teal);
+}
+
+.center-info {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+}
+
+.center-logo-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm, 4px);
+    object-fit: contain;
+    background: white;
+    padding: 3px;
+    border: 1px solid var(--border-default);
+}
+
+.center-name {
+    font-weight: 600;
+    color: var(--ink-primary);
+    font-size: var(--text-sm);
+}
+
+.status-select {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full, 20px);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 700;
+    border: 1px solid transparent;
+    background: var(--depth-2);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.status-select:hover {
+    background: var(--depth-3);
+}
+
+.status-active {
+    color: var(--codex-emerald, #10b981);
+    background: var(--state-success-bg);
+}
+
+.status-pending {
+    color: var(--codex-amber, #f59e0b);
+    background: var(--state-warning-bg);
+}
+
+.status-rejected {
+    color: var(--state-error);
+    background: var(--state-error-bg);
+}
