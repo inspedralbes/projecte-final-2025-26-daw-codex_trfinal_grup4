@@ -51,6 +51,7 @@ return new class extends Migration
             
             // Perfil
             $table->string('avatar')->nullable();
+            $table->string('banner')->nullable();
             $table->text('bio')->nullable();
             $table->boolean('is_blocked')->default(false); // Bloqueado por profesor/admin
             

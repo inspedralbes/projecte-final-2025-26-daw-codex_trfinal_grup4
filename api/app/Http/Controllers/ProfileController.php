@@ -52,6 +52,7 @@ class ProfileController extends Controller
             'username'         => $user->username,
             'role'             => $user->role,
             'avatar'           => $user->avatar,
+            'banner'           => $user->banner,
             'bio'              => $user->bio,
             'linkedin_url'     => $user->linkedin_url,
             'portfolio_url'    => $user->portfolio_url,
@@ -107,8 +108,10 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name'          => 'sometimes|string|max:255',
+            'username'      => 'sometimes|string|max:50|unique:users,username,' . $user->id . '|regex:/^[a-zA-Z0-9_]+$/',
             'bio'           => 'sometimes|nullable|string|max:1000',
-            'avatar'        => 'sometimes|nullable|image|max:5120', // 5 MB max when file
+            'avatar'        => 'sometimes|nullable|image|max:5120', 
+            'banner'        => 'sometimes|nullable|image|max:8192', // 8 MB max for banner
             'linkedin_url'  => 'sometimes|nullable|url|max:500',
             'portfolio_url' => 'sometimes|nullable|url|max:500',
             'external_url'  => 'sometimes|nullable|url|max:500',
@@ -132,6 +135,23 @@ class ProfileController extends Controller
             unset($validated['avatar']);
         }
 
+        // Handle banner file upload
+        if ($request->hasFile('banner')) {
+            // Delete old banner if it was a locally stored file
+            if ($user->banner && str_contains($user->banner, '/storage/banners/')) {
+                $oldPath = str_replace('/storage/', '', parse_url($user->banner, PHP_URL_PATH));
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+
+            // Store new banner in public/banners
+            $path = $request->file('banner')->store('banners', 'public');
+
+            // Build the full public URL
+            $validated['banner'] = url('storage/' . $path);
+        } else {
+            unset($validated['banner']);
+        }
+
         $user->update($validated);
         $user->refresh();
 
@@ -141,6 +161,7 @@ class ProfileController extends Controller
             'username'      => $user->username,
             'role'          => $user->role,
             'avatar'        => $user->avatar,
+            'banner'        => $user->banner,
             'bio'           => $user->bio,
             'linkedin_url'  => $user->linkedin_url,
             'portfolio_url' => $user->portfolio_url,
