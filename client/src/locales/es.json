@@ -1,0 +1,244 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error_server": "Error del servidor. Por favor, inténtalo más tarde.",
+    "error_generic": "Ha ocurrido un error. Por favor, inténtalo de nuevo.",
+    "logout": "Cerrar sesión",
+    "search_placeholder": "Buscar...",
+    "search_placeholder_codex": "Buscar en Codex...",
+    "user": "Usuario",
+    "anonymous": "anónimo",
+    "see_more": "Ver más",
+    "see_all": "Ver todas",
+    "processing": "Procesando...",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "retry": "Reintentar",
+    "load_more": "Cargar más",
+    "delete": "Eliminar"
+  },
+  "widgets": {
+    "trending": "Tendencias",
+    "no_trends": "No hay tendencias",
+    "top_contributors": "Top Contribuidores",
+    "no_contributors": "No hay contribuidores",
+    "see_ranking": "Ver ranking",
+    "recent_questions": "Dudas Recientes",
+    "no_questions": "No hay preguntas"
+  },
+  "feed": {
+    "publish": "Publicar",
+    "post_question": "Publicar Duda",
+    "posts_count": "publicaciones",
+    "no_title": "Sin título",
+    "placeholder_news": "¿Qué quieres compartir hoy?",
+    "placeholder_question": "¿Qué duda técnica tienes?",
+    "code_placeholder": "// Pega tu código aquí...",
+    "tags_placeholder": "Etiquetas (separadas por coma o espacio)",
+    "visibility_public": "Público",
+    "loading_posts": "Cargando publicaciones...",
+    "no_posts": "No hay publicaciones todavía.",
+    "be_first": "¡Sé el primero en compartir algo!",
+    "solved": "Resuelto",
+    "reposted": "ha reposteado",
+    "delete_confirm": "¿Estás seguro de que quieres eliminar esta publicación?",
+    "tabs": {
+      "for_you": "Para ti",
+      "following": "Siguiendo"
+    },
+    "tools": {
+      "add_code": "Añadir código",
+      "add_image": "Añadir imagen",
+      "add_link": "Añadir enlace",
+      "add_question": "Publicar duda"
+    },
+    "time": {
+      "now": "ahora",
+      "m": "m",
+      "h": "h",
+      "d": "d"
+    }
+  },
+  "profile": {
+    "loading": "Cargando perfil...",
+    "error": "Error al cargar el perfil",
+    "bio": "Biografía",
+    "followers": "Seguidores",
+    "points": "Puntos",
+    "joined": "Se unió en",
+    "follow": "Seguir",
+    "unfollow": "Siguiendo",
+    "likes": "Me gusta",
+    "no_posts_category": "No hay publicaciones en esta categoría",
+    "edit": {
+      "title": "Editar perfil",
+      "cta": "Editar perfil",
+      "save": "Guardar",
+      "bio_placeholder": "Cuéntanos sobre ti...",
+      "error": "Error al guardar cambios"
+    },
+    "links": {
+      "other": "Otro enlace",
+      "web": "Web"
+    }
+  },
+  "sidebar": {
+    "home": "Inicio",
+    "explore": "Explorar",
+    "notifications": "Notificaciones",
+    "messages": "Mensajes",
+    "profile": "Perfil",
+    "center": "Centro",
+    "more": "Más",
+    "teacher": "Profesor",
+    "admin": "Admin",
+    "student": "Estudiante"
+  },
+  "footer": {
+    "terms": "Términos",
+    "privacy": "Privacidad",
+    "cookies": "Cookies",
+    "help": "Ayuda"
+  },
+  "auth": {
+    "login_success": "¡Inicio de sesión exitoso! Bienvenido de vuelta.",
+    "register_success": "¡Cuenta creada correctamente! Te hemos enviado un email de verificación.",
+    "register_teacher_success": "¡Cuenta creada! Tu solicitud de centro ha sido enviada. Un administrador la revisará pronto.",
+    "logout_info": "Sesión cerrada correctamente.",
+    "token_error": "Error: no se recibió token de autenticación.",
+    "login_error_fallback": "Error al iniciar sesión. Verifica tus credenciales.",
+    "register_error_fallback": "Error en el registro. Inténtalo de nuevo.",
+    "password_requirements": {
+      "title": "Requisitos de contraseña",
+      "length": "Mínimo 8 caracteres",
+      "uppercase": "Al menos una mayúscula",
+      "lowercase": "Al menos una minúscula",
+      "number": "Al menos un número"
+    }
+  },
+  "landing": {
+    "welcome": "Bienvenido a Codex",
+    "tagline": "La red social para estudiantes y profesores de informática",
+    "login": "Iniciar sesión",
+    "register": "Crear cuenta",
+    "already_account": "¿Ya tienes una cuenta? ",
+    "no_account": "¿No tienes una cuenta? ",
+    "register_here": "Regístrate aquí",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirm_password": "Confirmar Contraseña",
+    "username": "Nombre de usuario",
+    "full_name": "Nombre completo",
+    "center": "Centro",
+    "badge": "Red Social Académica para Desarrolladores",
+    "hero_title_part1": "El espacio donde los",
+    "hero_title_accent": "estudiantes de FP",
+    "hero_title_part2": "comparten código",
+    "hero_subtitle": "Conecta con tu centro, resuelve dudas técnicas y construye tu portfolio profesional junto a la comunidad de DAM, DAW y ASIX de toda España.",
+    "auth_title_login": "Bienvenido a Codex",
+    "auth_title_register": "Únete a Codex",
+    "auth_subtitle_login": "Inicia sesión para continuar",
+    "auth_subtitle_register": "Usa tu email del centro para acceso completo",
+    "footer_text": "La red social académica para el ecosistema de FP Informática en España",
+    "features": {
+      "snippets": {
+        "title": "Snippets con Sintaxis",
+        "desc": "Comparte código con highlight"
+      },
+      "hub": {
+        "title": "Hub del Centro",
+        "desc": "Espacio privado para tu instituto"
+      }
+    },
+    "messages": {
+      "checking_domain": "Comprobando dominio...",
+      "center_detected": "detectado – Acceso completo",
+      "center_pending": "Centro en revisión – Tu solicitud está pendiente",
+      "verification_required": "No hay centro para este dominio – Se te pedirá verificación",
+      "domain_not_recognized": "Dominio no reconocido",
+      "check_review": "🎉 ¡Cuenta creada! Tu solicitud de centro está en revisión.",
+      "passwords_match": "Las contraseñas coinciden"
+    },
+    "errors": {
+      "password_requirements": "La contraseña no cumple todos los requisitos.",
+      "passwords_dont_match": "Las contraseñas no coinciden."
+    }
+  },
+  "center": {
+    "no_center_title": "No perteneces a ningún centro",
+    "no_center_desc": "Contacta con tu administrador para unirte a un centro educativo.",
+    "loading": "Cargando centro...",
+    "default_name": "Centro Educativo",
+    "private": "Privado",
+    "members": "miembros",
+    "members_tab": "Miembros",
+    "since": "Desde",
+    "resources": "Recursos",
+    "pinned": "Fijado"
+  },
+  "teacher_modal": {
+    "title": "Verificación de Profesor",
+    "desc_intro": "El dominio",
+    "desc_body": "no tiene un centro educativo registrado en Codex. Para crear el centro, necesitamos verificar tu identidad como docente.",
+    "center_name": "Nombre del Centro Educativo",
+    "city": "Ciudad",
+    "document_title": "Documento Justificante",
+    "document_hint": "Sube un documento que acredite tu vinculación con el centro (carnet de docente, contrato, certificado, etc.)",
+    "submit": "Crear Cuenta y Solicitar Centro",
+    "footer_note": "Un administrador revisará tu solicitud. Una vez aprobada, se creará el centro y tu cuenta será promovida a profesor.",
+    "placeholders": {
+      "fullname": "Ej: María García López",
+      "center": "Ej: IES Jaume I",
+      "city": "Ej: Barcelona"
+    },
+    "dropzone": {
+      "text": "Arrastra tu archivo aquí o",
+      "cta": "haz clic para seleccionar",
+      "formats": "PDF, JPG o PNG · máx. 5 MB"
+    },
+    "errors": {
+      "invalid_type": "Solo se aceptan archivos PDF, JPG o PNG.",
+      "file_too_large": "El archivo no puede superar los 5 MB."
+    }
+  },
+  "explore": {
+    "search_placeholder": "Buscar publicaciones, usuarios, tags, código...",
+    "searching": "Buscando...",
+    "results_for": "Resultados para \"{{query}}\"",
+    "no_results": "No se encontraron resultados para \"{{query}}\"",
+    "users": "Usuarios",
+    "categories": {
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "devops": "DevOps",
+      "databases": "Bases de Datos",
+      "mobile": "Mobile",
+      "security": "Seguridad"
+    }
+  },
+  "notifications": {
+    "loading": "Cargando notificaciones...",
+    "error": "Error al cargar notificaciones",
+    "mark_all_read": "Marcar todo como leído",
+    "filters": {
+      "all": "Todo",
+      "social": "Social",
+      "code": "Código"
+    },
+    "time": {
+      "ago_m": "Hace {{count}} min",
+      "ago_h": "Hace {{count}}h",
+      "ago_d": "Hace {{count}} días",
+      "yesterday": "Ayer"
+    }
+  },
+  "more": {
+    "description": "Configuración y otras opciones."
+  },
+  "email_verification": {
+    "title": "Verifica tu correo",
+    "description": "Te hemos enviado un enlace de verificación a ",
+    "resend": "Reenviar email",
+    "resend_cooldown": "Reenviar en {{seconds}}s"
+  }
+}

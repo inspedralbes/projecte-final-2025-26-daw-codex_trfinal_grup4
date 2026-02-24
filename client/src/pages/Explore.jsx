@@ -1,65 +1,103 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSearch } from '@/hooks/useSearch';
-import { useTags } from '@/hooks/useTags';
-import profileService from '@/services/profileService';
-import PostCard from '@/components/feed/PostCard';
-import './Explore.css';
+import React, { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { useSearch } from "@/hooks/useSearch";
+import { useTags } from "@/hooks/useTags";
+import profileService from "@/services/profileService";
+import PostCard from "@/components/feed/PostCard";
+import "./Explore.css";
 
 // Icons
 const SearchIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="11" cy="11" r="8" />
+    <path d="m21 21-4.35-4.35" />
   </svg>
 );
 
 const TrendingIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+    <polyline points="17 6 23 6 23 12" />
   </svg>
 );
 
 const StarIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
   </svg>
 );
 
 const LoadingSpinner = () => (
   <div className="explore__spinner">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
-      <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/>
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+      <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
     </svg>
   </div>
 );
 
-// Static categories for browsing
-const categories = [
-  { name: 'Frontend', icon: '🎨' },
-  { name: 'Backend', icon: '⚙️' },
-  { name: 'DevOps', icon: '🚀' },
-  { name: 'Bases de Datos', icon: '🗄️' },
-  { name: 'Mobile', icon: '📱' },
-  { name: 'Seguridad', icon: '🔒' },
-];
-
 export default function Explore() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+
+  // Static categories for browsing
+  const categories = [
+    { name: t("explore.categories.frontend"), icon: "🎨" },
+    { name: t("explore.categories.backend"), icon: "⚙️" },
+    { name: t("explore.categories.devops"), icon: "🚀" },
+    { name: t("explore.categories.databases"), icon: "🗄️" },
+    { name: t("explore.categories.mobile"), icon: "📱" },
+    { name: t("explore.categories.security"), icon: "🔒" },
+  ];
+  const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [topContributors, setTopContributors] = useState([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
-  
+
   // Use search hook
-  const { 
-    results: searchResults, 
-    loading: searchLoading, 
+  const {
+    results: searchResults,
+    loading: searchLoading,
     error: searchError,
     search,
-    clearResults 
+    clearResults,
   } = useSearch();
-  
+
   // Use tags hook for trending tags
   const { tags: trendingTags, loading: tagsLoading } = useTags();
 
@@ -71,7 +109,7 @@ export default function Explore() {
         const response = await profileService.getLeaderboard(5);
         setTopContributors(response.data || response || []);
       } catch (err) {
-        console.error('Error fetching leaderboard:', err);
+        console.error("Error fetching leaderboard:", err);
         setTopContributors([]);
       } finally {
         setLoadingLeaderboard(false);
@@ -91,7 +129,7 @@ export default function Explore() {
         setShowResults(false);
       }
     }, 300);
-    
+
     return () => clearTimeout(timer);
   }, [searchQuery, search, clearResults]);
 
@@ -104,7 +142,7 @@ export default function Explore() {
 
   // Handle tag click
   const handleTagClick = (tagName) => {
-    const tag = tagName.startsWith('#') ? tagName : `#${tagName}`;
+    const tag = tagName.startsWith("#") ? tagName : `#${tagName}`;
     setSearchQuery(tag);
     search(tag);
     setShowResults(true);
@@ -112,7 +150,7 @@ export default function Explore() {
 
   // Handle user profile navigation
   const handleUserClick = (username) => {
-    navigate(`/profile/${username.replace('@', '')}`);
+    navigate(`/profile/${username.replace("@", "")}`);
   };
 
   // Format tag display
@@ -120,31 +158,34 @@ export default function Explore() {
     return tags.slice(0, 5).map((tag, index) => ({
       tag: tag.name ? `#${tag.name}` : tag.tag || `#${tag}`,
       growth: tag.growth || `+${Math.floor(Math.random() * 200)}%`,
-      posts: tag.posts_count || tag.posts || Math.floor(Math.random() * 2000)
+      posts: tag.posts_count || tag.posts || Math.floor(Math.random() * 2000),
     }));
   };
 
   // Get formatted trending tags from API
-  const displayTrendingTags = trendingTags.length > 0 
-    ? formatTrendingTags(trendingTags)
-    : [
-        { tag: '#SpringBoot', growth: '+245%', posts: 1234 },
-        { tag: '#ReactQuery', growth: '+189%', posts: 892 },
-        { tag: '#TailwindCSS', growth: '+156%', posts: 2103 },
-        { tag: '#PostgreSQL', growth: '+134%', posts: 756 },
-        { tag: '#DockerCompose', growth: '+98%', posts: 543 },
-      ];
+  const displayTrendingTags =
+    trendingTags.length > 0
+      ? formatTrendingTags(trendingTags)
+      : [
+          { tag: "#SpringBoot", growth: "+245%", posts: 1234 },
+          { tag: "#ReactQuery", growth: "+189%", posts: 892 },
+          { tag: "#TailwindCSS", growth: "+156%", posts: 2103 },
+          { tag: "#PostgreSQL", growth: "+134%", posts: 756 },
+          { tag: "#DockerCompose", growth: "+98%", posts: 543 },
+        ];
 
   return (
     <div className="explore">
       {/* Search Header */}
       <header className="explore__header">
         <div className="explore__search">
-          <span className="explore__search-icon"><SearchIcon /></span>
+          <span className="explore__search-icon">
+            <SearchIcon />
+          </span>
           <input
             type="text"
             className="explore__search-input"
-            placeholder="Buscar publicaciones, usuarios, tags, código..."
+            placeholder={t("explore.search_placeholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -157,39 +198,46 @@ export default function Explore() {
       {showResults && searchQuery.trim().length >= 2 && (
         <section className="explore__results">
           <div className="explore__results-header">
-            <h2>Resultados para "{searchQuery}"</h2>
-            <button 
+            <h2>{t("explore.results_for", { query: searchQuery })}</h2>
+            <button
               className="explore__results-close"
-              onClick={() => { setShowResults(false); setSearchQuery(''); clearResults(); }}
+              onClick={() => {
+                setShowResults(false);
+                setSearchQuery("");
+                clearResults();
+              }}
             >
               ✕
             </button>
           </div>
-          
+
           {searchLoading ? (
             <div className="explore__results-loading">
               <LoadingSpinner />
-              <p>Buscando...</p>
+              <p>{t("explore.searching")}</p>
             </div>
           ) : searchResults.posts?.length === 0 && searchResults.users?.length === 0 ? (
             <div className="explore__results-empty">
-              <p>No se encontraron resultados para "{searchQuery}"</p>
+              <p>{t("explore.no_results", { query: searchQuery })}</p>
             </div>
           ) : (
             <div className="explore__results-content">
               {/* Users Results */}
               {searchResults.users?.length > 0 && (
                 <div className="explore__results-section">
-                  <h3>Usuarios</h3>
+                  <h3>{t("explore.users")}</h3>
                   <div className="explore__results-users">
-                    {searchResults.users.map(user => (
+                    {searchResults.users.map((user) => (
                       <button
                         key={user.id}
                         className="explore__result-user"
                         onClick={() => handleUserClick(user.username)}
                       >
-                        <img 
-                          src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} 
+                        <img
+                          src={
+                            user.avatar ||
+                            `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
+                          }
                           alt={user.name}
                           className="explore__result-user-avatar"
                         />
@@ -202,13 +250,13 @@ export default function Explore() {
                   </div>
                 </div>
               )}
-              
+
               {/* Posts Results */}
               {searchResults.posts?.length > 0 && (
                 <div className="explore__results-section">
-                  <h3>Publicaciones</h3>
+                  <h3>{t("feed.posts_count")}</h3>
                   <div className="explore__results-posts">
-                    {searchResults.posts.map(post => (
+                    {searchResults.posts.map((post) => (
                       <PostCard key={post.id} post={post} />
                     ))}
                   </div>
@@ -224,9 +272,9 @@ export default function Explore() {
         <>
           {/* Categories */}
           <section className="explore__categories">
-            {categories.map(cat => (
-              <button 
-                key={cat.name} 
+            {categories.map((cat) => (
+              <button
+                key={cat.name}
                 className="explore__category"
                 onClick={() => handleCategoryClick(cat.name)}
               >
@@ -242,22 +290,26 @@ export default function Explore() {
             <section className="explore__widget explore__widget--trending">
               <div className="explore__widget-header">
                 <TrendingIcon />
-                <h2 className="explore__widget-title">Tendencias</h2>
+                <h2 className="explore__widget-title">{t("widgets.trending")}</h2>
               </div>
               <div className="explore__widget-content">
                 {tagsLoading ? (
-                  <div className="explore__widget-loading"><LoadingSpinner /></div>
+                  <div className="explore__widget-loading">
+                    <LoadingSpinner />
+                  </div>
                 ) : (
                   displayTrendingTags.map((trend, index) => (
-                    <button 
-                      key={trend.tag} 
+                    <button
+                      key={trend.tag}
                       className="explore__trend"
                       onClick={() => handleTagClick(trend.tag)}
                     >
                       <span className="explore__trend-rank">{index + 1}</span>
                       <div className="explore__trend-info">
                         <span className="explore__trend-tag">{trend.tag}</span>
-                        <span className="explore__trend-posts">{trend.posts} publicaciones</span>
+                        <span className="explore__trend-posts">
+                          {trend.posts} {t("feed.posts_count")}
+                        </span>
                       </div>
                       <span className="explore__trend-growth">{trend.growth}</span>
                     </button>
@@ -270,25 +322,35 @@ export default function Explore() {
             <section className="explore__widget explore__widget--contributors">
               <div className="explore__widget-header">
                 <StarIcon />
-                <h2 className="explore__widget-title">Top Contribuidores</h2>
+                <h2 className="explore__widget-title">{t("widgets.top_contributors")}</h2>
               </div>
               <div className="explore__widget-content">
                 {loadingLeaderboard ? (
-                  <div className="explore__widget-loading"><LoadingSpinner /></div>
+                  <div className="explore__widget-loading">
+                    <LoadingSpinner />
+                  </div>
                 ) : topContributors.length === 0 ? (
-                  <p className="explore__widget-empty">No hay contribuidores aún</p>
+                  <p className="explore__widget-empty">{t("widgets.no_contributors")}</p>
                 ) : (
-                  topContributors.map(user => (
-                    <button 
-                      key={user.id} 
+                  topContributors.map((user) => (
+                    <button
+                      key={user.id}
                       className="explore__contributor"
                       onClick={() => handleUserClick(user.username)}
                     >
-                      <span className={`explore__contributor-rank explore__contributor-rank--${user.rank}`}>
+                      <span
+                        className={`explore__contributor-rank explore__contributor-rank--${user.rank}`}
+                      >
                         {user.rank}
                       </span>
                       <div className="explore__contributor-avatar">
-                        <img src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} alt={user.name} />
+                        <img
+                          src={
+                            user.avatar ||
+                            `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
+                          }
+                          alt={user.name}
+                        />
                       </div>
                       <div className="explore__contributor-info">
                         <span className="explore__contributor-name">

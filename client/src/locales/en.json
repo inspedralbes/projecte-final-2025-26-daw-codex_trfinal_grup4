@@ -1,0 +1,244 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error_server": "Server error. Please try again later.",
+    "error_generic": "An error occurred. Please try again.",
+    "logout": "Log out",
+    "search_placeholder": "Search...",
+    "search_placeholder_codex": "Search in Codex...",
+    "user": "User",
+    "anonymous": "anonymous",
+    "see_more": "See more",
+    "see_all": "See all",
+    "processing": "Processing...",
+    "cancel": "Cancel",
+    "close": "Close",
+    "retry": "Retry",
+    "load_more": "Load more",
+    "delete": "Delete"
+  },
+  "widgets": {
+    "trending": "Trending",
+    "no_trends": "No trends available",
+    "top_contributors": "Top Contributors",
+    "no_contributors": "No contributors available",
+    "see_ranking": "See ranking",
+    "recent_questions": "Recent Questions",
+    "no_questions": "No questions available"
+  },
+  "feed": {
+    "publish": "Publish",
+    "post_question": "Post Question",
+    "posts_count": "posts",
+    "no_title": "No title",
+    "placeholder_news": "What do you want to share today?",
+    "placeholder_question": "What technical question do you have?",
+    "code_placeholder": "// Paste your code here...",
+    "tags_placeholder": "Tags (comma or space separated)",
+    "visibility_public": "Public",
+    "loading_posts": "Loading posts...",
+    "no_posts": "No posts yet.",
+    "be_first": "Be the first to share something!",
+    "solved": "Solved",
+    "reposted": "reposted",
+    "delete_confirm": "Are you sure you want to delete this post?",
+    "tabs": {
+      "for_you": "For you",
+      "following": "Following"
+    },
+    "tools": {
+      "add_code": "Add code",
+      "add_image": "Add image",
+      "add_link": "Add link",
+      "add_question": "Post question"
+    },
+    "time": {
+      "now": "now",
+      "m": "m",
+      "h": "h",
+      "d": "d"
+    }
+  },
+  "profile": {
+    "loading": "Loading profile...",
+    "error": "Error loading profile",
+    "bio": "Bio",
+    "followers": "Followers",
+    "points": "Points",
+    "joined": "Joined",
+    "follow": "Follow",
+    "unfollow": "Following",
+    "likes": "Likes",
+    "no_posts_category": "No posts in this category",
+    "edit": {
+      "title": "Edit profile",
+      "cta": "Edit profile",
+      "save": "Save",
+      "bio_placeholder": "Tell us about yourself...",
+      "error": "Error saving changes"
+    },
+    "links": {
+      "other": "Other link",
+      "web": "Web"
+    }
+  },
+  "sidebar": {
+    "home": "Home",
+    "explore": "Explore",
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "profile": "Profile",
+    "center": "Center",
+    "more": "More",
+    "teacher": "Teacher",
+    "admin": "Admin",
+    "student": "Student"
+  },
+  "footer": {
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "cookies": "Cookies",
+    "help": "Help"
+  },
+  "auth": {
+    "login_success": "Login successful! Welcome back.",
+    "register_success": "Account created successfully! We've sent you a verification email.",
+    "register_teacher_success": "Account created! Your center request has been sent. An administrator will review it soon.",
+    "logout_info": "Session closed successfully.",
+    "token_error": "Error: no authentication token received.",
+    "login_error_fallback": "Login error. Please check your credentials.",
+    "register_error_fallback": "Registration error. Please try again.",
+    "password_requirements": {
+      "title": "Password requirements",
+      "length": "At least 8 characters",
+      "uppercase": "At least one uppercase letter",
+      "lowercase": "At least one lowercase letter",
+      "number": "At least one number"
+    }
+  },
+  "landing": {
+    "welcome": "Welcome to Codex",
+    "tagline": "The social network for IT students and teachers",
+    "login": "Log in",
+    "register": "Create account",
+    "already_account": "Already have an account? ",
+    "no_account": "Don't have an account? ",
+    "register_here": "Register here",
+    "email": "Email",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "username": "Username",
+    "full_name": "Full name",
+    "center": "Center",
+    "badge": "Academic Social Network for Developers",
+    "hero_title_part1": "The space where",
+    "hero_title_accent": "IT students",
+    "hero_title_part2": "share code",
+    "hero_subtitle": "Connect with your center, solve technical doubts and build your professional portfolio alongside the community of DAM, DAW and ASIX from all over Spain.",
+    "auth_title_login": "Welcome to Codex",
+    "auth_title_register": "Join Codex",
+    "auth_subtitle_login": "Log in to continue",
+    "auth_subtitle_register": "Use your center email for full access",
+    "footer_text": "The academic social network for the IT vocational training ecosystem in Spain",
+    "features": {
+      "snippets": {
+        "title": "Syntax Snippets",
+        "desc": "Share code with highlighting"
+      },
+      "hub": {
+        "title": "Center Hub",
+        "desc": "Private space for your institute"
+      }
+    },
+    "messages": {
+      "checking_domain": "Checking domain...",
+      "center_detected": "detected – Full access",
+      "center_pending": "Center under review – Your request is pending",
+      "verification_required": "No center for this domain – Verification will be required",
+      "domain_not_recognized": "Domain not recognized",
+      "check_review": "🎉 Account created! Your center request is under review.",
+      "passwords_match": "Passwords match"
+    },
+    "errors": {
+      "password_requirements": "The password does not meet all requirements.",
+      "passwords_dont_match": "Passwords do not match."
+    }
+  },
+  "center": {
+    "no_center_title": "You do not belong to any center",
+    "no_center_desc": "Contact your administrator to join an educational center.",
+    "loading": "Loading center...",
+    "default_name": "Educational Center",
+    "private": "Private",
+    "members": "members",
+    "members_tab": "Members",
+    "since": "Since",
+    "resources": "Resources",
+    "pinned": "Pinned"
+  },
+  "teacher_modal": {
+    "title": "Teacher Verification",
+    "desc_intro": "The domain",
+    "desc_body": "does not have an educational center registered in Codex. To create the center, we need to verify your identity as a teacher.",
+    "center_name": "Educational Center Name",
+    "city": "City",
+    "document_title": "Supporting Document",
+    "document_hint": "Upload a document that proves your connection with the center (teacher ID, contract, certificate, etc.)",
+    "submit": "Create Account and Request Center",
+    "footer_note": "An administrator will review your request. Once approved, the center will be created and your account will be promoted to teacher.",
+    "placeholders": {
+      "fullname": "E.g.: Mary Smith Jones",
+      "center": "E.g.: High School North",
+      "city": "E.g.: New York"
+    },
+    "dropzone": {
+      "text": "Drag your file here or",
+      "cta": "click to select",
+      "formats": "PDF, JPG or PNG · max. 5 MB"
+    },
+    "errors": {
+      "invalid_type": "Only PDF, JPG or PNG files are accepted.",
+      "file_too_large": "The file cannot exceed 5 MB."
+    }
+  },
+  "explore": {
+    "search_placeholder": "Search posts, users, tags, code...",
+    "searching": "Searching...",
+    "results_for": "Results for \"{{query}}\"",
+    "no_results": "No results found for \"{{query}}\"",
+    "users": "Users",
+    "categories": {
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "devops": "DevOps",
+      "databases": "Databases",
+      "mobile": "Mobile",
+      "security": "Security"
+    }
+  },
+  "notifications": {
+    "loading": "Loading notifications...",
+    "error": "Error loading notifications",
+    "mark_all_read": "Mark all as read",
+    "filters": {
+      "all": "All",
+      "social": "Social",
+      "code": "Code"
+    },
+    "time": {
+      "ago_m": "{{count}} min ago",
+      "ago_h": "{{count}}h ago",
+      "ago_d": "{{count}} days ago",
+      "yesterday": "Yesterday"
+    }
+  },
+  "more": {
+    "description": "Settings and other options."
+  },
+  "email_verification": {
+    "title": "Verify your email",
+    "description": "We've sent a verification link to ",
+    "resend": "Resend email",
+    "resend_cooldown": "Resend in {{seconds}}s"
+  }
+}

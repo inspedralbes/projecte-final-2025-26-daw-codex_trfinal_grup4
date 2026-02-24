@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { usePosts } from "@/hooks/usePosts";
@@ -24,6 +26,7 @@ const LoadingSpinner = () => (
 
 // ── Edit Profile Modal ───────────────────────────────────────
 function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: profile.name || "",
     bio: profile.bio || "",
@@ -91,7 +94,7 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
     if (result.success) {
       onClose();
     } else {
-      setError(result.error || "Error al guardar cambios");
+      setError(result.error || t("profile.edit.error"));
     }
   };
 
@@ -99,8 +102,8 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
     <div className="edit-modal__backdrop" onClick={handleBackdropClick}>
       <div className="edit-modal">
         <div className="edit-modal__header">
-          <h2 className="edit-modal__title">Editar perfil</h2>
-          <button className="edit-modal__close" onClick={onClose} aria-label="Cerrar">
+          <h2 className="edit-modal__title">{t("profile.edit.title")}</h2>
+          <button className="edit-modal__close" onClick={onClose} aria-label={t("common.close")}>
             <svg
               width="20"
               height="20"
@@ -121,7 +124,7 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
           {/* Avatar */}
           <div className="edit-modal__avatar-section">
             <div className="edit-modal__avatar" onClick={() => fileInputRef.current?.click()}>
-              <img src={avatarPreview} alt="Avatar" />
+              <img src={avatarPreview} alt={t("common.user")} />
               <div className="edit-modal__avatar-overlay">
                 <svg
                   width="20"
@@ -148,7 +151,7 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
           {/* Name */}
           <div className="edit-modal__field">
             <label className="edit-modal__label" htmlFor="edit-name">
-              Nombre
+              {t("landing.full_name")}
             </label>
             <input
               id="edit-name"
@@ -165,7 +168,7 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
           {/* Bio */}
           <div className="edit-modal__field">
             <label className="edit-modal__label" htmlFor="edit-bio">
-              Biografía
+              {t("profile.bio")}
             </label>
             <textarea
               id="edit-bio"
@@ -175,7 +178,7 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
               onChange={handleChange}
               maxLength={1000}
               rows={3}
-              placeholder="Cuéntanos sobre ti..."
+              placeholder={t("profile.edit.bio_placeholder")}
             />
             <span className="edit-modal__char-count">{form.bio.length}/1000</span>
           </div>
@@ -245,7 +248,7 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
-              Otro enlace
+              {t("profile.links.web")}
             </label>
             <input
               id="edit-external"
@@ -269,10 +272,10 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
               onClick={onClose}
               disabled={saving}
             >
-              Cancelar
+              {t("common.cancel")}
             </button>
             <button type="submit" className="edit-modal__save" disabled={saving}>
-              {saving ? "Guardando..." : "Guardar"}
+              {saving ? t("common.processing") : t("profile.edit.save")}
             </button>
           </div>
         </form>
@@ -283,6 +286,7 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
 
 // ── Main Profile Component ───────────────────────────────────
 export default function Profile({ username }) {
+  const { t } = useTranslation();
   const { user: currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState("posts");
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -318,7 +322,7 @@ export default function Profile({ username }) {
       <div className="profile">
         <div className="profile__loading">
           <LoadingSpinner />
-          <p>Cargando perfil...</p>
+          <p>{t("profile.loading")}</p>
         </div>
       </div>
     );
@@ -328,7 +332,9 @@ export default function Profile({ username }) {
     return (
       <div className="profile">
         <div className="profile__error">
-          <p>Error al cargar el perfil: {profileError}</p>
+          <p>
+            {t("profile.error")}: {profileError}
+          </p>
         </div>
       </div>
     );
@@ -339,17 +345,20 @@ export default function Profile({ username }) {
   const user = profile;
 
   const joinedDate = user.created_at
-    ? new Date(user.created_at).toLocaleDateString("es-ES", { month: "long", year: "numeric" })
+    ? new Date(user.created_at).toLocaleDateString(i18next.language, {
+        month: "long",
+        year: "numeric",
+      })
     : null;
 
   const roleName =
     user.role === "student"
-      ? "Estudiante"
+      ? t("sidebar.student")
       : user.role === "teacher"
-        ? "Profesor"
+        ? t("sidebar.teacher")
         : user.role === "admin"
-          ? "Admin"
-          : user.role || "Usuario";
+          ? t("sidebar.admin")
+          : user.role || t("common.user");
 
   // Filter posts based on active tab
   const filteredPosts = posts.filter((post) => {
@@ -388,15 +397,15 @@ export default function Profile({ username }) {
         <div className="profile__stats">
           <div className="profile__stat">
             <span className="profile__stat-value">{user.posts_count || 0}</span>
-            <span className="profile__stat-label">Posts</span>
+            <span className="profile__stat-label">{t("feed.posts_count")}</span>
           </div>
           <div className="profile__stat">
             <span className="profile__stat-value">{user.followers_count || 0}</span>
-            <span className="profile__stat-label">Seguidores</span>
+            <span className="profile__stat-label">{t("profile.followers")}</span>
           </div>
           <div className="profile__stat">
             <span className="profile__stat-value">{user.following_count || 0}</span>
-            <span className="profile__stat-label">Siguiendo</span>
+            <span className="profile__stat-label">{t("feed.tabs.following")}</span>
           </div>
           <div className="profile__stat">
             <span className="profile__stat-value">
@@ -404,7 +413,7 @@ export default function Profile({ username }) {
                 ? user.reputation?.score || 0
                 : user.reputation || 0}
             </span>
-            <span className="profile__stat-label">Puntos</span>
+            <span className="profile__stat-label">{t("profile.points")}</span>
           </div>
         </div>
 
@@ -505,7 +514,7 @@ export default function Profile({ username }) {
                     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                     <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                   </svg>
-                  Web
+                  {t("profile.links.web")}
                 </a>
               )}
             </div>
@@ -527,7 +536,9 @@ export default function Profile({ username }) {
                 <line x1="8" y1="2" x2="8" y2="6" />
                 <line x1="3" y1="10" x2="21" y2="10" />
               </svg>
-              <span>Se unió en {joinedDate}</span>
+              <span>
+                {t("profile.joined")} {joinedDate}
+              </span>
             </div>
           )}
         </div>
@@ -535,14 +546,14 @@ export default function Profile({ username }) {
         {/* Action button */}
         {isOwnProfile ? (
           <button className="profile__edit-btn" onClick={() => setEditModalOpen(true)}>
-            Editar perfil
+            {t("profile.edit.cta")}
           </button>
         ) : (
           <button
             className={`profile__follow-btn ${isFollowing ? "profile__follow-btn--following" : ""}`}
             onClick={toggleFollow}
           >
-            {isFollowing ? "Siguiendo" : "Seguir"}
+            {isFollowing ? t("profile.unfollow") : t("profile.follow")}
           </button>
         )}
       </div>
@@ -553,20 +564,20 @@ export default function Profile({ username }) {
           className={`profile__tab ${activeTab === "posts" ? "profile__tab--active" : ""}`}
           onClick={() => setActiveTab("posts")}
         >
-          Posts
+          {t("sidebar.profile")}
         </button>
         <button
           className={`profile__tab ${activeTab === "questions" ? "profile__tab--active" : ""}`}
           onClick={() => setActiveTab("questions")}
         >
-          Dudas
+          {t("widgets.recent_questions")}
         </button>
         {isOwnProfile && (
           <button
             className={`profile__tab ${activeTab === "likes" ? "profile__tab--active" : ""}`}
             onClick={() => setActiveTab("likes")}
           >
-            Me gusta
+            {t("profile.likes")}
           </button>
         )}
       </nav>
@@ -579,7 +590,7 @@ export default function Profile({ username }) {
           </div>
         ) : filteredPosts.length === 0 ? (
           <div className="profile__posts-empty">
-            <p>No hay publicaciones en esta categoría</p>
+            <p>{t("profile.no_posts_category")}</p>
           </div>
         ) : (
           <>
@@ -593,7 +604,7 @@ export default function Profile({ username }) {
             ))}
             {hasMore && (
               <button className="profile__load-more" onClick={loadMore} disabled={postsLoading}>
-                {postsLoading ? "Cargando..." : "Cargar más"}
+                {postsLoading ? t("common.loading") : t("common.load_more")}
               </button>
             )}
           </>

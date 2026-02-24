@@ -1,10 +1,12 @@
-import React from 'react';
+import React from "react";
+import { useTranslation } from "react-i18next";
 
 export default function More() {
-    return (
-        <div style={{ padding: '16px', color: 'var(--color-text)' }}>
-            <h2>Més opcions</h2>
-            <p style={{ color: 'var(--color-text-secondary)' }}>Configuració i altres opcions.</p>
-        </div>
-    );
+  const { t } = useTranslation();
+  return (
+    <div style={{ padding: "16px", color: "var(--color-text)" }}>
+      <h2>{t("sidebar.more")}</h2>
+      <p style={{ color: "var(--color-text-secondary)" }}>{t("more.description")}</p>
+    </div>
+  );
 }

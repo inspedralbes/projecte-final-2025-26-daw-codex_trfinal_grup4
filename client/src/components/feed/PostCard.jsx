@@ -1,24 +1,53 @@
-import React, { useState, useCallback } from 'react';
-import { useInteractions } from '@/hooks/useInteractions';
-import postsService from '@/services/postsService';
-import { useAuth } from '@/hooks/useAuth';
-import './PostCard.css';
+import React, { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import i18next from "i18next";
+import { useInteractions } from "@/hooks/useInteractions";
+import postsService from "@/services/postsService";
+import { useAuth } from "@/hooks/useAuth";
+import "./PostCard.css";
 
 // Icons
 const HeartIcon = ({ filled }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill={filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
   </svg>
 );
 
 const CommentIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
   </svg>
 );
 
 const RepostIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <polyline points="17 1 21 5 17 9" />
     <path d="M3 11V9a4 4 0 0 1 4-4h14" />
     <polyline points="7 23 3 19 7 15" />
@@ -27,13 +56,31 @@ const RepostIcon = () => (
 );
 
 const BookmarkIcon = ({ filled }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill={filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
   </svg>
 );
 
 const ShareIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
     <polyline points="16 6 12 2 8 6" />
     <line x1="12" y1="2" x2="12" y2="15" />
@@ -41,7 +88,16 @@ const ShareIcon = () => (
 );
 
 const MoreIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <circle cx="12" cy="12" r="1" />
     <circle cx="19" cy="12" r="1" />
     <circle cx="5" cy="12" r="1" />
@@ -54,15 +110,20 @@ const VerifiedIcon = () => (
   </svg>
 );
 
-const QuestionBadge = ({ solved }) => (
-  <span className={`post-card__question-badge ${solved ? 'post-card__question-badge--solved' : ''}`}>
-    {solved ? '✓ Resuelto' : '? Duda técnica'}
-  </span>
-);
+export const QuestionBadge = ({ solved }) => {
+  const { t } = useTranslation();
+  return (
+    <span
+      className={`post-card__question-badge ${solved ? "post-card__question-badge--solved" : ""}`}
+    >
+      {solved ? `✓ ${t("feed.solved")}` : `? ${t("widgets.recent_questions")}`}
+    </span>
+  );
+};
 
 // Helper to format relative time
 const formatTimestamp = (timestamp) => {
-  if (!timestamp) return '';
+  if (!timestamp) return "";
   const date = new Date(timestamp);
   const now = new Date();
   const diffMs = now - date;
@@ -70,43 +131,38 @@ const formatTimestamp = (timestamp) => {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return 'ahora';
-  if (diffMins < 60) return `${diffMins}m`;
-  if (diffHours < 24) return `${diffHours}h`;
-  if (diffDays < 7) return `${diffDays}d`;
-  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  if (diffMins < 1) return i18next.t("feed.time.now");
+  if (diffMins < 60) return `${diffMins}${i18next.t("feed.time.m")}`;
+  if (diffHours < 24) return `${diffHours}${i18next.t("feed.time.h")}`;
+  if (diffDays < 7) return `${diffDays}${i18next.t("feed.time.d")}`;
+  return date.toLocaleDateString(i18next.language, { day: "numeric", month: "short" });
 };
 
 // Map API role to display badge
 const getRoleBadge = (user) => {
   if (!user) return null;
-  if (user.role === 'teacher') return 'Profesor';
-  if (user.role === 'admin') return 'Admin';
-  if (user.role === 'student' && user.center) {
+  if (user.role === "teacher") return i18next.t("sidebar.teacher");
+  if (user.role === "admin") return i18next.t("sidebar.admin");
+  if (user.role === "student" && user.center) {
     // Try to detect course from email or just show center
-    return user.center?.name?.substring(0, 8) || 'Estudiante';
+    return user.center?.name?.substring(0, 8) || "Estudiante";
   }
   return null;
 };
 
-export default function PostCard({ post, className = '', onInteractionUpdate, onDelete }) {
+export default function PostCard({ post, className = "", onInteractionUpdate, onDelete }) {
+  const { t } = useTranslation();
   const { user: currentUser } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const [reposting, setReposting] = useState(false);
 
   // Extract user from post (API returns user object)
   const author = post.user || post.author || {};
-  const isVerified = author.role === 'teacher' || author.role === 'admin';
+  const isVerified = author.role === "teacher" || author.role === "admin";
   const badge = getRoleBadge(author);
 
   // Use interactions hook for API calls
-  const {
-    liked,
-    bookmarked,
-    likesCount,
-    toggleLike,
-    toggleBookmark,
-  } = useInteractions({
+  const { liked, bookmarked, likesCount, toggleLike, toggleBookmark } = useInteractions({
     postId: post.id,
     likesCount: post.likes_count || post.stats?.likes || 0,
     bookmarksCount: post.bookmarks_count || post.stats?.bookmarks || 0,
@@ -120,9 +176,9 @@ export default function PostCard({ post, className = '', onInteractionUpdate, on
   const handleLike = useCallback(async () => {
     await toggleLike();
     if (onInteractionUpdate) {
-      onInteractionUpdate(post.id, { 
+      onInteractionUpdate(post.id, {
         likes_count: liked ? likesCount - 1 : likesCount + 1,
-        user_liked: !liked
+        user_liked: !liked,
       });
     }
   }, [toggleLike, onInteractionUpdate, post.id, liked, likesCount]);
@@ -138,14 +194,14 @@ export default function PostCard({ post, className = '', onInteractionUpdate, on
       await postsService.repost(post.id);
       // Could show success toast here
     } catch (err) {
-      console.error('Error reposting:', err);
+      console.error("Error reposting:", err);
     } finally {
       setReposting(false);
     }
   }, [post.id, reposting]);
 
   const handleDelete = useCallback(async () => {
-    if (onDelete && window.confirm('¿Estás seguro de que quieres eliminar esta publicación?')) {
+    if (onDelete && window.confirm(t("feed.delete_confirm"))) {
       await onDelete(post.id);
     }
     setShowMenu(false);
@@ -153,14 +209,16 @@ export default function PostCard({ post, className = '', onInteractionUpdate, on
 
   const formatNumber = (num) => {
     if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
+      return (num / 1000).toFixed(1) + "K";
     }
     return num;
   };
 
   const isOwner = currentUser?.id === author.id;
-  const postType = post.type || 'news';
-  const avatarUrl = author.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${author.username || author.name || 'user'}`;
+  const postType = post.type || "news";
+  const avatarUrl =
+    author.avatar ||
+    `https://api.dicebear.com/7.x/avataaars/svg?seed=${author.username || author.name || "user"}`;
 
   // Handle repost display
   const isRepost = post.is_repost || !!post.original_post;
@@ -171,15 +229,15 @@ export default function PostCard({ post, className = '', onInteractionUpdate, on
       {/* Repost indicator */}
       {isRepost && originalPost && (
         <div className="post-card__repost-indicator">
-          <RepostIcon /> <span>{author.name} ha reposteado</span>
+          <RepostIcon />{" "}
+          <span>
+            {author.name} {t("feed.reposted")}
+          </span>
         </div>
       )}
 
       <div className="post-card__avatar">
-        <img 
-          src={avatarUrl}
-          alt={author.name || 'Usuario'}
-        />
+        <img src={avatarUrl} alt={author.name || "Usuario"} />
       </div>
 
       <div className="post-card__content">
@@ -187,13 +245,11 @@ export default function PostCard({ post, className = '', onInteractionUpdate, on
         <header className="post-card__header">
           <div className="post-card__author">
             <span className="post-card__name">
-              {author.name || 'Usuario'}
+              {author.name || "Usuario"}
               {isVerified && <VerifiedIcon />}
             </span>
-            <span className="post-card__handle">@{author.username || 'user'}</span>
-            {badge && (
-              <span className="post-card__badge">{badge}</span>
-            )}
+            <span className="post-card__handle">@{author.username || "user"}</span>
+            {badge && <span className="post-card__badge">{badge}</span>}
             <span className="post-card__dot">·</span>
             <span className="post-card__time">{formatTimestamp(post.created_at)}</span>
           </div>
@@ -204,12 +260,15 @@ export default function PostCard({ post, className = '', onInteractionUpdate, on
             {showMenu && (
               <div className="post-card__dropdown">
                 {isOwner && (
-                  <button onClick={handleDelete} className="post-card__dropdown-item post-card__dropdown-item--danger">
-                    Eliminar
+                  <button
+                    onClick={handleDelete}
+                    className="post-card__dropdown-item post-card__dropdown-item--danger"
+                  >
+                    {t("common.delete")}
                   </button>
                 )}
                 <button onClick={() => setShowMenu(false)} className="post-card__dropdown-item">
-                  Cerrar
+                  {t("common.close")}
                 </button>
               </div>
             )}
@@ -217,9 +276,7 @@ export default function PostCard({ post, className = '', onInteractionUpdate, on
         </header>
 
         {/* Question Badge */}
-        {postType === 'question' && (
-          <QuestionBadge solved={post.is_solved || post.solved} />
-        )}
+        {postType === "question" && <QuestionBadge solved={post.is_solved || post.solved} />}
 
         {/* Text Content */}
         <p className="post-card__text">{post.content}</p>
@@ -229,9 +286,11 @@ export default function PostCard({ post, className = '', onInteractionUpdate, on
           <div className="post-card__code">
             <div className="post-card__code-header">
               <div className="post-card__code-dots">
-                <span /><span /><span />
+                <span />
+                <span />
+                <span />
               </div>
-              <span className="post-card__code-lang">{post.code_language || 'code'}</span>
+              <span className="post-card__code-lang">{post.code_language || "code"}</span>
             </div>
             <pre className="post-card__code-content">
               <code>{post.code_snippet}</code>
@@ -242,10 +301,12 @@ export default function PostCard({ post, className = '', onInteractionUpdate, on
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
           <div className="post-card__tags">
-            {post.tags.map(tag => {
-              const tagName = typeof tag === 'string' ? tag : (tag.name || tag.slug);
+            {post.tags.map((tag) => {
+              const tagName = typeof tag === "string" ? tag : tag.name || tag.slug;
               return (
-                <a key={tagName} href="#" className="post-card__tag">#{tagName}</a>
+                <a key={tagName} href="#" className="post-card__tag">
+                  #{tagName}
+                </a>
               );
             })}
           </div>
@@ -257,23 +318,23 @@ export default function PostCard({ post, className = '', onInteractionUpdate, on
             <CommentIcon />
             <span>{formatNumber(commentsCount)}</span>
           </button>
-          <button 
-            className={`post-card__action post-card__action--repost ${reposting ? 'post-card__action--loading' : ''}`}
+          <button
+            className={`post-card__action post-card__action--repost ${reposting ? "post-card__action--loading" : ""}`}
             onClick={handleRepost}
             disabled={reposting}
           >
             <RepostIcon />
             <span>{formatNumber(repostsCount)}</span>
           </button>
-          <button 
-            className={`post-card__action post-card__action--like ${liked ? 'post-card__action--liked' : ''}`}
+          <button
+            className={`post-card__action post-card__action--like ${liked ? "post-card__action--liked" : ""}`}
             onClick={handleLike}
           >
             <HeartIcon filled={liked} />
             <span>{formatNumber(likesCount)}</span>
           </button>
-          <button 
-            className={`post-card__action ${bookmarked ? 'post-card__action--bookmarked' : ''}`}
+          <button
+            className={`post-card__action ${bookmarked ? "post-card__action--bookmarked" : ""}`}
             onClick={handleBookmark}
           >
             <BookmarkIcon filled={bookmarked} />

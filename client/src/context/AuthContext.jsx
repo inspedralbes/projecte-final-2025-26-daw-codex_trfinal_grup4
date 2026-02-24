@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import api from "@/services/api";
+import i18next from "i18next";
 
 export const AuthContext = createContext(null);
 
@@ -16,7 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [emailVerified, setEmailVerified] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Feedback message state: { type: 'success' | 'error' | 'info', text: string }
+  // Feedback message state: { type: 'success' | 'error' | 'info', messageKey: string, params?: object }
   const [authMessage, setAuthMessage] = useState(null);
 
   // Auto-clear messages after 6 seconds
@@ -74,14 +75,14 @@ export const AuthProvider = ({ children }) => {
 
       setAuthMessage({
         type: "success",
-        text: "✅ ¡Inicio de sesión exitoso! Bienvenido de vuelta.",
+        text: i18next.t("auth.login_success"),
       });
       return { success: true };
     } catch (error) {
       console.error("Login error", error);
 
       // Parse backend validation errors
-      const errorMsg = parseApiError(error, "Error al iniciar sesión. Verifica tus credenciales.");
+      const errorMsg = parseApiError(error, i18next.t("auth.login_error_fallback"));
       setAuthMessage({ type: "error", text: errorMsg });
 
       return {
@@ -111,7 +112,7 @@ export const AuthProvider = ({ children }) => {
 
       setAuthMessage({
         type: "success",
-        text: "🎉 ¡Cuenta creada correctamente! Te hemos enviado un email de verificación.",
+        text: i18next.t("auth.register_success"),
       });
       return { success: true };
     } catch (error) {
@@ -136,7 +137,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("token");
       setUser(null);
       setEmailVerified(false);
-      setAuthMessage({ type: "info", text: "Sesión cerrada correctamente." });
+      setAuthMessage({ type: "info", text: i18next.t("auth.logout_info") });
     }
   };
 
@@ -190,12 +191,12 @@ export const AuthProvider = ({ children }) => {
 
       setAuthMessage({
         type: "success",
-        text: "🎉 ¡Cuenta creada! Tu solicitud de centro ha sido enviada. Un administrador la revisará pronto.",
+        text: i18next.t("auth.register_success"),
       });
       return { success: true };
     } catch (error) {
       console.error("Register with center request error", error);
-      const errorMsg = parseApiError(error, "Error en el registro. Inténtalo de nuevo.");
+      const errorMsg = parseApiError(error, i18next.t("auth.register_error_fallback"));
       setAuthMessage({ type: "error", text: errorMsg });
       return { success: false, message: errorMsg };
     }
@@ -254,16 +255,18 @@ function parseApiError(error, fallback) {
   // If it's a simple message (but not a technical error)
   if (error?.message && error.message !== "Error") {
     const msg = error.message;
-    
+
     // Don't show technical errors to users
-    if (msg.includes('SQLSTATE') || 
-        msg.includes('Connection:') ||
-        msg.includes('Table') ||
-        msg.includes('Column') ||
-        msg.includes('SQL:')) {
+    if (
+      msg.includes("SQLSTATE") ||
+      msg.includes("Connection:") ||
+      msg.includes("Table") ||
+      msg.includes("Column") ||
+      msg.includes("SQL:")
+    ) {
       return fallback;
     }
-    
+
     return msg;
   }
 

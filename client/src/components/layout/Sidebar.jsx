@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import "./Sidebar.css";
@@ -152,16 +153,17 @@ const LogoutIcon = () => (
 );
 
 const navItems = [
-  { path: "/", label: "Feed Global", Icon: HomeIcon },
-  { path: "/explore", label: "Explorar", Icon: ExploreIcon },
-  { path: "/center", label: "Mi Centro", Icon: CenterIcon },
-  { path: "/notifications", label: "Notificaciones", Icon: NotificationsIcon },
-  { path: "/messages", label: "Mensajes", Icon: MessagesIcon },
-  { path: "/profile", label: "Perfil", Icon: ProfileIcon },
-  { path: "/more", label: "Más", Icon: MoreIcon },
+  { path: "/", label: "sidebar.home", Icon: HomeIcon },
+  { path: "/explore", label: "sidebar.explore", Icon: ExploreIcon },
+  { path: "/center", label: "sidebar.center", Icon: CenterIcon },
+  { path: "/notifications", label: "sidebar.notifications", Icon: NotificationsIcon },
+  { path: "/messages", label: "sidebar.messages", Icon: MessagesIcon },
+  { path: "/profile", label: "sidebar.profile", Icon: ProfileIcon },
+  { path: "/more", label: "sidebar.more", Icon: MoreIcon },
 ];
 
 export default function Sidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -200,7 +202,7 @@ export default function Sidebar() {
                 <span className="sidebar__nav-icon">
                   <Icon active={isActive} />
                 </span>
-                <span className="sidebar__nav-label">{label}</span>
+                <span className="sidebar__nav-label">{t(label)}</span>
               </NavLink>
             );
           })}
@@ -211,7 +213,7 @@ export default function Sidebar() {
           <span className="sidebar__post-btn-icon">
             <PenIcon />
           </span>
-          <span className="sidebar__post-btn-text">Publicar</span>
+          <span className="sidebar__post-btn-text">{t("feed.publish")}</span>
         </button>
 
         {/* User Profile */}
@@ -226,10 +228,12 @@ export default function Sidebar() {
             />
           </div>
           <div className="sidebar__user-info">
-            <span className="sidebar__user-name">{user?.name || "Usuario"}</span>
-            <span className="sidebar__user-handle">@{user?.username || "usuario"}</span>
+            <span className="sidebar__user-name">{user?.name || t("common.user")}</span>
+            <span className="sidebar__user-handle">
+              @{user?.username || t("common.user").toLowerCase()}
+            </span>
           </div>
-          <button className="sidebar__user-menu" onClick={handleLogout} title="Cerrar sesión">
+          <button className="sidebar__user-menu" onClick={handleLogout} title={t("common.logout")}>
             <LogoutIcon />
           </button>
         </div>

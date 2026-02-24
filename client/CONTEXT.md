@@ -82,14 +82,18 @@
 ```json
 {
   "dependencies": {
+    "i18next": "^25.x",
+    "i18next-browser-languagedetector": "^8.x",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.13.0"
+    "react-i18next": "^16.x",
+    "react-router-dom": "^7.13.0",
+    "socket.io-client": "^4.8.x"
   },
   "devDependencies": {
     "vitest": "^4.x",
     "@testing-library/react": "^16.x",
-    "jsdom": "^26.x"
+    "jsdom": "^28.x"
   }
 }
 ```
@@ -112,6 +116,24 @@
 ---
 
 ## 📅 Registre de canvis
+
+### 2026-02-24 – Suport Multidioma (i18n), Estabilització de l'Entorn i Fix de Referències
+
+- **Autor:** @iker
+- **Multi-idioma (i18next):**
+  - Implementat suport complet per a **Català (ca)**, **Espanyol (es)** i **Anglès (en)**.
+  - Creats fitxers de traducció a `src/locales/`.
+  - Configurat `src/i18n.js` amb detector de llenguatge (localStorage/browser) i fallback a espanyol.
+  - Creat component `LanguageSwitcher.jsx` per al canvi de llengua en temps real.
+  - Localitzades totes les rutes principals: `Feed`, `Profile`, `Explore`, `Notifications`, `CenterHub` i `More`.
+- **Estabilització i Debugging:**
+  - Corregits errors de referència (`createContext`, `useState`, `useRef`, `i18next`) a `AuthContext.jsx`, `Landing.jsx` i `PostCard.jsx`.
+  - Re-instal·lació de dependències dins del contenidor `tfg_client_dev` per resoldre conflictes de resolució de mòduls (`react-i18next`).
+  - Verificada l'estabilitat del dev server de Vite i el correcte renderitzat de la UI.
+- **Fitxers nous:**
+  - `src/i18n.js` — Configuració central d'i18next.
+  - `src/locales/{ca,es,en}.json` — Diccionaris de traduccions.
+  - `src/components/ui/LanguageSwitcher.jsx` / `.css` — Selector d'idiomes.
 
 ### 2026-02-23 – Sustitució del Logo (XC) i Entorn de Testing
 
@@ -301,11 +323,14 @@ src/
 │   ├── profile/
 │   │   └── Profile.jsx / Profile.css       # Perfil d'usuari (minimalista, dades reals)
 │   └── ui/
-│       └── Icons.jsx                # Icones SVG reutilitzables
+│       ├── Icons.jsx                # Icones SVG reutilitzables
+│       └── LanguageSwitcher.jsx / LanguageSwitcher.css # Selector d'idioma
 ├── context/
 │   └── AuthContext.jsx              # Provider auth global (login/register/logout/emailVerified/refreshUser)
 ├── hooks/
 │   └── useAuth.js                   # Hook per consumir AuthContext
+├── i18n.js                          # Configuració i18next
+├── locales/                         # Fitxers de traducció (ca, es, en)
 ├── pages/
 │   ├── Landing.jsx / Landing.css    # Welcome + Auth + Feedback UX
 │   ├── Home.jsx                     # Wrapper per Feed
