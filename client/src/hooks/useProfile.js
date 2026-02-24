@@ -97,11 +97,26 @@ export function useProfile(username) {
 
     socketService.onProfileUpdate(handleProfileUpdate);
 
+    const handlePostDeleted = (data) => {
+      if (data.user_id === profileIdRef.current) {
+        setProfile((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            posts_count: Math.max(0, (prev.posts_count || 0) - 1),
+          };
+        });
+      }
+    };
+
+    socketService.on("post.deleted", handlePostDeleted);
+
     return () => {
       if (profileIdRef.current) {
         socketService.leaveProfileRoom(profileIdRef.current);
       }
       socketService.off("profile.updated", handleProfileUpdate);
+      socketService.off("post.deleted", handlePostDeleted);
     };
   }, []); // Connect once, handle id changes via refs if needed or reconnect specifically
 
@@ -160,17 +175,26 @@ export function useProfile(username) {
     async (data) => {
       try {
         const response = await profileService.updateProfile(data);
+        const updatedUser = response.data || response;
+
+        // If username changed, don't fetch with old username
+        // The caller (Profile.jsx) will handle navigation
+        if (updatedUser.username !== profile?.username) {
+          if (isOwnProfile) await refreshUser();
+          return { success: true, data: updatedUser, usernameChanged: true };
+        }
+
         // Refresh local profile
         await fetchProfile();
         // Sync global auth state
         if (isOwnProfile) await refreshUser();
-        return { success: true, data: response.data || response };
+        return { success: true, data: updatedUser };
       } catch (err) {
         console.error("Error updating profile:", err);
         return { success: false, error: err.message || "Error al actualizar perfil" };
       }
     },
-    [fetchProfile, isOwnProfile, refreshUser],
+    [fetchProfile, isOwnProfile, refreshUser, profile?.username],
   );
 
   // Update profile with avatar
@@ -178,17 +202,25 @@ export function useProfile(username) {
     async (formData) => {
       try {
         const response = await profileService.updateProfileWithAvatar(formData);
+        const updatedUser = response.data || response;
+
+        // If username changed, handle transitions
+        if (updatedUser.username !== profile?.username) {
+          if (isOwnProfile) await refreshUser();
+          return { success: true, data: updatedUser, usernameChanged: true };
+        }
+
         // Refresh local profile
         await fetchProfile();
         // Sync global auth state
         if (isOwnProfile) await refreshUser();
-        return { success: true, data: response.data || response };
+        return { success: true, data: updatedUser };
       } catch (err) {
         console.error("Error updating profile with avatar:", err);
         return { success: false, error: err.message || "Error al actualizar perfil" };
       }
     },
-    [fetchProfile, isOwnProfile, refreshUser],
+    [fetchProfile, isOwnProfile, refreshUser, profile?.username],
   );
 
   return {

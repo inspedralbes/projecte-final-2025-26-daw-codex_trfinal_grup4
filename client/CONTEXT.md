@@ -301,6 +301,20 @@
   - Àvatar de la barra lateral ara fa servir `user.username` com a seed per a Dicebear (consistent amb la pàgina de perfil).
   - Botó de logout completament funcional.
 
+### 2026-02-24 – Millores de Perfil i Sincronització Real-Time
+
+- **Autor:** @iker
+- **Correcció de Redirecció (Rename):**
+  - Implementada lògica a `useProfile.js` per detectar canvis d'username.
+  - `Profile.jsx` ara redirigeix automàticament a la nova URL de perfil per evitar errors 404.
+- **URLs de Perfil Restaurades:**
+  - Tornats a afegir els enllaços de **Portfolio** i **Web** a la capçalera del perfil amb els seus respectius icones SVG.
+- **Sincronització Real-Time (Sockets):**
+  - **`socketService.js`**: Afegit mètode genèric `.on()` per a subscripció a events arbitràris.
+  - **`usePosts.js`**: Afegits listeners globals per a `post.deleted` (esborra de feeds) i `interaction.removed` (actualitza comptadors de likes/bookmarks).
+  - **`useProfile.js`**: Listener per a `post.deleted` per sincronitzar el comptador total de posts del perfil.
+  - **`Profile.jsx`**: Implementats listeners per sincronitzar en viu les pestanyes de Likes, Bookmarks i Replies quan s'eliminen continguts.
+
 ---
 
 ## 🎨 Estructura actual de components

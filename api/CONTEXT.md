@@ -671,6 +671,8 @@
     - `new.notification` → canal `user.{id}` — Notificacions (like, follow, comment, reply, repost)
     - `new.interaction` → canal `user.{id}` — Interaccions like/bookmark (ja existent)
     - `new.comment` → canal `post.{id}` — Comentaris nous a un post (ja existent)
+    - `post.deleted` → canal `user.{id}` i `profile.{id}` — Eliminació de post (Nou)
+    - `interaction.removed` → canal `user.{id}` — Like o bookmark eliminat (Nou)
 
 ### 2026-02-20 – Cerca per Tags i Leaderboard
 
@@ -702,6 +704,16 @@
     - Fixat `APP_URL=http://localhost:8080` per a URLs d'àvatar correctes.
     - Creat symlink de `storage` dins del contenidor.
     - Configurat Nginx per servir `/storage/` directament des del disc des de la carpeta `public`.
+
+### 2026-02-24 – Sincronització Real-Time de Eliminacions i Interaccions
+
+- **Autor:** @iker
+- **Nous Events Broadcast:**
+    - `PostDeleted`: S'emet quan un post és eliminat sàviament. Canal `user.{userId}` i `profile.{userId}`.
+    - `InteractionRemoved`: S'emet quan es desfà un like o bookmark. Canal `user.{userId}`.
+- **Canvis en Controladors:**
+    - `PostController@destroy`: Ara dispara `PostDeleted`.
+    - `InteractionController@toggle`: Ara dispara `InteractionRemoved` quan l'estat passa a `active: false`.
 
 ---
 

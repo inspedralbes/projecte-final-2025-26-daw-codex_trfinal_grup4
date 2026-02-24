@@ -182,6 +182,8 @@
   - `new.notification` — Notificació nova (like, follow, comment, reply, repost)
   - `new.interaction` — Interacció like/bookmark
   - `new.comment` — Comentari nou a un post
+  - `post.deleted` — Publicació eliminada (Nou)
+  - `interaction.removed` — Like o bookmark eliminat (Nou)
 - **Health check millorat**: `GET /health` ara retorna `subscribedChannels` (llista de canals que han rebut missatges, útil per debugging)
 - **Prefix Redis configurable**: via variable d'entorn `REDIS_PREFIX` (default: `tfg-database-`)
 - **Flux complet:**
@@ -211,6 +213,14 @@
   - `join-profile` → `{ profileId: N }` — El client s'uneix a la room del perfil `profile.N` per rebre actualitzacions de dades (avatar, nom, bio, stats) en temps real.
   - `leave-profile` → `{ profileId: N }` — El client abandona la room del perfil.
 - **Payload `profile.updated`:** `user_id`, `name`, `avatar`, `bio`, `followers_count`, `following_count`.
+
+### 2026-02-24 – Sincronització Real-Time d'Eliminacions (Broadcast)
+
+- **Autor:** @iker
+- **Noves entrades de broadcast (Laravel → Redis → Sockets):**
+  - `post.deleted`: Sincronitza l'eliminació de posts en tots els feeds mundials i perfils d'usuari.
+  - `interaction.removed`: Sincronitza la eliminació de likes/bookmarks per mantenir l'estat local del client sense refrescar.
+- **Client Side**: `socketService.js` actualitzat amb el mètode genèric `.on()` per capturar aquests nous events.
 
 ---
 

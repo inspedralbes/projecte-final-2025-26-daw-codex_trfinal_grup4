@@ -155,6 +155,17 @@ const socketService = {
   },
 
   /**
+   * Listen for any event
+   * @param {string} event - Event name
+   * @param {Function} callback - Handler function
+   */
+  on: (event, callback) => {
+    if (socket) {
+      socket.on(event, callback);
+    }
+  },
+
+  /**
    * Remove event listener
    * @param {string} event - Event name
    * @param {Function} callback - Handler to remove

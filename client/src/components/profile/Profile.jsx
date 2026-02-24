@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { usePosts } from "@/hooks/usePosts";
+import socketService from "@/services/socketService";
 import interactionsService from "@/services/interactionsService";
 import profileService from "@/services/profileService";
 import PostCard from "@/components/feed/PostCard";
@@ -28,7 +30,6 @@ const LoadingSpinner = () => (
 );
 
 // ── Edit Profile Modal ───────────────────────────────────────
-// (Keep EditProfileModal logic identical but update styling if needed in CSS)
 function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
   const { t } = useTranslation();
   const [form, setForm] = useState({
@@ -99,11 +100,20 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
     if (files.avatar) formData.append("avatar", files.avatar);
     if (files.banner) formData.append("banner", files.banner);
 
-    // We use updateProfileWithAvatar because it handles multipart/form-data
     const result = await onSaveWithAvatar(formData);
     setSaving(false);
-    if (result.success) onClose();
-    else setError(result.error || t("profile.edit.error"));
+
+    if (result.success) {
+      if (result.usernameChanged && result.data?.username) {
+        onClose();
+        // The parent will handle redirect if needed, but we can return data
+        onSave({ success: true, data: result.data, usernameChanged: true });
+      } else {
+        onClose();
+      }
+    } else {
+      setError(result.error || t("profile.edit.error"));
+    }
   };
 
   return (
@@ -128,7 +138,7 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
         <form className="edit-modal__form" onSubmit={handleSubmit}>
           <div className="edit-modal__banner-section">
             <div className="edit-modal__banner">
-              <img src={previews.banner} alt="Banner preview" />
+              <img src={previews.banner} alt="Banner" />
               <label className="edit-modal__banner-overlay">
                 <input
                   type="file"
@@ -154,7 +164,7 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
 
           <div className="edit-modal__avatar-section">
             <div className="edit-modal__avatar">
-              <img src={previews.avatar} alt={t("common.user")} />
+              <img src={previews.avatar} alt="Avatar" />
               <label className="edit-modal__avatar-overlay">
                 <input
                   type="file"
@@ -190,7 +200,6 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
                 required
               />
             </div>
-
             <div className="edit-modal__field">
               <label className="edit-modal__label">{t("landing.username")}</label>
               <input
@@ -215,7 +224,6 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
             />
           </div>
 
-          {/* Social & Links Restoration */}
           <div className="edit-modal__grid">
             <div className="edit-modal__field">
               <label className="edit-modal__label">LinkedIn</label>
@@ -225,10 +233,8 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
                 name="linkedin_url"
                 value={form.linkedin_url}
                 onChange={handleChange}
-                placeholder="https://linkedin.com/in/..."
               />
             </div>
-
             <div className="edit-modal__field">
               <label className="edit-modal__label">
                 {t("profile.links.portfolio") || "Portfolio"}
@@ -239,7 +245,6 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
                 name="portfolio_url"
                 value={form.portfolio_url}
                 onChange={handleChange}
-                placeholder="https://..."
               />
             </div>
           </div>
@@ -252,9 +257,10 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
               name="external_url"
               value={form.external_url}
               onChange={handleChange}
-              placeholder="https://su-web.com"
             />
           </div>
+
+          {error && <p className="edit-modal__error">{error}</p>}
 
           <div className="edit-modal__actions">
             <button type="button" className="edit-modal__cancel" onClick={onClose}>
@@ -273,12 +279,29 @@ function EditProfileModal({ profile, onClose, onSave, onSaveWithAvatar }) {
 // ── Main Profile Component ───────────────────────────────────
 export default function Profile({ username }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
+
   const [activeTab, setActiveTab] = useState("posts");
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [followModal, setFollowModal] = useState({ open: false, type: "followers" });
 
-  // Stabilize target username to avoid flickering redirects
-  // If username prop is present, use it. Otherwise use currentUser's username.
+  // Liked posts state
+  const [likedPosts, setLikedPosts] = useState([]);
+  const [likedPostsLoading, setLikedPostsLoading] = useState(false);
+  const [likedPostsLoaded, setLikedPostsLoaded] = useState(false);
+
+  // Bookmarked posts state
+  const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
+  const [bookmarkedPostsLoading, setBookmarkedPostsLoading] = useState(false);
+  const [bookmarkedPostsLoaded, setBookmarkedPostsLoaded] = useState(false);
+
+  // Replies state
+  const [replies, setReplies] = useState([]);
+  const [repliesLoading, setRepliesLoading] = useState(false);
+  const [repliesLoaded, setRepliesLoaded] = useState(false);
+
+  // Stabilize target username
   const targetUsername = username || currentUser?.username;
 
   const {
@@ -304,23 +327,7 @@ export default function Profile({ username }) {
     enabled: !!profile,
   });
 
-  // Additional state for tabs
-  const [likedPosts, setLikedPosts] = useState([]);
-  const [likedPostsLoading, setLikedPostsLoading] = useState(false);
-  const [likedPostsLoaded, setLikedPostsLoaded] = useState(false);
-
-  const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
-  const [bookmarkedPostsLoading, setBookmarkedPostsLoading] = useState(false);
-  const [bookmarkedPostsLoaded, setBookmarkedPostsLoaded] = useState(false);
-
-  const [replies, setReplies] = useState([]);
-  const [repliesLoading, setRepliesLoading] = useState(false);
-  const [repliesLoaded, setRepliesLoaded] = useState(false);
-
-  // Follow Modal State
-  const [followModal, setFollowModal] = useState({ open: false, type: "following" });
-
-  // Fetch liked posts when tab is selected
+  // Fetch logic for tabs
   useEffect(() => {
     const fetchLikedPosts = async () => {
       if (activeTab === "likes" && isOwnProfile && !likedPostsLoaded) {
@@ -331,7 +338,7 @@ export default function Profile({ username }) {
           setLikedPosts(data.posts || data.data || data || []);
           setLikedPostsLoaded(true);
         } catch (err) {
-          console.error("Error fetching liked posts:", err);
+          console.error("Error fetching likes:", err);
         } finally {
           setLikedPostsLoading(false);
         }
@@ -340,7 +347,6 @@ export default function Profile({ username }) {
     fetchLikedPosts();
   }, [activeTab, isOwnProfile, likedPostsLoaded]);
 
-  // Fetch bookmarked posts when tab is selected
   useEffect(() => {
     const fetchBookmarkedPosts = async () => {
       if (activeTab === "bookmarks" && isOwnProfile && !bookmarkedPostsLoaded) {
@@ -351,7 +357,7 @@ export default function Profile({ username }) {
           setBookmarkedPosts(data.posts || data.data || data || []);
           setBookmarkedPostsLoaded(true);
         } catch (err) {
-          console.error("Error fetching bookmarked posts:", err);
+          console.error("Error fetching bookmarks:", err);
         } finally {
           setBookmarkedPostsLoading(false);
         }
@@ -360,7 +366,6 @@ export default function Profile({ username }) {
     fetchBookmarkedPosts();
   }, [activeTab, isOwnProfile, bookmarkedPostsLoaded]);
 
-  // Fetch replies when tab is selected
   useEffect(() => {
     const fetchReplies = async () => {
       if (activeTab === "replies" && targetUsername && !repliesLoaded) {
@@ -380,7 +385,61 @@ export default function Profile({ username }) {
     fetchReplies();
   }, [activeTab, targetUsername, repliesLoaded]);
 
-  if (profileLoading && !profile)
+  // Real-time updates for domestic lists
+  useEffect(() => {
+    if (!profile?.id) return;
+
+    // Listen for deletions to remove from local state
+    const handlePostDeleted = (data) => {
+      setLikedPosts((prev) => prev.filter((p) => p.id !== data.post_id));
+      setBookmarkedPosts((prev) => prev.filter((p) => p.id !== data.post_id));
+      setReplies((prev) => prev.filter((p) => p.id !== data.post_id && p.post_id !== data.post_id));
+    };
+
+    // Listen for interaction removals
+    const handleInteractionRemoved = (data) => {
+      if (data.userId === currentUser?.id) {
+        if (data.type === "like" && data.interactable_type === "Post") {
+          setLikedPosts((prev) => prev.filter((p) => p.id !== data.interactable_id));
+        }
+        if (data.type === "bookmark" && data.interactable_type === "Post") {
+          setBookmarkedPosts((prev) => prev.filter((p) => p.id !== data.interactable_id));
+        }
+      }
+    };
+
+    socketService.on("post.deleted", handlePostDeleted);
+    socketService.on("interaction.removed", handleInteractionRemoved);
+
+    return () => {
+      socketService.off("post.deleted", handlePostDeleted);
+      socketService.off("interaction.removed", handleInteractionRemoved);
+    };
+  }, [profile?.id, currentUser?.id]);
+
+  const handleProfileSave = (result) => {
+    if (result.success && result.usernameChanged) {
+      navigate(`/profile/${result.data.username}`, { replace: true });
+    }
+  };
+
+  // Display logic
+  const getDisplayPosts = () => {
+    if (activeTab === "likes") return likedPosts;
+    if (activeTab === "bookmarks") return bookmarkedPosts;
+    if (activeTab === "replies") return replies;
+    if (activeTab === "questions") return posts.filter((p) => p.type === "question");
+    return posts.filter((p) => p.type !== "question");
+  };
+
+  const displayPosts = getDisplayPosts();
+  const isLoadingPosts =
+    (activeTab === "likes" && likedPostsLoading) ||
+    (activeTab === "bookmarks" && bookmarkedPostsLoading) ||
+    (activeTab === "replies" && repliesLoading) ||
+    ((activeTab === "posts" || activeTab === "questions") && postsLoading && posts.length === 0);
+
+  if (profileLoading && !profile) {
     return (
       <div className="profile-guay profile-guay--loading">
         <div className="profile-guay__header profile-guay__header--skeleton">
@@ -388,7 +447,9 @@ export default function Profile({ username }) {
         </div>
       </div>
     );
-  if (profileError)
+  }
+
+  if (profileError) {
     return (
       <div className="profile__error">
         <p>
@@ -396,7 +457,9 @@ export default function Profile({ username }) {
         </p>
       </div>
     );
-  if (!profile && !profileLoading) return null;
+  }
+
+  if (!profile) return null;
 
   const user = profile;
   const joinedDate = user.created_at
@@ -412,44 +475,17 @@ export default function Profile({ username }) {
         ? t("sidebar.teacher")
         : t("common.user");
 
-  // Determine which posts to display and which loading state to use
-  let displayPosts = [];
-  let isLoadingPosts = false;
-
-  if (activeTab === "posts") {
-    displayPosts = posts.filter((p) => p.type !== "question");
-    isLoadingPosts = postsLoading;
-  } else if (activeTab === "questions") {
-    displayPosts = posts.filter((p) => p.type === "question");
-    isLoadingPosts = postsLoading;
-  } else if (activeTab === "likes") {
-    displayPosts = likedPosts;
-    isLoadingPosts = likedPostsLoading;
-  } else if (activeTab === "bookmarks") {
-    displayPosts = bookmarkedPosts;
-    isLoadingPosts = bookmarkedPostsLoading;
-  } else if (activeTab === "replies") {
-    displayPosts = replies;
-    isLoadingPosts = repliesLoading;
-  }
-
   return (
     <div className="profile-guay">
-      {/* 1. Header Visual: Cover + Avatar + Basic Stats overlay */}
+      {/* 1. Header Visual */}
       <header className="profile-guay__header">
         <div className="profile-guay__cover">
           {user.banner ? (
-            <img
-              src={user.banner}
-              alt="Profile banner"
-              className="profile-guay__banner-img"
-              loading="lazy"
-            />
+            <img src={user.banner} alt="Banner" className="profile-guay__banner-img" />
           ) : (
             <div className="profile-guay__cover-overlay" />
           )}
         </div>
-
         <div className="profile-guay__avatar-row">
           <div className="profile-guay__avatar-container">
             <div className="profile-guay__avatar-box">
@@ -458,11 +494,9 @@ export default function Profile({ username }) {
                   user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
                 }
                 alt={user.name}
-                loading="lazy"
               />
             </div>
           </div>
-
           <div className="profile-guay__actions-row">
             {isOwnProfile ? (
               <button
@@ -506,9 +540,7 @@ export default function Profile({ username }) {
               strokeWidth="2"
             >
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
+              <path d="M16 2v4M8 2v4M3 10h18" />
             </svg>
             <span>
               {t("profile.joined")} {joinedDate}
@@ -591,15 +623,15 @@ export default function Profile({ username }) {
                 stroke="currentColor"
                 strokeWidth="2"
               >
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
               </svg>
-              <span>{t("profile.links.web")}</span>
+              <span>{t("profile.links.web") || "Web"}</span>
             </a>
           )}
         </div>
 
-        {/* Interactive Stats Panel */}
         <div className="profile-guay__stats">
           <button
             className="profile-guay__stat-btn"
@@ -630,87 +662,91 @@ export default function Profile({ username }) {
         </div>
       </section>
 
-      {/* Tabs */}
-      <nav className="profile__tabs">
-        <button
-          className={`profile__tab ${activeTab === "posts" ? "profile__tab--active" : ""}`}
-          onClick={() => setActiveTab("posts")}
-        >
-          {t("sidebar.profile")}
-        </button>
-        <button
-          className={`profile__tab ${activeTab === "replies" ? "profile__tab--active" : ""}`}
-          onClick={() => setActiveTab("replies")}
-        >
-          {t("profile.replies")}
-        </button>
-        <button
-          className={`profile__tab ${activeTab === "questions" ? "profile__tab--active" : ""}`}
-          onClick={() => setActiveTab("questions")}
-        >
-          {t("widgets.recent_questions")}
-        </button>
-        {isOwnProfile && (
-          <>
-            <button
-              className={`profile__tab ${activeTab === "likes" ? "profile__tab--active" : ""}`}
-              onClick={() => setActiveTab("likes")}
-            >
-              {t("profile.likes")}
-            </button>
-            <button
-              className={`profile__tab ${activeTab === "bookmarks" ? "profile__tab--active" : ""}`}
-              onClick={() => setActiveTab("bookmarks")}
-            >
-              {t("profile.bookmarks")}
-            </button>
-          </>
-        )}
-      </nav>
-
-      {/* Posts list */}
-      <div className="profile__posts">
-        {isLoadingPosts ? (
-          <div className="profile__posts-loading">
-            <LoadingSpinner />
-          </div>
-        ) : displayPosts.length === 0 ? (
-          <div className="profile__posts-empty">
-            <p>{t("profile.no_posts_category")}</p>
-          </div>
-        ) : (
-          <>
-            {displayPosts.map((post, index) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                onDelete={
-                  isOwnProfile && (activeTab === "posts" || activeTab === "questions")
-                    ? () => deletePost(post.id)
-                    : undefined
-                }
-                className={`animate-slideUp stagger-${Math.min(index + 1, 5)}`}
-              />
-            ))}
-            {hasMore && (activeTab === "posts" || activeTab === "questions") && (
-              <button className="profile__load-more" onClick={loadMore} disabled={postsLoading}>
-                {postsLoading ? t("common.loading") : t("common.load_more")}
+      {/* 3. Feed Section */}
+      <section className="profile-guay__content">
+        <nav className="profile-guay__nav">
+          <button
+            className={`profile-guay__nav-btn ${activeTab === "posts" ? "active" : ""}`}
+            onClick={() => setActiveTab("posts")}
+          >
+            {t("sidebar.profile")}
+          </button>
+          <button
+            className={`profile-guay__nav-btn ${activeTab === "replies" ? "active" : ""}`}
+            onClick={() => setActiveTab("replies")}
+          >
+            {t("profile.replies")}
+          </button>
+          <button
+            className={`profile-guay__nav-btn ${activeTab === "questions" ? "active" : ""}`}
+            onClick={() => setActiveTab("questions")}
+          >
+            {t("widgets.recent_questions")}
+          </button>
+          {isOwnProfile && (
+            <>
+              <button
+                className={`profile-guay__nav-btn ${activeTab === "likes" ? "active" : ""}`}
+                onClick={() => setActiveTab("likes")}
+              >
+                {t("profile.likes")}
               </button>
-            )}
-          </>
-        )}
-      </div>
+              <button
+                className={`profile-guay__nav-btn ${activeTab === "bookmarks" ? "active" : ""}`}
+                onClick={() => setActiveTab("bookmarks")}
+              >
+                {t("profile.bookmarks")}
+              </button>
+            </>
+          )}
+        </nav>
+
+        <div className="profile-guay__feed">
+          {isLoadingPosts ? (
+            <div className="profile-guay__loading-feed">
+              <LoadingSpinner />
+            </div>
+          ) : displayPosts.length === 0 ? (
+            <div className="profile-guay__empty-feed">
+              <p>{t("profile.no_posts_category")}</p>
+            </div>
+          ) : (
+            <>
+              {displayPosts.map((post, index) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  onDelete={
+                    isOwnProfile && (activeTab === "posts" || activeTab === "questions")
+                      ? () => deletePost(post.id)
+                      : undefined
+                  }
+                  className={`animate-slideUp stagger-${Math.min(index + 1, 5)}`}
+                />
+              ))}
+              {hasMore && (activeTab === "posts" || activeTab === "questions") && (
+                <button
+                  className="profile-guay__load-more"
+                  onClick={loadMore}
+                  disabled={postsLoading}
+                >
+                  {postsLoading ? t("common.loading") : t("common.load_more")}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </section>
 
       {/* Modals */}
       {editModalOpen && (
         <EditProfileModal
           profile={profile}
           onClose={() => setEditModalOpen(false)}
-          onSave={updateProfile}
+          onSave={handleProfileSave}
           onSaveWithAvatar={updateProfileWithAvatar}
         />
       )}
-
       {followModal.open && (
         <FollowListModal
           userId={profile.id}

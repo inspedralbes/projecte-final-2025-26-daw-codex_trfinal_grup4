@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\InteractionRemoved;
 use App\Events\NewInteractionEvent;
 use App\Http\Resources\PostResource;
 use App\Models\Interaction;
@@ -57,6 +58,14 @@ class InteractionController extends Controller
 
         if ($existing) {
             $existing->delete();
+            
+            event(new InteractionRemoved(
+                $user->id,
+                $request->interactable_id,
+                $request->interactable_type,
+                $request->type
+            ));
+
             return $this->success([
                 'active' => false,
                 'type'   => $request->type,

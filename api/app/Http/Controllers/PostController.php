@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PostDeleted;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
@@ -216,6 +217,8 @@ class PostController extends Controller
         }
 
         $post->delete();
+
+        event(new PostDeleted($post->id, $post->user_id));
 
         return $this->success(null, 'Post deleted successfully');
     }
