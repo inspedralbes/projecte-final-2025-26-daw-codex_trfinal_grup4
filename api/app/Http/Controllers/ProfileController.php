@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Comment;
 use App\Services\ReputationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -94,6 +95,62 @@ class ProfileController extends Controller
             ->paginate(15);
 
         return $this->success($posts);
+    }
+
+    /**
+     * GET /api/profile/{username}/replies
+     * Paginated comments (replies) by user, formatted as post-like objects.
+     */
+    public function replies(string $username): JsonResponse
+    {
+        $user = User::where('username', $username)->first();
+
+        if (!$user) {
+            return $this->error('User not found', 404);
+        }
+
+        $comments = $user->comments()
+            ->with([
+                'user:id,name,username,avatar',
+                'post:id,content,type,user_id',
+                'post.user:id,name,username,avatar',
+                'parent:id,user_id,content',
+                'parent.user:id,name,username',
+            ])
+            ->latest()
+            ->paginate(15);
+
+        // Transform comments to look like posts with reply context
+        $transformed = $comments->through(function ($comment) {
+            return [
+                'id'             => $comment->id,
+                'type'           => 'reply', // Mark as reply type
+                'content'        => $comment->content,
+                'is_solution'    => $comment->is_solution,
+                'created_at'     => $comment->created_at,
+                'user'           => $comment->user,
+                // Reference to the original post being replied to
+                'reply_to_post'  => $comment->post ? [
+                    'id'       => $comment->post->id,
+                    'content'  => mb_substr($comment->post->content, 0, 100),
+                    'type'     => $comment->post->type,
+                    'user'     => $comment->post->user,
+                ] : null,
+                // Reference to parent comment (for nested replies)
+                'reply_to_comment' => $comment->parent ? [
+                    'id'   => $comment->parent->id,
+                    'user' => $comment->parent->user,
+                ] : null,
+                // Mimic post structure for compatibility
+                'likes_count'     => 0,
+                'comments_count'  => 0,
+                'bookmarks_count' => 0,
+                'reposts_count'   => 0,
+                'tags'            => [],
+            ];
+        });
+
+        return $this->success($transformed);
     }
 
     /**

@@ -57,7 +57,14 @@
       "m": "m",
       "h": "h",
       "d": "d"
-    }
+    },
+    "comment": "Comentar",
+    "repost": "Repostear",
+    "like": "Me gusta",
+    "unlike": "Quitar me gusta",
+    "bookmark": "Guardar",
+    "unbookmark": "Quitar de guardados",
+    "cant_repost_own": "No puedes repostear tu propia publicación"
   },
   "profile": {
     "loading": "Cargando perfil...",
@@ -69,6 +76,8 @@
     "follow": "Seguir",
     "unfollow": "Siguiendo",
     "likes": "Me gusta",
+    "bookmarks": "Guardados",
+    "replies": "Respuestas",
     "no_posts_category": "No hay publicaciones en esta categoría",
     "edit": {
       "title": "Editar perfil",
@@ -240,5 +249,22 @@
     "description": "Te hemos enviado un enlace de verificación a ",
     "resend": "Reenviar email",
     "resend_cooldown": "Reenviar en {{seconds}}s"
+  },
+  "post": {
+    "title": "Publicación",
+    "replying_to": "Respondiendo a",
+    "accepted_answer": "Respuesta aceptada",
+    "reply": "Responder",
+    "mark_solution": "Marcar como solución",
+    "unmark_solution": "Desmarcar solución",
+    "write_reply": "Escribe una respuesta...",
+    "send": "Enviar",
+    "write_comment": "Escribe un comentario...",
+    "comment_btn": "Comentar",
+    "comments": "Comentarios",
+    "no_comments": "Todavía no hay comentarios",
+    "be_first_comment": "¡Sé el primero en comentar!",
+    "not_found": "Publicación no encontrada",
+    "back": "Volver"
   }
 }

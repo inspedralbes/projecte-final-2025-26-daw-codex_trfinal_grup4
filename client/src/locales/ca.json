@@ -57,7 +57,14 @@
       "m": "m",
       "h": "h",
       "d": "d"
-    }
+    },
+    "comment": "Comentar",
+    "repost": "Repostejar",
+    "like": "M'agrada",
+    "unlike": "Treure m'agrada",
+    "bookmark": "Desar",
+    "unbookmark": "Treure de desats",
+    "cant_repost_own": "No pots repostejar la teva pròpia publicació"
   },
   "profile": {
     "loading": "Carregant perfil...",
@@ -69,6 +76,8 @@
     "follow": "Seguir",
     "unfollow": "Seguint",
     "likes": "M'agrada",
+    "bookmarks": "Desats",
+    "replies": "Respostes",
     "no_posts_category": "No hi ha publicacions en aquesta categoria",
     "edit": {
       "title": "Editar perfil",
@@ -240,5 +249,22 @@
     "description": "T'hem enviat un enllaç de verificació a ",
     "resend": "Reenviar correu",
     "resend_cooldown": "Reenviar en {{seconds}}s"
+  },
+  "post": {
+    "title": "Publicació",
+    "replying_to": "Responent a",
+    "accepted_answer": "Resposta acceptada",
+    "reply": "Respondre",
+    "mark_solution": "Marcar com a solució",
+    "unmark_solution": "Desmarcar solució",
+    "write_reply": "Escriu una resposta...",
+    "send": "Enviar",
+    "write_comment": "Escriu un comentari...",
+    "comment_btn": "Comentar",
+    "comments": "Comentaris",
+    "no_comments": "Encara no hi ha comentaris",
+    "be_first_comment": "Sigues el primer a comentar!",
+    "not_found": "Publicació no trobada",
+    "back": "Tornar"
   }
 }

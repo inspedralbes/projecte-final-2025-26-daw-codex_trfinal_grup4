@@ -4,6 +4,8 @@ import i18next from "i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { usePosts } from "@/hooks/usePosts";
+import interactionsService from "@/services/interactionsService";
+import profileService from "@/services/profileService";
 import PostCard from "@/components/feed/PostCard";
 import "./Profile.css";
 
@@ -291,6 +293,21 @@ export default function Profile({ username }) {
   const [activeTab, setActiveTab] = useState("posts");
   const [editModalOpen, setEditModalOpen] = useState(false);
 
+  // Liked posts state
+  const [likedPosts, setLikedPosts] = useState([]);
+  const [likedPostsLoading, setLikedPostsLoading] = useState(false);
+  const [likedPostsLoaded, setLikedPostsLoaded] = useState(false);
+
+  // Bookmarked posts state
+  const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
+  const [bookmarkedPostsLoading, setBookmarkedPostsLoading] = useState(false);
+  const [bookmarkedPostsLoaded, setBookmarkedPostsLoaded] = useState(false);
+
+  // Replies state
+  const [replies, setReplies] = useState([]);
+  const [repliesLoading, setRepliesLoading] = useState(false);
+  const [repliesLoaded, setRepliesLoaded] = useState(false);
+
   // Use profile hook for the target user (or current user if no username)
   const targetUsername = username || currentUser?.username;
   const {
@@ -316,6 +333,66 @@ export default function Profile({ username }) {
     userId: profile?.username || profile?.id,
     enabled: !!profile,
   });
+
+  // Fetch liked posts when tab is selected
+  useEffect(() => {
+    const fetchLikedPosts = async () => {
+      if (activeTab === "likes" && isOwnProfile && !likedPostsLoaded) {
+        setLikedPostsLoading(true);
+        try {
+          const response = await interactionsService.getLikedPosts();
+          const data = response.data || response;
+          setLikedPosts(data.data || data || []);
+          setLikedPostsLoaded(true);
+        } catch (err) {
+          console.error("Error fetching liked posts:", err);
+        } finally {
+          setLikedPostsLoading(false);
+        }
+      }
+    };
+    fetchLikedPosts();
+  }, [activeTab, isOwnProfile, likedPostsLoaded]);
+
+  // Fetch bookmarked posts when tab is selected
+  useEffect(() => {
+    const fetchBookmarkedPosts = async () => {
+      if (activeTab === "bookmarks" && isOwnProfile && !bookmarkedPostsLoaded) {
+        setBookmarkedPostsLoading(true);
+        try {
+          const response = await interactionsService.getBookmarkedPosts();
+          const data = response.data || response;
+          setBookmarkedPosts(data.data || data || []);
+          setBookmarkedPostsLoaded(true);
+        } catch (err) {
+          console.error("Error fetching bookmarked posts:", err);
+        } finally {
+          setBookmarkedPostsLoading(false);
+        }
+      }
+    };
+    fetchBookmarkedPosts();
+  }, [activeTab, isOwnProfile, bookmarkedPostsLoaded]);
+
+  // Fetch replies when tab is selected
+  useEffect(() => {
+    const fetchReplies = async () => {
+      if (activeTab === "replies" && targetUsername && !repliesLoaded) {
+        setRepliesLoading(true);
+        try {
+          const response = await profileService.getUserReplies(targetUsername);
+          const data = response.data || response;
+          setReplies(data.data || data || []);
+          setRepliesLoaded(true);
+        } catch (err) {
+          console.error("Error fetching replies:", err);
+        } finally {
+          setRepliesLoading(false);
+        }
+      }
+    };
+    fetchReplies();
+  }, [activeTab, targetUsername, repliesLoaded]);
 
   if (profileLoading) {
     return (
@@ -360,13 +437,21 @@ export default function Profile({ username }) {
           ? t("sidebar.admin")
           : user.role || t("common.user");
 
-  // Filter posts based on active tab
-  const filteredPosts = posts.filter((post) => {
-    if (activeTab === "posts") return post.type !== "question";
-    if (activeTab === "questions") return post.type === "question";
-    if (activeTab === "likes") return post.liked_by_user;
-    return true;
-  });
+  // Get posts based on active tab
+  const getDisplayPosts = () => {
+    if (activeTab === "likes") return likedPosts;
+    if (activeTab === "bookmarks") return bookmarkedPosts;
+    if (activeTab === "replies") return replies;
+    if (activeTab === "questions") return posts.filter((post) => post.type === "question");
+    return posts.filter((post) => post.type !== "question"); // posts tab
+  };
+
+  const displayPosts = getDisplayPosts();
+  const isLoadingPosts = 
+    (activeTab === "likes" && likedPostsLoading) ||
+    (activeTab === "bookmarks" && bookmarkedPostsLoading) ||
+    (activeTab === "replies" && repliesLoading) ||
+    ((activeTab === "posts" || activeTab === "questions") && postsLoading && posts.length === 0);
 
   return (
     <div className="profile">
@@ -567,42 +652,56 @@ export default function Profile({ username }) {
           {t("sidebar.profile")}
         </button>
         <button
+          className={`profile__tab ${activeTab === "replies" ? "profile__tab--active" : ""}`}
+          onClick={() => setActiveTab("replies")}
+        >
+          {t("profile.replies")}
+        </button>
+        <button
           className={`profile__tab ${activeTab === "questions" ? "profile__tab--active" : ""}`}
           onClick={() => setActiveTab("questions")}
         >
           {t("widgets.recent_questions")}
         </button>
         {isOwnProfile && (
-          <button
-            className={`profile__tab ${activeTab === "likes" ? "profile__tab--active" : ""}`}
-            onClick={() => setActiveTab("likes")}
-          >
-            {t("profile.likes")}
-          </button>
+          <>
+            <button
+              className={`profile__tab ${activeTab === "likes" ? "profile__tab--active" : ""}`}
+              onClick={() => setActiveTab("likes")}
+            >
+              {t("profile.likes")}
+            </button>
+            <button
+              className={`profile__tab ${activeTab === "bookmarks" ? "profile__tab--active" : ""}`}
+              onClick={() => setActiveTab("bookmarks")}
+            >
+              {t("profile.bookmarks")}
+            </button>
+          </>
         )}
       </nav>
 
       {/* Posts list */}
       <div className="profile__posts">
-        {postsLoading && posts.length === 0 ? (
+        {isLoadingPosts ? (
           <div className="profile__posts-loading">
             <LoadingSpinner />
           </div>
-        ) : filteredPosts.length === 0 ? (
+        ) : displayPosts.length === 0 ? (
           <div className="profile__posts-empty">
             <p>{t("profile.no_posts_category")}</p>
           </div>
         ) : (
           <>
-            {filteredPosts.map((post, index) => (
+            {displayPosts.map((post, index) => (
               <PostCard
                 key={post.id}
                 post={post}
-                onDelete={isOwnProfile ? () => deletePost(post.id) : undefined}
+                onDelete={isOwnProfile && (activeTab === "posts" || activeTab === "questions") ? () => deletePost(post.id) : undefined}
                 className={`animate-slideUp stagger-${Math.min(index + 1, 5)}`}
               />
             ))}
-            {hasMore && (
+            {hasMore && (activeTab === "posts" || activeTab === "questions") && (
               <button className="profile__load-more" onClick={loadMore} disabled={postsLoading}>
                 {postsLoading ? t("common.loading") : t("common.load_more")}
               </button>

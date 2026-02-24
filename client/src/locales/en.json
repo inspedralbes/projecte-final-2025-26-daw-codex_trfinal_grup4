@@ -57,7 +57,14 @@
       "m": "m",
       "h": "h",
       "d": "d"
-    }
+    },
+    "comment": "Comment",
+    "repost": "Repost",
+    "like": "Like",
+    "unlike": "Unlike",
+    "bookmark": "Bookmark",
+    "unbookmark": "Remove bookmark",
+    "cant_repost_own": "You can't repost your own post"
   },
   "profile": {
     "loading": "Loading profile...",
@@ -69,6 +76,8 @@
     "follow": "Follow",
     "unfollow": "Following",
     "likes": "Likes",
+    "bookmarks": "Bookmarks",
+    "replies": "Replies",
     "no_posts_category": "No posts in this category",
     "edit": {
       "title": "Edit profile",
@@ -240,5 +249,22 @@
     "description": "We've sent a verification link to ",
     "resend": "Resend email",
     "resend_cooldown": "Resend in {{seconds}}s"
+  },
+  "post": {
+    "title": "Post",
+    "replying_to": "Replying to",
+    "accepted_answer": "Accepted answer",
+    "reply": "Reply",
+    "mark_solution": "Mark as solution",
+    "unmark_solution": "Unmark solution",
+    "write_reply": "Write a reply...",
+    "send": "Send",
+    "write_comment": "Write a comment...",
+    "comment_btn": "Comment",
+    "comments": "Comments",
+    "no_comments": "No comments yet",
+    "be_first_comment": "Be the first to comment!",
+    "not_found": "Post not found",
+    "back": "Back"
   }
 }
