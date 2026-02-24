@@ -44,8 +44,13 @@ class ProfileUpdatedEvent implements ShouldBroadcastNow
         return [
             'user_id'         => $this->user->id,
             'name'            => $this->user->name,
+            'username'        => $this->user->username,
             'avatar'          => $this->user->avatar,
+            'banner'          => $this->user->banner,
             'bio'             => $this->user->bio,
+            'linkedin_url'    => $this->user->linkedin_url,
+            'portfolio_url'   => $this->user->portfolio_url,
+            'external_url'    => $this->user->external_url,
             'followers_count' => $this->user->followers()->count(),
             'following_count' => $this->user->following()->count(),
         ];

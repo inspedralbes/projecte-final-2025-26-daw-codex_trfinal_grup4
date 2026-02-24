@@ -212,6 +212,9 @@ class ProfileController extends Controller
         $user->update($validated);
         $user->refresh();
 
+        // Broadcast profile update for real-time synchronization
+        broadcast(new \App\Events\ProfileUpdatedEvent($user));
+
         return $this->success([
             'id'            => $user->id,
             'name'          => $user->name,
