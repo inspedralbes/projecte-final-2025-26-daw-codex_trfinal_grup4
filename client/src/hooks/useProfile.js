@@ -79,7 +79,9 @@ export function useProfile(username) {
         setProfile((prev) => ({
           ...prev,
           name: data.name ?? prev.name,
+          username: data.username ?? prev.username,
           avatar: data.avatar ?? prev.avatar,
+          banner: data.banner ?? prev.banner,
           bio: data.bio ?? prev.bio,
           followers_count: data.followers_count ?? prev.followers_count,
           following_count: data.following_count ?? prev.following_count,
