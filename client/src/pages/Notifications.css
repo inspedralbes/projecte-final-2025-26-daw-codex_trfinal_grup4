@@ -314,7 +314,7 @@
 }
 
 .notif__spinner {
-  animation: spin 1s linear infinite;
+  animation: spinner-rotate 1s linear infinite;
 }
 
 .notif__spinner svg {
@@ -330,7 +330,11 @@
   text-align: center;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes spinner-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

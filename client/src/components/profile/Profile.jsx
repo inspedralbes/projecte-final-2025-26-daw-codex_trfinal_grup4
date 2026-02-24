@@ -276,7 +276,10 @@ export default function Profile({ username }) {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [followModal, setFollowModal] = useState({ open: false, type: "followers" });
 
+  // Stabilize target username to avoid flickering redirects
+  // If username prop is present, use it. Otherwise use currentUser's username.
   const targetUsername = username || currentUser?.username;
+
   const {
     profile,
     loading: profileLoading,
@@ -300,11 +303,12 @@ export default function Profile({ username }) {
     enabled: !!profile,
   });
 
-  if (profileLoading)
+  if (profileLoading && !profile)
     return (
-      <div className="profile__loading">
-        <LoadingSpinner />
-        <p>{t("profile.loading")}</p>
+      <div className="profile-guay profile-guay--loading">
+        <div className="profile-guay__header profile-guay__header--skeleton">
+          <LoadingSpinner />
+        </div>
       </div>
     );
   if (profileError)
@@ -315,7 +319,7 @@ export default function Profile({ username }) {
         </p>
       </div>
     );
-  if (!profile) return null;
+  if (!profile && !profileLoading) return null;
 
   const user = profile;
   const joinedDate = user.created_at
@@ -344,7 +348,12 @@ export default function Profile({ username }) {
       <header className="profile-guay__header">
         <div className="profile-guay__cover">
           {user.banner ? (
-            <img src={user.banner} alt="Profile banner" className="profile-guay__banner-img" />
+            <img
+              src={user.banner}
+              alt="Profile banner"
+              className="profile-guay__banner-img"
+              loading="lazy"
+            />
           ) : (
             <div className="profile-guay__cover-overlay" />
           )}
@@ -358,6 +367,7 @@ export default function Profile({ username }) {
                   user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
                 }
                 alt={user.name}
+                loading="lazy"
               />
             </div>
           </div>

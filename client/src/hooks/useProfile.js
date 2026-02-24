@@ -75,32 +75,43 @@ export function useProfile(username) {
     socketService.joinProfileRoom(profile.id);
 
     const handleProfileUpdate = (data) => {
-      if (data.user_id === profile.id) {
-        setProfile((prev) => ({
-          ...prev,
-          name: data.name ?? prev.name,
-          username: data.username ?? prev.username,
-          avatar: data.avatar ?? prev.avatar,
-          banner: data.banner ?? prev.banner,
-          bio: data.bio ?? prev.bio,
-          followers_count: data.followers_count ?? prev.followers_count,
-          following_count: data.following_count ?? prev.following_count,
-        }));
-
-        // If it's the own profile, also refresh the global auth state to sync Sidebar etc.
-        if (isOwnProfile) {
-          refreshUser();
-        }
+      if (data.user_id === profileIdRef.current) {
+        setProfile((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            name: data.name ?? prev.name,
+            username: data.username ?? prev.username,
+            avatar: data.avatar ?? prev.avatar,
+            banner: data.banner ?? prev.banner,
+            bio: data.bio ?? prev.bio,
+            linkedin_url: data.linkedin_url ?? prev.linkedin_url,
+            portfolio_url: data.portfolio_url ?? prev.portfolio_url,
+            external_url: data.external_url ?? prev.external_url,
+            followers_count: data.followers_count ?? prev.followers_count,
+            following_count: data.following_count ?? prev.following_count,
+          };
+        });
       }
     };
 
     socketService.onProfileUpdate(handleProfileUpdate);
 
     return () => {
-      socketService.leaveProfileRoom(profile.id);
+      if (profileIdRef.current) {
+        socketService.leaveProfileRoom(profileIdRef.current);
+      }
       socketService.off("profile.updated", handleProfileUpdate);
     };
-  }, [profile?.id, isOwnProfile, refreshUser]);
+  }, []); // Connect once, handle id changes via refs if needed or reconnect specifically
+
+  // Explicitly join room when profile.id changes without full effect re-run if possible
+  useEffect(() => {
+    if (profile?.id) {
+      profileIdRef.current = profile.id;
+      socketService.joinProfileRoom(profile.id);
+    }
+  }, [profile?.id]);
 
   // Toggle follow
   const toggleFollow = useCallback(async () => {
@@ -108,6 +119,8 @@ export function useProfile(username) {
 
     // Optimistic update
     const wasFollowing = isFollowing;
+    const prevFollowersCount = profile.followers_count;
+
     setIsFollowing(!wasFollowing);
     setProfile((prev) => ({
       ...prev,
@@ -115,17 +128,32 @@ export function useProfile(username) {
     }));
 
     try {
-      await followService.toggleFollowUser(profile.id);
+      const response = await followService.toggleFollowUser(profile.id);
+      const data = response.data || response;
+
+      // Update with exact data from server
+      if (data.followers_count !== undefined) {
+        setProfile((prev) => ({
+          ...prev,
+          followers_count: data.followers_count,
+        }));
+      }
+      if (data.following !== undefined) {
+        setIsFollowing(data.following);
+      }
+
+      // Also refresh current user to sync their "following" count if needed
+      if (currentUser) refreshUser();
     } catch (err) {
       // Revert on error
       console.error("Error toggling follow:", err);
       setIsFollowing(wasFollowing);
       setProfile((prev) => ({
         ...prev,
-        followers_count: wasFollowing ? prev.followers_count + 1 : prev.followers_count - 1,
+        followers_count: prevFollowersCount,
       }));
     }
-  }, [profile, isFollowing]);
+  }, [profile, isFollowing, currentUser, refreshUser]);
 
   // Update profile (for edit modal)
   const updateProfile = useCallback(

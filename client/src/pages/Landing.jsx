@@ -467,12 +467,30 @@ export default function Landing() {
                 type="submit"
                 className="auth-card__submit"
                 disabled={loading || (!isLogin && (!allPasswordReqsMet || !passwordsMatch))}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                }}
               >
-                {loading
-                  ? t("common.processing")
-                  : isLogin
-                    ? t("landing.login")
-                    : t("landing.register")}
+                {loading ? (
+                  <div
+                    className="profile__spinner"
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      border: "2px solid rgba(255,255,255,0.2)",
+                      borderTopColor: "white",
+                      borderRadius: "50%",
+                      animation: "spinner-rotate 0.6s linear infinite",
+                    }}
+                  />
+                ) : isLogin ? (
+                  t("landing.login")
+                ) : (
+                  t("landing.register")
+                )}
               </button>
             </form>
 

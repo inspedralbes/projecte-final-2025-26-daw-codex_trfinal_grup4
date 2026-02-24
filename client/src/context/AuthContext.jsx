@@ -203,7 +203,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
-   * Re-fetch user data from /me to check if email has been verified.
+   * Re-fetch user data from /me to check if email has been verified or stats updated.
    */
   const refreshUser = async () => {
     try {
@@ -216,6 +216,51 @@ export const AuthProvider = ({ children }) => {
       console.error("refreshUser failed", error);
     }
   };
+
+  // Real-time listener for current user stats
+  useEffect(() => {
+    if (!user?.id) return;
+
+    // Use dynamic import to avoid circular dependency or early access
+    const setupSocket = async () => {
+      const socketModule = await import("@/services/socketService");
+      const socketService = socketModule.default;
+
+      const token = localStorage.getItem("token");
+      socketService.connect(token);
+      socketService.joinProfileRoom(user.id);
+
+      const handleSelfUpdate = (data) => {
+        if (data.user_id === user.id) {
+          setUser((prev) => {
+            // Only update if there are meaningful changes
+            const hasChanges = Object.keys(data).some(
+              (key) => data[key] !== undefined && data[key] !== prev[key],
+            );
+
+            if (!hasChanges) return prev;
+
+            return {
+              ...prev,
+              ...data,
+            };
+          });
+        }
+      };
+
+      socketService.onProfileUpdate(handleSelfUpdate);
+
+      return () => {
+        socketService.leaveProfileRoom(user.id);
+        socketService.off("profile.updated", handleSelfUpdate);
+      };
+    };
+
+    const cleanupPromise = setupSocket();
+    return () => {
+      cleanupPromise.then((cleanup) => cleanup && cleanup());
+    };
+  }, [user?.id]);
 
   // Clear the feedback message manually
   const clearAuthMessage = () => setAuthMessage(null);
@@ -236,7 +281,39 @@ export const AuthProvider = ({ children }) => {
     clearAuthMessage,
   };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          background: "var(--depth-1)",
+          color: "var(--codex-teal)",
+        }}
+      >
+        <div
+          className="profile__spinner"
+          style={{ animation: "spinner-rotate 1s linear infinite" }}
+        >
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+            <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 /**
