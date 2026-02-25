@@ -316,6 +316,24 @@
   - **`useProfile.js`**: Listener per a `post.deleted` per sincronitzar el comptador total de posts del perfil.
   - **`Profile.jsx`**: Implementats listeners per sincronitzar en viu les pestanyes de Likes, Bookmarks i Replies quan s'eliminen continguts.
 
+### 2026-02-25 – Selector de Visibilitat Global/Centre al crear posts
+
+- **Autor:** @copilot (IA)
+- **Selector de Visibilitat (PostInput.jsx):**
+  - Usuaris amb `center_id`: poden triar entre "Público" (feed global) i "Solo Centro" (només visible al centre).
+  - Usuaris sense `center_id`: veuen badge estàtic "Público" (sense dropdown).
+  - Dropdown amb icones SVG (GlobeIcon, CenterIcon) i descripcions.
+  - Indicador visual: teal per global, amber per centre.
+  - Camp `visibility` s'envia al backend (`global` o `center`).
+  - Tancar dropdown amb clic fora (useEffect + ref).
+- **Backend (PostController):**
+  - `store()`: usa camp `visibility` per decidir `center_id` (global→null, center→user.center_id).
+  - `update()`: permet canviar la visibilitat d'un post existent.
+  - `StorePostRequest` i `UpdatePostRequest`: validació del camp `visibility` (in:global,center).
+- **Traduccions (es/ca/en):**
+  - `visibility_center`, `visibility_public_desc`, `visibility_center_desc`
+- **Fitxers modificats:** `PostInput.jsx`, `PostInput.css`, `PostController.php`, `StorePostRequest.php`, `UpdatePostRequest.php`, `es.json`, `ca.json`, `en.json`
+
 ### 2026-02-25 – Millores de la pàgina Explore (Trending Posts, Suggeriments, Filtres, Categories reals)
 
 - **Autor:** @copilot (IA)

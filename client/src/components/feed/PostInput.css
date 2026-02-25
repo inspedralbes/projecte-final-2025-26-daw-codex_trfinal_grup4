@@ -197,6 +197,95 @@
   color: var(--codex-teal);
   background: rgba(20, 184, 166, 0.1);
   border-radius: var(--radius-full);
+  border: none;
+}
+
+/* ── Visibility Selector (center users) ───────────────────── */
+.post-input__visibility-selector {
+  position: relative;
+}
+
+.post-input__visibility--interactive {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.post-input__visibility--interactive:hover {
+  background: rgba(20, 184, 166, 0.2);
+}
+
+.post-input__visibility--center {
+  color: var(--codex-amber, #f59e0b);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.post-input__visibility--center:hover {
+  background: rgba(245, 158, 11, 0.2);
+}
+
+.post-input__visibility-dropdown {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  background: var(--depth-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 100;
+  animation: slideUp var(--duration-normal) var(--ease-out);
+}
+
+.post-input__visibility-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--ink-secondary);
+  transition: all var(--transition-fast);
+}
+
+.post-input__visibility-option:hover {
+  background: var(--depth-3);
+}
+
+.post-input__visibility-option--active {
+  background: rgba(20, 184, 166, 0.08);
+  color: var(--codex-teal);
+}
+
+.post-input__visibility-option--active:hover {
+  background: rgba(20, 184, 166, 0.12);
+}
+
+.post-input__visibility-option svg {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.post-input__visibility-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.post-input__visibility-option-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.post-input__visibility-option-desc {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  line-height: 1.3;
 }
 
 .post-input__submit {

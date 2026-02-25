@@ -714,6 +714,18 @@
 - **Canvis en Controladors:**
     - `PostController@destroy`: Ara dispara `PostDeleted`.
     - `InteractionController@toggle`: Ara dispara `InteractionRemoved` quan l'estat passa a `active: false`.
+
+### 2026-02-25 – Selector de Visibilitat Global/Centre al crear/editar posts
+
+- **Autor:** @copilot (IA)
+- **StorePostRequest:** Afegit camp `visibility` (`sometimes|string|in:global,center`)
+- **UpdatePostRequest:** Afegit camp `visibility` (`sometimes|string|in:global,center`)
+- **PostController::store():** Usa `visibility` per decidir `center_id`:
+  - `global` → `center_id = null` (visible a tothom)
+  - `center` → `center_id = user->center_id` (només al centre de l'usuari)
+  - Abans sempre assignava `user->center_id` automàticament
+- **PostController::update():** Permet canviar la visibilitat d'un post existent amb el mateix camp `visibility`
+
 ---
 
 ## 📚 Documentació Relacionada

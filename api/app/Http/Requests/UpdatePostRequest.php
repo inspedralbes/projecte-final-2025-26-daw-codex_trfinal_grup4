@@ -24,6 +24,7 @@ class UpdatePostRequest extends FormRequest
             'code_language' => ['sometimes', 'nullable', 'string', 'max:50'],
             'tags'          => ['sometimes', 'nullable', 'array', 'max:5'],
             'tags.*'        => ['string', 'max:30'],
+            'visibility'    => ['sometimes', 'string', 'in:global,center'],
         ];
     }
 }

@@ -69,10 +69,10 @@ const QuestionIcon = () => (
   </svg>
 );
 
-const GlobeIcon = () => (
+const GlobeIcon = ({ size = 14 }) => (
   <svg
-    width="14"
-    height="14"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -83,6 +83,37 @@ const GlobeIcon = () => (
     <circle cx="12" cy="12" r="10" />
     <line x1="2" y1="12" x2="22" y2="12" />
     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  </svg>
+);
+
+const CenterIcon = ({ size = 14 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    <polyline points="9 22 9 12 15 12 15 22" />
+  </svg>
+);
+
+const ChevronDownIcon = () => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="6 9 12 15 18 9" />
   </svg>
 );
 
@@ -101,13 +132,31 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
   const [imageFile, setImageFile] = useState(null);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
+  const [visibility, setVisibility] = useState("global");
+  const [showVisibilityDropdown, setShowVisibilityDropdown] = useState(false);
   const imageInputRef = React.useRef(null);
   const textareaRef = React.useRef(null);
+  const visibilityRef = React.useRef(null);
+
+  const hasCenterAccess = !!user?.center_id;
 
   // Sync isQuestion with forceQuestion prop when tab changes
   useEffect(() => {
     setIsQuestion(forceQuestion);
   }, [forceQuestion]);
+
+  // Close visibility dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (visibilityRef.current && !visibilityRef.current.contains(e.target)) {
+        setShowVisibilityDropdown(false);
+      }
+    };
+    if (showVisibilityDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showVisibilityDropdown]);
 
   const handleSubmit = useCallback(
     async (e) => {
@@ -138,6 +187,7 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
           code_language: code.trim() ? codeLanguage : null,
           type: isQuestion ? "question" : "news",
           tags: parsedTags.length > 0 ? parsedTags : undefined,
+          visibility: hasCenterAccess ? visibility : "global",
         };
 
         // If image file exists, use FormData
@@ -169,6 +219,7 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
             setImageFile(null);
             setShowLinkInput(false);
             setLinkUrl("");
+            setVisibility("global");
           } else {
             setError(result.error || t("auth.register_error_fallback"));
           }
@@ -180,7 +231,7 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
         setSubmitting(false);
       }
     },
-    [content, code, codeLanguage, isQuestion, tags, submitting, onSubmit, imageFile],
+    [content, code, codeLanguage, isQuestion, tags, submitting, onSubmit, imageFile, visibility, hasCenterAccess],
   );
 
   const avatarUrl =
@@ -374,10 +425,50 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
             </button>
           </div>
           <div className="post-input__submit-area">
-            <div className="post-input__visibility">
-              <GlobeIcon />
-              <span>{t("feed.visibility_public")}</span>
-            </div>
+            {hasCenterAccess ? (
+              <div className="post-input__visibility-selector" ref={visibilityRef}>
+                <button
+                  type="button"
+                  className={`post-input__visibility post-input__visibility--interactive ${visibility === "center" ? "post-input__visibility--center" : ""}`}
+                  onClick={() => setShowVisibilityDropdown(!showVisibilityDropdown)}
+                >
+                  {visibility === "global" ? <GlobeIcon /> : <CenterIcon />}
+                  <span>{visibility === "global" ? t("feed.visibility_public") : t("feed.visibility_center")}</span>
+                  <ChevronDownIcon />
+                </button>
+                {showVisibilityDropdown && (
+                  <div className="post-input__visibility-dropdown">
+                    <button
+                      type="button"
+                      className={`post-input__visibility-option ${visibility === "global" ? "post-input__visibility-option--active" : ""}`}
+                      onClick={() => { setVisibility("global"); setShowVisibilityDropdown(false); }}
+                    >
+                      <GlobeIcon size={16} />
+                      <div className="post-input__visibility-option-text">
+                        <span className="post-input__visibility-option-label">{t("feed.visibility_public")}</span>
+                        <span className="post-input__visibility-option-desc">{t("feed.visibility_public_desc")}</span>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      className={`post-input__visibility-option ${visibility === "center" ? "post-input__visibility-option--active" : ""}`}
+                      onClick={() => { setVisibility("center"); setShowVisibilityDropdown(false); }}
+                    >
+                      <CenterIcon size={16} />
+                      <div className="post-input__visibility-option-text">
+                        <span className="post-input__visibility-option-label">{t("feed.visibility_center")}</span>
+                        <span className="post-input__visibility-option-desc">{t("feed.visibility_center_desc")}</span>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="post-input__visibility">
+                <GlobeIcon />
+                <span>{t("feed.visibility_public")}</span>
+              </div>
+            )}
             <button
               type="submit"
               className="post-input__submit"
