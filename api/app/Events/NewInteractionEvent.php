@@ -24,10 +24,16 @@ class NewInteractionEvent implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         $ownerId = $this->getResourceOwnerId();
+        $performerId = $this->interaction->user_id;
 
-        return [
-            new Channel('user.' . $ownerId),
-        ];
+        $channels = [new Channel('user.' . $ownerId)];
+        
+        // Always include performer to sync tabs/sessions
+        if ($performerId !== $ownerId) {
+            $channels[] = new Channel('user.' . $performerId);
+        }
+
+        return $channels;
     }
 
     /**

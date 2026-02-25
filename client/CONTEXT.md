@@ -302,6 +302,17 @@
   - Àvatar de la barra lateral ara fa servir `user.username` com a seed per a Dicebear (consistent amb la pàgina de perfil).
   - Botó de logout completament funcional.
 
+### 2026-02-25 – Resolució de Conflictes i Restauració de Perfil
+
+- **Autor:** @iker
+- **Resolució de Conflictes:**
+  - Resolució de conflictes de merge a `Profile.jsx` després d'un rebase de git.
+  - Restauració de la lògica de pestanyes (`activeTab`, `setActiveTab`) que s'havia perdut.
+  - Restauració del fetch de dades per a `posts`, `likedPosts`, `bookmarkedPosts` i `replies`.
+- **Millores de Perfil:**
+  - Sincronització automàtica de la barra lateral amb el nou àvatar.
+  - Redirecció automàtica en cas de canvi d'username.
+
 ### 2026-02-24 – Millores de Perfil i Sincronització Real-Time
 
 - **Autor:** @iker
@@ -343,7 +354,7 @@
   - Cada post mostra autor, preview del text (max 100 chars) i estadístiques (❤️ / 💬).
   - Clicable per navegar al post individual.
 - **Suggeriments de perfils ("A qui seguir"):**
-  - Nou widget amb icona de persona+ que mostra fins a 6 usuaris suggerits.
+  - Nou widget with icona de persona+ que mostra fins a 6 usuaris suggerits.
   - Reutilitza l'endpoint del leaderboard filtrant l'usuari actual.
   - Botó "Seguir"/"Siguiendo" funcional amb `followService.toggleFollowUser()`.
   - El botó canvia d'estil (teal → border) i mostra "Siguiendo" en hover vermell per deseleccionar.
@@ -395,7 +406,7 @@
   - Feedback visual "Link copied!" amb animació `fadeIn` durant 2 segons.
 - **Link Preview:**
   - `PostCard.jsx` detecta URLs dins del contingut amb regex.
-  - Mostra un preview amb icona 🔗, domini i URL truncada sota el contingut del post.
+  - Mostra un preview with icona 🔗, domini i URL truncada sota el contingut del post.
 - **Temps Relatiu Auto-actualitzat:**
   - Creat hook `useRelativeTime` dins de `PostCard.jsx` que actualitza el temps cada minut amb `setInterval`.
   - Mostra "hace X minutos", "hace X horas", "ayer", etc.
@@ -440,11 +451,12 @@
   - `landing.errors.google_failed`, `landing.errors.google_no_code`
   - `landing.messages.redirecting`, `landing.messages.google_processing`, `landing.messages.passwords_dont_match`
 - **Flux complet Google OAuth:**
-  1. Usuari clica "Continuar amb Google" → frontend crida `GET /api/auth/google/redirect`
-  2. Backend retorna URL de Google → frontend redirigeix el navegador
-  3. Google autentica → redirigeix a `http://localhost:5173/auth/google/callback?code=XXX`
-  4. `GoogleCallback.jsx` captura el code → `POST /api/auth/google/callback` → token Sanctum
-  5. Redirecció a `/` amb sessió activa
+  - 1. Usuari clica "Continuar amb Google" → frontend crida `GET /api/auth/google/redirect`
+  - 2. Backend retorna URL de Google → frontend redirigeix el navegador
+  - 3. Google autentica → redirigeix a `http://localhost:5173/auth/google/callback?code=XXX`
+  - 4. `GoogleCallback.jsx` captura el code → `POST /api/auth/google/callback` → token Sanctum
+  - 5. Redirecció a `/` amb sessió activa
+
 ---
 
 ## 🎨 Estructura actual de components

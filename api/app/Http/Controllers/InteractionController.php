@@ -82,11 +82,8 @@ class InteractionController extends Controller
 
         $interaction->load(['user', 'interactable']);
 
-        // Broadcast to the resource owner (don't notify yourself)
-        $ownerId = $resource->user_id ?? null;
-        if ($ownerId && $ownerId !== $user->id) {
-            event(new NewInteractionEvent($interaction));
-        }
+        // Broadcast to the resource owner and performer
+        event(new NewInteractionEvent($interaction));
 
         // Persist notification for likes (not bookmarks)
         if ($request->type === 'like' && $ownerId) {

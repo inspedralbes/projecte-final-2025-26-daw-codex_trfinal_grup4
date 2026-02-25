@@ -721,10 +721,15 @@
 - **StorePostRequest:** Afegit camp `visibility` (`sometimes|string|in:global,center`)
 - **UpdatePostRequest:** Afegit camp `visibility` (`sometimes|string|in:global,center`)
 - **PostController::store():** Usa `visibility` per decidir `center_id`:
-  - `global` → `center_id = null` (visible a tothom)
-  - `center` → `center_id = user->center_id` (només al centre de l'usuari)
-  - Abans sempre assignava `user->center_id` automàticament
+    - `global` → `center_id = null` (visible a tothom)
+    - `center` → `center_id = user->center_id` (només al centre de l'usuari)
+    - Abans sempre assignava `user->center_id` automàticament
 - **PostController::update():** Permet canviar la visibilitat d'un post existent amb el mateix camp `visibility`
+
+### 2026-02-25 – Documentació de Profiling i Neteja
+
+- **Autor:** @iker
+- Actualització de `CONTEXT.md` amb el resum de les darreres funcionalitats de real-time i gestió de perfils.
 
 ---
 
