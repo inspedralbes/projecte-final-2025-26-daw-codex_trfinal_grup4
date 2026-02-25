@@ -80,6 +80,11 @@ Route::get('/leaderboard', [ProfileController::class, 'leaderboard']);
 Route::get('/centers', [CenterController::class, 'index']);
 Route::get('/centers/{center}', [CenterController::class, 'show']);
 
+// Center members – requires authentication (any center member can view)
+Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
+    Route::get('/centers/{center}/members', [CenterController::class, 'members']);
+});
+
 /* ------------------------------------------------------------------ */
 /*  Protected Routes (auth:sanctum + not-blocked)                      */
 /* ------------------------------------------------------------------ */

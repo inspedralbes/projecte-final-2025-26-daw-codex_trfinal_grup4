@@ -107,8 +107,13 @@
   color: var(--codex-teal);
 }
 
-/* ── Question Badge ───────────────────────────────────────── */
+/* ── Question Badge ───────────────────────────────────────── 
+   Academic aesthetic: Amber gold for pending (like a highlighter 
+   marking important text), emerald green for solved (knowledge gained).
+   Features a subtle pulsing glow to draw attention.
+   ──────────────────────────────────────────────────────────── */
 .post-card__question-badge {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -125,20 +130,48 @@
   color: var(--state-warning);
 }
 
-.post-card__question-badge--solved {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.1));
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  color: var(--state-success);
-}
-
 .post-card__question-badge-icon {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
 }
 
 .post-card__question-badge-text {
-  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+/* Subtle pulsing glow for pending questions */
+.post-card__question-badge-pulse {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 20% 50%,
+    rgba(251, 191, 36, 0.3) 0%,
+    transparent 60%
+  );
+  animation: questionPulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes questionPulse {
+  0%, 100% { 
+    opacity: 0.4; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8; 
+    transform: scale(1.05);
+  }
+}
+
+/* Solved state - confident emerald green */
+.post-card__question-badge--solved {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.1));
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: var(--state-success);
 }
 
 /* ── Text Content ─────────────────────────────────────────── */

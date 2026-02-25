@@ -16,6 +16,7 @@ class Center extends Model
         'website',
         'description',
         'status',
+        'is_private',
         'justificante',
         'creator_id',
     ];
@@ -27,6 +28,7 @@ class Center extends Model
     {
         return [
             'status' => 'string',
+            'is_private' => 'boolean',
         ];
     }
 

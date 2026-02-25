@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import "./PostInput.css";
@@ -86,14 +86,14 @@ const GlobeIcon = () => (
   </svg>
 );
 
-export default function PostInput({ onSubmit }) {
+export default function PostInput({ onSubmit, forceQuestion = false }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [content, setContent] = useState("");
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [code, setCode] = useState("");
   const [codeLanguage, setCodeLanguage] = useState("javascript");
-  const [isQuestion, setIsQuestion] = useState(false);
+  const [isQuestion, setIsQuestion] = useState(forceQuestion);
   const [tags, setTags] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -103,6 +103,11 @@ export default function PostInput({ onSubmit }) {
   const [linkUrl, setLinkUrl] = useState("");
   const imageInputRef = React.useRef(null);
   const textareaRef = React.useRef(null);
+
+  // Sync isQuestion with forceQuestion prop when tab changes
+  useEffect(() => {
+    setIsQuestion(forceQuestion);
+  }, [forceQuestion]);
 
   const handleSubmit = useCallback(
     async (e) => {
@@ -116,11 +121,16 @@ export default function PostInput({ onSubmit }) {
 
       try {
         // Parse tags from input (comma or space separated)
-        const parsedTags = tags
+        let parsedTags = tags
           .split(/[,\s]+/)
           .map((t) => t.replace(/^#/, "").trim())
           .filter((t) => t.length > 0)
           .slice(0, 5);
+
+        // Auto-add "dubtes-recents" tag for questions if not already present
+        if (isQuestion && !parsedTags.some(tag => tag.toLowerCase() === "dubtes-recents")) {
+          parsedTags = ["dubtes-recents", ...parsedTags].slice(0, 5);
+        }
 
         const postData = {
           content: content.trim() || null,
