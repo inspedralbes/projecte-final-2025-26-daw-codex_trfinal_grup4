@@ -350,6 +350,9 @@
   - `client/src/pages/Explore.jsx` + `.css`
   - `client/src/components/feed/Feed.jsx`
   - `client/src/locales/{es,ca,en}.json`
+- **Emojis substituïts per icones SVG:**
+  - Categories: 🎨⚙️🚀🗄️📱🔒 → FrontendIcon, BackendIcon, DevopsIcon, DatabaseIcon, MobileIcon, SecurityIcon
+  - Stats trending posts: ❤️💬 → HeartIcon, CommentIcon
 
 ### 2026-02-25 – Millores del Feed (Syntax Highlight, Infinite Scroll, Skeleton Loaders, Share, Imatge, Links, Welcome Card)
 
