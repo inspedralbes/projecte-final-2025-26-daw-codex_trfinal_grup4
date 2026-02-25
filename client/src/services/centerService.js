@@ -23,7 +23,26 @@ const centerService = {
   },
 
   /**
-   * Get members of the user's center (for teachers)
+   * Get public members of a center (any member can access)
+   * @param {number} centerId - Center ID
+   * @param {Object} params - Filter params
+   * @param {string} params.role - Filter by role
+   * @param {string} params.search - Search by name/username
+   * @param {number} params.page - Page number
+   * @returns {Promise<Object>} Paginated members list
+   */
+  getCenterMembers: async (centerId, params = {}) => {
+    const query = new URLSearchParams();
+    if (params.role) query.set("role", params.role);
+    if (params.search) query.set("search", params.search);
+    if (params.page) query.set("page", params.page);
+    
+    const queryString = query.toString();
+    return api.get(`/centers/${centerId}/members${queryString ? `?${queryString}` : ""}`);
+  },
+
+  /**
+   * Get members of the user's center (for teachers - admin endpoint)
    * @param {Object} params - Filter params
    * @param {string} params.role - Filter by role
    * @param {string} params.search - Search by name/username

@@ -107,25 +107,104 @@
   color: var(--codex-teal);
 }
 
-/* ── Question Badge ───────────────────────────────────────── */
+/* ── Question Badge ───────────────────────────────────────── 
+   Academic aesthetic: Amber gold for pending (like a highlighter 
+   marking important text), emerald green for solved (knowledge gained).
+   Features a subtle pulsing glow to draw attention.
+   ──────────────────────────────────────────────────────────── */
 .post-card__question-badge {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-3);
-  margin-bottom: var(--space-2);
-  background: var(--state-warning-bg);
-  border: 1px solid rgba(234, 179, 8, 0.3);
-  border-radius: var(--radius-full);
-  font-size: var(--text-xs);
+  gap: var(--space-2);
+  padding: var(--space-1-5) var(--space-4);
+  margin-bottom: var(--space-3);
+  background: linear-gradient(
+    135deg,
+    rgba(251, 191, 36, 0.15) 0%,
+    rgba(245, 158, 11, 0.1) 100%
+  );
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--state-warning);
+  color: #fbbf24;
+  letter-spacing: 0.02em;
+  box-shadow: 
+    0 0 0 1px rgba(251, 191, 36, 0.1),
+    0 2px 8px -2px rgba(251, 191, 36, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
 }
 
+.post-card__question-badge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
+}
+
+.post-card__question-badge-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* Subtle pulsing glow for pending questions */
+.post-card__question-badge-pulse {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 20% 50%,
+    rgba(251, 191, 36, 0.3) 0%,
+    transparent 60%
+  );
+  animation: questionPulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes questionPulse {
+  0%, 100% { 
+    opacity: 0.4; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8; 
+    transform: scale(1.05);
+  }
+}
+
+/* Solved state - confident emerald green */
 .post-card__question-badge--solved {
-  background: var(--state-success-bg);
-  border-color: rgba(34, 197, 94, 0.3);
-  color: var(--state-success);
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.15) 0%,
+    rgba(5, 150, 105, 0.1) 100%
+  );
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #10b981;
+  box-shadow: 
+    0 0 0 1px rgba(16, 185, 129, 0.1),
+    0 2px 8px -2px rgba(16, 185, 129, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.post-card__question-badge--solved .post-card__question-badge-icon {
+  color: #10b981;
+  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.5));
+}
+
+/* Hover refinement */
+.post-card__question-badge:hover {
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+}
+
+.post-card__question-badge--solved:hover {
+  box-shadow: 
+    0 0 0 1px rgba(16, 185, 129, 0.15),
+    0 4px 12px -2px rgba(16, 185, 129, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* ── Text Content ─────────────────────────────────────────── */

@@ -55,9 +55,47 @@ class CenterController extends Controller
             }
         }
 
-        $center->loadCount('users');
+        $center->loadCount(['users', 'teachers', 'students']);
 
         return $this->success($center);
+    }
+
+    /**
+     * GET /api/centers/{center}/members
+     * List members of a center (public for center members).
+     */
+    public function members(Request $request, Center $center): JsonResponse
+    {
+        $user = auth('sanctum')->user();
+
+        // Only members of the center can see the member list
+        if (!$user || $user->center_id !== $center->id) {
+            return $this->error('You must be a member of this center to view members', 403);
+        }
+
+        $query = $center->users()
+            ->select('id', 'name', 'username', 'role', 'avatar', 'bio', 'created_at')
+            ->withCount(['posts', 'comments']);
+
+        // Filter by role
+        if ($request->has('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Search by name/username
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%");
+            });
+        }
+
+        $members = $query->orderByRaw("CASE role WHEN 'teacher' THEN 1 WHEN 'student' THEN 2 ELSE 3 END")
+            ->orderBy('name')
+            ->paginate(30);
+
+        return $this->success($members);
     }
 
     /**
