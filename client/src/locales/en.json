@@ -149,6 +149,8 @@
     "auth_subtitle_login": "Log in to continue",
     "auth_subtitle_register": "Use your center email for full access",
     "footer_text": "The academic social network for the IT vocational training ecosystem in Spain",
+    "or_continue_with": "or continue with",
+    "google_login": "Continue with Google",
     "features": {
       "snippets": {
         "title": "Syntax Snippets",
@@ -166,11 +168,16 @@
       "verification_required": "No center for this domain – Verification will be required",
       "domain_not_recognized": "Domain not recognized",
       "check_review": "🎉 Account created! Your center request is under review.",
-      "passwords_match": "Passwords match"
+      "passwords_match": "Passwords match",
+      "passwords_dont_match": "Passwords do not match",
+      "redirecting": "Redirecting...",
+      "google_processing": "Signing in with Google..."
     },
     "errors": {
       "password_requirements": "The password does not meet all requirements.",
-      "passwords_dont_match": "Passwords do not match."
+      "passwords_dont_match": "Passwords do not match.",
+      "google_failed": "Failed to connect with Google. Please try again.",
+      "google_no_code": "No authorization code received from Google."
     }
   },
   "center": {

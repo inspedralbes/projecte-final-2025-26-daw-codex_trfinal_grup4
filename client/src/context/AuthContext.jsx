@@ -203,6 +203,42 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
+   * Handle Google OAuth callback.
+   * Called from the GoogleCallback page after Google redirects back with a code.
+   */
+  const loginWithGoogle = async (code) => {
+    try {
+      const response = await api.post("/auth/google/callback", { code });
+      const data = response.data || response;
+      const token = data.token;
+      const userData = data.user;
+
+      if (!token) {
+        setAuthMessage({ type: "error", text: "Error: no token received from Google." });
+        return { success: false, message: "No token received" };
+      }
+
+      localStorage.setItem("token", token);
+      setUser(userData);
+      setEmailVerified(data.email_verified ?? !!userData.email_verified_at);
+
+      const msgKey = data.is_new_user ? "auth.register_success" : "auth.login_success";
+      setAuthMessage({ type: "success", text: i18next.t(msgKey) });
+
+      return {
+        success: true,
+        isNewUser: data.is_new_user,
+        needsPassword: data.needs_password,
+      };
+    } catch (error) {
+      console.error("Google login error", error);
+      const errorMsg = parseApiError(error, i18next.t("auth.login_error_fallback"));
+      setAuthMessage({ type: "error", text: errorMsg });
+      return { success: false, message: errorMsg };
+    }
+  };
+
+  /**
    * Re-fetch user data from /me to check if email has been verified or stats updated.
    */
   const refreshUser = async () => {
@@ -273,6 +309,7 @@ export const AuthProvider = ({ children }) => {
     register,
     registerWithCenterRequest,
     checkDomain,
+    loginWithGoogle,
     logout,
     refreshUser,
     isAuthenticated: !!user,

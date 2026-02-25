@@ -17,6 +17,7 @@ import Notifications from "@/pages/Notifications";
 import Messages from "@/pages/Messages";
 import More from "@/pages/More";
 import Landing from "@/pages/Landing";
+import GoogleCallback from "@/pages/GoogleCallback";
 import CenterHub from "@/pages/CenterHub";
 import EmailVerification from "@/pages/EmailVerification";
 
@@ -52,6 +53,9 @@ export default function AppRouter() {
           </PublicOnlyRoute>
         }
       />
+
+      {/* Google OAuth callback */}
+      <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
       {/* Email verification screen (authenticated but unverified) */}
       <Route element={<ProtectedRoute />}>

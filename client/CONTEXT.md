@@ -314,6 +314,31 @@
   - **`usePosts.js`**: Afegits listeners globals per a `post.deleted` (esborra de feeds) i `interaction.removed` (actualitza comptadors de likes/bookmarks).
   - **`useProfile.js`**: Listener per a `post.deleted` per sincronitzar el comptador total de posts del perfil.
   - **`Profile.jsx`**: Implementats listeners per sincronitzar en viu les pestanyes de Likes, Bookmarks i Replies quan s'eliminen continguts.
+
+### 2026-02-25 – Redisseny Login i Google OAuth
+
+- **Autor:** @copilot (IA)
+- **Redisseny de la pantalla de Landing/Login:**
+  - Eliminat el **footer** complet (marca, text, etc.).
+  - Mogut el **`LanguageSwitcher`** a la cantonada superior dreta (`.landing__top-bar`).
+  - Afegit **botó "Continuar amb Google"** amb icona SVG oficial dels colors de Google.
+  - Afegit **divisor** ("o continuar amb") entre el formulari i el botó de Google.
+  - Substituïts estils inline del spinner per classe CSS reutilitzable `.auth-card__spinner`.
+  - Estils nous: `.auth-card__google-btn`, `.auth-card__spinner`, `.landing__top-bar`.
+- **Integració Google OAuth al Frontend:**
+  - Creat **`GoogleCallback.jsx`** (`/auth/google/callback`): captura el `code` de la URL de redirecció de Google, l'envia al backend (`POST /api/auth/google/callback`) i redirigeix a `/`.
+  - Afegit **`loginWithGoogle(code)`** a `AuthContext.jsx`: gestiona l'intercanvi code→token amb el backend i actualitza l'estat global d'autenticació.
+  - Ruta `/auth/google/callback` registrada al router (`router/index.jsx`).
+- **Traduccions i18n (3 idiomes: es, ca, en):**
+  - `landing.or_continue_with`, `landing.google_login`
+  - `landing.errors.google_failed`, `landing.errors.google_no_code`
+  - `landing.messages.redirecting`, `landing.messages.google_processing`, `landing.messages.passwords_dont_match`
+- **Flux complet Google OAuth:**
+  1. Usuari clica "Continuar amb Google" → frontend crida `GET /api/auth/google/redirect`
+  2. Backend retorna URL de Google → frontend redirigeix el navegador
+  3. Google autentica → redirigeix a `http://localhost:5173/auth/google/callback?code=XXX`
+  4. `GoogleCallback.jsx` captura el code → `POST /api/auth/google/callback` → token Sanctum
+  5. Redirecció a `/` amb sessió activa
 ---
 
 ## 🎨 Estructura actual de components
@@ -345,7 +370,8 @@ src/
 ├── i18n.js                          # Configuració i18next
 ├── locales/                         # Fitxers de traducció (ca, es, en)
 ├── pages/
-│   ├── Landing.jsx / Landing.css    # Welcome + Auth + Feedback UX
+│   ├── Landing.jsx / Landing.css    # Welcome + Auth + Google OAuth + Feedback UX
+│   ├── GoogleCallback.jsx           # Callback per Google OAuth (captura code)
 │   ├── Home.jsx                     # Wrapper per Feed
 │   ├── Explore.jsx / Explore.css    # Cerca + Descobriment
 │   ├── Notifications.jsx / Notifications.css # Activitat

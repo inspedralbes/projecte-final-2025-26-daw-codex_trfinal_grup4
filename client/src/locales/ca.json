@@ -149,6 +149,8 @@
     "auth_subtitle_login": "Inicia sessió per continuar",
     "auth_subtitle_register": "Fes servir el teu correu del centre per a accés complet",
     "footer_text": "La xarxa social acadèmica per a l'ecosistema de FP Informàtica a Espanya",
+    "or_continue_with": "o continuar amb",
+    "google_login": "Continuar amb Google",
     "features": {
       "snippets": {
         "title": "Snippets amb Sintaxi",
@@ -166,11 +168,16 @@
       "verification_required": "No hi ha centre per a aquest domini – Es demanarà verificació",
       "domain_not_recognized": "Domini no reconegut",
       "check_review": "🎉 Compte creat! La teva sol·licitud de centre està en revisió.",
-      "passwords_match": "Les contrasenyes coincideixen"
+      "passwords_match": "Les contrasenyes coincideixen",
+      "passwords_dont_match": "Les contrasenyes no coincideixen",
+      "redirecting": "Redirigint...",
+      "google_processing": "Iniciant sessió amb Google..."
     },
     "errors": {
       "password_requirements": "La contrasenya no compleix tots els requisits.",
-      "passwords_dont_match": "Les contrasenyes no coincideixen."
+      "passwords_dont_match": "Les contrasenyes no coincideixen.",
+      "google_failed": "Error en connectar amb Google. Torna-ho a provar.",
+      "google_no_code": "No s'ha rebut codi d'autorització de Google."
     }
   },
   "center": {

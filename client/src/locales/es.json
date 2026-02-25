@@ -149,6 +149,8 @@
     "auth_subtitle_login": "Inicia sesión para continuar",
     "auth_subtitle_register": "Usa tu email del centro para acceso completo",
     "footer_text": "La red social académica para el ecosistema de FP Informática en España",
+    "or_continue_with": "o continuar con",
+    "google_login": "Continuar con Google",
     "features": {
       "snippets": {
         "title": "Snippets con Sintaxis",
@@ -166,11 +168,16 @@
       "verification_required": "No hay centro para este dominio – Se te pedirá verificación",
       "domain_not_recognized": "Dominio no reconocido",
       "check_review": "🎉 ¡Cuenta creada! Tu solicitud de centro está en revisión.",
-      "passwords_match": "Las contraseñas coinciden"
+      "passwords_match": "Las contraseñas coinciden",
+      "passwords_dont_match": "Las contraseñas no coinciden",
+      "redirecting": "Redirigiendo...",
+      "google_processing": "Iniciando sesión con Google..."
     },
     "errors": {
       "password_requirements": "La contraseña no cumple todos los requisitos.",
-      "passwords_dont_match": "Las contraseñas no coinciden."
+      "passwords_dont_match": "Las contraseñas no coinciden.",
+      "google_failed": "Error al conectar con Google. Inténtalo de nuevo.",
+      "google_no_code": "No se recibió código de autorización de Google."
     }
   },
   "center": {
