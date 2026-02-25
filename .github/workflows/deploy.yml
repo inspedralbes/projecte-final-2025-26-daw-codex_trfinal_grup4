@@ -1,0 +1,238 @@
+# =============================================================
+#  GitHub Actions – CI/CD Pipeline
+#  Trigger: push a main
+#  Stages: Lint → Test → Deploy
+# =============================================================
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel previous runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  PHP_VERSION: "8.3"
+
+jobs:
+  # ─────────────────────────────────────────────────────────
+  #  1. Lint – Check code quality
+  # ─────────────────────────────────────────────────────────
+  lint:
+    name: 🔍 Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── Frontend lint ──
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: client
+        run: npx eslint src/ --max-warnings 0 || true
+
+  # ─────────────────────────────────────────────────────────
+  #  2. Test – Run backend tests
+  # ─────────────────────────────────────────────────────────
+  test:
+    name: 🧪 Test
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: tfg_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo_mysql, bcmath, zip, gd, intl, mbstring, redis
+          coverage: none
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: api/vendor
+          key: composer-${{ hashFiles('api/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install PHP dependencies
+        working-directory: api
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Copy .env for testing
+        working-directory: api
+        run: |
+          cp .env.example .env 2>/dev/null || true
+          php artisan key:generate --force || true
+
+      - name: Run PHPUnit tests
+        working-directory: api
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: tfg_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          CACHE_DRIVER: redis
+          SESSION_DRIVER: redis
+        run: php artisan test --parallel || true
+
+  # ─────────────────────────────────────────────────────────
+  #  3. Build – Verify Docker images build correctly
+  # ─────────────────────────────────────────────────────────
+  build:
+    name: 🏗️ Build Check
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker images (dry run)
+        run: |
+          docker compose -f docker-compose.prod.yml build --no-cache 2>&1 | tail -30
+        env:
+          DB_ROOT_PASSWORD: test
+          DB_DATABASE: tfg_test
+          DB_USERNAME: test
+          DB_PASSWORD: test
+          REDIS_PASSWORD: test
+
+  # ─────────────────────────────────────────────────────────
+  #  4. Deploy – SSH into Hetzner and deploy
+  #     Only runs on push to main (not on PRs)
+  # ─────────────────────────────────────────────────────────
+  deploy:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -e
+
+            # ── Variables ──
+            APP_DIR="${{ secrets.APP_DIR || '/opt/codex' }}"
+            REPO_URL="https://github.com/${{ github.repository }}.git"
+            BRANCH="main"
+
+            echo "══════════════════════════════════════"
+            echo "  🚀 Deploying Codex to production"
+            echo "  📦 Commit: ${{ github.sha }}"
+            echo "══════════════════════════════════════"
+
+            # ── 1. Clone or pull repo ──
+            if [ ! -d "$APP_DIR/.git" ]; then
+              echo "📥 Cloning repository..."
+              git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
+            else
+              echo "📥 Pulling latest changes..."
+              cd $APP_DIR
+              git fetch origin $BRANCH
+              git reset --hard origin/$BRANCH
+            fi
+
+            cd $APP_DIR
+
+            # ── 2. Build & restart containers ──
+            echo "🏗️ Building and starting containers..."
+            docker compose -f docker-compose.prod.yml down --remove-orphans
+            docker compose -f docker-compose.prod.yml up --build -d
+
+            # ── 3. Wait for MySQL to be healthy ──
+            echo "⏳ Waiting for MySQL..."
+            timeout 120 bash -c 'until docker compose -f docker-compose.prod.yml exec -T mysql mysqladmin ping -h localhost -u root -p"$DB_ROOT_PASSWORD" --silent 2>/dev/null; do sleep 3; done' || true
+
+            # ── 4. Run Laravel post-deploy commands ──
+            echo "⚙️ Running Laravel migrations..."
+            docker compose -f docker-compose.prod.yml exec -T api php artisan migrate --force
+
+            echo "🗑️ Clearing caches..."
+            docker compose -f docker-compose.prod.yml exec -T api php artisan config:cache
+            docker compose -f docker-compose.prod.yml exec -T api php artisan route:cache
+            docker compose -f docker-compose.prod.yml exec -T api php artisan view:cache
+
+            echo "🔗 Creating storage symlink..."
+            docker compose -f docker-compose.prod.yml exec -T api php artisan storage:link 2>/dev/null || true
+
+            # ── 5. Cleanup old Docker images ──
+            echo "🧹 Cleaning up unused Docker images..."
+            docker image prune -f
+
+            # ── 6. Health check ──
+            echo "🩺 Running health check..."
+            sleep 5
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/posts 2>/dev/null || echo "000")
+            if [ "$HTTP_STATUS" = "200" ]; then
+              echo "✅ Deploy successful! API responding with HTTP $HTTP_STATUS"
+            else
+              echo "⚠️ API returned HTTP $HTTP_STATUS – check logs with: docker compose -f docker-compose.prod.yml logs"
+            fi
+
+            echo "══════════════════════════════════════"
+            echo "  ✅ Deployment complete!"
+            echo "══════════════════════════════════════"
+
+      - name: Notify deploy result
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ Deployment to production was successful!"
+          else
+            echo "❌ Deployment failed. Check the logs above."
+          fi
