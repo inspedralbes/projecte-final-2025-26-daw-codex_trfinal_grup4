@@ -24,6 +24,9 @@ docker/mysql/data/
 # --- Node ---
 node_modules/
 
+# --- Build output ---
+dist/
+
 # --- PHP / Laravel ---
 vendor/
 
