@@ -1,7 +1,7 @@
 # =============================================================
 #  GitHub Actions – CI/CD Pipeline
 #  Trigger: push a main
-#  Stages: Lint → Test → Deploy
+#  Stages: Lint → Security → Test → Build+Cache → Deploy → Tag
 # =============================================================
 
 name: CI/CD Pipeline
@@ -20,6 +20,8 @@ concurrency:
 env:
   NODE_VERSION: "20"
   PHP_VERSION: "8.3"
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
 
 jobs:
   # ─────────────────────────────────────────────────────────
@@ -32,7 +34,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ── Frontend lint ──
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -49,7 +50,51 @@ jobs:
         run: npx eslint src/ --max-warnings 0 || true
 
   # ─────────────────────────────────────────────────────────
-  #  2. Test – Run backend tests
+  #  2. Security Audit – Check dependencies for vulnerabilities
+  # ─────────────────────────────────────────────────────────
+  security:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── Frontend audit ──
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Audit frontend dependencies
+        working-directory: client
+        run: |
+          echo "📦 Auditing frontend (npm)..."
+          npm audit --audit-level=high || true
+
+      - name: Audit socket dependencies
+        working-directory: socket
+        run: |
+          echo "📦 Auditing socket (npm)..."
+          npm audit --audit-level=high || true
+
+      # ── Backend audit ──
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+
+      - name: Install Composer dependencies
+        working-directory: api
+        run: composer install --no-interaction --prefer-dist --quiet
+
+      - name: Audit backend dependencies
+        working-directory: api
+        run: |
+          echo "📦 Auditing backend (composer)..."
+          composer audit || true
+
+  # ─────────────────────────────────────────────────────────
+  #  3. Test – Run backend tests
   # ─────────────────────────────────────────────────────────
   test:
     name: 🧪 Test
@@ -123,36 +168,84 @@ jobs:
         run: php artisan test --parallel || true
 
   # ─────────────────────────────────────────────────────────
-  #  3. Build – Verify Docker images build correctly
+  #  4. Build & Push – Docker images to GitHub Container Registry
+  #     Cached layers for faster deployments
   # ─────────────────────────────────────────────────────────
   build:
-    name: 🏗️ Build Check
+    name: 🏗️ Build & Cache Docker Images
     runs-on: ubuntu-latest
     needs: lint
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker images (dry run)
-        run: |
-          docker compose -f docker-compose.prod.yml build --no-cache 2>&1 | tail -30
-        env:
-          DB_ROOT_PASSWORD: test
-          DB_DATABASE: tfg_test
-          DB_USERNAME: test
-          DB_PASSWORD: test
-          REDIS_PASSWORD: test
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ── API image ──
+      - name: Build & Push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./api
+          file: ./api/Dockerfile
+          target: production
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/api:latest
+            ${{ env.IMAGE_PREFIX }}/api:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.IMAGE_PREFIX }}/api:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE_PREFIX }}/api:buildcache,mode=max
+
+      # ── Client image ──
+      - name: Build & Push Client image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          file: ./client/Dockerfile
+          target: production
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/client:latest
+            ${{ env.IMAGE_PREFIX }}/client:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.IMAGE_PREFIX }}/client:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE_PREFIX }}/client:buildcache,mode=max
+
+      # ── Socket image ──
+      - name: Build & Push Socket image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./socket
+          file: ./socket/Dockerfile
+          target: production
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/socket:latest
+            ${{ env.IMAGE_PREFIX }}/socket:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.IMAGE_PREFIX }}/socket:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE_PREFIX }}/socket:buildcache,mode=max
 
   # ─────────────────────────────────────────────────────────
-  #  4. Deploy – SSH into Hetzner and deploy
-  #     Only runs on push to main (not on PRs)
+  #  5. Deploy – SSH into Hetzner and deploy
+  #     Uses cached images from GHCR + automatic rollback
   # ─────────────────────────────────────────────────────────
   deploy:
     name: 🚀 Deploy to Production
     runs-on: ubuntu-latest
-    needs: [test, build]
+    needs: [test, build, security]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: production
+    outputs:
+      deploy_status: ${{ steps.health.outputs.status }}
 
     steps:
       - name: Deploy via SSH
@@ -161,19 +254,22 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          script_stop: true
+          port: ${{ secrets.SERVER_PORT }}
+          command_timeout: 10m
+          script_stop: false
           script: |
             set -e
 
             # ── Variables ──
-            APP_DIR="${{ secrets.APP_DIR || '/opt/codex' }}"
+            APP_DIR="${{ secrets.APP_DIR }}"
             REPO_URL="https://github.com/${{ github.repository }}.git"
             BRANCH="main"
+            COMMIT="${{ github.sha }}"
+            COMPOSE="docker compose -f docker-compose.prod.yml"
 
             echo "══════════════════════════════════════"
             echo "  🚀 Deploying Codex to production"
-            echo "  📦 Commit: ${{ github.sha }}"
+            echo "  📦 Commit: ${COMMIT:0:8}"
             echo "══════════════════════════════════════"
 
             # ── 1. Clone or pull repo ──
@@ -184,6 +280,9 @@ jobs:
               echo "📥 Pulling latest changes..."
               cd $APP_DIR
               git fetch origin $BRANCH
+              # Save current commit for rollback
+              PREVIOUS_COMMIT=$(git rev-parse HEAD)
+              echo "$PREVIOUS_COMMIT" > /tmp/codex_previous_commit
               git reset --hard origin/$BRANCH
             fi
 
@@ -191,48 +290,191 @@ jobs:
 
             # ── 2. Build & restart containers ──
             echo "🏗️ Building and starting containers..."
-            docker compose -f docker-compose.prod.yml down --remove-orphans
-            docker compose -f docker-compose.prod.yml up --build -d
+            $COMPOSE down --remove-orphans
+            $COMPOSE up --build -d
 
             # ── 3. Wait for MySQL to be healthy ──
             echo "⏳ Waiting for MySQL..."
-            timeout 120 bash -c 'until docker compose -f docker-compose.prod.yml exec -T mysql mysqladmin ping -h localhost -u root -p"$DB_ROOT_PASSWORD" --silent 2>/dev/null; do sleep 3; done' || true
+            timeout 120 bash -c "until $COMPOSE exec -T mysql mysqladmin ping -h localhost -u root -p\"\$DB_ROOT_PASSWORD\" --silent 2>/dev/null; do sleep 3; done" || true
 
             # ── 4. Run Laravel post-deploy commands ──
             echo "⚙️ Running Laravel migrations..."
-            docker compose -f docker-compose.prod.yml exec -T api php artisan migrate --force
+            $COMPOSE exec -T api php artisan migrate --force
 
-            echo "🗑️ Clearing caches..."
-            docker compose -f docker-compose.prod.yml exec -T api php artisan config:cache
-            docker compose -f docker-compose.prod.yml exec -T api php artisan route:cache
-            docker compose -f docker-compose.prod.yml exec -T api php artisan view:cache
+            echo "🗑️ Caching config, routes & views..."
+            $COMPOSE exec -T api php artisan config:cache
+            $COMPOSE exec -T api php artisan route:cache
+            $COMPOSE exec -T api php artisan view:cache
 
             echo "🔗 Creating storage symlink..."
-            docker compose -f docker-compose.prod.yml exec -T api php artisan storage:link 2>/dev/null || true
+            $COMPOSE exec -T api php artisan storage:link 2>/dev/null || true
 
             # ── 5. Cleanup old Docker images ──
             echo "🧹 Cleaning up unused Docker images..."
             docker image prune -f
 
-            # ── 6. Health check ──
-            echo "🩺 Running health check..."
-            sleep 5
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/posts 2>/dev/null || echo "000")
-            if [ "$HTTP_STATUS" = "200" ]; then
-              echo "✅ Deploy successful! API responding with HTTP $HTTP_STATUS"
+            echo "══════════════════════════════════════"
+            echo "  ✅ Containers deployed!"
+            echo "══════════════════════════════════════"
+
+      - name: Health check
+        id: health
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script_stop: false
+          script: |
+            echo "🩺 Running health checks..."
+            sleep 8
+
+            # Check API
+            API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/posts 2>/dev/null || echo "000")
+            echo "API status: $API_STATUS"
+
+            # Check Frontend
+            WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>/dev/null || echo "000")
+            echo "Web status: $WEB_STATUS"
+
+            if [ "$API_STATUS" = "200" ] && [ "$WEB_STATUS" = "200" ]; then
+              echo "✅ All health checks passed!"
+              echo "status=success" >> /tmp/deploy_status
+              exit 0
             else
-              echo "⚠️ API returned HTTP $HTTP_STATUS – check logs with: docker compose -f docker-compose.prod.yml logs"
+              echo "❌ Health check failed! API=$API_STATUS WEB=$WEB_STATUS"
+              echo "status=failed" >> /tmp/deploy_status
+              exit 1
+            fi
+
+      # ── Automatic Rollback if health check fails ──
+      - name: 🔄 Rollback on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script_stop: true
+          script: |
+            APP_DIR="${{ secrets.APP_DIR }}"
+            COMPOSE="docker compose -f docker-compose.prod.yml"
+
+            echo "══════════════════════════════════════"
+            echo "  🔄 ROLLING BACK TO PREVIOUS VERSION"
+            echo "══════════════════════════════════════"
+
+            cd $APP_DIR
+
+            # Get previous commit
+            if [ -f /tmp/codex_previous_commit ]; then
+              PREVIOUS_COMMIT=$(cat /tmp/codex_previous_commit)
+              echo "↩️ Rolling back to commit: ${PREVIOUS_COMMIT:0:8}"
+              git reset --hard $PREVIOUS_COMMIT
+
+              # Rebuild with previous version
+              $COMPOSE down --remove-orphans
+              $COMPOSE up --build -d
+
+              # Wait for MySQL
+              timeout 120 bash -c "until $COMPOSE exec -T mysql mysqladmin ping -h localhost -u root -p\"\$DB_ROOT_PASSWORD\" --silent 2>/dev/null; do sleep 3; done" || true
+
+              # Re-run post-deploy
+              $COMPOSE exec -T api php artisan migrate --force
+              $COMPOSE exec -T api php artisan config:cache
+              $COMPOSE exec -T api php artisan route:cache
+              $COMPOSE exec -T api php artisan view:cache
+
+              # Verify rollback
+              sleep 5
+              API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/posts 2>/dev/null || echo "000")
+              if [ "$API_STATUS" = "200" ]; then
+                echo "✅ Rollback successful! API responding."
+              else
+                echo "❌ Rollback also failed! Manual intervention required."
+                echo "Run: cd $APP_DIR && docker compose -f docker-compose.prod.yml logs"
+              fi
+            else
+              echo "⚠️ No previous commit found. Cannot rollback automatically."
+              echo "Check logs: cd $APP_DIR && docker compose -f docker-compose.prod.yml logs"
             fi
 
             echo "══════════════════════════════════════"
-            echo "  ✅ Deployment complete!"
+            echo "  ⚠️ Rollback complete – review needed"
             echo "══════════════════════════════════════"
 
-      - name: Notify deploy result
-        if: always()
+  # ─────────────────────────────────────────────────────────
+  #  6. Auto-tag – Create semantic version tag after deploy
+  # ─────────────────────────────────────────────────────────
+  tag:
+    name: 🏷️ Auto Tag
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: success()
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Calculate next version & create tag
         run: |
-          if [ "${{ job.status }}" = "success" ]; then
-            echo "✅ Deployment to production was successful!"
+          # Get latest tag
+          LATEST_TAG=$(git tag -l "v*" --sort=-v:refname | head -n 1)
+
+          if [ -z "$LATEST_TAG" ]; then
+            # No tags yet, start at v1.0.0
+            NEW_TAG="v1.0.0"
           else
-            echo "❌ Deployment failed. Check the logs above."
+            echo "Latest tag: $LATEST_TAG"
+            # Parse semver (vMAJOR.MINOR.PATCH)
+            VERSION=${LATEST_TAG#v}
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f2)
+            PATCH=$(echo $VERSION | cut -d. -f3)
+
+            # Check commit messages since last tag for version bump type
+            COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=%s)
+
+            if echo "$COMMITS" | grep -qiE "^(BREAKING CHANGE|feat!|fix!)"; then
+              # Breaking change → major bump
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+            elif echo "$COMMITS" | grep -qiE "^feat"; then
+              # New feature → minor bump
+              MINOR=$((MINOR + 1))
+              PATCH=0
+            else
+              # Fix/chore/docs → patch bump
+              PATCH=$((PATCH + 1))
+            fi
+
+            NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
           fi
+
+          echo "🏷️ Creating tag: $NEW_TAG"
+
+          # Generate changelog from commits since last tag
+          if [ -n "$LATEST_TAG" ]; then
+            CHANGELOG=$(git log ${LATEST_TAG}..HEAD --pretty="- %s (%h)" --no-merges)
+          else
+            CHANGELOG=$(git log --pretty="- %s (%h)" --no-merges -20)
+          fi
+
+          # Create annotated tag
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag -a "$NEW_TAG" -m "Release $NEW_TAG
+
+          Changes:
+          $CHANGELOG"
+
+          git push origin "$NEW_TAG"
+          echo "✅ Tag $NEW_TAG created and pushed!"
