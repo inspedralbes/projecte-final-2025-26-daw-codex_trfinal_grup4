@@ -64,7 +64,17 @@
     "unlike": "Quitar me gusta",
     "bookmark": "Guardar",
     "unbookmark": "Quitar de guardados",
-    "cant_repost_own": "No puedes repostear tu propia publicación"
+    "cant_repost_own": "No puedes repostear tu propia publicación",
+    "share": "Compartir",
+    "link_copied": "¡Enlace copiado!",
+    "open_question": "Pregunta abierta",
+    "welcome_title": "¡Bienvenido a Codex!",
+    "welcome_text": "Tu feed está vacío. ¡Empieza compartiendo código, resolviendo dudas o siguiendo a otros desarrolladores!",
+    "welcome_tip_code": "Comparte snippets de código con highlight",
+    "welcome_tip_question": "Publica dudas técnicas y obtén respuestas",
+    "welcome_tip_follow": "Sigue a compañeros y profesores de tu centro",
+    "link_placeholder": "Pega una URL (https://...)",
+    "add_link_btn": "Añadir"
   },
   "profile": {
     "loading": "Cargando perfil...",

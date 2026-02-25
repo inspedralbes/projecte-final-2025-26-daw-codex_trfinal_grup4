@@ -64,7 +64,17 @@
     "unlike": "Treure m'agrada",
     "bookmark": "Desar",
     "unbookmark": "Treure de desats",
-    "cant_repost_own": "No pots repostejar la teva pròpia publicació"
+    "cant_repost_own": "No pots repostejar la teva pròpia publicació",
+    "share": "Compartir",
+    "link_copied": "Enllaç copiat!",
+    "open_question": "Pregunta oberta",
+    "welcome_title": "Benvingut a Codex!",
+    "welcome_text": "El teu feed està buit. Comença compartint codi, publicant dubtes o seguint altres desenvolupadors!",
+    "welcome_tip_code": "Comparteix snippets de codi amb highlight de sintaxi",
+    "welcome_tip_question": "Publica dubtes tècnics i obtén respostes",
+    "welcome_tip_follow": "Segueix companys i professors del teu centre",
+    "link_placeholder": "Enganxa una URL (https://...)",
+    "add_link_btn": "Afegir"
   },
   "profile": {
     "loading": "Carregant perfil...",

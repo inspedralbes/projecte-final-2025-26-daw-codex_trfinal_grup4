@@ -82,6 +82,7 @@
 ```json
 {
   "dependencies": {
+    "highlight.js": "^11.11.1",
     "i18next": "^25.x",
     "i18next-browser-languagedetector": "^8.x",
     "react": "^18.3.1",
@@ -314,6 +315,55 @@
   - **`usePosts.js`**: Afegits listeners globals per a `post.deleted` (esborra de feeds) i `interaction.removed` (actualitza comptadors de likes/bookmarks).
   - **`useProfile.js`**: Listener per a `post.deleted` per sincronitzar el comptador total de posts del perfil.
   - **`Profile.jsx`**: Implementats listeners per sincronitzar en viu les pestanyes de Likes, Bookmarks i Replies quan s'eliminen continguts.
+
+### 2026-02-25 – Millores del Feed (Syntax Highlight, Infinite Scroll, Skeleton Loaders, Share, Imatge, Links, Welcome Card)
+
+- **Autor:** @copilot (IA)
+- **Syntax Highlighting (highlight.js):**
+  - Instal·lat `highlight.js ^11.11.1` com a dependència.
+  - `PostCard.jsx` detecta blocs `<code>` dins del contingut i aplica `hljs.highlightElement()` amb el tema `github-dark`.
+  - Estils personalitzats per sobreescriure el fons de `code.hljs` i mantenir coherència visual.
+- **Infinite Scroll:**
+  - Eliminat botó "Carregar més" de `Feed.jsx`.
+  - Implementat `IntersectionObserver` amb un `<div>` sentinel i `rootMargin: "200px"` per carregar automàticament la següent pàgina.
+  - Spinner de càrrega mostrat mentre es recuperen dades.
+- **Skeleton Loaders:**
+  - Creat component `PostSkeleton` a `Feed.jsx` amb animació `skeletonPulse`.
+  - Es mostren 3 skeletons mentre el feed es carrega inicialment (substitueix la pantalla buida).
+- **Welcome Card:**
+  - Creat component `WelcomeCard` a `Feed.jsx` per a usuaris nous.
+  - Mostra 3 tips: com compartir codi, com fer preguntes, i com seguir gent.
+  - Es detecta via `isNewUser` del `useAuth()`.
+- **Share Button (Copiar enllaç):**
+  - Nou botó de compartir a `PostCard.jsx` amb `navigator.clipboard.writeText()`.
+  - Feedback visual "Link copied!" amb animació `fadeIn` durant 2 segons.
+- **Link Preview:**
+  - `PostCard.jsx` detecta URLs dins del contingut amb regex.
+  - Mostra un preview amb icona 🔗, domini i URL truncada sota el contingut del post.
+- **Temps Relatiu Auto-actualitzat:**
+  - Creat hook `useRelativeTime` dins de `PostCard.jsx` que actualitza el temps cada minut amb `setInterval`.
+  - Mostra "hace X minutos", "hace X horas", "ayer", etc.
+- **Millora del Badge de Pregunta:**
+  - `PostCard.jsx` ara mostra un badge amb gradient i icona SVG per a preguntes (obert ↔ resolt).
+  - Variants `--open` (taronja) i `--solved` (verd) amb icones diferenciades.
+- **Image Upload UI (Frontend Ready):**
+  - `PostInput.jsx`: botó d'imatge obre un `<input type="file">` ocult.
+  - Preview de la imatge seleccionada amb botó d'eliminar.
+  - `PostCard.jsx` mostra `post.image_url` si existeix.
+  - ⚠️ El backend encara no suporta camps d'imatge als posts.
+- **Link Input Panel:**
+  - `PostInput.jsx`: el botó de cadena (🔗) obre un panell per introduir una URL.
+  - La URL s'insereix al contingut del textarea amb suport Enter i botó "Afegir".
+- **Traduccions afegides (es, ca, en):**
+  - `feed.share`, `feed.link_copied`, `feed.open_question`
+  - `feed.welcome_title`, `feed.welcome_text`, `feed.welcome_tip_code`, `feed.welcome_tip_question`, `feed.welcome_tip_follow`
+  - `feed.link_placeholder`, `feed.add_link_btn`
+- **Fitxers modificats:**
+  - `client/package.json` (+ highlight.js)
+  - `client/src/components/feed/PostCard.jsx` + `.css`
+  - `client/src/components/feed/Feed.jsx` + `.css`
+  - `client/src/components/feed/PostInput.jsx` + `.css`
+  - `client/src/locales/{es,ca,en}.json`
 
 ### 2026-02-25 – Redisseny Login i Google OAuth
 
