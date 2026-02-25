@@ -95,6 +95,64 @@ const FilterIcon = () => (
   </svg>
 );
 
+// Category icons
+const FrontendIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 19l7-7 3 3-7 7-3-3z" /><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" /><path d="M2 2l7.586 7.586" /><circle cx="11" cy="11" r="2" />
+  </svg>
+);
+
+const BackendIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="20" height="8" rx="2" ry="2" /><rect x="2" y="14" width="20" height="8" rx="2" ry="2" /><line x1="6" y1="6" x2="6.01" y2="6" /><line x1="6" y1="18" x2="6.01" y2="18" />
+  </svg>
+);
+
+const DevopsIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" /><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" /><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" /><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+  </svg>
+);
+
+const DatabaseIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+  </svg>
+);
+
+const MobileIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" /><line x1="12" y1="18" x2="12.01" y2="18" />
+  </svg>
+);
+
+const SecurityIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+
+const HeartIcon = ({ size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
+
+const CommentIcon = ({ size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
+const categoryIcons = {
+  frontend: <FrontendIcon />,
+  backend: <BackendIcon />,
+  devops: <DevopsIcon />,
+  databases: <DatabaseIcon />,
+  mobile: <MobileIcon />,
+  security: <SecurityIcon />,
+};
+
 export default function Explore() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -102,12 +160,12 @@ export default function Explore() {
 
   // Static categories with tag slugs for real filtering
   const categories = [
-    { name: t("explore.categories.frontend"), icon: "🎨", tag: "frontend" },
-    { name: t("explore.categories.backend"), icon: "⚙️", tag: "backend" },
-    { name: t("explore.categories.devops"), icon: "🚀", tag: "devops" },
-    { name: t("explore.categories.databases"), icon: "🗄️", tag: "databases" },
-    { name: t("explore.categories.mobile"), icon: "📱", tag: "mobile" },
-    { name: t("explore.categories.security"), icon: "🔒", tag: "security" },
+    { name: t("explore.categories.frontend"), tag: "frontend" },
+    { name: t("explore.categories.backend"), tag: "backend" },
+    { name: t("explore.categories.devops"), tag: "devops" },
+    { name: t("explore.categories.databases"), tag: "databases" },
+    { name: t("explore.categories.mobile"), tag: "mobile" },
+    { name: t("explore.categories.security"), tag: "security" },
   ];
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
@@ -322,7 +380,7 @@ export default function Explore() {
             className={`explore__category ${activeCategory === cat.tag ? "explore__category--active" : ""}`}
             onClick={() => handleCategoryClick(cat)}
           >
-            <span className="explore__category-icon">{cat.icon}</span>
+            <span className="explore__category-icon">{categoryIcons[cat.tag]}</span>
             <span className="explore__category-name">{cat.name}</span>
           </button>
         ))}
@@ -464,10 +522,10 @@ export default function Explore() {
                       </div>
                       <div className="explore__hot-post-stats">
                         <span className="explore__hot-post-stat">
-                          ❤️ {post.likes_count || 0}
+                          <HeartIcon /> {post.likes_count || 0}
                         </span>
                         <span className="explore__hot-post-stat">
-                          💬 {post.comments_count || 0}
+                          <CommentIcon /> {post.comments_count || 0}
                         </span>
                       </div>
                     </button>
