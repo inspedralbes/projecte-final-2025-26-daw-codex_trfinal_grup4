@@ -408,12 +408,25 @@ export default function Profile({ username }) {
       }
     };
 
+    // Listen for new interactions (to invalidate lists or update counts)
+    const handleNewInteraction = (data) => {
+      // If I liked/bookmarked something, I want the lists to refresh next time I visit the tab
+      if (data.user?.id === currentUser?.id) {
+        if (data.type === "like") setLikedPostsLoaded(false);
+        if (data.type === "bookmark") setBookmarkedPostsLoaded(false);
+      }
+    };
+
     socketService.on("post.deleted", handlePostDeleted);
+    socketService.on("comment.deleted", handlePostDeleted);
     socketService.on("interaction.removed", handleInteractionRemoved);
+    socketService.on("new.interaction", handleNewInteraction);
 
     return () => {
       socketService.off("post.deleted", handlePostDeleted);
+      socketService.off("comment.deleted", handlePostDeleted);
       socketService.off("interaction.removed", handleInteractionRemoved);
+      socketService.off("new.interaction", handleNewInteraction);
     };
   }, [profile?.id, currentUser?.id]);
 
@@ -717,7 +730,8 @@ export default function Profile({ username }) {
                   key={post.id}
                   post={post}
                   onDelete={
-                    isOwnProfile && (activeTab === "posts" || activeTab === "questions")
+                    isOwnProfile &&
+                    (activeTab === "posts" || activeTab === "questions" || activeTab === "replies")
                       ? () => deletePost(post.id)
                       : undefined
                   }

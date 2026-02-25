@@ -6,12 +6,13 @@ import { io } from "socket.io-client";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:8080";
 
+const rooms = new Set(); // Track joined rooms for auto-rejoin
 let socket = null;
 
 const socketService = {
   /**
    * Initialize socket connection
-   * @param {string} token - Auth token (optional, for future auth middleware)
+   * @param {string} token - Auth token
    * @returns {Socket} Socket.io instance
    */
   connect: (token = null) => {
@@ -24,12 +25,13 @@ const socketService = {
       transports: ["websocket", "polling"],
       auth: token ? { token } : {},
       reconnection: true,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
       reconnectionDelay: 1000,
     });
 
     socket.on("connect", () => {
       console.log("[Socket.io] Connected:", socket.id);
+      socketService.rejoinRooms();
     });
 
     socket.on("disconnect", (reason) => {
@@ -66,6 +68,7 @@ const socketService = {
   joinUserRoom: (userId) => {
     if (socket) {
       socket.emit("join", { userId });
+      rooms.add(`user.${userId}`);
       console.log("[Socket.io] Joined room: user." + userId);
     }
   },
@@ -77,6 +80,7 @@ const socketService = {
   joinPostRoom: (postId) => {
     if (socket) {
       socket.emit("join-post", { postId });
+      rooms.add(`post.${postId}`);
       console.log("[Socket.io] Joined room: post." + postId);
     }
   },
@@ -88,6 +92,7 @@ const socketService = {
   leavePostRoom: (postId) => {
     if (socket) {
       socket.emit("leave-post", { postId });
+      rooms.delete(`post.${postId}`);
       console.log("[Socket.io] Left room: post." + postId);
     }
   },
@@ -129,6 +134,7 @@ const socketService = {
   joinProfileRoom: (userId) => {
     if (socket) {
       socket.emit("join-profile", { userId });
+      rooms.add(`profile.${userId}`);
       console.log("[Socket.io] Joined room: profile." + userId);
     }
   },
@@ -140,7 +146,23 @@ const socketService = {
   leaveProfileRoom: (userId) => {
     if (socket) {
       socket.emit("leave-profile", { userId });
+      rooms.delete(`profile.${userId}`);
       console.log("[Socket.io] Left room: profile." + userId);
+    }
+  },
+
+  /**
+   * Rejoin all tracked rooms (called on connect)
+   */
+  rejoinRooms: () => {
+    if (socket && socket.connected) {
+      rooms.forEach((room) => {
+        const [type, id] = room.split(".");
+        if (type === "user") socket.emit("join", { userId: id });
+        if (type === "post") socket.emit("join-post", { postId: id });
+        if (type === "profile") socket.emit("join-profile", { userId: id });
+        console.log("[Socket.io] Rejoined room: " + room);
+      });
     }
   },
 

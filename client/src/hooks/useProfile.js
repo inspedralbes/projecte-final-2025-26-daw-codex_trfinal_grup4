@@ -70,11 +70,14 @@ export function useProfile(username) {
   useEffect(() => {
     if (!profile?.id) return;
 
+    profileIdRef.current = profile.id;
+
     const token = localStorage.getItem("token");
     socketService.connect(token);
     socketService.joinProfileRoom(profile.id);
 
     const handleProfileUpdate = (data) => {
+      // Use ref to check current profile ID
       if (data.user_id === profileIdRef.current) {
         setProfile((prev) => {
           if (!prev) return prev;
@@ -95,8 +98,6 @@ export function useProfile(username) {
       }
     };
 
-    socketService.onProfileUpdate(handleProfileUpdate);
-
     const handlePostDeleted = (data) => {
       if (data.user_id === profileIdRef.current) {
         setProfile((prev) => {
@@ -109,6 +110,7 @@ export function useProfile(username) {
       }
     };
 
+    socketService.onProfileUpdate(handleProfileUpdate);
     socketService.on("post.deleted", handlePostDeleted);
 
     return () => {
@@ -118,21 +120,13 @@ export function useProfile(username) {
       socketService.off("profile.updated", handleProfileUpdate);
       socketService.off("post.deleted", handlePostDeleted);
     };
-  }, []); // Connect once, handle id changes via refs if needed or reconnect specifically
-
-  // Explicitly join room when profile.id changes without full effect re-run if possible
-  useEffect(() => {
-    if (profile?.id) {
-      profileIdRef.current = profile.id;
-      socketService.joinProfileRoom(profile.id);
-    }
-  }, [profile?.id]);
+  }, [profile?.id]); // Re-run when profile ID changes
 
   // Toggle follow
   const toggleFollow = useCallback(async () => {
     if (!profile) return;
 
-    // Optimistic update
+    // Optimistic update to UI for immediate feedback
     const wasFollowing = isFollowing;
     const prevFollowersCount = profile.followers_count;
 
@@ -144,7 +138,7 @@ export function useProfile(username) {
 
     try {
       const response = await followService.toggleFollowUser(profile.id);
-      const data = response.data || response;
+      const data = response.data?.data || response.data || response;
 
       // Update with exact data from server
       if (data.followers_count !== undefined) {
