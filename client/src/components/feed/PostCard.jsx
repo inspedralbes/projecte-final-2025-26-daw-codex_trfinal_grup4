@@ -1,7 +1,9 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import i18next from "i18next";
+import hljs from "highlight.js";
+import "highlight.js/styles/github-dark.css";
 import { useInteractions } from "@/hooks/useInteractions";
 import postsService from "@/services/postsService";
 import { useAuth } from "@/hooks/useAuth";
@@ -80,11 +82,20 @@ const VerifiedIcon = () => (
 export const QuestionBadge = ({ solved }) => {
   const { t } = useTranslation();
   return (
-    <span
-      className={`post-card__question-badge ${solved ? "post-card__question-badge--solved" : ""}`}
+    <div
+      className={`post-card__question-badge ${solved ? "post-card__question-badge--solved" : "post-card__question-badge--open"}`}
     >
-      {solved ? `✓ ${t("feed.solved")}` : `? ${t("widgets.recent_questions")}`}
-    </span>
+      <span className="post-card__question-badge-icon">
+        {solved ? (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+        )}
+      </span>
+      <span className="post-card__question-badge-text">
+        {solved ? t("feed.solved") : t("feed.open_question")}
+      </span>
+    </div>
   );
 };
 
@@ -105,6 +116,34 @@ const formatTimestamp = (timestamp) => {
   return date.toLocaleDateString(i18next.language, { day: "numeric", month: "short" });
 };
 
+// Hook for auto-updating relative time
+const useRelativeTime = (timestamp) => {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!timestamp) return;
+    const date = new Date(timestamp);
+    const diffMs = Date.now() - date.getTime();
+    // Update every 30s if < 1h, every 60s if < 24h, else no update needed
+    let interval;
+    if (diffMs < 3600000) {
+      interval = setInterval(() => setTick((t) => t + 1), 30000);
+    } else if (diffMs < 86400000) {
+      interval = setInterval(() => setTick((t) => t + 1), 60000);
+    }
+    return () => interval && clearInterval(interval);
+  }, [timestamp]);
+
+  return formatTimestamp(timestamp);
+};
+
+// Helper to extract URLs from text
+const extractUrls = (text) => {
+  if (!text) return [];
+  const urlRegex = /(https?:\/\/[^\s<]+[^\s<.,:;"')\]!?])/g;
+  return text.match(urlRegex) || [];
+};
+
 // Map API role to display badge
 const getRoleBadge = (user) => {
   if (!user) return null;
@@ -123,6 +162,24 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
   const { user: currentUser } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const [reposting, setReposting] = useState(false);
+  const [showCopied, setShowCopied] = useState(false);
+  const codeRef = useRef(null);
+
+  // Auto-updating relative time
+  const relativeTime = useRelativeTime(post.created_at);
+
+  // Syntax highlighting
+  useEffect(() => {
+    if (codeRef.current && post.code_snippet) {
+      codeRef.current.removeAttribute('data-highlighted');
+      hljs.highlightElement(codeRef.current);
+    }
+  }, [post.code_snippet, post.code_language]);
+
+  // Extract URLs for link preview
+  const detectedUrls = useMemo(() => extractUrls(post.content), [post.content]);
+  const previewUrl = detectedUrls.length > 0 ? detectedUrls[0] : null;
+  const previewDomain = previewUrl ? (() => { try { return new URL(previewUrl).hostname; } catch { return previewUrl; } })() : null;
 
   // Extract user from post (API returns user object)
   const author = post.user || post.author || {};
@@ -174,6 +231,25 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
     }
     setShowMenu(false);
   }, [onDelete, post.id]);
+
+  const handleShare = useCallback(async () => {
+    const url = `${window.location.origin}/post/${post.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setShowCopied(true);
+      setTimeout(() => setShowCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const input = document.createElement('input');
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      setShowCopied(true);
+      setTimeout(() => setShowCopied(false), 2000);
+    }
+  }, [post.id]);
 
   const formatNumber = (num) => {
     if (num >= 1000) {
@@ -253,7 +329,7 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
             <span className="post-card__handle">@{author.username || "user"}</span>
             {badge && <span className="post-card__badge">{badge}</span>}
             <span className="post-card__dot">·</span>
-            <span className="post-card__time">{formatTimestamp(post.created_at)}</span>
+            <span className="post-card__time">{relativeTime}</span>
           </div>
           <div className="post-card__menu-wrapper">
             <button className="post-card__more" onClick={() => setShowMenu(!showMenu)}>
@@ -283,7 +359,14 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
         {/* Text Content */}
         <p className="post-card__text">{post.content}</p>
 
-        {/* Code Block */}
+        {/* Image */}
+        {post.image_url && (
+          <div className="post-card__image">
+            <img src={post.image_url} alt="" loading="lazy" />
+          </div>
+        )}
+
+        {/* Code Block with Syntax Highlighting */}
         {post.code_snippet && (
           <div className="post-card__code">
             <div className="post-card__code-header">
@@ -295,9 +378,28 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
               <span className="post-card__code-lang">{post.code_language || "code"}</span>
             </div>
             <pre className="post-card__code-content">
-              <code>{post.code_snippet}</code>
+              <code ref={codeRef} className={post.code_language ? `language-${post.code_language}` : ''}>{post.code_snippet}</code>
             </pre>
           </div>
+        )}
+
+        {/* Link Preview */}
+        {previewUrl && (
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="post-card__link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="post-card__link-image">
+              <span className="post-card__link-icon">🔗</span>
+            </div>
+            <div className="post-card__link-content">
+              <span className="post-card__link-title">{previewDomain}</span>
+              <span className="post-card__link-url">{previewUrl.length > 60 ? previewUrl.substring(0, 60) + '...' : previewUrl}</span>
+            </div>
+          </a>
         )}
 
         {/* Tags */}
@@ -350,6 +452,15 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
             title={bookmarked ? t('feed.unbookmark') : t('feed.bookmark')}
           >
             <span className="post-card__action-icon"><BookmarkIcon filled={bookmarked} /></span>
+          </button>
+
+          <button
+            className={`post-card__action post-card__action--share ${showCopied ? "post-card__action--copied" : ""}`}
+            onClick={(e) => { e.stopPropagation(); handleShare(); }}
+            title={t('feed.share')}
+          >
+            <span className="post-card__action-icon"><ShareIcon /></span>
+            {showCopied && <span className="post-card__action-copied-text">{t('feed.link_copied')}</span>}
           </button>
         </div>
       </div>

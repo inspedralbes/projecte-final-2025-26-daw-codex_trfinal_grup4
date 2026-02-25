@@ -97,6 +97,12 @@ export default function PostInput({ onSubmit }) {
   const [tags, setTags] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const imageInputRef = React.useRef(null);
+  const textareaRef = React.useRef(null);
 
   const handleSubmit = useCallback(
     async (e) => {
@@ -124,6 +130,22 @@ export default function PostInput({ onSubmit }) {
           tags: parsedTags.length > 0 ? parsedTags : undefined,
         };
 
+        // If image file exists, use FormData
+        if (imageFile) {
+          const formData = new FormData();
+          Object.entries(postData).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+              if (Array.isArray(value)) {
+                value.forEach((v, i) => formData.append(`${key}[${i}]`, v));
+              } else {
+                formData.append(key, value);
+              }
+            }
+          });
+          formData.append('image', imageFile);
+          postData._formData = formData;
+        }
+
         if (onSubmit) {
           const result = await onSubmit(postData);
           if (result.success) {
@@ -133,6 +155,10 @@ export default function PostInput({ onSubmit }) {
             setTags("");
             setShowCodeEditor(false);
             setIsQuestion(false);
+            setImagePreview(null);
+            setImageFile(null);
+            setShowLinkInput(false);
+            setLinkUrl("");
           } else {
             setError(result.error || t("auth.register_error_fallback"));
           }
@@ -144,7 +170,7 @@ export default function PostInput({ onSubmit }) {
         setSubmitting(false);
       }
     },
-    [content, code, codeLanguage, isQuestion, tags, submitting, onSubmit],
+    [content, code, codeLanguage, isQuestion, tags, submitting, onSubmit, imageFile],
   );
 
   const avatarUrl =
@@ -160,6 +186,7 @@ export default function PostInput({ onSubmit }) {
         {error && <div className="post-input__error">{error}</div>}
 
         <textarea
+          ref={textareaRef}
           className="post-input__textarea"
           placeholder={isQuestion ? t("feed.placeholder_question") : t("feed.placeholder_news")}
           value={content}
@@ -210,6 +237,86 @@ export default function PostInput({ onSubmit }) {
           </div>
         )}
 
+        {/* Image Preview */}
+        {imagePreview && (
+          <div className="post-input__image-preview">
+            <img src={imagePreview} alt="Preview" />
+            <button
+              type="button"
+              className="post-input__image-remove"
+              onClick={() => { setImagePreview(null); setImageFile(null); }}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        {/* Hidden file input */}
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={(e) => {
+            const file = e.target.files[0];
+            if (file) {
+              setImageFile(file);
+              const reader = new FileReader();
+              reader.onload = (ev) => setImagePreview(ev.target.result);
+              reader.readAsDataURL(file);
+            }
+            e.target.value = '';
+          }}
+        />
+
+        {/* Link Input */}
+        {showLinkInput && (
+          <div className="post-input__link-input">
+            <LinkIcon />
+            <input
+              type="url"
+              className="post-input__link-url"
+              placeholder={t("feed.link_placeholder")}
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (linkUrl.trim()) {
+                    setContent((prev) => prev + (prev.trim() ? "\n" : "") + linkUrl.trim());
+                    setLinkUrl("");
+                    setShowLinkInput(false);
+                    textareaRef.current?.focus();
+                  }
+                }
+              }}
+              autoFocus
+            />
+            <button
+              type="button"
+              className="post-input__link-add"
+              onClick={() => {
+                if (linkUrl.trim()) {
+                  setContent((prev) => prev + (prev.trim() ? "\n" : "") + linkUrl.trim());
+                  setLinkUrl("");
+                  setShowLinkInput(false);
+                  textareaRef.current?.focus();
+                }
+              }}
+              disabled={!linkUrl.trim()}
+            >
+              {t("feed.add_link_btn")}
+            </button>
+            <button
+              type="button"
+              className="post-input__link-close"
+              onClick={() => { setShowLinkInput(false); setLinkUrl(""); }}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Tags Input */}
         <div className="post-input__tags-row">
           <input
@@ -231,10 +338,20 @@ export default function PostInput({ onSubmit }) {
             >
               <CodeIcon />
             </button>
-            <button type="button" className="post-input__tool" title={t("feed.tools.add_image")}>
+            <button
+              type="button"
+              className={`post-input__tool ${imagePreview ? "post-input__tool--active" : ""}`}
+              onClick={() => imageInputRef.current?.click()}
+              title={t("feed.tools.add_image")}
+            >
               <ImageIcon />
             </button>
-            <button type="button" className="post-input__tool" title={t("feed.tools.add_link")}>
+            <button
+              type="button"
+              className={`post-input__tool ${showLinkInput ? "post-input__tool--active" : ""}`}
+              onClick={() => setShowLinkInput(!showLinkInput)}
+              title={t("feed.tools.add_link")}
+            >
               <LinkIcon />
             </button>
             <button

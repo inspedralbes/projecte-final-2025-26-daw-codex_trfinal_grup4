@@ -64,7 +64,17 @@
     "unlike": "Unlike",
     "bookmark": "Bookmark",
     "unbookmark": "Remove bookmark",
-    "cant_repost_own": "You can't repost your own post"
+    "cant_repost_own": "You can't repost your own post",
+    "share": "Share",
+    "link_copied": "Link copied!",
+    "open_question": "Open question",
+    "welcome_title": "Welcome to Codex!",
+    "welcome_text": "Your feed is empty. Start by sharing code, posting questions or following other developers!",
+    "welcome_tip_code": "Share code snippets with syntax highlighting",
+    "welcome_tip_question": "Post technical questions and get answers",
+    "welcome_tip_follow": "Follow classmates and teachers from your center",
+    "link_placeholder": "Paste a URL (https://...)",
+    "add_link_btn": "Add"
   },
   "profile": {
     "loading": "Loading profile...",
