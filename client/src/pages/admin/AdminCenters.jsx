@@ -45,9 +45,25 @@ export default function AdminCenters() {
         }
     };
 
-    const handleDownloadJustificante = (centerId) => {
+    const handleDownloadJustificante = async (centerId) => {
         const token = localStorage.getItem("token");
-        window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/centers/${centerId}/justificante?token=${token}`, '_blank');
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+        try {
+            const response = await fetch(
+                `${baseUrl}/center-requests/${centerId}/justificante`,
+                { headers: { Authorization: `Bearer ${token}`, Accept: '*/*' } }
+            );
+            if (!response.ok) {
+                alert('No se pudo cargar el justificante.');
+                return;
+            }
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+        } catch (err) {
+            alert('Error al obtener el justificante.');
+        }
     };
 
     return (

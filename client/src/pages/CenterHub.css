@@ -17,7 +17,7 @@
 .center-hub__banner-overlay {
   position: absolute;
   inset: 0;
-  background: 
+  background:
     radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(20, 184, 166, 0.3) 0%, transparent 50%);
 }
@@ -282,7 +282,7 @@
   justify-content: center;
   padding: var(--space-12) var(--space-4);
   gap: var(--space-4);
-  color: var(--text-secondary);
+  color: var(--ink-secondary);
   text-align: center;
 }
 
@@ -295,7 +295,7 @@
 }
 
 .center-hub__error {
-  color: var(--status-error);
+  color: var(--state-error);
 }
 
 .center-hub__no-center-icon {
@@ -304,13 +304,35 @@
 }
 
 .center-hub__no-center h2 {
-  color: var(--text-primary);
+  color: var(--ink-primary);
   font-size: var(--text-xl);
   margin: 0;
 }
 
 .center-hub__no-center p {
   max-width: 400px;
+}
+
+/* ── Request link-button ───────────────────────────────────── */
+.center-hub__request-btn {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-5);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  color: var(--codex-teal);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.center-hub__request-btn:hover {
+  color: var(--codex-teal-light);
+  border-color: var(--codex-teal);
+  background: rgba(20, 184, 166, 0.07);
 }
 
 /* ── Load More Button ─────────────────────────────────────── */
@@ -339,6 +361,11 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }

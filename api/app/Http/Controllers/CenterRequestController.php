@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Enums\UserRole;
 use App\Traits\ApiResponse;
 use App\Http\Requests\StoreCenterRequestRequest;
+use App\Notifications\CenterRequestApproved;
+use App\Notifications\CenterRequestRejected;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -143,6 +145,15 @@ class CenterRequestController extends Controller
 
         $center->load('creator:id,name,username,email');
 
+        // Send approval email to the requesting user
+        $requester = User::find($centerRequest->user_id);
+        if ($requester) {
+            $requester->notify(new CenterRequestApproved(
+                $centerRequest,
+                $request->input('admin_notes')
+            ));
+        }
+
         return $this->success($center, 'Center request approved. Center created and user promoted to teacher.');
     }
 
@@ -164,6 +175,15 @@ class CenterRequestController extends Controller
             'status'      => 'rejected',
             'admin_notes' => $request->input('admin_notes'),
         ]);
+
+        // Send rejection email to the requesting user
+        $requester = User::find($centerRequest->user_id);
+        if ($requester) {
+            $requester->notify(new CenterRequestRejected(
+                $centerRequest,
+                $request->input('admin_notes')
+            ));
+        }
 
         return $this->success($centerRequest, 'Center request rejected.');
     }
@@ -190,9 +210,13 @@ class CenterRequestController extends Controller
             ], 404);
         }
 
-        return Storage::disk('public')->download(
-            $centerRequest->justificante,
-            'justificante_' . $centerRequest->domain . '.' . pathinfo($centerRequest->justificante, PATHINFO_EXTENSION)
-        );
+        $filePath = Storage::disk('public')->path($centerRequest->justificante);
+        $mimeType = Storage::disk('public')->mimeType($centerRequest->justificante);
+        $filename = 'justificante_' . $centerRequest->domain . '.' . pathinfo($centerRequest->justificante, PATHINFO_EXTENSION);
+
+        return response()->file($filePath, [
+            'Content-Type'        => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+        ]);
     }
 }

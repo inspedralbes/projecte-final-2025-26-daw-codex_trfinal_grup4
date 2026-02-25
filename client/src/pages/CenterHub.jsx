@@ -5,6 +5,8 @@ import { usePosts } from '@/hooks/usePosts';
 import { useTags } from '@/hooks/useTags';
 import { useAuth } from '@/hooks/useAuth';
 import centerService from '@/services/centerService';
+import api from '@/services/api';
+import TeacherVerificationModal from '@/components/auth/TeacherVerificationModal';
 import './CenterHub.css';
 
 // Icons
@@ -32,8 +34,8 @@ const LockIcon = () => (
 const LoadingSpinner = () => (
   <div className="center-hub__spinner">
     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
-      <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/>
+      <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+      <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
     </svg>
   </div>
 );
@@ -56,24 +58,28 @@ export default function CenterHub() {
   const [activeTab, setActiveTab] = useState('posts');
   const [centerInfo, setCenterInfo] = useState(null);
   const [loadingCenter, setLoadingCenter] = useState(true);
-  
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestLoading, setRequestLoading] = useState(false);
+  const [requestSuccess, setRequestSuccess] = useState(false);
+
   const centerId = user?.center_id;
-  
+  const isTeacher = user?.role === 'teacher';
+
   // Fetch posts for this center
-  const { 
-    posts, 
-    loading: loadingPosts, 
-    error: postsError, 
-    hasMore, 
-    loadMore, 
+  const {
+    posts,
+    loading: loadingPosts,
+    error: postsError,
+    hasMore,
+    loadMore,
     createPost,
-    deletePost 
-  } = usePosts({ 
-    feedType: 'center', 
+    deletePost
+  } = usePosts({
+    feedType: 'center',
     centerId,
-    enabled: !!centerId 
+    enabled: !!centerId
   });
-  
+
   // Fetch center-specific tags
   const { tags: channels, loading: loadingTags } = useTags(centerId);
 
@@ -83,7 +89,7 @@ export default function CenterHub() {
       setLoadingCenter(false);
       return;
     }
-    
+
     const fetchCenterInfo = async () => {
       try {
         setLoadingCenter(true);
@@ -95,7 +101,7 @@ export default function CenterHub() {
         setLoadingCenter(false);
       }
     };
-    
+
     fetchCenterInfo();
   }, [centerId]);
 
@@ -105,8 +111,8 @@ export default function CenterHub() {
     const postTags = post.tags || [];
     return postTags.some(tag => {
       const tagName = typeof tag === 'string' ? tag : tag.name;
-      return tagName.toLowerCase() === activeChannel.toLowerCase() || 
-             `#${tagName}`.toLowerCase() === activeChannel.toLowerCase();
+      return tagName.toLowerCase() === activeChannel.toLowerCase() ||
+        `#${tagName}`.toLowerCase() === activeChannel.toLowerCase();
     });
   }).filter(post => {
     // Filter by tab
@@ -124,15 +130,62 @@ export default function CenterHub() {
     });
   };
 
+  // Handle center request submission
+  const handleCenterRequestSubmit = async (data) => {
+    setRequestLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('full_name', data.full_name);
+      formData.append('center_name', data.center_name);
+      formData.append('domain', data.domain);
+      if (data.city) formData.append('city', data.city);
+      formData.append('justificante', data.justificante);
+      await api.upload('/center-requests', formData);
+      setShowRequestModal(false);
+      setRequestSuccess(true);
+    } catch (err) {
+      console.error('Error submitting center request:', err);
+    } finally {
+      setRequestLoading(false);
+    }
+  };
+
   // No center assigned
   if (!centerId) {
     return (
       <div className="center-hub">
         <div className="center-hub__no-center">
           <span className="center-hub__no-center-icon">🏫</span>
-          <h2>No perteneces a ningún centro</h2>
-          <p>Contacta con tu administrador para unirte a un centro educativo.</p>
+          {requestSuccess ? (
+            <>
+              <h2>✅ Solicitud enviada</h2>
+              <p>Un administrador revisará tu solicitud y activará tu centro en breve.</p>
+            </>
+          ) : (
+            <>
+              <h2>{isTeacher ? 'Crea tu centro educativo' : 'No perteneces a ningún centro'}</h2>
+              <p>
+                {isTeacher
+                  ? 'Como profesor, puedes solicitar crear el hub de tu centro en Codex.'
+                  : 'Si eres docente o representante de un centro, puedes solicitar darlo de alta en Codex.'}
+              </p>
+              <button
+                className="center-hub__request-btn"
+                onClick={() => setShowRequestModal(true)}
+              >
+                Solicitar Centro
+              </button>
+            </>
+          )}
         </div>
+        {showRequestModal && (
+          <TeacherVerificationModal
+            email={user?.email}
+            loading={requestLoading}
+            onConfirm={handleCenterRequestSubmit}
+            onCancel={() => setShowRequestModal(false)}
+          />
+        )}
       </div>
     );
   }
@@ -185,7 +238,7 @@ export default function CenterHub() {
 
       {/* Channel Filters */}
       <div className="center-hub__channels">
-        <button 
+        <button
           className={`center-hub__channel ${activeChannel === 'all' ? 'center-hub__channel--active' : ''}`}
           onClick={() => setActiveChannel('all')}
         >
@@ -196,7 +249,7 @@ export default function CenterHub() {
           const displayName = tagName.startsWith('#') ? tagName : `#${tagName}`;
           const postCount = channel.posts_count || channel.posts || 0;
           const color = getTagColor(displayName);
-          
+
           return (
             <button
               key={channel.id || displayName}
@@ -212,25 +265,25 @@ export default function CenterHub() {
 
       {/* Navigation Tabs */}
       <nav className="center-hub__nav">
-        <button 
+        <button
           className={`center-hub__nav-tab ${activeTab === 'posts' ? 'center-hub__nav-tab--active' : ''}`}
           onClick={() => setActiveTab('posts')}
         >
           Publicaciones
         </button>
-        <button 
+        <button
           className={`center-hub__nav-tab ${activeTab === 'questions' ? 'center-hub__nav-tab--active' : ''}`}
           onClick={() => setActiveTab('questions')}
         >
           Dudas
         </button>
-        <button 
+        <button
           className={`center-hub__nav-tab ${activeTab === 'resources' ? 'center-hub__nav-tab--active' : ''}`}
           onClick={() => setActiveTab('resources')}
         >
           Recursos
         </button>
-        <button 
+        <button
           className={`center-hub__nav-tab ${activeTab === 'members' ? 'center-hub__nav-tab--active' : ''}`}
           onClick={() => setActiveTab('members')}
         >
@@ -265,8 +318,8 @@ export default function CenterHub() {
                 📌 Fijado
               </div>
             )}
-            <PostCard 
-              post={post} 
+            <PostCard
+              post={post}
               onDelete={() => deletePost(post.id)}
               className={`animate-slideUp stagger-${Math.min(index + 1, 5)}`}
             />
@@ -283,7 +336,7 @@ export default function CenterHub() {
 
       {/* Load More */}
       {hasMore && posts.length > 0 && (
-        <button 
+        <button
           className="center-hub__load-more"
           onClick={loadMore}
           disabled={loadingPosts}
