@@ -3,7 +3,10 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useSearch } from "@/hooks/useSearch";
 import { useTags } from "@/hooks/useTags";
+import { useAuth } from "@/hooks/useAuth";
 import profileService from "@/services/profileService";
+import postsService from "@/services/postsService";
+import followService from "@/services/followService";
 import PostCard from "@/components/feed/PostCard";
 import "./Explore.css";
 
@@ -71,23 +74,52 @@ const LoadingSpinner = () => (
   </div>
 );
 
+const FireIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+  </svg>
+);
+
+const UserPlusIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <line x1="19" y1="8" x2="19" y2="14" />
+    <line x1="22" y1="11" x2="16" y2="11" />
+  </svg>
+);
+
+const FilterIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+  </svg>
+);
+
 export default function Explore() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  // Static categories for browsing
+  // Static categories with tag slugs for real filtering
   const categories = [
-    { name: t("explore.categories.frontend"), icon: "🎨" },
-    { name: t("explore.categories.backend"), icon: "⚙️" },
-    { name: t("explore.categories.devops"), icon: "🚀" },
-    { name: t("explore.categories.databases"), icon: "🗄️" },
-    { name: t("explore.categories.mobile"), icon: "📱" },
-    { name: t("explore.categories.security"), icon: "🔒" },
+    { name: t("explore.categories.frontend"), icon: "🎨", tag: "frontend" },
+    { name: t("explore.categories.backend"), icon: "⚙️", tag: "backend" },
+    { name: t("explore.categories.devops"), icon: "🚀", tag: "devops" },
+    { name: t("explore.categories.databases"), icon: "🗄️", tag: "databases" },
+    { name: t("explore.categories.mobile"), icon: "📱", tag: "mobile" },
+    { name: t("explore.categories.security"), icon: "🔒", tag: "security" },
   ];
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
+  const [searchFilter, setSearchFilter] = useState("all"); // "all" | "users" | "posts"
   const [topContributors, setTopContributors] = useState([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
+  const [trendingPosts, setTrendingPosts] = useState([]);
+  const [loadingTrending, setLoadingTrending] = useState(true);
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const [loadingSuggested, setLoadingSuggested] = useState(true);
+  const [followingMap, setFollowingMap] = useState({});
+  const [activeCategory, setActiveCategory] = useState(null);
 
   // Use search hook
   const {
@@ -118,6 +150,55 @@ export default function Explore() {
     fetchLeaderboard();
   }, []);
 
+  // Fetch trending posts (most liked recent posts)
+  useEffect(() => {
+    const fetchTrendingPosts = async () => {
+      try {
+        setLoadingTrending(true);
+        const response = await postsService.getFeed({ page: 1 });
+        const data = response.data || response;
+        const posts = data.data || data || [];
+        // Sort by likes + comments and pick top 5
+        const sorted = [...posts]
+          .sort((a, b) => {
+            const scoreA = (a.likes_count || 0) + (a.comments_count || 0) * 2;
+            const scoreB = (b.likes_count || 0) + (b.comments_count || 0) * 2;
+            return scoreB - scoreA;
+          })
+          .slice(0, 5);
+        setTrendingPosts(sorted);
+      } catch (err) {
+        console.error("Error fetching trending posts:", err);
+        setTrendingPosts([]);
+      } finally {
+        setLoadingTrending(false);
+      }
+    };
+    fetchTrendingPosts();
+  }, []);
+
+  // Fetch suggested users (leaderboard with more users, excluding self)
+  useEffect(() => {
+    const fetchSuggested = async () => {
+      try {
+        setLoadingSuggested(true);
+        const response = await profileService.getLeaderboard(15);
+        const allUsers = response.data || response || [];
+        // Filter out current user and pick users not in top 5
+        const suggestions = allUsers
+          .filter((u) => u.username !== user?.username)
+          .slice(0, 6);
+        setSuggestedUsers(suggestions);
+      } catch (err) {
+        console.error("Error fetching suggested users:", err);
+        setSuggestedUsers([]);
+      } finally {
+        setLoadingSuggested(false);
+      }
+    };
+    if (user) fetchSuggested();
+  }, [user]);
+
   // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -133,17 +214,27 @@ export default function Explore() {
     return () => clearTimeout(timer);
   }, [searchQuery, search, clearResults]);
 
-  // Handle category click
-  const handleCategoryClick = (categoryName) => {
-    setSearchQuery(categoryName);
-    search(categoryName);
-    setShowResults(true);
+  // Handle category click - filter by real tag
+  const handleCategoryClick = (category) => {
+    if (activeCategory === category.tag) {
+      // Deselect
+      setActiveCategory(null);
+      setShowResults(false);
+      setSearchQuery("");
+      clearResults();
+    } else {
+      setActiveCategory(category.tag);
+      setSearchQuery(category.name);
+      search(category.name);
+      setShowResults(true);
+    }
   };
 
   // Handle tag click
   const handleTagClick = (tagName) => {
     const tag = tagName.startsWith("#") ? tagName : `#${tagName}`;
     setSearchQuery(tag);
+    setActiveCategory(null);
     search(tag);
     setShowResults(true);
   };
@@ -151,6 +242,28 @@ export default function Explore() {
   // Handle user profile navigation
   const handleUserClick = (username) => {
     navigate(`/profile/${username.replace("@", "")}`);
+  };
+
+  // Handle follow toggle
+  const handleFollowToggle = async (userId) => {
+    try {
+      const response = await followService.toggleFollowUser(userId);
+      const data = response.data || response;
+      setFollowingMap((prev) => ({ ...prev, [userId]: data.following }));
+    } catch (err) {
+      console.error("Error toggling follow:", err);
+    }
+  };
+
+  // Filter search results based on active tab
+  const getFilteredResults = () => {
+    if (searchFilter === "users") {
+      return { users: searchResults.users || [], posts: [] };
+    }
+    if (searchFilter === "posts") {
+      return { users: [], posts: searchResults.posts || [] };
+    }
+    return searchResults;
   };
 
   // Format tag display
@@ -174,6 +287,10 @@ export default function Explore() {
           { tag: "#DockerCompose", growth: "+98%", posts: 543 },
         ];
 
+  const filteredResults = getFilteredResults();
+  const totalUsers = searchResults.users?.length || 0;
+  const totalPosts = searchResults.posts?.length || 0;
+
   return (
     <div className="explore">
       {/* Search Header */}
@@ -187,14 +304,31 @@ export default function Explore() {
             className="explore__search-input"
             placeholder={t("explore.search_placeholder")}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setActiveCategory(null);
+            }}
           />
           {searchLoading && <LoadingSpinner />}
           {!searchLoading && <span className="explore__search-shortcut">⌘K</span>}
         </div>
       </header>
 
-      {/* Search Results */}
+      {/* Categories - always visible */}
+      <section className="explore__categories">
+        {categories.map((cat) => (
+          <button
+            key={cat.tag}
+            className={`explore__category ${activeCategory === cat.tag ? "explore__category--active" : ""}`}
+            onClick={() => handleCategoryClick(cat)}
+          >
+            <span className="explore__category-icon">{cat.icon}</span>
+            <span className="explore__category-name">{cat.name}</span>
+          </button>
+        ))}
+      </section>
+
+      {/* Search Results with filter tabs */}
       {showResults && searchQuery.trim().length >= 2 && (
         <section className="explore__results">
           <div className="explore__results-header">
@@ -204,6 +338,8 @@ export default function Explore() {
               onClick={() => {
                 setShowResults(false);
                 setSearchQuery("");
+                setActiveCategory(null);
+                setSearchFilter("all");
                 clearResults();
               }}
             >
@@ -211,39 +347,64 @@ export default function Explore() {
             </button>
           </div>
 
+          {/* Filter tabs */}
+          {!searchLoading && (totalUsers > 0 || totalPosts > 0) && (
+            <div className="explore__results-filters">
+              <button
+                className={`explore__results-filter ${searchFilter === "all" ? "explore__results-filter--active" : ""}`}
+                onClick={() => setSearchFilter("all")}
+              >
+                <FilterIcon />
+                {t("explore.filter_all")} ({totalUsers + totalPosts})
+              </button>
+              <button
+                className={`explore__results-filter ${searchFilter === "users" ? "explore__results-filter--active" : ""}`}
+                onClick={() => setSearchFilter("users")}
+              >
+                {t("explore.users")} ({totalUsers})
+              </button>
+              <button
+                className={`explore__results-filter ${searchFilter === "posts" ? "explore__results-filter--active" : ""}`}
+                onClick={() => setSearchFilter("posts")}
+              >
+                {t("explore.filter_posts")} ({totalPosts})
+              </button>
+            </div>
+          )}
+
           {searchLoading ? (
             <div className="explore__results-loading">
               <LoadingSpinner />
               <p>{t("explore.searching")}</p>
             </div>
-          ) : searchResults.posts?.length === 0 && searchResults.users?.length === 0 ? (
+          ) : totalUsers === 0 && totalPosts === 0 ? (
             <div className="explore__results-empty">
               <p>{t("explore.no_results", { query: searchQuery })}</p>
             </div>
           ) : (
             <div className="explore__results-content">
               {/* Users Results */}
-              {searchResults.users?.length > 0 && (
+              {filteredResults.users?.length > 0 && (
                 <div className="explore__results-section">
                   <h3>{t("explore.users")}</h3>
                   <div className="explore__results-users">
-                    {searchResults.users.map((user) => (
+                    {filteredResults.users.map((u) => (
                       <button
-                        key={user.id}
+                        key={u.id}
                         className="explore__result-user"
-                        onClick={() => handleUserClick(user.username)}
+                        onClick={() => handleUserClick(u.username)}
                       >
                         <img
                           src={
-                            user.avatar ||
-                            `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
+                            u.avatar ||
+                            `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`
                           }
-                          alt={user.name}
+                          alt={u.name}
                           className="explore__result-user-avatar"
                         />
                         <div className="explore__result-user-info">
-                          <span className="explore__result-user-name">{user.name}</span>
-                          <span className="explore__result-user-handle">@{user.username}</span>
+                          <span className="explore__result-user-name">{u.name}</span>
+                          <span className="explore__result-user-handle">@{u.username}</span>
                         </div>
                       </button>
                     ))}
@@ -252,11 +413,11 @@ export default function Explore() {
               )}
 
               {/* Posts Results */}
-              {searchResults.posts?.length > 0 && (
+              {filteredResults.posts?.length > 0 && (
                 <div className="explore__results-section">
-                  <h3>{t("feed.posts_count")}</h3>
+                  <h3>{t("explore.filter_posts")}</h3>
                   <div className="explore__results-posts">
-                    {searchResults.posts.map((post) => (
+                    {filteredResults.posts.map((post) => (
                       <PostCard key={post.id} post={post} />
                     ))}
                   </div>
@@ -270,22 +431,51 @@ export default function Explore() {
       {/* Default Explore Content (hide when showing search results) */}
       {!showResults && (
         <>
-          {/* Categories */}
-          <section className="explore__categories">
-            {categories.map((cat) => (
-              <button
-                key={cat.name}
-                className="explore__category"
-                onClick={() => handleCategoryClick(cat.name)}
-              >
-                <span className="explore__category-icon">{cat.icon}</span>
-                <span className="explore__category-name">{cat.name}</span>
-              </button>
-            ))}
-          </section>
-
           {/* Grid Widgets */}
           <div className="explore__grid">
+            {/* Trending Posts - NEW */}
+            <section className="explore__widget explore__widget--hot">
+              <div className="explore__widget-header">
+                <FireIcon />
+                <h2 className="explore__widget-title">{t("explore.trending_posts")}</h2>
+              </div>
+              <div className="explore__widget-content">
+                {loadingTrending ? (
+                  <div className="explore__widget-loading">
+                    <LoadingSpinner />
+                  </div>
+                ) : trendingPosts.length === 0 ? (
+                  <p className="explore__widget-empty">{t("explore.no_trending")}</p>
+                ) : (
+                  trendingPosts.map((post) => (
+                    <button
+                      key={post.id}
+                      className="explore__hot-post"
+                      onClick={() => navigate(`/post/${post.id}`)}
+                    >
+                      <div className="explore__hot-post-content">
+                        <span className="explore__hot-post-author">
+                          {post.user?.name || t("common.anonymous")}
+                        </span>
+                        <p className="explore__hot-post-text">
+                          {post.content?.substring(0, 100) || post.title || t("feed.no_title")}
+                          {post.content?.length > 100 && "..."}
+                        </p>
+                      </div>
+                      <div className="explore__hot-post-stats">
+                        <span className="explore__hot-post-stat">
+                          ❤️ {post.likes_count || 0}
+                        </span>
+                        <span className="explore__hot-post-stat">
+                          💬 {post.comments_count || 0}
+                        </span>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </section>
+
             {/* Trending Tags */}
             <section className="explore__widget explore__widget--trending">
               <div className="explore__widget-header">
@@ -318,6 +508,55 @@ export default function Explore() {
               </div>
             </section>
 
+            {/* Suggested Users - NEW */}
+            <section className="explore__widget explore__widget--suggested">
+              <div className="explore__widget-header">
+                <UserPlusIcon />
+                <h2 className="explore__widget-title">{t("explore.who_to_follow")}</h2>
+              </div>
+              <div className="explore__widget-content">
+                {loadingSuggested ? (
+                  <div className="explore__widget-loading">
+                    <LoadingSpinner />
+                  </div>
+                ) : suggestedUsers.length === 0 ? (
+                  <p className="explore__widget-empty">{t("explore.no_suggestions")}</p>
+                ) : (
+                  suggestedUsers.map((u) => (
+                    <div key={u.id} className="explore__suggested-user">
+                      <button
+                        className="explore__suggested-user-main"
+                        onClick={() => handleUserClick(u.username)}
+                      >
+                        <div className="explore__suggested-user-avatar">
+                          <img
+                            src={
+                              u.avatar ||
+                              `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`
+                            }
+                            alt={u.name}
+                          />
+                        </div>
+                        <div className="explore__suggested-user-info">
+                          <span className="explore__suggested-user-name">{u.name}</span>
+                          <span className="explore__suggested-user-handle">@{u.username}</span>
+                        </div>
+                      </button>
+                      <button
+                        className={`explore__follow-btn ${followingMap[u.id] ? "explore__follow-btn--following" : ""}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFollowToggle(u.id);
+                        }}
+                      >
+                        {followingMap[u.id] ? t("explore.following") : t("explore.follow")}
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+
             {/* Top Contributors */}
             <section className="explore__widget explore__widget--contributors">
               <div className="explore__widget-header">
@@ -332,33 +571,33 @@ export default function Explore() {
                 ) : topContributors.length === 0 ? (
                   <p className="explore__widget-empty">{t("widgets.no_contributors")}</p>
                 ) : (
-                  topContributors.map((user) => (
+                  topContributors.map((u) => (
                     <button
-                      key={user.id}
+                      key={u.id}
                       className="explore__contributor"
-                      onClick={() => handleUserClick(user.username)}
+                      onClick={() => handleUserClick(u.username)}
                     >
                       <span
-                        className={`explore__contributor-rank explore__contributor-rank--${user.rank}`}
+                        className={`explore__contributor-rank explore__contributor-rank--${u.rank}`}
                       >
-                        {user.rank}
+                        {u.rank}
                       </span>
                       <div className="explore__contributor-avatar">
                         <img
                           src={
-                            user.avatar ||
-                            `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`
+                            u.avatar ||
+                            `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`
                           }
-                          alt={user.name}
+                          alt={u.name}
                         />
                       </div>
                       <div className="explore__contributor-info">
                         <span className="explore__contributor-name">
-                          {user.name} {user.badge}
+                          {u.name} {u.badge}
                         </span>
-                        <span className="explore__contributor-handle">@{user.username}</span>
+                        <span className="explore__contributor-handle">@{u.username}</span>
                       </div>
-                      <span className="explore__contributor-points">{user.score} pts</span>
+                      <span className="explore__contributor-points">{u.score} pts</span>
                     </button>
                   ))
                 )}

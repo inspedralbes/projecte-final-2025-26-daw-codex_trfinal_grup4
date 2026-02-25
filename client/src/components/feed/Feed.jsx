@@ -114,7 +114,6 @@ export default function Feed({ feedType = "global", centerMode = false }) {
     <div className="feed">
       {/* Header */}
       <header className="feed__header">
-        <h1 className="feed__title">{centerMode ? t("sidebar.center") : t("sidebar.home")}</h1>
         <nav className="feed__tabs">
           <button
             className={`feed__tab ${activeTab === "all" ? "feed__tab--active" : ""}`}

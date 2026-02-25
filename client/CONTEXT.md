@@ -316,6 +316,41 @@
   - **`useProfile.js`**: Listener per a `post.deleted` per sincronitzar el comptador total de posts del perfil.
   - **`Profile.jsx`**: Implementats listeners per sincronitzar en viu les pestanyes de Likes, Bookmarks i Replies quan s'eliminen continguts.
 
+### 2026-02-25 – Millores de la pàgina Explore (Trending Posts, Suggeriments, Filtres, Categories reals)
+
+- **Autor:** @copilot (IA)
+- **Trending Posts (nous widget):**
+  - Nou widget "Posts en Tendència" amb icona de foc 🔥.
+  - Obté els posts recents i els ordena per score (likes + comments×2), mostra els top 5.
+  - Cada post mostra autor, preview del text (max 100 chars) i estadístiques (❤️ / 💬).
+  - Clicable per navegar al post individual.
+- **Suggeriments de perfils ("A qui seguir"):**
+  - Nou widget amb icona de persona+ que mostra fins a 6 usuaris suggerits.
+  - Reutilitza l'endpoint del leaderboard filtrant l'usuari actual.
+  - Botó "Seguir"/"Siguiendo" funcional amb `followService.toggleFollowUser()`.
+  - El botó canvia d'estil (teal → border) i mostra "Siguiendo" en hover vermell per deseleccionar.
+- **Filtres als resultats de cerca:**
+  - Afegida barra de filtres amb 3 tabs: "Todo" / "Usuarios" / "Publicaciones".
+  - Cada tab mostra el comptador de resultats.
+  - Filtratge instantani al frontend sense re-fetch.
+- **Categories amb filtre real per tag:**
+  - Les categories ara tenen un `tag` slug associat (frontend, backend, devops, etc.).
+  - Clicar una categoria llença una cerca amb el nom de la categoria.
+  - Estat visual actiu (teal highlight) quan una categoria està seleccionada.
+  - Deseleccionar la categoria neteja els resultats.
+- **Eliminat títol "Inicio" del Feed:**
+  - `Feed.jsx`: eliminat `<h1>` amb el títol redundant.
+  - Les tabs "Para ti" / "Siguiendo" / "Dudas" queden directament sota el header.
+- **Traduccions afegides (es, ca, en):**
+  - `explore.filter_all`, `explore.filter_posts`
+  - `explore.trending_posts`, `explore.no_trending`
+  - `explore.who_to_follow`, `explore.no_suggestions`
+  - `explore.follow`, `explore.following`
+- **Fitxers modificats:**
+  - `client/src/pages/Explore.jsx` + `.css`
+  - `client/src/components/feed/Feed.jsx`
+  - `client/src/locales/{es,ca,en}.json`
+
 ### 2026-02-25 – Millores del Feed (Syntax Highlight, Infinite Scroll, Skeleton Loaders, Share, Imatge, Links, Welcome Card)
 
 - **Autor:** @copilot (IA)
