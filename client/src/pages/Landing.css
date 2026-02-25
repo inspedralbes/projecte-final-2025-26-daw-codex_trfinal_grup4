@@ -60,6 +60,15 @@
   }
 }
 
+/* ── Top Bar (Language Selector) ──────────────────────────── */
+.landing__top-bar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: var(--z-sticky);
+  padding: var(--space-3) var(--space-4);
+}
+
 /* ── Navigation ───────────────────────────────────────────── */
 .landing__nav {
   position: fixed;
@@ -341,6 +350,10 @@
 }
 
 .auth-card__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   margin-top: var(--space-2);
   padding: var(--space-3) var(--space-4);
   background: linear-gradient(135deg, var(--codex-teal), var(--codex-teal-dark));
@@ -421,6 +434,62 @@
 
 .auth-card__link:hover {
   color: var(--codex-teal-light);
+}
+
+/* ── Google OAuth Button ─────────────────────────────────── */
+.auth-card__google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--depth-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--ink-primary);
+  font-size: var(--text-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.auth-card__google-btn:hover {
+  background: var(--depth-3);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-card__google-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.auth-card__google-icon {
+  flex-shrink: 0;
+}
+
+/* ── Inline Spinner ──────────────────────────────────────── */
+.auth-card__spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spinner-rotate 0.6s linear infinite;
+}
+
+.auth-card__google-btn .auth-card__spinner {
+  border-color: rgba(255, 255, 255, 0.15);
+  border-top-color: var(--codex-teal);
+}
+
+@keyframes spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── Code Preview Section ─────────────────────────────────── */
@@ -710,6 +779,10 @@
 }
 
 @media (max-width: 640px) {
+  .landing__top-bar {
+    padding-top: calc(var(--space-2) + var(--safe-top));
+  }
+
   .landing__nav {
     padding: var(--space-3) var(--space-4);
     padding-top: calc(var(--space-3) + var(--safe-top));
