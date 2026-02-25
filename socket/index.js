@@ -72,6 +72,30 @@ io.on("connection", (socket) => {
     }
   });
 
+  /**
+   * Clients join a profile room to receive live follower updates.
+   *   socket.emit('join-profile', { userId: 5 })
+   */
+  socket.on("join-profile", (data) => {
+    if (data && data.userId) {
+      const room = `profile.${data.userId}`;
+      socket.join(room);
+      console.log(`[Socket.io] ${socket.id} joined room ${room}`);
+    }
+  });
+
+  /**
+   * Leave a profile room.
+   *   socket.emit('leave-profile', { userId: 5 })
+   */
+  socket.on("leave-profile", (data) => {
+    if (data && data.userId) {
+      const room = `profile.${data.userId}`;
+      socket.leave(room);
+      console.log(`[Socket.io] ${socket.id} left room ${room}`);
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log(`[Socket.io] Client disconnected: ${socket.id}`);
   });
@@ -127,10 +151,10 @@ redisSubscriber.on("pmessage", (_pattern, channel, rawMessage) => {
 
     // Laravel wraps broadcast data in { event: '...', data: {...} }
     const eventName = payload.event; // e.g. "new.notification"
-    const eventData = payload.data;  // the broadcastWith() object
+    const eventData = payload.data; // the broadcastWith() object
 
     console.log(
-      `[Socket.io] Redis ← channel=${laravelChannel} event=${eventName}`
+      `[Socket.io] Redis ← channel=${laravelChannel} event=${eventName}`,
     );
 
     // Emit to the matching Socket.io room
@@ -140,7 +164,7 @@ redisSubscriber.on("pmessage", (_pattern, channel, rawMessage) => {
   } catch (err) {
     console.error(
       `[Socket.io] Error processing message from ${channel}:`,
-      err.message
+      err.message,
     );
   }
 });

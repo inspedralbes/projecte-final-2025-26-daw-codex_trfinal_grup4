@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import "./TeacherVerificationModal.css";
 
 const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
@@ -77,6 +78,7 @@ function formatFileSize(bytes) {
 }
 
 export default function TeacherVerificationModal({ onConfirm, onCancel, loading, email }) {
+  const { t } = useTranslation();
   const [fullName, setFullName] = useState("");
   const [centerName, setCenterName] = useState("");
   const [city, setCity] = useState("");
@@ -89,11 +91,11 @@ export default function TeacherVerificationModal({ onConfirm, onCancel, loading,
 
   const validateFile = useCallback((f) => {
     if (!ACCEPTED_TYPES.includes(f.type)) {
-      setFileError("Solo se aceptan archivos PDF, JPG o PNG.");
+      setFileError(t("teacher_modal.errors.invalid_type"));
       return false;
     }
     if (f.size > MAX_FILE_SIZE) {
-      setFileError("El archivo no puede superar los 5 MB.");
+      setFileError(t("teacher_modal.errors.file_too_large"));
       return false;
     }
     setFileError("");
@@ -148,7 +150,12 @@ export default function TeacherVerificationModal({ onConfirm, onCancel, loading,
     <div className="tvm-overlay" onClick={onCancel}>
       <div className="tvm-modal" onClick={(e) => e.stopPropagation()}>
         {/* Close button */}
-        <button className="tvm-close" onClick={onCancel} type="button" aria-label="Cerrar">
+        <button
+          className="tvm-close"
+          onClick={onCancel}
+          type="button"
+          aria-label={t("common.close")}
+        >
           <CloseIcon />
         </button>
 
@@ -157,10 +164,9 @@ export default function TeacherVerificationModal({ onConfirm, onCancel, loading,
           <div className="tvm-header__icon">
             <ShieldCheckIcon />
           </div>
-          <h2 className="tvm-header__title">Verificación de Profesor</h2>
+          <h2 className="tvm-header__title">{t("teacher_modal.title")}</h2>
           <p className="tvm-header__desc">
-            El dominio <strong>{domain}</strong> no tiene un centro educativo registrado en Codex.
-            Para crear el centro, necesitamos verificar tu identidad como docente.
+            {t("teacher_modal.desc_intro")} <strong>{domain}</strong> {t("teacher_modal.desc_body")}
           </p>
         </div>
 
@@ -169,13 +175,13 @@ export default function TeacherVerificationModal({ onConfirm, onCancel, loading,
           {/* Full Name */}
           <div className="tvm-field">
             <label className="tvm-label" htmlFor="tvm-fullname">
-              Nombre Completo <span className="tvm-required">*</span>
+              {t("landing.full_name")} <span className="tvm-required">*</span>
             </label>
             <input
               type="text"
               id="tvm-fullname"
               className="tvm-input"
-              placeholder="Ej: María García López"
+              placeholder={t("teacher_modal.placeholders.fullname")}
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
@@ -185,13 +191,13 @@ export default function TeacherVerificationModal({ onConfirm, onCancel, loading,
           {/* Center Name */}
           <div className="tvm-field">
             <label className="tvm-label" htmlFor="tvm-center">
-              Nombre del Centro Educativo <span className="tvm-required">*</span>
+              {t("teacher_modal.center_name")} <span className="tvm-required">*</span>
             </label>
             <input
               type="text"
               id="tvm-center"
               className="tvm-input"
-              placeholder="Ej: IES Jaume I"
+              placeholder={t("teacher_modal.placeholders.center")}
               value={centerName}
               onChange={(e) => setCenterName(e.target.value)}
               required
@@ -201,13 +207,13 @@ export default function TeacherVerificationModal({ onConfirm, onCancel, loading,
           {/* City */}
           <div className="tvm-field">
             <label className="tvm-label" htmlFor="tvm-city">
-              Ciudad
+              {t("teacher_modal.city")}
             </label>
             <input
               type="text"
               id="tvm-city"
               className="tvm-input"
-              placeholder="Ej: Barcelona"
+              placeholder={t("teacher_modal.placeholders.city")}
               value={city}
               onChange={(e) => setCity(e.target.value)}
             />
@@ -216,12 +222,9 @@ export default function TeacherVerificationModal({ onConfirm, onCancel, loading,
           {/* File Upload */}
           <div className="tvm-field">
             <label className="tvm-label">
-              Documento Justificante <span className="tvm-required">*</span>
+              {t("teacher_modal.document_title")} <span className="tvm-required">*</span>
             </label>
-            <p className="tvm-hint">
-              Sube un documento que acredite tu vinculación con el centro (carnet de docente,
-              contrato, certificado, etc.)
-            </p>
+            <p className="tvm-hint">{t("teacher_modal.document_hint")}</p>
 
             {!file ? (
               <div
@@ -233,9 +236,10 @@ export default function TeacherVerificationModal({ onConfirm, onCancel, loading,
               >
                 <UploadIcon />
                 <span className="tvm-dropzone__text">
-                  Arrastra tu archivo aquí o <strong>haz clic para seleccionar</strong>
+                  {t("teacher_modal.dropzone.text")}{" "}
+                  <strong>{t("teacher_modal.dropzone.cta")}</strong>
                 </span>
-                <span className="tvm-dropzone__formats">PDF, JPG o PNG · máx. 5 MB</span>
+                <span className="tvm-dropzone__formats">{t("teacher_modal.dropzone.formats")}</span>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -270,17 +274,14 @@ export default function TeacherVerificationModal({ onConfirm, onCancel, loading,
               onClick={onCancel}
               disabled={loading}
             >
-              Cancelar
+              {t("common.cancel")}
             </button>
             <button type="submit" className="tvm-btn tvm-btn--primary" disabled={!canSubmit}>
-              {loading ? "Procesando..." : "Crear Cuenta y Solicitar Centro"}
+              {loading ? t("common.processing") : t("teacher_modal.submit")}
             </button>
           </div>
 
-          <p className="tvm-footer-note">
-            Un administrador revisará tu solicitud. Una vez aprobada, se creará el centro y tu
-            cuenta será promovida a profesor.
-          </p>
+          <p className="tvm-footer-note">{t("teacher_modal.footer_note")}</p>
         </form>
       </div>
     </div>

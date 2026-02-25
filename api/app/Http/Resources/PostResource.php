@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Interaction;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,6 +15,25 @@ class PostResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Check if current user has liked/bookmarked this post
+        $user = auth('sanctum')->user();
+        $userLiked = false;
+        $userBookmarked = false;
+
+        if ($user) {
+            $userLiked = Interaction::where('user_id', $user->id)
+                ->where('interactable_type', \App\Models\Post::class)
+                ->where('interactable_id', $this->id)
+                ->where('type', 'like')
+                ->exists();
+
+            $userBookmarked = Interaction::where('user_id', $user->id)
+                ->where('interactable_type', \App\Models\Post::class)
+                ->where('interactable_id', $this->id)
+                ->where('type', 'bookmark')
+                ->exists();
+        }
+
         return [
             'id'            => $this->id,
             'type'          => $this->type,
@@ -47,6 +67,10 @@ class PostResource extends JsonResource
             'comments_count' => $this->whenCounted('comments'),
             'bookmarks_count'=> $this->whenCounted('bookmarkedByUsers'),
             'reposts_count'  => $this->whenCounted('reposts'),
+
+            // User interaction status
+            'user_liked'     => $userLiked,
+            'user_bookmarked'=> $userBookmarked,
 
             // Repost – original post data
             'original_post' => $this->whenLoaded('originalPost', fn () => $this->originalPost ? [

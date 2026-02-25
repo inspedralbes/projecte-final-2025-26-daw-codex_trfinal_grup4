@@ -132,10 +132,18 @@
   animation: slideUp var(--duration-normal) var(--ease-out);
 }
 
-.explore__widget--trending { animation-delay: 0ms; }
-.explore__widget--contributors { animation-delay: 50ms; }
-.explore__widget--repos { animation-delay: 100ms; }
-.explore__widget--doubts { animation-delay: 150ms; }
+.explore__widget--trending {
+  animation-delay: 0ms;
+}
+.explore__widget--contributors {
+  animation-delay: 50ms;
+}
+.explore__widget--repos {
+  animation-delay: 100ms;
+}
+.explore__widget--doubts {
+  animation-delay: 150ms;
+}
 
 .explore__widget-header {
   display: flex;
@@ -403,6 +411,7 @@
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -617,7 +626,12 @@
 
 /* ── Spinner ──────────────────────────────────────────────── */
 .explore__spinner {
-  animation: spin 1s linear infinite;
+  position: absolute;
+  right: var(--space-4);
+  animation: spinner-rotate 1s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .explore__spinner svg {
@@ -639,6 +653,10 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

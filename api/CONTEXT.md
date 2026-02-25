@@ -671,7 +671,49 @@
     - `new.notification` → canal `user.{id}` — Notificacions (like, follow, comment, reply, repost)
     - `new.interaction` → canal `user.{id}` — Interaccions like/bookmark (ja existent)
     - `new.comment` → canal `post.{id}` — Comentaris nous a un post (ja existent)
+    - `post.deleted` → canal `user.{id}` i `profile.{id}` — Eliminació de post (Nou)
+    - `interaction.removed` → canal `user.{id}` — Like o bookmark eliminat (Nou)
 
+### 2026-02-20 – Cerca per Tags i Leaderboard
+
+- **Autor:** @copilot (IA)
+- Actualitzat **`SearchController`**:
+    - `GET /api/search` — Ara cerca posts per títol, contingut I per nom de tags relacionats
+    - Afegit `orWhereHas('tags', ...)` per incloure posts que tenen tags coincidents amb la query
+- Actualitzat **`ProfileController`**:
+    - `GET /api/leaderboard` — Nou endpoint públic que retorna els top N usuaris per reputació (default 5)
+    - Utilitza `ReputationService` per calcular puntuació
+    - Retorna: id, name, username, avatar, reputation (score, current_badge)
+- Actualitzat **`routes/api.php`**:
+    - Nova ruta pública: `GET /api/leaderboard?limit=N`
+
+### 2026-02-23 – Temps real de Perfil, Àvatars i Taula de Notificacions
+
+- **Autor:** @iker
+- Creat **`ProfileUpdatedEvent`** a `app/Events/`:
+    - Broadcast al canal `profile.{userId}` quan un usuari actualitza el seu perfil.
+    - Payload: `user_id`, `name`, `avatar`, `bio`, `followers_count`, `following_count`.
+- **Gestió d'Àvatars (Carga de fitxers):**
+    - `ProfileController@update` actualitzat per acceptar `multipart/form-data`.
+    - Guarda l'àvatar al disc públic (`storage/app/public/avatars`) i borra l'anterior si existia.
+    - Retorna la URL completa de la imatge.
+- **Corregit error 500 en Follow:**
+    - Creada la migració de la taula `notifications` que faltava i que bloquejava el `NotificationService`.
+- **Configuració de Servidor:**
+    - Canviat `FILESYSTEM_DISK=public` al `.env`.
+    - Fixat `APP_URL=http://localhost:8080` per a URLs d'àvatar correctes.
+    - Creat symlink de `storage` dins del contenidor.
+    - Configurat Nginx per servir `/storage/` directament des del disc des de la carpeta `public`.
+
+### 2026-02-24 – Sincronització Real-Time de Eliminacions i Interaccions
+
+- **Autor:** @iker
+- **Nous Events Broadcast:**
+    - `PostDeleted`: S'emet quan un post és eliminat sàviament. Canal `user.{userId}` i `profile.{userId}`.
+    - `InteractionRemoved`: S'emet quan es desfà un like o bookmark. Canal `user.{userId}`.
+- **Canvis en Controladors:**
+    - `PostController@destroy`: Ara dispara `PostDeleted`.
+    - `InteractionController@toggle`: Ara dispara `InteractionRemoved` quan l'estat passa a `active: false`.
 ---
 
 ## 📚 Documentació Relacionada

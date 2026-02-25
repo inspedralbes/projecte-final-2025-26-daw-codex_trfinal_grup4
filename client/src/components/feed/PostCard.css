@@ -4,6 +4,7 @@
 
 .post-card {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-3);
   padding: var(--space-4);
   border-bottom: 1px solid var(--border-subtle);
@@ -274,48 +275,102 @@
   text-decoration: underline;
 }
 
-/* ── Actions ──────────────────────────────────────────────── */
+/* ── Actions - Twitter-style minimal ─────────────────────── */
 .post-card__actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  max-width: 425px;
-  margin-left: -8px;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  margin-left: -10px;
 }
 
 .post-card__action {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2);
+  gap: var(--space-1);
+  padding: 0;
   background: none;
   border: none;
-  border-radius: var(--radius-full);
-  color: var(--ink-tertiary);
-  font-size: var(--text-sm);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: color 0.15s ease;
 }
 
-.post-card__action:hover {
-  color: var(--codex-teal);
-  background: rgba(20, 184, 166, 0.1);
+.post-card__action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--ink-tertiary);
+  transition: all 0.15s ease;
 }
 
-.post-card__action--repost:hover {
-  color: var(--codex-emerald);
-  background: rgba(16, 185, 129, 0.1);
+.post-card__action-count {
+  font-size: 13px;
+  color: var(--ink-tertiary);
+  min-width: 24px;
+  padding-right: var(--space-3);
+  transition: color 0.15s ease;
 }
 
-.post-card__action--like:hover,
-.post-card__action--liked {
-  color: var(--codex-rose);
-  background: rgba(244, 63, 94, 0.1);
+/* Comment - Blue */
+.post-card__action--comment:hover .post-card__action-icon {
+  color: rgb(29, 155, 240);
+  background: rgba(29, 155, 240, 0.1);
+}
+.post-card__action--comment:hover .post-card__action-count {
+  color: rgb(29, 155, 240);
 }
 
-.post-card__action--bookmarked {
-  color: var(--codex-violet);
-  background: rgba(139, 92, 246, 0.1);
+/* Repost - Green */
+.post-card__action--repost:hover:not(:disabled) .post-card__action-icon {
+  color: rgb(0, 186, 124);
+  background: rgba(0, 186, 124, 0.1);
+}
+.post-card__action--repost:hover:not(:disabled) .post-card__action-count {
+  color: rgb(0, 186, 124);
+}
+.post-card__action--repost:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Like - Pink/Red */
+.post-card__action--like:hover .post-card__action-icon {
+  color: rgb(249, 24, 128);
+  background: rgba(249, 24, 128, 0.1);
+}
+.post-card__action--like:hover .post-card__action-count {
+  color: rgb(249, 24, 128);
+}
+.post-card__action--like.post-card__action--active .post-card__action-icon {
+  color: rgb(249, 24, 128);
+}
+.post-card__action--like.post-card__action--active .post-card__action-count {
+  color: rgb(249, 24, 128);
+}
+
+/* Bookmark - Blue */
+.post-card__action--bookmark:hover .post-card__action-icon {
+  color: rgb(29, 155, 240);
+  background: rgba(29, 155, 240, 0.1);
+}
+.post-card__action--bookmark.post-card__action--active .post-card__action-icon {
+  color: rgb(29, 155, 240);
+}
+
+/* Loading state */
+.post-card__action--loading {
+  pointer-events: none;
+}
+.post-card__action--loading .post-card__action-icon {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ── Responsive ───────────────────────────────────────────── */
@@ -461,8 +516,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-4) var(--space-2);
-  margin-left: 56px;
+  flex-basis: 100%;
+  margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) 0;
+  padding: var(--space-2) var(--space-4);
+  background: rgba(0, 186, 124, 0.05);
+  border-bottom: 1px solid var(--border-subtle);
   color: var(--ink-tertiary);
   font-size: var(--text-xs);
 }
@@ -471,6 +529,46 @@
   width: 14px;
   height: 14px;
   color: var(--codex-emerald);
+  flex-shrink: 0;
+}
+
+/* ── Reply Indicator ──────────────────────────────────────── */
+.post-card--reply {
+  border-left: 3px solid var(--codex-teal);
+}
+
+.post-card__reply-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-basis: 100%;
+  margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) 0;
+  padding: var(--space-2) var(--space-4);
+  background: rgba(20, 184, 166, 0.05);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink-tertiary);
+  font-size: var(--text-xs);
+}
+
+.post-card__reply-indicator svg {
+  width: 14px;
+  height: 14px;
+  color: var(--codex-teal);
+  flex-shrink: 0;
+}
+
+.post-card__reply-link {
+  color: var(--codex-teal);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.post-card__reply-link:hover {
+  text-decoration: underline;
+}
+
+.post-card__reply-secondary {
+  color: var(--ink-quaternary);
 }
 
 /* ── Loading State ────────────────────────────────────────── */

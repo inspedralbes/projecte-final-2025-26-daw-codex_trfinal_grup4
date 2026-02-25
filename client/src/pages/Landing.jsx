@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { PASSWORD_REQUIREMENTS } from "@/context/AuthContext";
 import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal";
+import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import "./Landing.css";
 
 // Icons as inline SVGs for a minimal approach
@@ -55,22 +57,6 @@ const ShieldIcon = () => (
   </svg>
 );
 
-const TerminalIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="4 17 10 11 4 5" />
-    <line x1="12" y1="19" x2="20" y2="19" />
-  </svg>
-);
-
 const CheckIcon = () => (
   <svg
     width="14"
@@ -103,6 +89,7 @@ const XIcon = () => (
 );
 
 export default function Landing() {
+  const { t } = useTranslation();
   const { login, register, registerWithCenterRequest, checkDomain, authMessage, clearAuthMessage } =
     useAuth();
   const navigate = useNavigate();
@@ -177,7 +164,7 @@ export default function Landing() {
         // LOGIN
         const result = await login(email, password);
         if (result.success) {
-          setSuccessMsg("✅ ¡Inicio de sesión exitoso!");
+          setSuccessMsg(t("auth.login_success"));
           setTimeout(() => navigate("/"), 800);
         } else {
           setError(result.message);
@@ -185,13 +172,13 @@ export default function Landing() {
       } else {
         // REGISTER - Client-side validations
         if (!allPasswordReqsMet) {
-          setError("La contraseña no cumple todos los requisitos.");
+          setError(t("landing.errors.password_requirements"));
           setLoading(false);
           return;
         }
 
         if (password !== passwordConfirmation) {
-          setError("Las contraseñas no coinciden.");
+          setError(t("landing.errors.passwords_dont_match"));
           setLoading(false);
           return;
         }
@@ -219,14 +206,14 @@ export default function Landing() {
         const result = await register(userData);
 
         if (result.success) {
-          setSuccessMsg("🎉 ¡Cuenta creada correctamente!");
+          setSuccessMsg(t("auth.register_success"));
           setTimeout(() => navigate("/"), 800);
         } else {
           setError(result.message);
         }
       }
     } catch (err) {
-      setError("Ocurrió un error inesperado. Inténtalo de nuevo.");
+      setError(t("common.error_generic"));
     } finally {
       setLoading(false);
     }
@@ -241,7 +228,7 @@ export default function Landing() {
 
     if (result.success) {
       setShowVerificationModal(false);
-      setSuccessMsg("🎉 ¡Cuenta creada! Tu solicitud de centro está en revisión.");
+      setSuccessMsg(t("landing.messages.check_review"));
       setTimeout(() => navigate("/"), 1200);
     } else {
       setError(result.message);
@@ -282,19 +269,19 @@ export default function Landing() {
           {/* Badge */}
           <div className="landing__badge animate-slideDown">
             <span className="landing__badge-dot" />
-            Red Social Académica para Desarrolladores
+            {t("landing.badge")}
           </div>
 
           {/* Headline */}
           <h1 className="landing__title animate-slideUp">
-            El espacio donde los <span className="landing__title-accent">estudiantes de FP</span>{" "}
-            comparten código
+            {t("landing.hero_title_part1")}{" "}
+            <span className="landing__title-accent">{t("landing.hero_title_accent")}</span>{" "}
+            {t("landing.hero_title_part2")}
           </h1>
 
           {/* Subheadline */}
           <p className="landing__subtitle animate-slideUp stagger-1">
-            Conecta con tu centro, resuelve dudas técnicas y construye tu portfolio profesional
-            junto a la comunidad de DAM, DAW y ASIX de toda España.
+            {t("landing.hero_subtitle")}
           </p>
 
           {/* Features Grid */}
@@ -304,8 +291,10 @@ export default function Landing() {
                 <CodeIcon />
               </div>
               <div className="landing__feature-text">
-                <span className="landing__feature-title">Snippets con Sintaxis</span>
-                <span className="landing__feature-desc">Comparte código con highlight</span>
+                <span className="landing__feature-title">
+                  {t("landing.features.snippets.title")}
+                </span>
+                <span className="landing__feature-desc">{t("landing.features.snippets.desc")}</span>
               </div>
             </div>
             <div className="landing__feature">
@@ -313,8 +302,8 @@ export default function Landing() {
                 <UsersIcon />
               </div>
               <div className="landing__feature-text">
-                <span className="landing__feature-title">Hub del Centro</span>
-                <span className="landing__feature-desc">Espacio privado para tu instituto</span>
+                <span className="landing__feature-title">{t("landing.features.hub.title")}</span>
+                <span className="landing__feature-desc">{t("landing.features.hub.desc")}</span>
               </div>
             </div>
           </div>
@@ -325,12 +314,10 @@ export default function Landing() {
           <div className="auth-card">
             <div className="auth-card__header">
               <h2 className="auth-card__title">
-                {isLogin ? "Bienvenido a Codex" : "Únete a Codex"}
+                {isLogin ? t("landing.auth_title_login") : t("landing.auth_title_register")}
               </h2>
               <p className="auth-card__subtitle">
-                {isLogin
-                  ? "Inicia sesión para continuar"
-                  : "Usa tu email del centro para acceso completo"}
+                {isLogin ? t("landing.auth_subtitle_login") : t("landing.auth_subtitle_register")}
               </p>
             </div>
 
@@ -346,7 +333,7 @@ export default function Landing() {
               {!isLogin && (
                 <div className="auth-card__input-group">
                   <label className="auth-card__label" htmlFor="name">
-                    Nombre Completo
+                    {t("landing.full_name")}
                   </label>
                   <input
                     type="text"
@@ -362,7 +349,7 @@ export default function Landing() {
 
               <div className="auth-card__input-group">
                 <label className="auth-card__label" htmlFor="email">
-                  Email
+                  {t("landing.email")}
                 </label>
                 <input
                   type="email"
@@ -375,7 +362,7 @@ export default function Landing() {
                 />
                 {!isLogin && checkingDomain && (
                   <div className="auth-card__verified" style={{ color: "var(--ink-tertiary)" }}>
-                    <span>Comprobando dominio...</span>
+                    <span>{t("landing.messages.checking_domain")}</span>
                   </div>
                 )}
                 {!isLogin && domainInfo && !checkingDomain && (
@@ -386,12 +373,12 @@ export default function Landing() {
                     <ShieldIcon />
                     <span>
                       {domainInfo.has_center
-                        ? `${domainInfo.center_name || "Centro"} detectado – Acceso completo`
+                        ? `${domainInfo.center_name || t("landing.center")} ${t("landing.messages.center_detected")}`
                         : domainInfo.is_pending
-                          ? "Centro en revisión – Tu solicitud está pendiente"
+                          ? t("landing.messages.center_pending")
                           : domainInfo.can_request
-                            ? "No hay centro para este dominio – Se te pedirá verificación"
-                            : "Dominio no reconocido"}
+                            ? t("landing.messages.verification_required")
+                            : t("landing.messages.domain_not_recognized")}
                     </span>
                   </div>
                 )}
@@ -399,7 +386,7 @@ export default function Landing() {
 
               <div className="auth-card__input-group">
                 <label className="auth-card__label" htmlFor="password">
-                  Contraseña
+                  {t("landing.password")}
                 </label>
                 <input
                   type="password"
@@ -415,7 +402,7 @@ export default function Landing() {
                 {showPasswordReqs && (
                   <div className="auth-card__password-reqs">
                     <span className="auth-card__password-reqs-title">
-                      Requisitos de contraseña:
+                      {t("auth.password_requirements.title")}:
                     </span>
                     <ul className="auth-card__password-reqs-list">
                       {PASSWORD_REQUIREMENTS.map((req) => {
@@ -428,7 +415,7 @@ export default function Landing() {
                             <span className="auth-card__password-req-icon">
                               {met ? <CheckIcon /> : <XIcon />}
                             </span>
-                            {req.label}
+                            {t(`auth.password_requirements.${req.id}`)}
                           </li>
                         );
                       })}
@@ -440,7 +427,7 @@ export default function Landing() {
               {!isLogin && (
                 <div className="auth-card__input-group">
                   <label className="auth-card__label" htmlFor="password_confirmation">
-                    Confirmar Contraseña
+                    {t("landing.confirm_password")}
                   </label>
                   <input
                     type="password"
@@ -469,8 +456,8 @@ export default function Landing() {
                         {passwordsMatch ? <CheckIcon /> : <XIcon />}
                       </span>
                       {passwordsMatch
-                        ? "Las contraseñas coinciden"
-                        : "Las contraseñas no coinciden"}
+                        ? t("landing.messages.passwords_match")
+                        : t("landing.messages.passwords_dont_match")}
                     </div>
                   )}
                 </div>
@@ -480,19 +467,41 @@ export default function Landing() {
                 type="submit"
                 className="auth-card__submit"
                 disabled={loading || (!isLogin && (!allPasswordReqsMet || !passwordsMatch))}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                }}
               >
-                {loading ? "Procesando..." : isLogin ? "Iniciar Sesión" : "Crear Cuenta"}
+                {loading ? (
+                  <div
+                    className="profile__spinner"
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      border: "2px solid rgba(255,255,255,0.2)",
+                      borderTopColor: "white",
+                      borderRadius: "50%",
+                      animation: "spinner-rotate 0.6s linear infinite",
+                    }}
+                  />
+                ) : isLogin ? (
+                  t("landing.login")
+                ) : (
+                  t("landing.register")
+                )}
               </button>
             </form>
 
             <p className="auth-card__footer">
-              {isLogin ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
+              {isLogin ? t("landing.no_account") : t("landing.already_account")}
               <button
                 onClick={toggleMode}
                 className="auth-card__link"
                 style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
               >
-                {isLogin ? "Regístrate aquí" : "Inicia sesión"}
+                {isLogin ? t("landing.register_here") : t("landing.login")}
               </button>
             </p>
           </div>
@@ -501,16 +510,22 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="landing__footer">
+        <div className="landing__language-selector">
+          <LanguageSwitcher />
+        </div>
         <div className="landing__footer-container">
           <div className="landing__footer-brand">
             <span className="landing__logo-icon">
-              <TerminalIcon />
+              <img
+                src="/logo-transparent.png"
+                alt="XC Logo"
+                className="landing__logo-img"
+                style={{ width: "24px", height: "24px", objectFit: "contain" }}
+              />
             </span>
             <span>Codex</span>
           </div>
-          <p className="landing__footer-text">
-            La red social académica para el ecosistema de FP Informática en España
-          </p>
+          <p className="landing__footer-text">{t("landing.footer_text")}</p>
         </div>
       </footer>
 

@@ -1,0 +1,270 @@
+{
+  "common": {
+    "loading": "Carregant...",
+    "error_server": "Error del servidor. Per favor, intenta-ho més tard.",
+    "error_generic": "S'ha produït un error. Per favor, intenta-ho de nou.",
+    "logout": "Tancar sessió",
+    "search_placeholder": "Cercar...",
+    "search_placeholder_codex": "Cercar a Codex...",
+    "user": "Usuari",
+    "anonymous": "anònim",
+    "see_more": "Veure més",
+    "see_all": "Veure totes",
+    "processing": "Processant...",
+    "cancel": "Cancel·lar",
+    "close": "Tancar",
+    "retry": "Tornar a intentar",
+    "load_more": "Carregar més",
+    "delete": "Eliminar"
+  },
+  "widgets": {
+    "trending": "Tendències",
+    "no_trends": "No hi ha tendències",
+    "top_contributors": "Top Contribuïdors",
+    "no_contributors": "No hi ha contribuïdors",
+    "see_ranking": "Veure rànquing",
+    "recent_questions": "Dubtes Recents",
+    "no_questions": "No hi ha preguntes"
+  },
+  "feed": {
+    "publish": "Publicar",
+    "post_question": "Publicar Dubte",
+    "posts_count": "publicacions",
+    "no_title": "Sense títol",
+    "placeholder_news": "Què vols compartir avui?",
+    "placeholder_question": "Quin dubte tècnic tens?",
+    "code_placeholder": "// Enganxa el teu codi aquí...",
+    "tags_placeholder": "Etiquetes (separades per coma o espai)",
+    "visibility_public": "Públic",
+    "loading_posts": "Carregant publicacions...",
+    "no_posts": "Encara no hi ha publicacions.",
+    "be_first": "Sigues el primer en compartir alguna cosa!",
+    "solved": "Resolt",
+    "reposted": "ha repostejat",
+    "delete_confirm": "Estàs segur que vols eliminar aquesta publicació?",
+    "tabs": {
+      "for_you": "Per a tu",
+      "following": "Seguint"
+    },
+    "tools": {
+      "add_code": "Afegir codi",
+      "add_image": "Afegir imatge",
+      "add_link": "Afegir enllaç",
+      "add_question": "Publicar dubte"
+    },
+    "time": {
+      "now": "ara",
+      "m": "m",
+      "h": "h",
+      "d": "d"
+    },
+    "comment": "Comentar",
+    "repost": "Repostejar",
+    "like": "M'agrada",
+    "unlike": "Treure m'agrada",
+    "bookmark": "Desar",
+    "unbookmark": "Treure de desats",
+    "cant_repost_own": "No pots repostejar la teva pròpia publicació"
+  },
+  "profile": {
+    "loading": "Carregant perfil...",
+    "error": "Error en carregar el perfil",
+    "bio": "Biografia",
+    "followers": "Seguidors",
+    "points": "Punts",
+    "joined": "Es va unir el",
+    "follow": "Seguir",
+    "unfollow": "Seguint",
+    "likes": "M'agrada",
+    "bookmarks": "Desats",
+    "replies": "Respostes",
+    "no_posts_category": "No hi ha publicacions en aquesta categoria",
+    "edit": {
+      "title": "Editar perfil",
+      "cta": "Editar perfil",
+      "save": "Guardar",
+      "bio_placeholder": "Explica'ns sobre tu...",
+      "error": "Error en desar els canvis"
+    },
+    "links": {
+      "other": "Altre enllaç",
+      "web": "Web"
+    }
+  },
+  "sidebar": {
+    "home": "Inici",
+    "explore": "Explorar",
+    "notifications": "Notificacions",
+    "messages": "Missatges",
+    "profile": "Perfil",
+    "center": "Centre",
+    "more": "Més",
+    "teacher": "Professor",
+    "admin": "Admin",
+    "student": "Estudiant"
+  },
+  "footer": {
+    "terms": "Termes",
+    "privacy": "Privadesa",
+    "cookies": "Cookies",
+    "help": "Ajuda"
+  },
+  "auth": {
+    "login_success": "Sessió iniciada correctament! Benvingut de nou.",
+    "register_success": "Compte creat correctament! T'hem enviat un correu de verificació.",
+    "register_teacher_success": "Compte creat! La teva sol·licitud de centre ha estat enviada. Un administrador la revisarà aviat.",
+    "logout_info": "Sessió tancada correctament.",
+    "token_error": "Error: no s'ha rebut cap token d'autenticació.",
+    "login_error_fallback": "Error en iniciar sessió. Verifica les teves credencials.",
+    "register_error_fallback": "Error en el registre. Torna-ho a intentar.",
+    "password_requirements": {
+      "title": "Requisits de contrasenya",
+      "length": "Mínim 8 caràcters",
+      "uppercase": "Almenys una majúscula",
+      "lowercase": "Almenys una minúscula",
+      "number": "Almenys un número"
+    }
+  },
+  "landing": {
+    "welcome": "Benvingut a Codex",
+    "tagline": "La xarxa social per a estudiants i professors d'informàtica",
+    "login": "Iniciar sessió",
+    "register": "Crear compte",
+    "already_account": "Ja tens un compte? ",
+    "no_account": "No tens un compte? ",
+    "register_here": "Registra't aquí",
+    "email": "Correu electrònic",
+    "password": "Contrasenya",
+    "confirm_password": "Confirmar Contrasenya",
+    "username": "Nom d'usuari",
+    "full_name": "Nom complet",
+    "center": "Centre",
+    "badge": "Xarxa Social Acadèmica per a Desenvolupadors",
+    "hero_title_part1": "L'espai on els",
+    "hero_title_accent": "estudiants de FP",
+    "hero_title_part2": "comparteixen codi",
+    "hero_subtitle": "Connecta amb el teu centre, resol dubtes tècnics i construeix el teu portfoli professional juntament amb la comunitat de DAM, DAW i ASIX de tota Espanya.",
+    "auth_title_login": "Benvingut a Codex",
+    "auth_title_register": "Uneix-te a Codex",
+    "auth_subtitle_login": "Inicia sessió per continuar",
+    "auth_subtitle_register": "Fes servir el teu correu del centre per a accés complet",
+    "footer_text": "La xarxa social acadèmica per a l'ecosistema de FP Informàtica a Espanya",
+    "features": {
+      "snippets": {
+        "title": "Snippets amb Sintaxi",
+        "desc": "Comparteix codi amb highlight"
+      },
+      "hub": {
+        "title": "Hub del Centre",
+        "desc": "Espai privat per al teu institut"
+      }
+    },
+    "messages": {
+      "checking_domain": "Comprovant domini...",
+      "center_detected": "detectat – Accés complet",
+      "center_pending": "Centre en revisió – La teva sol·licitud està pendent",
+      "verification_required": "No hi ha centre per a aquest domini – Es demanarà verificació",
+      "domain_not_recognized": "Domini no reconegut",
+      "check_review": "🎉 Compte creat! La teva sol·licitud de centre està en revisió.",
+      "passwords_match": "Les contrasenyes coincideixen"
+    },
+    "errors": {
+      "password_requirements": "La contrasenya no compleix tots els requisits.",
+      "passwords_dont_match": "Les contrasenyes no coincideixen."
+    }
+  },
+  "center": {
+    "no_center_title": "No pertanys a cap centre",
+    "no_center_desc": "Contacta amb el teu administrador per unir-te a un centre educatiu.",
+    "loading": "Carregant centre...",
+    "default_name": "Centre Educatiu",
+    "private": "Privat",
+    "members": "membres",
+    "members_tab": "Membres",
+    "since": "Des de",
+    "resources": "Recursos",
+    "pinned": "Fixat"
+  },
+  "teacher_modal": {
+    "title": "Verificació de Professor",
+    "desc_intro": "El domini",
+    "desc_body": "no té un centre educatiu registrat a Codex. Per crear el centre, necessitem verificar la teva identitat com a docent.",
+    "center_name": "Nom del Centre Educatiu",
+    "city": "Ciutat",
+    "document_title": "Document Justificant",
+    "document_hint": "Puja un document que acrediti la teva vinculació amb el centre (carnet de docent, contracte, certificat, etc.)",
+    "submit": "Crear Compte i Sol·licitar Centre",
+    "footer_note": "Un administrador revisarà la teva sol·licitud. Un cop aprovada, es crearà el centre i el teu compte serà promogut a professor.",
+    "placeholders": {
+      "fullname": "Ex: Maria Garcia López",
+      "center": "Ex: IES Jaume I",
+      "city": "Ex: Barcelona"
+    },
+    "dropzone": {
+      "text": "Arrossega el teu arxiu aquí o",
+      "cta": "fes clic per seleccionar",
+      "formats": "PDF, JPG o PNG · màx. 5 MB"
+    },
+    "errors": {
+      "invalid_type": "Només s'accepten arxius PDF, JPG o PNG.",
+      "file_too_large": "L'arxiu no pot superar els 5 MB."
+    }
+  },
+  "explore": {
+    "search_placeholder": "Cercar publicacions, usuaris, tags, codi...",
+    "searching": "Cercant...",
+    "results_for": "Resultats per a \"{{query}}\"",
+    "no_results": "No s'han trobat resultats per a \"{{query}}\"",
+    "users": "Usuaris",
+    "categories": {
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "devops": "DevOps",
+      "databases": "Bases de Dades",
+      "mobile": "Mòbil",
+      "security": "Seguretat"
+    }
+  },
+  "notifications": {
+    "loading": "Carregant notificacions...",
+    "error": "Error en carregar notificacions",
+    "mark_all_read": "Marcar tot com a llegit",
+    "filters": {
+      "all": "Tot",
+      "social": "Social",
+      "code": "Codi"
+    },
+    "time": {
+      "ago_m": "Fa {{count}} min",
+      "ago_h": "Fa {{count}}h",
+      "ago_d": "Fa {{count}} dies",
+      "yesterday": "Ahir"
+    }
+  },
+  "more": {
+    "description": "Configuració i altres opcions."
+  },
+  "email_verification": {
+    "title": "Verifica el teu correu",
+    "description": "T'hem enviat un enllaç de verificació a ",
+    "resend": "Reenviar correu",
+    "resend_cooldown": "Reenviar en {{seconds}}s"
+  },
+  "post": {
+    "title": "Publicació",
+    "replying_to": "Responent a",
+    "accepted_answer": "Resposta acceptada",
+    "reply": "Respondre",
+    "mark_solution": "Marcar com a solució",
+    "unmark_solution": "Desmarcar solució",
+    "write_reply": "Escriu una resposta...",
+    "send": "Enviar",
+    "write_comment": "Escriu un comentari...",
+    "comment_btn": "Comentar",
+    "comments": "Comentaris",
+    "no_comments": "Encara no hi ha comentaris",
+    "be_first_comment": "Sigues el primer a comentar!",
+    "not_found": "Publicació no trobada",
+    "back": "Tornar"
+  }
+}

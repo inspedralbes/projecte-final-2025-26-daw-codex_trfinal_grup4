@@ -82,9 +82,18 @@
 ```json
 {
   "dependencies": {
+    "i18next": "^25.x",
+    "i18next-browser-languagedetector": "^8.x",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.13.0"
+    "react-i18next": "^16.x",
+    "react-router-dom": "^7.13.0",
+    "socket.io-client": "^4.8.x"
+  },
+  "devDependencies": {
+    "vitest": "^4.x",
+    "@testing-library/react": "^16.x",
+    "jsdom": "^28.x"
   }
 }
 ```
@@ -95,6 +104,7 @@
 - Host: `0.0.0.0` (obligatori per Docker)
 - Port: `5173` (strictPort)
 - Watch: polling activat (obligatori per HMR dins Docker)
+- **Testing**: Vitest configurat amb `jsdom` i globals.
 
 ### Variables d'entorn disponibles
 
@@ -106,6 +116,37 @@
 ---
 
 ## 📅 Registre de canvis
+
+### 2026-02-24 – Suport Multidioma (i18n), Estabilització de l'Entorn i Fix de Referències
+
+- **Autor:** @iker
+- **Multi-idioma (i18next):**
+  - Implementat suport complet per a **Català (ca)**, **Espanyol (es)** i **Anglès (en)**.
+  - Creats fitxers de traducció a `src/locales/`.
+  - Configurat `src/i18n.js` amb detector de llenguatge (localStorage/browser) i fallback a espanyol.
+  - Creat component `LanguageSwitcher.jsx` per al canvi de llengua en temps real.
+  - Localitzades totes les rutes principals: `Feed`, `Profile`, `Explore`, `Notifications`, `CenterHub` i `More`.
+- **Estabilització i Debugging:**
+  - Corregits errors de referència (`createContext`, `useState`, `useRef`, `i18next`) a `AuthContext.jsx`, `Landing.jsx` i `PostCard.jsx`.
+  - Re-instal·lació de dependències dins del contenidor `tfg_client_dev` per resoldre conflictes de resolució de mòduls (`react-i18next`).
+  - Verificada l'estabilitat del dev server de Vite i el correcte renderitzat de la UI.
+- **Fitxers nous:**
+  - `src/i18n.js` — Configuració central d'i18next.
+  - `src/locales/{ca,es,en}.json` — Diccionaris de traduccions.
+  - `src/components/ui/LanguageSwitcher.jsx` / `.css` — Selector d'idiomes.
+
+### 2026-02-23 – Sustitució del Logo (XC) i Entorn de Testing
+
+- **Autor:** @iker
+- **Identitat Visual:**
+  - Substituït el logo anterior (forma de terminal) pel nou logo "XC" en format imatge.
+  - Actualitzat `Sidebar.jsx` i el footer de `Landing.jsx` per utilitzar `/logo-transparent.png`.
+- **Testing (Vitest):**
+  - Configurat entorn de proves amb **Vitest** + **React Testing Library** + **jsdom**.
+  - Actualitzat `vite.config.js` amb bloc `test` i setup de globals i jsdom.
+  - Creat `src/test/setup.js` per a la configuració global de tests (`jest-dom`).
+  - Creat `src/components/layout/Sidebar.test.jsx` — Prova automatitzada per verificar la correcta visualització del logo.
+- **Accions:** Instal·lats paquets `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`.
 
 ### 2026-02-19 – Sistema d'autenticació complet + Feedback UX
 
@@ -244,6 +285,35 @@
     - Nova ruta `/verify-email` → `EmailVerification` (protegida però no requereix verificació)
 - **Fix config mail backend:** `api/.env` corregit de `MAIL_MAILER=log` a `smtp`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025`
 
+### 2026-02-23 – Temps real de perfil, Càrrega d'àvatars i Sync d'Estat Global
+
+- **Autor:** @iker
+- **Perfil en temps real:**
+  - `src/hooks/useProfile.js` actualitzat per escoltar `profile.updated` a través de Socket.io.
+  - Sincronització automàtica de dades (nom, àvatar, bio, stats) sense recarregar la pàgina.
+- **Càrrega d'Àvatars:**
+  - Modificat `src/services/api.js`: l'upload ara accepta opcions per sobreescriure el mètode HTTP.
+  - Modificat `src/services/profileService.js`: implementat **Method Spoofing** enviant `_method=PUT` dins del `FormData` per compatibilitat amb el backend Laravel i `multipart/form-data`.
+- **Sincronització d'Estat Global:**
+  - `useProfile` ara crida a `refreshUser()` del `AuthContext` quan l'usuari actualitza el seu propi perfil.
+  - Això garanteix que la barra lateral (Sidebar) i altres components vegin el nou àvatar a l'instant.
+- **Barra Lateral (Sidebar):**
+  - Àvatar de la barra lateral ara fa servir `user.username` com a seed per a Dicebear (consistent amb la pàgina de perfil).
+  - Botó de logout completament funcional.
+
+### 2026-02-24 – Millores de Perfil i Sincronització Real-Time
+
+- **Autor:** @iker
+- **Correcció de Redirecció (Rename):**
+  - Implementada lògica a `useProfile.js` per detectar canvis d'username.
+  - `Profile.jsx` ara redirigeix automàticament a la nova URL de perfil per evitar errors 404.
+- **URLs de Perfil Restaurades:**
+  - Tornats a afegir els enllaços de **Portfolio** i **Web** a la capçalera del perfil amb els seus respectius icones SVG.
+- **Sincronització Real-Time (Sockets):**
+  - **`socketService.js`**: Afegit mètode genèric `.on()` per a subscripció a events arbitràris.
+  - **`usePosts.js`**: Afegits listeners globals per a `post.deleted` (esborra de feeds) i `interaction.removed` (actualitza comptadors de likes/bookmarks).
+  - **`useProfile.js`**: Listener per a `post.deleted` per sincronitzar el comptador total de posts del perfil.
+  - **`Profile.jsx`**: Implementats listeners per sincronitzar en viu les pestanyes de Likes, Bookmarks i Replies quan s'eliminen continguts.
 ---
 
 ## 🎨 Estructura actual de components
@@ -266,11 +336,14 @@ src/
 │   ├── profile/
 │   │   └── Profile.jsx / Profile.css       # Perfil d'usuari (minimalista, dades reals)
 │   └── ui/
-│       └── Icons.jsx                # Icones SVG reutilitzables
+│       ├── Icons.jsx                # Icones SVG reutilitzables
+│       └── LanguageSwitcher.jsx / LanguageSwitcher.css # Selector d'idioma
 ├── context/
 │   └── AuthContext.jsx              # Provider auth global (login/register/logout/emailVerified/refreshUser)
 ├── hooks/
 │   └── useAuth.js                   # Hook per consumir AuthContext
+├── i18n.js                          # Configuració i18next
+├── locales/                         # Fitxers de traducció (ca, es, en)
 ├── pages/
 │   ├── Landing.jsx / Landing.css    # Welcome + Auth + Feedback UX
 │   ├── Home.jsx                     # Wrapper per Feed
