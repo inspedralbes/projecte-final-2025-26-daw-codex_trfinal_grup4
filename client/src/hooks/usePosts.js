@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback } from "react";
 import postsService from "@/services/postsService";
 import profileService from "@/services/profileService";
+import commentsService from "@/services/commentsService";
 import socketService from "@/services/socketService";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -135,11 +136,15 @@ export function usePosts({
       );
     };
 
+    const token = localStorage.getItem("token");
+    socketService.connect(token);
     socketService.on("post.deleted", handlePostDeleted);
+    socketService.on("comment.deleted", handlePostDeleted); // Re-use same handler as it fits data structure
     socketService.on("interaction.removed", handleInteractionRemoved);
 
     return () => {
       socketService.off("post.deleted", handlePostDeleted);
+      socketService.off("comment.deleted", handlePostDeleted);
       socketService.off("interaction.removed", handleInteractionRemoved);
     };
   }, [enabled, currentUser?.id]);
@@ -172,15 +177,24 @@ export function usePosts({
   }, []);
 
   // Delete a post
-  const deletePost = useCallback(async (postId) => {
-    try {
-      await postsService.deletePost(postId);
-      setPosts((prev) => prev.filter((p) => p.id !== postId));
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
-  }, []);
+  const deletePost = useCallback(
+    async (postId) => {
+      try {
+        const targetPost = posts.find((p) => p.id === postId);
+        if (targetPost && targetPost.type === "reply") {
+          await commentsService.deleteComment(postId);
+        } else {
+          await postsService.deletePost(postId);
+        }
+        setPosts((prev) => prev.filter((p) => p.id !== postId));
+        return { success: true };
+      } catch (err) {
+        console.error("Error deleting post/comment:", err);
+        return { success: false, error: err.message };
+      }
+    },
+    [posts],
+  );
 
   // Update post in list
   const updatePostInList = useCallback((postId, updates) => {

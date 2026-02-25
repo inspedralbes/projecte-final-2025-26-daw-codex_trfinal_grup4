@@ -301,6 +301,17 @@
   - Àvatar de la barra lateral ara fa servir `user.username` com a seed per a Dicebear (consistent amb la pàgina de perfil).
   - Botó de logout completament funcional.
 
+### 2026-02-25 – Resolució de Conflictes i Restauració de Perfil
+
+- **Autor:** @iker
+- **Resolució de Conflictes:**
+  - Resolució de conflictes de merge a `Profile.jsx` després d'un rebase de git.
+  - Restauració de la lògica de pestanyes (`activeTab`, `setActiveTab`) que s'havia perdut.
+  - Restauració del fetch de dades per a `posts`, `likedPosts`, `bookmarkedPosts` i `replies`.
+- **Millores de Perfil:**
+  - Sincronització automàtica de la barra lateral amb el nou àvatar.
+  - Redirecció automàtica en cas de canvi d'username.
+
 ### 2026-02-24 – Millores de Perfil i Sincronització Real-Time
 
 - **Autor:** @iker
@@ -314,6 +325,7 @@
   - **`usePosts.js`**: Afegits listeners globals per a `post.deleted` (esborra de feeds) i `interaction.removed` (actualitza comptadors de likes/bookmarks).
   - **`useProfile.js`**: Listener per a `post.deleted` per sincronitzar el comptador total de posts del perfil.
   - **`Profile.jsx`**: Implementats listeners per sincronitzar en viu les pestanyes de Likes, Bookmarks i Replies quan s'eliminen continguts.
+
 ---
 
 ## 🎨 Estructura actual de components

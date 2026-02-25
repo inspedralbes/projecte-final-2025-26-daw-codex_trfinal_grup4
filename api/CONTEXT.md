@@ -714,6 +714,12 @@
 - **Canvis en Controladors:**
     - `PostController@destroy`: Ara dispara `PostDeleted`.
     - `InteractionController@toggle`: Ara dispara `InteractionRemoved` quan l'estat passa a `active: false`.
+
+### 2026-02-25 – Documentació de Profiling i Neteja
+
+- **Autor:** @iker
+- Actualització de `CONTEXT.md` amb el resum de les darreres funcionalitats de real-time i gestió de perfils.
+
 ---
 
 ## 📚 Documentació Relacionada
