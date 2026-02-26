@@ -276,11 +276,15 @@ jobs:
               echo "📥 Cloning repository..."
               rm -rf "$APP_DIR"
               git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
-            else
+            elif [ -d "$APP_DIR/.git" ]; then
               echo "📥 Pulling latest changes..."
               cd $APP_DIR
               git fetch origin $BRANCH
               git reset --hard origin/$BRANCH
+            else
+              echo "📥 Directory exists but is not a git repo. Re-cloning..."
+              rm -rf "$APP_DIR"
+              git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
             fi
 
             cd $APP_DIR
