@@ -260,7 +260,7 @@ jobs:
             set -e
 
             # ── Variables ──
-            APP_DIR="${{ secrets.APP_DIR }}"
+            APP_DIR="/opt/codex"
             REPO_URL="https://github.com/${{ github.repository }}.git"
             BRANCH="main"
             COMMIT="${{ github.sha }}"
