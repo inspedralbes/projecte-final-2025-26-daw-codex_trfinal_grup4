@@ -14,9 +14,14 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "443:443"
     volumes:
-      - ./docker/nginx/default.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx/default.prod.conf:/etc/nginx/templates/default.conf.template:ro
       - client_build:/var/www/html/client/dist:ro
+      - certbot_conf:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+    environment:
+      - DOMAIN=${DOMAIN}
     depends_on:
       api:
         condition: service_started
@@ -137,6 +142,19 @@ services:
       - tfg_network
     # Sin puertos expuestos – solo accesible via red interna
 
+  # -----------------------------------------------------------
+  #  Certbot – Let's Encrypt SSL
+  # -----------------------------------------------------------
+  certbot:
+    image: certbot/certbot:latest
+    container_name: tfg_certbot_prod
+    restart: "no"
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    networks:
+      - tfg_network
+
 # =============================================================
 #  Volumes (persistentes)
 # =============================================================
@@ -148,6 +166,10 @@ volumes:
   api_storage:
     driver: local
   client_build:
+    driver: local
+  certbot_conf:
+    driver: local
+  certbot_www:
     driver: local
 
 # =============================================================
