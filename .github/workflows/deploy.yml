@@ -277,8 +277,16 @@ jobs:
               git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
             elif [ ! -d "$APP_DIR/.git" ]; then
               echo "📥 Directory exists but is not a git repo. Re-cloning..."
+              if [ -f "$APP_DIR/.env" ]; then
+                echo "💾 Preserving .env file..."
+                mv "$APP_DIR/.env" /tmp/codex_env_backup
+              fi
               rm -rf $APP_DIR
               git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
+              if [ -f /tmp/codex_env_backup ]; then
+                mv /tmp/codex_env_backup "$APP_DIR/.env"
+                echo "✅ .env restored after clone"
+              fi
             else
               echo "📥 Pulling latest changes..."
               cd $APP_DIR
