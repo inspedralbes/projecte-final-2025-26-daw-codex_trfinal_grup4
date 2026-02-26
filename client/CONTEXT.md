@@ -457,6 +457,23 @@
   - 4. `GoogleCallback.jsx` captura el code → `POST /api/auth/google/callback` → token Sanctum
   - 5. Redirecció a `/` amb sessió activa
 
+### 2026-02-26 – UX Navegación Chat-Perfil
+
+- **Autor:** @copilot (IA)
+- **Chat → Perfil:**
+  - `Messages.jsx`: L'avatar i nom al header del xat ara són clickables per navegar al perfil de l'usuari (`/profile/{username}`).
+  - CSS nou: `.msg__chat-user-link` amb efecte hover (background i color teal al passar el ratolí).
+- **Perfil → Chat:**
+  - `Profile.jsx`: Afegit botó de missatge (icona bombolla) al costat del botó Follow/Unfollow als perfils d'altres usuaris.
+  - En clicar redirigeix a `/messages?user={id}` per iniciar/obrir conversa directament.
+  - CSS nou: `.profile-guay__btn--message` amb icona SVG i transició hover a teal.
+- **Traduccions (es, ca, en):**
+  - `profile.sendMessage`: "Enviar mensaje" / "Enviar missatge" / "Send message".
+- **Fitxers modificats:**
+  - `client/src/pages/Messages.jsx` / `.css`
+  - `client/src/components/profile/Profile.jsx` / `.css`
+  - `client/src/locales/{es,ca,en}.json`
+
 ---
 
 ## 🎨 Estructura actual de components
@@ -502,6 +519,8 @@ src/
 │   └── index.jsx                    # Rutes protegides + públiques + VerifiedRoute
 ├── services/
 │   ├── api.js                       # Client HTTP (amb Bearer token auto + upload)
+│   ├── chatService.js               # Serveis xat (converses, missatges, marcar llegit)
+│   ├── socketService.js             # Client Socket.io (connexió, rooms, events P2P)
 │   └── mockApi.js                   # Dades de prova
 └── styles/
     ├── index.css                    # Entry point

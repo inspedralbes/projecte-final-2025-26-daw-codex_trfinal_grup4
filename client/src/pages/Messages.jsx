@@ -741,13 +741,19 @@ export default function Messages() {
               <button className="msg__back-btn" onClick={handleBack}>
                 <ChevronLeftIcon />
               </button>
-              <Avatar src={partner?.avatar} name={partner?.name} size={40} />
-              <div className="msg__chat-info">
-                <h2 className="msg__chat-name">{partner?.name}</h2>
-                <span className="msg__chat-username">
-                  @{partner?.username}
-                  {typing && <span className="msg__typing-indicator">escribiendo...</span>}
-                </span>
+              <div
+                className="msg__chat-user-link"
+                onClick={() => navigate(`/profile/${partner?.username}`)}
+                style={{ cursor: 'pointer' }}
+              >
+                <Avatar src={partner?.avatar} name={partner?.name} size={40} />
+                <div className="msg__chat-info">
+                  <h2 className="msg__chat-name">{partner?.name}</h2>
+                  <span className="msg__chat-username">
+                    @{partner?.username}
+                    {typing && <span className="msg__typing-indicator">escribiendo...</span>}
+                  </span>
+                </div>
               </div>
               {conversationStatus?.is_mutual && (
                 <span className="msg__mutual-badge" title="Os seguís mutuamente">

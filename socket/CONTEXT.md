@@ -247,11 +247,19 @@
 - **Autor:** @copilot (IA)
 - **Nous Events Socket.io (P2P):**
   - `send-message`: Client envia missatge directament via socket (`{ receiverId, content, tempId, token }`).
-    - El socket valida i persisteix el missatge cridant l'API internament.
+    - El socket valida i persisteix el missatge cridant l'API internament (`POST /api/chat/messages`).
+    - Header `X-Socket-P2P: true` evita broadcast duplicat (Laravel no emet event si ja ho fa socket).
     - Emet `new.message` a la room del xat amb `tempId` per actualització optimista.
     - Retorna callback amb `{ success, message, error }`.
   - `mark-read`: Client marca missatges com llegits via socket (`{ partnerId, userId, token }`).
     - El socket crida l'API per persistir i emet `messages.read` a la room.
+- **Prevenció de Duplicats:**
+  - El header `X-Socket-P2P` indica a `ChatController.php` que no faci `event(new NewMessageEvent(...))`.
+  - D'aquesta manera només el socket emet `new.message`, evitant que arribi dos cops al client.
+- **Client (`socketService.js`):**
+  - `sendMessage(receiverId, content, tempId)`: Envia missatge P2P amb timeout i callback.
+  - `markMessagesRead(userId, partnerId)`: Marca missatges llegits via socket.
+  - `setAuthToken(token)`: Guarda token per a enviaments P2P autenticats.
 - **Avantatges P2P:**
   - Latència reduïda: missatge arriba immediatament sense esperar resposta HTTP.
   - Actualització optimista: UI s'actualitza abans de confirmació del servidor.

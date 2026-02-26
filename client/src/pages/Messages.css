@@ -308,6 +308,26 @@
   color: var(--color-text);
 }
 
+.msg__chat-user-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-2);
+  margin: calc(-1 * var(--space-2));
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.msg__chat-user-link:hover {
+  background: var(--depth-2);
+}
+
+.msg__chat-user-link:hover .msg__chat-name {
+  color: var(--codex-teal);
+}
+
 .msg__chat-info {
   flex: 1;
   min-width: 0;

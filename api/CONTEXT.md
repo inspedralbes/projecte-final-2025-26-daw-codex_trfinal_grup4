@@ -759,6 +759,14 @@
     - Si els usuaris NO es segueixen mútuament: només 1 missatge permès per direcció.
     - Si els usuaris ES segueixen mútuament: conversa completa sense límits.
 
+### 2026-02-26 – Header X-Socket-P2P per evitar broadcasts duplicats
+
+- **Autor:** @copilot (IA)
+- **ChatController::store():**
+  - Afegit check `$request->hasHeader('X-Socket-P2P')` abans de fer `event(new NewMessageEvent(...))`.
+  - Si existeix el header, el socket ja emet l'event directament i Laravel no ha de fer broadcast duplicat.
+  - Això permet que el sistema P2P funcioni sense que arribin dos missatges al client.
+
 ---
 
 ## 📚 Documentació Relacionada
