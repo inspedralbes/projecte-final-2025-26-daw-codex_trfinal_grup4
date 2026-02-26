@@ -256,7 +256,6 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           command_timeout: 10m
-          script_stop: false
           script: |
             set -e
 
@@ -273,8 +272,12 @@ jobs:
             echo "══════════════════════════════════════"
 
             # ── 1. Clone or pull repo ──
-            if [ ! -d "$APP_DIR/.git" ]; then
+            if [ ! -d "$APP_DIR" ]; then
               echo "📥 Cloning repository..."
+              git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
+            elif [ ! -d "$APP_DIR/.git" ]; then
+              echo "📥 Directory exists but is not a git repo. Re-cloning..."
+              rm -rf $APP_DIR
               git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
             else
               echo "📥 Pulling latest changes..."
@@ -325,7 +328,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
-          script_stop: false
           script: |
             echo "🩺 Running health checks..."
             sleep 8
@@ -357,7 +359,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
-          script_stop: true
           script: |
             APP_DIR="${{ secrets.APP_DIR }}"
             COMPOSE="docker compose -f docker-compose.prod.yml"
