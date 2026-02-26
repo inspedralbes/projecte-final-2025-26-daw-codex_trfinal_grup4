@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import "./PostInput.css";
@@ -69,10 +69,10 @@ const QuestionIcon = () => (
   </svg>
 );
 
-const GlobeIcon = () => (
+const GlobeIcon = ({ size = 14 }) => (
   <svg
-    width="14"
-    height="14"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -86,17 +86,77 @@ const GlobeIcon = () => (
   </svg>
 );
 
-export default function PostInput({ onSubmit }) {
+const CenterIcon = ({ size = 14 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    <polyline points="9 22 9 12 15 12 15 22" />
+  </svg>
+);
+
+const ChevronDownIcon = () => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
+export default function PostInput({ onSubmit, forceQuestion = false }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [content, setContent] = useState("");
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [code, setCode] = useState("");
   const [codeLanguage, setCodeLanguage] = useState("javascript");
-  const [isQuestion, setIsQuestion] = useState(false);
+  const [isQuestion, setIsQuestion] = useState(forceQuestion);
   const [tags, setTags] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [visibility, setVisibility] = useState("global");
+  const [showVisibilityDropdown, setShowVisibilityDropdown] = useState(false);
+  const imageInputRef = React.useRef(null);
+  const textareaRef = React.useRef(null);
+  const visibilityRef = React.useRef(null);
+
+  const hasCenterAccess = !!user?.center_id;
+
+  // Sync isQuestion with forceQuestion prop when tab changes
+  useEffect(() => {
+    setIsQuestion(forceQuestion);
+  }, [forceQuestion]);
+
+  // Close visibility dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (visibilityRef.current && !visibilityRef.current.contains(e.target)) {
+        setShowVisibilityDropdown(false);
+      }
+    };
+    if (showVisibilityDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showVisibilityDropdown]);
 
   const handleSubmit = useCallback(
     async (e) => {
@@ -110,11 +170,16 @@ export default function PostInput({ onSubmit }) {
 
       try {
         // Parse tags from input (comma or space separated)
-        const parsedTags = tags
+        let parsedTags = tags
           .split(/[,\s]+/)
           .map((t) => t.replace(/^#/, "").trim())
           .filter((t) => t.length > 0)
           .slice(0, 5);
+
+        // Auto-add "dubtes-recents" tag for questions if not already present
+        if (isQuestion && !parsedTags.some(tag => tag.toLowerCase() === "dubtes-recents")) {
+          parsedTags = ["dubtes-recents", ...parsedTags].slice(0, 5);
+        }
 
         const postData = {
           content: content.trim() || null,
@@ -122,7 +187,24 @@ export default function PostInput({ onSubmit }) {
           code_language: code.trim() ? codeLanguage : null,
           type: isQuestion ? "question" : "news",
           tags: parsedTags.length > 0 ? parsedTags : undefined,
+          visibility: hasCenterAccess ? visibility : "global",
         };
+
+        // If image file exists, use FormData
+        if (imageFile) {
+          const formData = new FormData();
+          Object.entries(postData).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+              if (Array.isArray(value)) {
+                value.forEach((v, i) => formData.append(`${key}[${i}]`, v));
+              } else {
+                formData.append(key, value);
+              }
+            }
+          });
+          formData.append('image', imageFile);
+          postData._formData = formData;
+        }
 
         if (onSubmit) {
           const result = await onSubmit(postData);
@@ -133,6 +215,11 @@ export default function PostInput({ onSubmit }) {
             setTags("");
             setShowCodeEditor(false);
             setIsQuestion(false);
+            setImagePreview(null);
+            setImageFile(null);
+            setShowLinkInput(false);
+            setLinkUrl("");
+            setVisibility("global");
           } else {
             setError(result.error || t("auth.register_error_fallback"));
           }
@@ -144,7 +231,7 @@ export default function PostInput({ onSubmit }) {
         setSubmitting(false);
       }
     },
-    [content, code, codeLanguage, isQuestion, tags, submitting, onSubmit],
+    [content, code, codeLanguage, isQuestion, tags, submitting, onSubmit, imageFile, visibility, hasCenterAccess],
   );
 
   const avatarUrl =
@@ -160,6 +247,7 @@ export default function PostInput({ onSubmit }) {
         {error && <div className="post-input__error">{error}</div>}
 
         <textarea
+          ref={textareaRef}
           className="post-input__textarea"
           placeholder={isQuestion ? t("feed.placeholder_question") : t("feed.placeholder_news")}
           value={content}
@@ -210,6 +298,86 @@ export default function PostInput({ onSubmit }) {
           </div>
         )}
 
+        {/* Image Preview */}
+        {imagePreview && (
+          <div className="post-input__image-preview">
+            <img src={imagePreview} alt="Preview" />
+            <button
+              type="button"
+              className="post-input__image-remove"
+              onClick={() => { setImagePreview(null); setImageFile(null); }}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        {/* Hidden file input */}
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={(e) => {
+            const file = e.target.files[0];
+            if (file) {
+              setImageFile(file);
+              const reader = new FileReader();
+              reader.onload = (ev) => setImagePreview(ev.target.result);
+              reader.readAsDataURL(file);
+            }
+            e.target.value = '';
+          }}
+        />
+
+        {/* Link Input */}
+        {showLinkInput && (
+          <div className="post-input__link-input">
+            <LinkIcon />
+            <input
+              type="url"
+              className="post-input__link-url"
+              placeholder={t("feed.link_placeholder")}
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (linkUrl.trim()) {
+                    setContent((prev) => prev + (prev.trim() ? "\n" : "") + linkUrl.trim());
+                    setLinkUrl("");
+                    setShowLinkInput(false);
+                    textareaRef.current?.focus();
+                  }
+                }
+              }}
+              autoFocus
+            />
+            <button
+              type="button"
+              className="post-input__link-add"
+              onClick={() => {
+                if (linkUrl.trim()) {
+                  setContent((prev) => prev + (prev.trim() ? "\n" : "") + linkUrl.trim());
+                  setLinkUrl("");
+                  setShowLinkInput(false);
+                  textareaRef.current?.focus();
+                }
+              }}
+              disabled={!linkUrl.trim()}
+            >
+              {t("feed.add_link_btn")}
+            </button>
+            <button
+              type="button"
+              className="post-input__link-close"
+              onClick={() => { setShowLinkInput(false); setLinkUrl(""); }}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Tags Input */}
         <div className="post-input__tags-row">
           <input
@@ -231,10 +399,20 @@ export default function PostInput({ onSubmit }) {
             >
               <CodeIcon />
             </button>
-            <button type="button" className="post-input__tool" title={t("feed.tools.add_image")}>
+            <button
+              type="button"
+              className={`post-input__tool ${imagePreview ? "post-input__tool--active" : ""}`}
+              onClick={() => imageInputRef.current?.click()}
+              title={t("feed.tools.add_image")}
+            >
               <ImageIcon />
             </button>
-            <button type="button" className="post-input__tool" title={t("feed.tools.add_link")}>
+            <button
+              type="button"
+              className={`post-input__tool ${showLinkInput ? "post-input__tool--active" : ""}`}
+              onClick={() => setShowLinkInput(!showLinkInput)}
+              title={t("feed.tools.add_link")}
+            >
               <LinkIcon />
             </button>
             <button
@@ -247,10 +425,50 @@ export default function PostInput({ onSubmit }) {
             </button>
           </div>
           <div className="post-input__submit-area">
-            <div className="post-input__visibility">
-              <GlobeIcon />
-              <span>{t("feed.visibility_public")}</span>
-            </div>
+            {hasCenterAccess ? (
+              <div className="post-input__visibility-selector" ref={visibilityRef}>
+                <button
+                  type="button"
+                  className={`post-input__visibility post-input__visibility--interactive ${visibility === "center" ? "post-input__visibility--center" : ""}`}
+                  onClick={() => setShowVisibilityDropdown(!showVisibilityDropdown)}
+                >
+                  {visibility === "global" ? <GlobeIcon /> : <CenterIcon />}
+                  <span>{visibility === "global" ? t("feed.visibility_public") : t("feed.visibility_center")}</span>
+                  <ChevronDownIcon />
+                </button>
+                {showVisibilityDropdown && (
+                  <div className="post-input__visibility-dropdown">
+                    <button
+                      type="button"
+                      className={`post-input__visibility-option ${visibility === "global" ? "post-input__visibility-option--active" : ""}`}
+                      onClick={() => { setVisibility("global"); setShowVisibilityDropdown(false); }}
+                    >
+                      <GlobeIcon size={16} />
+                      <div className="post-input__visibility-option-text">
+                        <span className="post-input__visibility-option-label">{t("feed.visibility_public")}</span>
+                        <span className="post-input__visibility-option-desc">{t("feed.visibility_public_desc")}</span>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      className={`post-input__visibility-option ${visibility === "center" ? "post-input__visibility-option--active" : ""}`}
+                      onClick={() => { setVisibility("center"); setShowVisibilityDropdown(false); }}
+                    >
+                      <CenterIcon size={16} />
+                      <div className="post-input__visibility-option-text">
+                        <span className="post-input__visibility-option-label">{t("feed.visibility_center")}</span>
+                        <span className="post-input__visibility-option-desc">{t("feed.visibility_center_desc")}</span>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="post-input__visibility">
+                <GlobeIcon />
+                <span>{t("feed.visibility_public")}</span>
+              </div>
+            )}
             <button
               type="submit"
               className="post-input__submit"

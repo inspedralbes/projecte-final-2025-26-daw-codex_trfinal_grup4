@@ -25,6 +25,7 @@ class StorePostRequest extends FormRequest
             'code_language' => ['nullable', 'string', 'max:50'],
             'tags'          => ['nullable', 'array', 'max:5'],
             'tags.*'        => ['string', 'max:30'],
+            'visibility'    => ['sometimes', 'string', 'in:global,center'],
         ];
     }
 

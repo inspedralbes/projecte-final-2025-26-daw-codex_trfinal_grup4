@@ -67,6 +67,26 @@ const interactionsService = {
   getPostInteractions: async (postId) => {
     return api.get(`/posts/${postId}/interactions`);
   },
+
+  /**
+   * Get posts that the current user has liked
+   * @param {number} page - Page number (default 1)
+   * @param {number} perPage - Items per page (default 15)
+   * @returns {Promise<Object>} Paginated list of liked posts
+   */
+  getLikedPosts: async (page = 1, perPage = 15) => {
+    return api.get(`/liked?page=${page}&per_page=${perPage}`);
+  },
+
+  /**
+   * Get posts that the current user has bookmarked
+   * @param {number} page - Page number (default 1)
+   * @param {number} perPage - Items per page (default 15)
+   * @returns {Promise<Object>} Paginated list of bookmarked posts
+   */
+  getBookmarkedPosts: async (page = 1, perPage = 15) => {
+    return api.get(`/bookmarks?page=${page}&per_page=${perPage}`);
+  },
 };
 
 export default interactionsService;

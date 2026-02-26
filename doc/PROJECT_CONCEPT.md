@@ -3,7 +3,7 @@
 > **Nombre del Proyecto:** Codex  
 > **Tipo:** Red Social Académica Vertical  
 > **Público Objetivo:** Estudiantes, Profesores y Alumni de FP Informática en España (DAM, DAW, ASIX).  
-> **Estado:** MVP Funcional - Frontend + Backend + Real-time ✓
+> **Estado:** Frontend UI implementado ✓
 
 ---
 
@@ -103,42 +103,25 @@ Sistema de elevación con 6 niveles (`--surface-depth-0` a `--surface-depth-5`) 
 
 ## 7. Estructura de Pantallas
 
-### Rutas Frontend
+### Rutas Implementadas
 | Ruta | Componente | Descripción |
 |------|------------|-------------|
-| `/` | Landing | Página de bienvenida con login/registro |
-| `/feed` | Feed | Feed Global con tabs (Para ti / Siguiendo / Dudas) |
-| `/center` | CenterHub | Dashboard del centro educativo (requiere centro) |
-| `/explore` | Explore | Búsqueda global y tendencias |
-| `/notifications` | Notifications | Stream de notificaciones en tiempo real |
-| `/profile/:username` | Profile | Perfil de usuario con stats y posts |
+| `/welcome` | Landing | Página de bienvenida con autenticación |
+| `/` | Home → Feed | Feed Global con tabs (Para ti / Siguiendo / Dudas) |
+| `/center` | CenterHub | Dashboard del centro educativo |
+| `/explore` | Explore | Búsqueda y descubrimiento |
+| `/notifications` | Notifications | Stream de actividad |
+| `/profile` | Profile | Perfil de desarrollador |
 | `/messages` | Messages | Chat (pendiente) |
-
-### Endpoints API Principales
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/login` | Autenticación |
-| POST | `/api/register` | Registro de usuario |
-| GET | `/api/posts` | Feed global paginado |
-| POST | `/api/posts` | Crear publicación |
-| GET | `/api/center/posts` | Posts del centro del usuario |
-| GET | `/api/profile/{username}` | Perfil público con stats |
-| GET | `/api/search?q=` | Búsqueda global |
-| GET | `/api/leaderboard` | Top contribuidores |
-| GET | `/api/tags` | Tags disponibles |
-| POST | `/api/posts/{id}/like` | Like/unlike |
-| GET | `/api/notifications` | Notificaciones del usuario |
 
 ### Arquitectura de Componentes
 ```
 src/
 ├── pages/
 │   ├── Landing.jsx          # Auth + Hero
-│   ├── Feed.jsx             # Feed global con tabs
-│   ├── Explore.jsx          # Búsqueda + Tendencias
-│   ├── Notifications.jsx    # Notificaciones real-time
-│   ├── CenterHub.jsx        # Hub institucional
-│   └── ProfilePage.jsx      # Wrapper de perfil
+│   ├── Explore.jsx          # Search + Widgets
+│   ├── Notifications.jsx    # Activity stream
+│   └── CenterHub.jsx        # Hub institucional
 ├── components/
 │   ├── layout/
 │   │   ├── MainLayout.jsx   # Shell 3-columnas
@@ -150,29 +133,6 @@ src/
 │   │   └── PostCard.jsx     # Tarjeta de post
 │   └── profile/
 │       └── Profile.jsx      # Perfil de usuario
-├── services/
-│   ├── api.js               # Cliente HTTP base
-│   ├── postsService.js      # CRUD posts
-│   ├── profileService.js    # Perfiles y leaderboard
-│   ├── searchService.js     # Búsqueda global
-│   ├── notificationsService.js
-│   ├── interactionsService.js
-│   ├── commentsService.js
-│   ├── followService.js
-│   ├── tagsService.js
-│   ├── centerService.js
-│   └── socketService.js     # Socket.io client
-├── hooks/
-│   ├── usePosts.js          # Gestión de posts
-│   ├── useProfile.js        # Perfil de usuario
-│   ├── useNotifications.js  # Notificaciones
-│   ├── useSearch.js         # Búsqueda
-│   ├── useTags.js           # Tags
-│   ├── useInteractions.js   # Likes, bookmarks
-│   └── useComments.js       # Comentarios
-├── context/
-│   ├── AuthContext.jsx      # Autenticación
-│   └── SocketContext.jsx    # WebSocket
 └── styles/
     ├── variables.css        # Design tokens
     ├── base.css             # Reset + Typography
@@ -190,41 +150,10 @@ Para detalles específicos sobre la implementación técnica de cada microservic
 
 ---
 
-## 9. Estado Actual del Proyecto
-
-### Completado ✓
-- [x] **Integración Frontend-Backend:** API REST conectada con React mediante servicios y hooks personalizados
-- [x] **Sistema de Autenticación:** Login/Registro con Sanctum, validación de email, soporte Google OAuth
-- [x] **Feed Global y Centro:** Posts con likes, comentarios, bookmarks, reposts
-- [x] **Sistema de Tags:** Etiquetas asociadas a posts, búsqueda por hashtags
-- [x] **Perfiles de Usuario:** Estadísticas, reputación, badges, posts del usuario
-- [x] **Notificaciones Real-time:** Socket.io con Redis Pub/Sub
-- [x] **Búsqueda Global:** Posts, usuarios y tags con búsqueda en vivo
-- [x] **Leaderboard:** Top contribuidores ordenados por reputación
-- [x] **Centro Educativo (Hub):** Acceso exclusivo por dominio de email verificado
-
-### Infraestructura Docker ✓
-```
-┌─────────────┬─────────────┬─────────────┐
-│   Client    │    API      │   Socket    │
-│  (React)    │  (Laravel)  │  (Node.js)  │
-│  :5173      │  :8080      │  :3000      │
-└──────┬──────┴──────┬──────┴──────┬──────┘
-       │             │             │
-       └─────────────┼─────────────┘
-                     │
-       ┌─────────────┼─────────────┐
-       │             │             │
-  ┌────▼────┐   ┌────▼────┐  ┌────▼────┐
-  │  MySQL  │   │  Redis  │  │ Mailpit │
-  │  :3306  │   │  :6379  │  │  :8025  │
-  └─────────┘   └─────────┘  └─────────┘
-```
-
-### Próximos Pasos
-- [ ] Chat/Mensajes directos entre usuarios
-- [ ] Sistema de moderación avanzado para profesores
-- [ ] Notificaciones push (PWA)
-- [ ] Upload de avatares y archivos
-- [ ] Panel de administración
-- [ ] Métricas y analytics del centro
+## 9. Próximos Pasos
+- [ ] Integración con API real (reemplazar mockApi)
+- [ ] Sistema de autenticación con validación de dominios educativos
+- [ ] WebSocket para notificaciones en tiempo real
+- [ ] Chat/Mensajes directos
+- [ ] Sistema de puntos y gamificación
+- [ ] Moderación para profesores en Hub del Centro

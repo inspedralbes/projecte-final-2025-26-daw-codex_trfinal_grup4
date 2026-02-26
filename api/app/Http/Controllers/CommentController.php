@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\NewCommentEvent;
+use App\Events\CommentDeleted;
 use App\Http\Requests\StoreCommentRequest;
 use App\Models\Comment;
 use App\Models\Post;
@@ -79,7 +80,7 @@ class CommentController extends Controller
         }
 
         // Fire broadcast event to Redis → Socket.io picks it up
-        broadcast(new NewCommentEvent($comment))->toOthers();
+        broadcast(new NewCommentEvent($comment));
 
         return $this->success(
             $this->formatComment($comment),
@@ -98,7 +99,14 @@ class CommentController extends Controller
             return $this->error('Unauthorized', 403);
         }
 
+        $commentId = $comment->id;
+        $userId = $comment->user_id;
+        $postId = $comment->post_id;
+
         $comment->delete();
+
+        // Broadcast deletion
+        broadcast(new CommentDeleted($commentId, $userId, $postId))->toOthers();
 
         return $this->success(null, 'Comment deleted successfully');
     }

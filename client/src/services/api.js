@@ -41,26 +41,9 @@ async function request(endpoint, options = {}) {
   const response = await fetch(url, config);
 
   if (!response.ok) {
+    // TODO: implement proper error handling
     const error = await response.json().catch(() => ({}));
-    
-    // Sanitize error message - don't expose technical/SQL errors to users
-    let errorMessage = error.message || `HTTP ${response.status}`;
-    
-    // Hide SQL/technical errors
-    if (errorMessage.includes('SQLSTATE') || 
-        errorMessage.includes('Connection:') ||
-        errorMessage.includes('Table') ||
-        errorMessage.includes('Column') ||
-        response.status === 500) {
-      errorMessage = response.status === 500 
-        ? 'Error del servidor. Por favor, inténtalo más tarde.' 
-        : 'Ha ocurrido un error. Por favor, inténtalo de nuevo.';
-    }
-    
-    const err = new Error(errorMessage);
-    err.status = response.status;
-    err.errors = error.errors; // Keep Laravel validation errors
-    throw err;
+    throw new Error(error.message || `HTTP ${response.status}`);
   }
 
   return response.json();

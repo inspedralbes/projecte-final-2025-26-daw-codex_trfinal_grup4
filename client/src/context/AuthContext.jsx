@@ -203,7 +203,43 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
-   * Re-fetch user data from /me to check if email has been verified.
+   * Handle Google OAuth callback.
+   * Called from the GoogleCallback page after Google redirects back with a code.
+   */
+  const loginWithGoogle = async (code) => {
+    try {
+      const response = await api.post("/auth/google/callback", { code });
+      const data = response.data || response;
+      const token = data.token;
+      const userData = data.user;
+
+      if (!token) {
+        setAuthMessage({ type: "error", text: "Error: no token received from Google." });
+        return { success: false, message: "No token received" };
+      }
+
+      localStorage.setItem("token", token);
+      setUser(userData);
+      setEmailVerified(data.email_verified ?? !!userData.email_verified_at);
+
+      const msgKey = data.is_new_user ? "auth.register_success" : "auth.login_success";
+      setAuthMessage({ type: "success", text: i18next.t(msgKey) });
+
+      return {
+        success: true,
+        isNewUser: data.is_new_user,
+        needsPassword: data.needs_password,
+      };
+    } catch (error) {
+      console.error("Google login error", error);
+      const errorMsg = parseApiError(error, i18next.t("auth.login_error_fallback"));
+      setAuthMessage({ type: "error", text: errorMsg });
+      return { success: false, message: errorMsg };
+    }
+  };
+
+  /**
+   * Re-fetch user data from /me to check if email has been verified or stats updated.
    */
   const refreshUser = async () => {
     try {
@@ -217,6 +253,51 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Real-time listener for current user stats
+  useEffect(() => {
+    if (!user?.id) return;
+
+    // Use dynamic import to avoid circular dependency or early access
+    const setupSocket = async () => {
+      const socketModule = await import("@/services/socketService");
+      const socketService = socketModule.default;
+
+      const token = localStorage.getItem("token");
+      socketService.connect(token);
+      socketService.joinProfileRoom(user.id);
+
+      const handleSelfUpdate = (data) => {
+        if (data.user_id === user.id) {
+          setUser((prev) => {
+            // Only update if there are meaningful changes
+            const hasChanges = Object.keys(data).some(
+              (key) => data[key] !== undefined && data[key] !== prev[key],
+            );
+
+            if (!hasChanges) return prev;
+
+            return {
+              ...prev,
+              ...data,
+            };
+          });
+        }
+      };
+
+      socketService.onProfileUpdate(handleSelfUpdate);
+
+      return () => {
+        socketService.leaveProfileRoom(user.id);
+        socketService.off("profile.updated", handleSelfUpdate);
+      };
+    };
+
+    const cleanupPromise = setupSocket();
+    return () => {
+      cleanupPromise.then((cleanup) => cleanup && cleanup());
+    };
+  }, [user?.id]);
+
   // Clear the feedback message manually
   const clearAuthMessage = () => setAuthMessage(null);
 
@@ -228,6 +309,7 @@ export const AuthProvider = ({ children }) => {
     register,
     registerWithCenterRequest,
     checkDomain,
+    loginWithGoogle,
     logout,
     refreshUser,
     isAuthenticated: !!user,
@@ -236,13 +318,44 @@ export const AuthProvider = ({ children }) => {
     clearAuthMessage,
   };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          background: "var(--depth-1)",
+          color: "var(--codex-teal)",
+        }}
+      >
+        <div
+          className="profile__spinner"
+          style={{ animation: "spinner-rotate 1s linear infinite" }}
+        >
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+            <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 /**
  * Parse API error responses into user-friendly messages.
  * Handles Laravel validation errors (422) and generic messages.
- * Hides technical/SQL errors from users.
  */
 function parseApiError(error, fallback) {
   // If error has a response body with validation errors
@@ -252,7 +365,7 @@ function parseApiError(error, fallback) {
     return messages.join(" · ");
   }
 
-  // If it's a simple message (but not a technical error)
+  // If it's a simple message
   if (error?.message && error.message !== "Error") {
     const msg = error.message;
 

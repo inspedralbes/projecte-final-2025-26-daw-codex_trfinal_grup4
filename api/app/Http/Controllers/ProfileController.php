@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Comment;
 use App\Services\ReputationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -52,6 +53,7 @@ class ProfileController extends Controller
             'username'         => $user->username,
             'role'             => $user->role,
             'avatar'           => $user->avatar,
+            'banner'           => $user->banner,
             'bio'              => $user->bio,
             'linkedin_url'     => $user->linkedin_url,
             'portfolio_url'    => $user->portfolio_url,
@@ -97,6 +99,62 @@ class ProfileController extends Controller
     }
 
     /**
+     * GET /api/profile/{username}/replies
+     * Paginated comments (replies) by user, formatted as post-like objects.
+     */
+    public function replies(string $username): JsonResponse
+    {
+        $user = User::where('username', $username)->first();
+
+        if (!$user) {
+            return $this->error('User not found', 404);
+        }
+
+        $comments = $user->comments()
+            ->with([
+                'user:id,name,username,avatar',
+                'post:id,content,type,user_id',
+                'post.user:id,name,username,avatar',
+                'parent:id,user_id,content',
+                'parent.user:id,name,username',
+            ])
+            ->latest()
+            ->paginate(15);
+
+        // Transform comments to look like posts with reply context
+        $transformed = $comments->through(function ($comment) {
+            return [
+                'id'             => $comment->id,
+                'type'           => 'reply', // Mark as reply type
+                'content'        => $comment->content,
+                'is_solution'    => $comment->is_solution,
+                'created_at'     => $comment->created_at,
+                'user'           => $comment->user,
+                // Reference to the original post being replied to
+                'reply_to_post'  => $comment->post ? [
+                    'id'       => $comment->post->id,
+                    'content'  => mb_substr($comment->post->content, 0, 100),
+                    'type'     => $comment->post->type,
+                    'user'     => $comment->post->user,
+                ] : null,
+                // Reference to parent comment (for nested replies)
+                'reply_to_comment' => $comment->parent ? [
+                    'id'   => $comment->parent->id,
+                    'user' => $comment->parent->user,
+                ] : null,
+                // Mimic post structure for compatibility
+                'likes_count'     => 0,
+                'comments_count'  => 0,
+                'bookmarks_count' => 0,
+                'reposts_count'   => 0,
+                'tags'            => [],
+            ];
+        });
+
+        return $this->success($transformed);
+    }
+
+    /**
      * PUT /api/profile
      * Update authenticated user's profile.
      * Accepts both JSON (text fields only) and multipart/form-data (with avatar file).
@@ -107,8 +165,10 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name'          => 'sometimes|string|max:255',
+            'username'      => 'sometimes|string|max:50|unique:users,username,' . $user->id . '|regex:/^[a-zA-Z0-9_]+$/',
             'bio'           => 'sometimes|nullable|string|max:1000',
-            'avatar'        => 'sometimes|nullable|image|max:5120', // 5 MB max when file
+            'avatar'        => 'sometimes|nullable|image|max:5120', 
+            'banner'        => 'sometimes|nullable|image|max:8192', // 8 MB max for banner
             'linkedin_url'  => 'sometimes|nullable|url|max:500',
             'portfolio_url' => 'sometimes|nullable|url|max:500',
             'external_url'  => 'sometimes|nullable|url|max:500',
@@ -132,8 +192,28 @@ class ProfileController extends Controller
             unset($validated['avatar']);
         }
 
+        // Handle banner file upload
+        if ($request->hasFile('banner')) {
+            // Delete old banner if it was a locally stored file
+            if ($user->banner && str_contains($user->banner, '/storage/banners/')) {
+                $oldPath = str_replace('/storage/', '', parse_url($user->banner, PHP_URL_PATH));
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+
+            // Store new banner in public/banners
+            $path = $request->file('banner')->store('banners', 'public');
+
+            // Build the full public URL
+            $validated['banner'] = url('storage/' . $path);
+        } else {
+            unset($validated['banner']);
+        }
+
         $user->update($validated);
         $user->refresh();
+
+        // Broadcast profile update for real-time synchronization
+        broadcast(new \App\Events\ProfileUpdatedEvent($user));
 
         return $this->success([
             'id'            => $user->id,
@@ -141,6 +221,7 @@ class ProfileController extends Controller
             'username'      => $user->username,
             'role'          => $user->role,
             'avatar'        => $user->avatar,
+            'banner'        => $user->banner,
             'bio'           => $user->bio,
             'linkedin_url'  => $user->linkedin_url,
             'portfolio_url' => $user->portfolio_url,

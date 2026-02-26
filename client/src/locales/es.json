@@ -36,6 +36,9 @@
     "code_placeholder": "// Pega tu código aquí...",
     "tags_placeholder": "Etiquetas (separadas por coma o espacio)",
     "visibility_public": "Público",
+    "visibility_center": "Solo Centro",
+    "visibility_public_desc": "Visible para todos los usuarios",
+    "visibility_center_desc": "Solo visible para miembros de tu centro",
     "loading_posts": "Cargando publicaciones...",
     "no_posts": "No hay publicaciones todavía.",
     "be_first": "¡Sé el primero en compartir algo!",
@@ -57,7 +60,24 @@
       "m": "m",
       "h": "h",
       "d": "d"
-    }
+    },
+    "comment": "Comentar",
+    "repost": "Repostear",
+    "like": "Me gusta",
+    "unlike": "Quitar me gusta",
+    "bookmark": "Guardar",
+    "unbookmark": "Quitar de guardados",
+    "cant_repost_own": "No puedes repostear tu propia publicación",
+    "share": "Compartir",
+    "link_copied": "¡Enlace copiado!",
+    "open_question": "Pregunta abierta",
+    "welcome_title": "¡Bienvenido a Codex!",
+    "welcome_text": "Tu feed está vacío. ¡Empieza compartiendo código, resolviendo dudas o siguiendo a otros desarrolladores!",
+    "welcome_tip_code": "Comparte snippets de código con highlight",
+    "welcome_tip_question": "Publica dudas técnicas y obtén respuestas",
+    "welcome_tip_follow": "Sigue a compañeros y profesores de tu centro",
+    "link_placeholder": "Pega una URL (https://...)",
+    "add_link_btn": "Añadir"
   },
   "profile": {
     "loading": "Cargando perfil...",
@@ -69,6 +89,8 @@
     "follow": "Seguir",
     "unfollow": "Siguiendo",
     "likes": "Me gusta",
+    "bookmarks": "Guardados",
+    "replies": "Respuestas",
     "no_posts_category": "No hay publicaciones en esta categoría",
     "edit": {
       "title": "Editar perfil",
@@ -140,6 +162,8 @@
     "auth_subtitle_login": "Inicia sesión para continuar",
     "auth_subtitle_register": "Usa tu email del centro para acceso completo",
     "footer_text": "La red social académica para el ecosistema de FP Informática en España",
+    "or_continue_with": "o continuar con",
+    "google_login": "Continuar con Google",
     "features": {
       "snippets": {
         "title": "Snippets con Sintaxis",
@@ -157,11 +181,16 @@
       "verification_required": "No hay centro para este dominio – Se te pedirá verificación",
       "domain_not_recognized": "Dominio no reconocido",
       "check_review": "🎉 ¡Cuenta creada! Tu solicitud de centro está en revisión.",
-      "passwords_match": "Las contraseñas coinciden"
+      "passwords_match": "Las contraseñas coinciden",
+      "passwords_dont_match": "Las contraseñas no coinciden",
+      "redirecting": "Redirigiendo...",
+      "google_processing": "Iniciando sesión con Google..."
     },
     "errors": {
       "password_requirements": "La contraseña no cumple todos los requisitos.",
-      "passwords_dont_match": "Las contraseñas no coinciden."
+      "passwords_dont_match": "Las contraseñas no coinciden.",
+      "google_failed": "Error al conectar con Google. Inténtalo de nuevo.",
+      "google_no_code": "No se recibió código de autorización de Google."
     }
   },
   "center": {
@@ -170,11 +199,43 @@
     "loading": "Cargando centro...",
     "default_name": "Centro Educativo",
     "private": "Privado",
+    "public": "Público",
     "members": "miembros",
     "members_tab": "Miembros",
     "since": "Desde",
     "resources": "Recursos",
-    "pinned": "Fijado"
+    "pinned": "Fijado",
+    "posts_tab": "Publicaciones",
+    "admin_tab": "Administrar",
+    "teachers": "Profesores",
+    "students": "Estudiantes",
+    "search_members": "Buscar miembros...",
+    "all": "Todos",
+    "no_members_found": "No se encontraron miembros",
+    "posts_count": "publicaciones",
+    "comments": "comentarios",
+    "promote_to_teacher": "Hacer profesor",
+    "demote_to_student": "Hacer estudiante",
+    "block": "Bloquear",
+    "unblock": "Desbloquear",
+    "settings": "Configuración del Centro",
+    "statistics": "Estadísticas",
+    "total_members": "Total Miembros",
+    "total_posts": "Total Publicaciones",
+    "total_teachers": "Profesores",
+    "total_students": "Estudiantes",
+    "name": "Nombre del Centro",
+    "description": "Descripción",
+    "privacy": "Privacidad",
+    "center_only": "Solo visible para miembros del centro",
+    "public_visible": "Visible para todos",
+    "save_changes": "Guardar Cambios",
+    "saving": "Guardando...",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "website": "Sitio web",
+    "no_description": "Sin descripción",
+    "no_website": "Sin sitio web"
   },
   "teacher_modal": {
     "title": "Verificación de Profesor",
@@ -207,6 +268,14 @@
     "results_for": "Resultados para \"{{query}}\"",
     "no_results": "No se encontraron resultados para \"{{query}}\"",
     "users": "Usuarios",
+    "filter_all": "Todo",
+    "filter_posts": "Publicaciones",
+    "trending_posts": "Posts en Tendencia",
+    "no_trending": "No hay posts en tendencia",
+    "who_to_follow": "A quién seguir",
+    "no_suggestions": "No hay sugerencias por ahora",
+    "follow": "Seguir",
+    "following": "Siguiendo",
     "categories": {
       "frontend": "Frontend",
       "backend": "Backend",
@@ -240,5 +309,22 @@
     "description": "Te hemos enviado un enlace de verificación a ",
     "resend": "Reenviar email",
     "resend_cooldown": "Reenviar en {{seconds}}s"
+  },
+  "post": {
+    "title": "Publicación",
+    "replying_to": "Respondiendo a",
+    "accepted_answer": "Respuesta aceptada",
+    "reply": "Responder",
+    "mark_solution": "Marcar como solución",
+    "unmark_solution": "Desmarcar solución",
+    "write_reply": "Escribe una respuesta...",
+    "send": "Enviar",
+    "write_comment": "Escribe un comentario...",
+    "comment_btn": "Comentar",
+    "comments": "Comentarios",
+    "no_comments": "Todavía no hay comentarios",
+    "be_first_comment": "¡Sé el primero en comentar!",
+    "not_found": "Publicación no encontrada",
+    "back": "Volver"
   }
 }

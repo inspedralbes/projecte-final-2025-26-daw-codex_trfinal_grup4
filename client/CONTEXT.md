@@ -82,6 +82,7 @@
 ```json
 {
   "dependencies": {
+    "highlight.js": "^11.11.1",
     "i18next": "^25.x",
     "i18next-browser-languagedetector": "^8.x",
     "react": "^18.3.1",
@@ -301,6 +302,161 @@
   - Àvatar de la barra lateral ara fa servir `user.username` com a seed per a Dicebear (consistent amb la pàgina de perfil).
   - Botó de logout completament funcional.
 
+### 2026-02-25 – Resolució de Conflictes i Restauració de Perfil
+
+- **Autor:** @iker
+- **Resolució de Conflictes:**
+  - Resolució de conflictes de merge a `Profile.jsx` després d'un rebase de git.
+  - Restauració de la lògica de pestanyes (`activeTab`, `setActiveTab`) que s'havia perdut.
+  - Restauració del fetch de dades per a `posts`, `likedPosts`, `bookmarkedPosts` i `replies`.
+- **Millores de Perfil:**
+  - Sincronització automàtica de la barra lateral amb el nou àvatar.
+  - Redirecció automàtica en cas de canvi d'username.
+
+### 2026-02-24 – Millores de Perfil i Sincronització Real-Time
+
+- **Autor:** @iker
+- **Correcció de Redirecció (Rename):**
+  - Implementada lògica a `useProfile.js` per detectar canvis d'username.
+  - `Profile.jsx` ara redirigeix automàticament a la nova URL de perfil per evitar errors 404.
+- **URLs de Perfil Restaurades:**
+  - Tornats a afegir els enllaços de **Portfolio** i **Web** a la capçalera del perfil amb els seus respectius icones SVG.
+- **Sincronització Real-Time (Sockets):**
+  - **`socketService.js`**: Afegit mètode genèric `.on()` per a subscripció a events arbitràris.
+  - **`usePosts.js`**: Afegits listeners globals per a `post.deleted` (esborra de feeds) i `interaction.removed` (actualitza comptadors de likes/bookmarks).
+  - **`useProfile.js`**: Listener per a `post.deleted` per sincronitzar el comptador total de posts del perfil.
+  - **`Profile.jsx`**: Implementats listeners per sincronitzar en viu les pestanyes de Likes, Bookmarks i Replies quan s'eliminen continguts.
+
+### 2026-02-25 – Selector de Visibilitat Global/Centre al crear posts
+
+- **Autor:** @copilot (IA)
+- **Selector de Visibilitat (PostInput.jsx):**
+  - Usuaris amb `center_id`: poden triar entre "Público" (feed global) i "Solo Centro" (només visible al centre).
+  - Usuaris sense `center_id`: veuen badge estàtic "Público" (sense dropdown).
+  - Dropdown amb icones SVG (GlobeIcon, CenterIcon) i descripcions.
+  - Indicador visual: teal per global, amber per centre.
+  - Camp `visibility` s'envia al backend (`global` o `center`).
+  - Tancar dropdown amb clic fora (useEffect + ref).
+- **Backend (PostController):**
+  - `store()`: usa camp `visibility` per decidir `center_id` (global→null, center→user.center_id).
+  - `update()`: permet canviar la visibilitat d'un post existent.
+  - `StorePostRequest` i `UpdatePostRequest`: validació del camp `visibility` (in:global,center).
+- **Traduccions (es/ca/en):**
+  - `visibility_center`, `visibility_public_desc`, `visibility_center_desc`
+- **Fitxers modificats:** `PostInput.jsx`, `PostInput.css`, `PostController.php`, `StorePostRequest.php`, `UpdatePostRequest.php`, `es.json`, `ca.json`, `en.json`
+
+### 2026-02-25 – Millores de la pàgina Explore (Trending Posts, Suggeriments, Filtres, Categories reals)
+
+- **Autor:** @copilot (IA)
+- **Trending Posts (nous widget):**
+  - Nou widget "Posts en Tendència" amb icona de foc 🔥.
+  - Obté els posts recents i els ordena per score (likes + comments×2), mostra els top 5.
+  - Cada post mostra autor, preview del text (max 100 chars) i estadístiques (❤️ / 💬).
+  - Clicable per navegar al post individual.
+- **Suggeriments de perfils ("A qui seguir"):**
+  - Nou widget with icona de persona+ que mostra fins a 6 usuaris suggerits.
+  - Reutilitza l'endpoint del leaderboard filtrant l'usuari actual.
+  - Botó "Seguir"/"Siguiendo" funcional amb `followService.toggleFollowUser()`.
+  - El botó canvia d'estil (teal → border) i mostra "Siguiendo" en hover vermell per deseleccionar.
+- **Filtres als resultats de cerca:**
+  - Afegida barra de filtres amb 3 tabs: "Todo" / "Usuarios" / "Publicaciones".
+  - Cada tab mostra el comptador de resultats.
+  - Filtratge instantani al frontend sense re-fetch.
+- **Categories amb filtre real per tag:**
+  - Les categories ara tenen un `tag` slug associat (frontend, backend, devops, etc.).
+  - Clicar una categoria llença una cerca amb el nom de la categoria.
+  - Estat visual actiu (teal highlight) quan una categoria està seleccionada.
+  - Deseleccionar la categoria neteja els resultats.
+- **Eliminat títol "Inicio" del Feed:**
+  - `Feed.jsx`: eliminat `<h1>` amb el títol redundant.
+  - Les tabs "Para ti" / "Siguiendo" / "Dudas" queden directament sota el header.
+- **Traduccions afegides (es, ca, en):**
+  - `explore.filter_all`, `explore.filter_posts`
+  - `explore.trending_posts`, `explore.no_trending`
+  - `explore.who_to_follow`, `explore.no_suggestions`
+  - `explore.follow`, `explore.following`
+- **Fitxers modificats:**
+  - `client/src/pages/Explore.jsx` + `.css`
+  - `client/src/components/feed/Feed.jsx`
+  - `client/src/locales/{es,ca,en}.json`
+- **Emojis substituïts per icones SVG:**
+  - Categories: 🎨⚙️🚀🗄️📱🔒 → FrontendIcon, BackendIcon, DevopsIcon, DatabaseIcon, MobileIcon, SecurityIcon
+  - Stats trending posts: ❤️💬 → HeartIcon, CommentIcon
+
+### 2026-02-25 – Millores del Feed (Syntax Highlight, Infinite Scroll, Skeleton Loaders, Share, Imatge, Links, Welcome Card)
+
+- **Autor:** @copilot (IA)
+- **Syntax Highlighting (highlight.js):**
+  - Instal·lat `highlight.js ^11.11.1` com a dependència.
+  - `PostCard.jsx` detecta blocs `<code>` dins del contingut i aplica `hljs.highlightElement()` amb el tema `github-dark`.
+  - Estils personalitzats per sobreescriure el fons de `code.hljs` i mantenir coherència visual.
+- **Infinite Scroll:**
+  - Eliminat botó "Carregar més" de `Feed.jsx`.
+  - Implementat `IntersectionObserver` amb un `<div>` sentinel i `rootMargin: "200px"` per carregar automàticament la següent pàgina.
+  - Spinner de càrrega mostrat mentre es recuperen dades.
+- **Skeleton Loaders:**
+  - Creat component `PostSkeleton` a `Feed.jsx` amb animació `skeletonPulse`.
+  - Es mostren 3 skeletons mentre el feed es carrega inicialment (substitueix la pantalla buida).
+- **Welcome Card:**
+  - Creat component `WelcomeCard` a `Feed.jsx` per a usuaris nous.
+  - Mostra 3 tips: com compartir codi, com fer preguntes, i com seguir gent.
+  - Es detecta via `isNewUser` del `useAuth()`.
+- **Share Button (Copiar enllaç):**
+  - Nou botó de compartir a `PostCard.jsx` amb `navigator.clipboard.writeText()`.
+  - Feedback visual "Link copied!" amb animació `fadeIn` durant 2 segons.
+- **Link Preview:**
+  - `PostCard.jsx` detecta URLs dins del contingut amb regex.
+  - Mostra un preview with icona 🔗, domini i URL truncada sota el contingut del post.
+- **Temps Relatiu Auto-actualitzat:**
+  - Creat hook `useRelativeTime` dins de `PostCard.jsx` que actualitza el temps cada minut amb `setInterval`.
+  - Mostra "hace X minutos", "hace X horas", "ayer", etc.
+- **Millora del Badge de Pregunta:**
+  - `PostCard.jsx` ara mostra un badge amb gradient i icona SVG per a preguntes (obert ↔ resolt).
+  - Variants `--open` (taronja) i `--solved` (verd) amb icones diferenciades.
+- **Image Upload UI (Frontend Ready):**
+  - `PostInput.jsx`: botó d'imatge obre un `<input type="file">` ocult.
+  - Preview de la imatge seleccionada amb botó d'eliminar.
+  - `PostCard.jsx` mostra `post.image_url` si existeix.
+  - ⚠️ El backend encara no suporta camps d'imatge als posts.
+- **Link Input Panel:**
+  - `PostInput.jsx`: el botó de cadena (🔗) obre un panell per introduir una URL.
+  - La URL s'insereix al contingut del textarea amb suport Enter i botó "Afegir".
+- **Traduccions afegides (es, ca, en):**
+  - `feed.share`, `feed.link_copied`, `feed.open_question`
+  - `feed.welcome_title`, `feed.welcome_text`, `feed.welcome_tip_code`, `feed.welcome_tip_question`, `feed.welcome_tip_follow`
+  - `feed.link_placeholder`, `feed.add_link_btn`
+- **Fitxers modificats:**
+  - `client/package.json` (+ highlight.js)
+  - `client/src/components/feed/PostCard.jsx` + `.css`
+  - `client/src/components/feed/Feed.jsx` + `.css`
+  - `client/src/components/feed/PostInput.jsx` + `.css`
+  - `client/src/locales/{es,ca,en}.json`
+
+### 2026-02-25 – Redisseny Login i Google OAuth
+
+- **Autor:** @copilot (IA)
+- **Redisseny de la pantalla de Landing/Login:**
+  - Eliminat el **footer** complet (marca, text, etc.).
+  - Mogut el **`LanguageSwitcher`** a la cantonada superior dreta (`.landing__top-bar`).
+  - Afegit **botó "Continuar amb Google"** amb icona SVG oficial dels colors de Google.
+  - Afegit **divisor** ("o continuar amb") entre el formulari i el botó de Google.
+  - Substituïts estils inline del spinner per classe CSS reutilitzable `.auth-card__spinner`.
+  - Estils nous: `.auth-card__google-btn`, `.auth-card__spinner`, `.landing__top-bar`.
+- **Integració Google OAuth al Frontend:**
+  - Creat **`GoogleCallback.jsx`** (`/auth/google/callback`): captura el `code` de la URL de redirecció de Google, l'envia al backend (`POST /api/auth/google/callback`) i redirigeix a `/`.
+  - Afegit **`loginWithGoogle(code)`** a `AuthContext.jsx`: gestiona l'intercanvi code→token amb el backend i actualitza l'estat global d'autenticació.
+  - Ruta `/auth/google/callback` registrada al router (`router/index.jsx`).
+- **Traduccions i18n (3 idiomes: es, ca, en):**
+  - `landing.or_continue_with`, `landing.google_login`
+  - `landing.errors.google_failed`, `landing.errors.google_no_code`
+  - `landing.messages.redirecting`, `landing.messages.google_processing`, `landing.messages.passwords_dont_match`
+- **Flux complet Google OAuth:**
+  - 1. Usuari clica "Continuar amb Google" → frontend crida `GET /api/auth/google/redirect`
+  - 2. Backend retorna URL de Google → frontend redirigeix el navegador
+  - 3. Google autentica → redirigeix a `http://localhost:5173/auth/google/callback?code=XXX`
+  - 4. `GoogleCallback.jsx` captura el code → `POST /api/auth/google/callback` → token Sanctum
+  - 5. Redirecció a `/` amb sessió activa
+
 ---
 
 ## 🎨 Estructura actual de components
@@ -332,7 +488,8 @@ src/
 ├── i18n.js                          # Configuració i18next
 ├── locales/                         # Fitxers de traducció (ca, es, en)
 ├── pages/
-│   ├── Landing.jsx / Landing.css    # Welcome + Auth + Feedback UX
+│   ├── Landing.jsx / Landing.css    # Welcome + Auth + Google OAuth + Feedback UX
+│   ├── GoogleCallback.jsx           # Callback per Google OAuth (captura code)
 │   ├── Home.jsx                     # Wrapper per Feed
 │   ├── Explore.jsx / Explore.css    # Cerca + Descobriment
 │   ├── Notifications.jsx / Notifications.css # Activitat

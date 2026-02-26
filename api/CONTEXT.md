@@ -671,6 +671,8 @@
     - `new.notification` → canal `user.{id}` — Notificacions (like, follow, comment, reply, repost)
     - `new.interaction` → canal `user.{id}` — Interaccions like/bookmark (ja existent)
     - `new.comment` → canal `post.{id}` — Comentaris nous a un post (ja existent)
+    - `post.deleted` → canal `user.{id}` i `profile.{id}` — Eliminació de post (Nou)
+    - `interaction.removed` → canal `user.{id}` — Like o bookmark eliminat (Nou)
 
 ### 2026-02-20 – Cerca per Tags i Leaderboard
 
@@ -702,6 +704,32 @@
     - Fixat `APP_URL=http://localhost:8080` per a URLs d'àvatar correctes.
     - Creat symlink de `storage` dins del contenidor.
     - Configurat Nginx per servir `/storage/` directament des del disc des de la carpeta `public`.
+
+### 2026-02-24 – Sincronització Real-Time de Eliminacions i Interaccions
+
+- **Autor:** @iker
+- **Nous Events Broadcast:**
+    - `PostDeleted`: S'emet quan un post és eliminat sàviament. Canal `user.{userId}` i `profile.{userId}`.
+    - `InteractionRemoved`: S'emet quan es desfà un like o bookmark. Canal `user.{userId}`.
+- **Canvis en Controladors:**
+    - `PostController@destroy`: Ara dispara `PostDeleted`.
+    - `InteractionController@toggle`: Ara dispara `InteractionRemoved` quan l'estat passa a `active: false`.
+
+### 2026-02-25 – Selector de Visibilitat Global/Centre al crear/editar posts
+
+- **Autor:** @copilot (IA)
+- **StorePostRequest:** Afegit camp `visibility` (`sometimes|string|in:global,center`)
+- **UpdatePostRequest:** Afegit camp `visibility` (`sometimes|string|in:global,center`)
+- **PostController::store():** Usa `visibility` per decidir `center_id`:
+    - `global` → `center_id = null` (visible a tothom)
+    - `center` → `center_id = user->center_id` (només al centre de l'usuari)
+    - Abans sempre assignava `user->center_id` automàticament
+- **PostController::update():** Permet canviar la visibilitat d'un post existent amb el mateix camp `visibility`
+
+### 2026-02-25 – Documentació de Profiling i Neteja
+
+- **Autor:** @iker
+- Actualització de `CONTEXT.md` amb el resum de les darreres funcionalitats de real-time i gestió de perfils.
 
 ---
 

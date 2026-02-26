@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\InteractionRemoved;
 use App\Events\NewInteractionEvent;
 use App\Http\Resources\PostResource;
 use App\Models\Interaction;
@@ -57,6 +58,14 @@ class InteractionController extends Controller
 
         if ($existing) {
             $existing->delete();
+            
+            event(new InteractionRemoved(
+                $user->id,
+                $request->interactable_id,
+                $request->interactable_type,
+                $request->type
+            ));
+
             return $this->success([
                 'active' => false,
                 'type'   => $request->type,
@@ -73,11 +82,8 @@ class InteractionController extends Controller
 
         $interaction->load(['user', 'interactable']);
 
-        // Broadcast to the resource owner (don't notify yourself)
-        $ownerId = $resource->user_id ?? null;
-        if ($ownerId && $ownerId !== $user->id) {
-            event(new NewInteractionEvent($interaction));
-        }
+        // Broadcast to the resource owner and performer
+        event(new NewInteractionEvent($interaction));
 
         // Persist notification for likes (not bookmarks)
         if ($request->type === 'like' && $ownerId) {
@@ -154,11 +160,28 @@ class InteractionController extends Controller
             ->where('interactable_type', Post::class)
             ->where('type', 'bookmark')
             ->orderByDesc('created_at')
-            ->pluck('interactable_id');
+            ->pluck('interactable_id')
+            ->toArray();
 
+        if (empty($postIds)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Bookmarked posts retrieved successfully',
+                'data'    => [],
+                'meta'    => [
+                    'current_page' => 1,
+                    'last_page'    => 1,
+                    'per_page'     => 15,
+                    'total'        => 0,
+                ],
+            ]);
+        }
+
+        // Maintain order by using FIELD()
         $posts = Post::whereIn('id', $postIds)
             ->with(['user', 'center', 'tags'])
-            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
+            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts'])
+            ->orderByRaw('FIELD(id, ' . implode(',', $postIds) . ')')
             ->paginate($request->input('per_page', 15));
 
         return response()->json([
@@ -186,11 +209,28 @@ class InteractionController extends Controller
             ->where('interactable_type', Post::class)
             ->where('type', 'like')
             ->orderByDesc('created_at')
-            ->pluck('interactable_id');
+            ->pluck('interactable_id')
+            ->toArray();
 
+        if (empty($postIds)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Liked posts retrieved successfully',
+                'data'    => [],
+                'meta'    => [
+                    'current_page' => 1,
+                    'last_page'    => 1,
+                    'per_page'     => 15,
+                    'total'        => 0,
+                ],
+            ]);
+        }
+
+        // Maintain order by using FIELD()
         $posts = Post::whereIn('id', $postIds)
             ->with(['user', 'center', 'tags'])
-            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
+            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts'])
+            ->orderByRaw('FIELD(id, ' . implode(',', $postIds) . ')')
             ->paginate($request->input('per_page', 15));
 
         return response()->json([

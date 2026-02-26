@@ -14,13 +14,14 @@ return new class extends Migration
         // 1. CENTROS (Independiente)
         Schema::create('centers', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); 
+            $table->string('name');
             $table->string('domain')->unique(); // Ej: "iesfoix.com" (Para validar emails)
             $table->string('city')->nullable();
             $table->string('logo')->nullable(); // URL imagen
             $table->string('website')->nullable();
             $table->text('description')->nullable(); // Descripción/portal del centro
             $table->enum('status', ['pending', 'active', 'rejected'])->default('pending');
+            $table->boolean('is_private')->default(true); // Walled Garden: posts only visible to members
             $table->string('justificante')->nullable(); // Path al fichero justificante
             $table->unsignedBigInteger('creator_id')->nullable(); // Profesor que solicitó el centro
             $table->timestamps();
@@ -29,31 +30,32 @@ return new class extends Migration
         // 2. USUARIOS (Depende de Centros)
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            
+
             // NULLABLE: Porque 'admin' y 'userNormal' no tienen centro.
             $table->foreignId('center_id')->nullable()->constrained()->onDelete('cascade');
-            
+
             $table->string('name');
             $table->string('username')->unique(); // @usuario
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password'); // Always set (Google users get a random temp password)
             $table->timestamp('password_set_at')->nullable(); // NULL = user needs to set password (Google OAuth)
-            
+
             // OAuth
             $table->string('google_id')->nullable()->unique(); // Google OAuth identifier
             $table->enum('auth_provider', ['local', 'google'])->default('local');
-            
-            // ROLES: 
+
+            // ROLES:
             // - admin/userNormal (Globales, sin centro)
             // - student/teacher (Vinculados a un centro)
             $table->enum('role', ['admin', 'userNormal', 'student', 'teacher'])->default('userNormal');
-            
+
             // Perfil
             $table->string('avatar')->nullable();
+            $table->string('banner')->nullable();
             $table->text('bio')->nullable();
             $table->boolean('is_blocked')->default(false); // Bloqueado por profesor/admin
-            
+
             // Redes Sociales
             $table->string('linkedin_url')->nullable();
             $table->string('portfolio_url')->nullable();
@@ -91,7 +93,7 @@ return new class extends Migration
         Schema::create('follows', function (Blueprint $table) {
             $table->foreignId('follower_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('followed_id')->constrained('users')->onDelete('cascade');
-            
+
             // Clave primaria compuesta para evitar duplicados
             $table->primary(['follower_id', 'followed_id']);
             $table->timestamps();
@@ -101,7 +103,7 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            
+
             // Si es NULL -> Post Global. Si tiene ID -> Post del Centro.
             $table->foreignId('center_id')->nullable()->constrained()->onDelete('cascade');
 
@@ -113,7 +115,7 @@ return new class extends Migration
             $table->boolean('is_solved')->default(false); // Solo para dudas
 
             $table->text('content')->nullable(); // Nullable por si es Repost sin texto
-            
+
             // CÓDIGO
             $table->longText('code_snippet')->nullable();
             $table->string('code_language')->nullable(); // 'javascript', 'php', etc.
@@ -132,13 +134,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('post_id')->constrained()->onDelete('cascade');
-            
+
             // Hilos (Comentario responde a comentario)
             $table->foreignId('parent_id')->nullable()->constrained('comments')->onDelete('cascade');
 
             $table->text('content');
             $table->boolean('is_solution')->default(false); // Check verde
-            
+
             $table->timestamps();
         });
 
@@ -198,18 +200,18 @@ return new class extends Migration
         Schema::create('chat_messages', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
-            
+
             // CHAT PRIVADO: Si tiene receiver_id
             $table->foreignId('receiver_id')->nullable()->constrained('users')->onDelete('cascade');
-            
+
             // CHAT GRUPAL: Si tiene center_id
             $table->foreignId('center_id')->nullable()->constrained('centers')->onDelete('cascade');
-            
+
             $table->text('content');
             $table->boolean('is_read')->default(false); // Leído (Solo 1:1)
-            
+
             $table->timestamps();
-            
+
             // Índices para optimizar la velocidad del chat
             $table->index(['sender_id', 'receiver_id']);
             $table->index('center_id');

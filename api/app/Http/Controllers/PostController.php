@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PostDeleted;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
@@ -154,9 +155,18 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request): JsonResponse
     {
+        // Determine center_id based on visibility choice
+        $user = $request->user();
+        $visibility = $request->input('visibility', 'global');
+        $centerId = null;
+
+        if ($user->center_id && $visibility === 'center') {
+            $centerId = $user->center_id;
+        }
+
         $post = Post::create([
-            'user_id'       => $request->user()->id,
-            'center_id'     => $request->user()->center_id, // null if global user
+            'user_id'       => $user->id,
+            'center_id'     => $centerId,
             'type'          => $request->input('type', 'news'),
             'content'       => $this->sanitizer->sanitizeHtml($request->input('content')),
             'code_snippet'  => $this->sanitizer->sanitizeCode($request->input('code_snippet')),
@@ -217,6 +227,8 @@ class PostController extends Controller
 
         $post->delete();
 
+        event(new PostDeleted($post->id, $post->user_id));
+
         return $this->success(null, 'Post deleted successfully');
     }
 
@@ -240,6 +252,17 @@ class PostController extends Controller
         }
         if ($request->has('code_language')) {
             $data['code_language'] = $this->sanitizer->sanitizePlain($request->input('code_language'));
+        }
+
+        // Allow changing visibility (global <-> center)
+        if ($request->has('visibility')) {
+            $user = $request->user();
+            $visibility = $request->input('visibility');
+            if ($visibility === 'center' && $user->center_id) {
+                $data['center_id'] = $user->center_id;
+            } elseif ($visibility === 'global') {
+                $data['center_id'] = null;
+            }
         }
 
         if (!empty($data)) {

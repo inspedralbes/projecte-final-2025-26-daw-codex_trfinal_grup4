@@ -64,6 +64,7 @@ Route::get('/tags', [TagController::class, 'index']);
 // Profile (US#7)
 Route::get('/profile/{username}', [ProfileController::class, 'show']);
 Route::get('/profile/{username}/posts', [ProfileController::class, 'posts']);
+Route::get('/profile/{username}/replies', [ProfileController::class, 'replies']);
 
 // Follow – public lists (anyone can view followers/following)
 Route::get('/users/{user}/followers', [FollowController::class, 'followers']);
@@ -80,6 +81,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/centers', [CenterController::class, 'index']);
 });
 Route::get('/centers/{center}', [CenterController::class, 'show']);
+
+// Center members – requires authentication (any center member can view)
+Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
+    Route::get('/centers/{center}/members', [CenterController::class, 'members']);
+});
 
 /* ------------------------------------------------------------------ */
 /*  Protected Routes (auth:sanctum + not-blocked)                      */

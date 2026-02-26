@@ -30,16 +30,33 @@ class SearchController extends Controller
         $type = $request->input('type');
         $results = [];
 
+        // Strip # from query for tag searches
+        $isTagSearch = str_starts_with($query, '#');
+        $tagQuery = $isTagSearch ? ltrim($query, '#') : $query;
+
         // Search posts (global only for non-auth, + center for auth)
         if (!$type || $type === 'posts') {
-            $postsQuery = Post::where(function ($q) use ($query) {
+            $postsQuery = Post::query();
+
+            if ($isTagSearch) {
+                // When searching for a hashtag, search posts by tag name only
+                $postsQuery->whereHas('tags', function ($tq) use ($tagQuery) {
+                    $tq->where('name', 'LIKE', "%{$tagQuery}%")
+                       ->orWhere('slug', 'LIKE', "%{$tagQuery}%");
+                });
+            } else {
+                // Regular search: content, code snippet, and tags
+                $postsQuery->where(function ($q) use ($query, $tagQuery) {
                     $q->where('content', 'LIKE', "%{$query}%")
                       ->orWhere('code_snippet', 'LIKE', "%{$query}%")
-                      ->orWhereHas('tags', function ($tagQuery) use ($query) {
-                          $tagQuery->where('name', 'LIKE', "%{$query}%")
-                                   ->orWhere('slug', 'LIKE', "%{$query}%");
+                      ->orWhereHas('tags', function ($tq) use ($tagQuery) {
+                          $tq->where('name', 'LIKE', "%{$tagQuery}%")
+                             ->orWhere('slug', 'LIKE', "%{$tagQuery}%");
                       });
-                })
+                });
+            }
+
+            $postsQuery = $postsQuery
                 ->with(['user', 'center', 'tags'])
                 ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
                 ->latest()
@@ -49,8 +66,8 @@ class SearchController extends Controller
             $results['posts'] = PostResource::collection($postsQuery);
         }
 
-        // Search users
-        if (!$type || $type === 'users') {
+        // Search users (skip when searching hashtags)
+        if ((!$type || $type === 'users') && !$isTagSearch) {
             $users = User::where(function ($q) use ($query) {
                     $q->where('name', 'LIKE', "%{$query}%")
                       ->orWhere('username', 'LIKE', "%{$query}%")
@@ -64,11 +81,11 @@ class SearchController extends Controller
             $results['users'] = $users;
         }
 
-        // Search tags
+        // Search tags (use tagQuery without #)
         if (!$type || $type === 'tags') {
-            $tags = Tag::where(function ($q) use ($query) {
-                    $q->where('name', 'LIKE', "%{$query}%")
-                      ->orWhere('slug', 'LIKE', "%{$query}%");
+            $tags = Tag::where(function ($q) use ($tagQuery) {
+                    $q->where('name', 'LIKE', "%{$tagQuery}%")
+                      ->orWhere('slug', 'LIKE', "%{$tagQuery}%");
                 })
                 ->withCount('posts')
                 ->orderByDesc('posts_count')
@@ -106,27 +123,49 @@ class SearchController extends Controller
 
         $query = $request->input('q');
 
+        // Strip # from query for tag searches
+        $isTagSearch = str_starts_with($query, '#');
+        $tagQuery = $isTagSearch ? ltrim($query, '#') : $query;
+
         // Posts within center
-        $posts = Post::where('center_id', $user->center_id)
-            ->where(function ($q) use ($query) {
+        $postsQuery = Post::where('center_id', $user->center_id);
+
+        if ($isTagSearch) {
+            // When searching for a hashtag, search posts by tag name only
+            $postsQuery->whereHas('tags', function ($tq) use ($tagQuery) {
+                $tq->where('name', 'LIKE', "%{$tagQuery}%")
+                   ->orWhere('slug', 'LIKE', "%{$tagQuery}%");
+            });
+        } else {
+            $postsQuery->where(function ($q) use ($query, $tagQuery) {
                 $q->where('content', 'LIKE', "%{$query}%")
-                  ->orWhere('code_snippet', 'LIKE', "%{$query}%");
-            })
+                  ->orWhere('code_snippet', 'LIKE', "%{$query}%")
+                  ->orWhereHas('tags', function ($tq) use ($tagQuery) {
+                      $tq->where('name', 'LIKE', "%{$tagQuery}%")
+                         ->orWhere('slug', 'LIKE', "%{$tagQuery}%");
+                  });
+            });
+        }
+
+        $posts = $postsQuery
             ->with(['user', 'center', 'tags'])
             ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers'])
             ->latest()
             ->limit(20)
             ->get();
 
-        // Members within center
-        $members = User::where('center_id', $user->center_id)
-            ->where(function ($q) use ($query) {
-                $q->where('name', 'LIKE', "%{$query}%")
-                  ->orWhere('username', 'LIKE', "%{$query}%");
-            })
-            ->select('id', 'name', 'username', 'avatar', 'role')
-            ->limit(20)
-            ->get();
+        // Members within center (skip when searching hashtags)
+        $members = [];
+        if (!$isTagSearch) {
+            $members = User::where('center_id', $user->center_id)
+                ->where(function ($q) use ($query) {
+                    $q->where('name', 'LIKE', "%{$query}%")
+                      ->orWhere('username', 'LIKE', "%{$query}%");
+                })
+                ->select('id', 'name', 'username', 'avatar', 'role')
+                ->limit(20)
+                ->get();
+        }
 
         return $this->success([
             'posts'   => PostResource::collection($posts),

@@ -36,6 +36,9 @@
     "code_placeholder": "// Paste your code here...",
     "tags_placeholder": "Tags (comma or space separated)",
     "visibility_public": "Public",
+    "visibility_center": "Center Only",
+    "visibility_public_desc": "Visible to all users",
+    "visibility_center_desc": "Only visible to your center members",
     "loading_posts": "Loading posts...",
     "no_posts": "No posts yet.",
     "be_first": "Be the first to share something!",
@@ -57,7 +60,24 @@
       "m": "m",
       "h": "h",
       "d": "d"
-    }
+    },
+    "comment": "Comment",
+    "repost": "Repost",
+    "like": "Like",
+    "unlike": "Unlike",
+    "bookmark": "Bookmark",
+    "unbookmark": "Remove bookmark",
+    "cant_repost_own": "You can't repost your own post",
+    "share": "Share",
+    "link_copied": "Link copied!",
+    "open_question": "Open question",
+    "welcome_title": "Welcome to Codex!",
+    "welcome_text": "Your feed is empty. Start by sharing code, posting questions or following other developers!",
+    "welcome_tip_code": "Share code snippets with syntax highlighting",
+    "welcome_tip_question": "Post technical questions and get answers",
+    "welcome_tip_follow": "Follow classmates and teachers from your center",
+    "link_placeholder": "Paste a URL (https://...)",
+    "add_link_btn": "Add"
   },
   "profile": {
     "loading": "Loading profile...",
@@ -69,6 +89,8 @@
     "follow": "Follow",
     "unfollow": "Following",
     "likes": "Likes",
+    "bookmarks": "Bookmarks",
+    "replies": "Replies",
     "no_posts_category": "No posts in this category",
     "edit": {
       "title": "Edit profile",
@@ -140,6 +162,8 @@
     "auth_subtitle_login": "Log in to continue",
     "auth_subtitle_register": "Use your center email for full access",
     "footer_text": "The academic social network for the IT vocational training ecosystem in Spain",
+    "or_continue_with": "or continue with",
+    "google_login": "Continue with Google",
     "features": {
       "snippets": {
         "title": "Syntax Snippets",
@@ -157,11 +181,16 @@
       "verification_required": "No center for this domain – Verification will be required",
       "domain_not_recognized": "Domain not recognized",
       "check_review": "🎉 Account created! Your center request is under review.",
-      "passwords_match": "Passwords match"
+      "passwords_match": "Passwords match",
+      "passwords_dont_match": "Passwords do not match",
+      "redirecting": "Redirecting...",
+      "google_processing": "Signing in with Google..."
     },
     "errors": {
       "password_requirements": "The password does not meet all requirements.",
-      "passwords_dont_match": "Passwords do not match."
+      "passwords_dont_match": "Passwords do not match.",
+      "google_failed": "Failed to connect with Google. Please try again.",
+      "google_no_code": "No authorization code received from Google."
     }
   },
   "center": {
@@ -170,11 +199,43 @@
     "loading": "Loading center...",
     "default_name": "Educational Center",
     "private": "Private",
+    "public": "Public",
     "members": "members",
     "members_tab": "Members",
     "since": "Since",
     "resources": "Resources",
-    "pinned": "Pinned"
+    "pinned": "Pinned",
+    "posts_tab": "Posts",
+    "admin_tab": "Admin",
+    "teachers": "Teachers",
+    "students": "Students",
+    "search_members": "Search members...",
+    "all": "All",
+    "no_members_found": "No members found",
+    "posts_count": "posts",
+    "comments": "comments",
+    "promote_to_teacher": "Make teacher",
+    "demote_to_student": "Make student",
+    "block": "Block",
+    "unblock": "Unblock",
+    "settings": "Center Settings",
+    "statistics": "Statistics",
+    "total_members": "Total Members",
+    "total_posts": "Total Posts",
+    "total_teachers": "Teachers",
+    "total_students": "Students",
+    "name": "Center Name",
+    "description": "Description",
+    "privacy": "Privacy",
+    "center_only": "Only visible to center members",
+    "public_visible": "Visible to everyone",
+    "save_changes": "Save Changes",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "website": "Website",
+    "no_description": "No description",
+    "no_website": "No website"
   },
   "teacher_modal": {
     "title": "Teacher Verification",
@@ -207,6 +268,14 @@
     "results_for": "Results for \"{{query}}\"",
     "no_results": "No results found for \"{{query}}\"",
     "users": "Users",
+    "filter_all": "All",
+    "filter_posts": "Posts",
+    "trending_posts": "Trending Posts",
+    "no_trending": "No trending posts",
+    "who_to_follow": "Who to follow",
+    "no_suggestions": "No suggestions right now",
+    "follow": "Follow",
+    "following": "Following",
     "categories": {
       "frontend": "Frontend",
       "backend": "Backend",
@@ -240,5 +309,22 @@
     "description": "We've sent a verification link to ",
     "resend": "Resend email",
     "resend_cooldown": "Resend in {{seconds}}s"
+  },
+  "post": {
+    "title": "Post",
+    "replying_to": "Replying to",
+    "accepted_answer": "Accepted answer",
+    "reply": "Reply",
+    "mark_solution": "Mark as solution",
+    "unmark_solution": "Unmark solution",
+    "write_reply": "Write a reply...",
+    "send": "Send",
+    "write_comment": "Write a comment...",
+    "comment_btn": "Comment",
+    "comments": "Comments",
+    "no_comments": "No comments yet",
+    "be_first_comment": "Be the first to comment!",
+    "not_found": "Post not found",
+    "back": "Back"
   }
 }

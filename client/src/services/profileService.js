@@ -30,6 +30,21 @@ const profileService = {
   },
 
   /**
+   * Get a user's replies (comments formatted as posts)
+   * @param {string} usernameOrId - Username or user ID
+   * @param {Object} params - Query params
+   * @param {number} params.page - Page number
+   * @returns {Promise<Object>} Paginated replies
+   */
+  getUserReplies: async (usernameOrId, params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString
+      ? `/profile/${usernameOrId}/replies?${queryString}`
+      : `/profile/${usernameOrId}/replies`;
+    return api.get(endpoint);
+  },
+
+  /**
    * Update current user's profile
    * @param {Object} data - Profile data
    * @param {string} data.name - Display name

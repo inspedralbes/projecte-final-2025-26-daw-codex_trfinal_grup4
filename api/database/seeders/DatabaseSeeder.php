@@ -103,6 +103,24 @@ class DatabaseSeeder extends Seeder
 
         echo "Normal User created: ID $normalId\n";
 
+        // 4c. Create Pol testing user (linked to center)
+        $polId = DB::table('users')->insertGetId([
+            'center_id' => $centerId,
+            'name' => 'Pol Diabel',
+            'username' => 'poldiabel',
+            'email' => 'a23poldiabel@inspedralbes.cat',
+            'password' => Hash::make('password'),
+            'role' => 'student',
+            'is_blocked' => false,
+            'auth_provider' => 'local',
+            'email_verified_at' => Carbon::now(),
+            'password_set_at' => Carbon::now(),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        echo "Pol Testing User created: ID $polId\n";
+
         // 5. Create a Follow
         DB::table('follows')->insert([
             'follower_id' => $studentId,

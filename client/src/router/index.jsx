@@ -11,11 +11,13 @@ import { useAuth } from "@/hooks/useAuth";
 // Pages
 import Home from "@/pages/Home";
 import ProfilePage from "@/pages/ProfilePage";
+import PostDetail from "@/pages/PostDetail";
 import Explore from "@/pages/Explore";
 import Notifications from "@/pages/Notifications";
 import Messages from "@/pages/Messages";
 import More from "@/pages/More";
 import Landing from "@/pages/Landing";
+import GoogleCallback from "@/pages/GoogleCallback";
 import CenterHub from "@/pages/CenterHub";
 import EmailVerification from "@/pages/EmailVerification";
 
@@ -68,6 +70,9 @@ export default function AppRouter() {
         }
       />
 
+      {/* Google OAuth callback */}
+      <Route path="/auth/google/callback" element={<GoogleCallback />} />
+
       {/* Email verification screen (authenticated but unverified) */}
       <Route element={<ProtectedRoute />}>
         <Route path="/verify-email" element={<EmailVerification />} />
@@ -83,6 +88,7 @@ export default function AppRouter() {
           }
         >
           <Route path="/" element={<Home />} />
+          <Route path="/post/:id" element={<PostDetail />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/messages" element={<Messages />} />

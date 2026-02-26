@@ -1,13 +1,61 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/hooks/useAuth";
 import PostInput from "./PostInput";
 import PostCard from "./PostCard";
 import { usePosts } from "@/hooks/usePosts";
 import "./Feed.css";
 
+// Skeleton loader component
+const PostSkeleton = () => (
+  <div className="post-skeleton">
+    <div className="post-skeleton__avatar" />
+    <div className="post-skeleton__content">
+      <div className="post-skeleton__header">
+        <div className="post-skeleton__name" />
+        <div className="post-skeleton__handle" />
+      </div>
+      <div className="post-skeleton__text-line post-skeleton__text-line--full" />
+      <div className="post-skeleton__text-line post-skeleton__text-line--3-4" />
+      <div className="post-skeleton__text-line post-skeleton__text-line--half" />
+      <div className="post-skeleton__actions">
+        <div className="post-skeleton__action" />
+        <div className="post-skeleton__action" />
+        <div className="post-skeleton__action" />
+        <div className="post-skeleton__action" />
+      </div>
+    </div>
+  </div>
+);
+
+// Welcome card for new/empty feeds
+const WelcomeCard = ({ t }) => (
+  <div className="feed__welcome">
+    <div className="feed__welcome-icon">👋</div>
+    <h2 className="feed__welcome-title">{t("feed.welcome_title")}</h2>
+    <p className="feed__welcome-text">{t("feed.welcome_text")}</p>
+    <div className="feed__welcome-tips">
+      <div className="feed__welcome-tip">
+        <span className="feed__welcome-tip-icon">💻</span>
+        <span>{t("feed.welcome_tip_code")}</span>
+      </div>
+      <div className="feed__welcome-tip">
+        <span className="feed__welcome-tip-icon">❓</span>
+        <span>{t("feed.welcome_tip_question")}</span>
+      </div>
+      <div className="feed__welcome-tip">
+        <span className="feed__welcome-tip-icon">👥</span>
+        <span>{t("feed.welcome_tip_follow")}</span>
+      </div>
+    </div>
+  </div>
+);
+
 export default function Feed({ feedType = "global", centerMode = false }) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("all");
+  const sentinelRef = useRef(null);
 
   // Determine feed type based on active tab
   const currentFeedType =
@@ -19,6 +67,24 @@ export default function Feed({ feedType = "global", centerMode = false }) {
       feedType: currentFeedType,
       type: postType,
     });
+
+  // Infinite scroll with IntersectionObserver
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          loadMore();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadMore]);
 
   const handleCreatePost = useCallback(
     async (postData) => {
@@ -42,11 +108,12 @@ export default function Feed({ feedType = "global", centerMode = false }) {
     [deletePost],
   );
 
+  const isNewUser = user && posts.length === 0 && !loading;
+
   return (
     <div className="feed">
       {/* Header */}
       <header className="feed__header">
-        <h1 className="feed__title">{centerMode ? t("sidebar.center") : t("sidebar.home")}</h1>
         <nav className="feed__tabs">
           <button
             className={`feed__tab ${activeTab === "all" ? "feed__tab--active" : ""}`}
@@ -85,10 +152,15 @@ export default function Feed({ feedType = "global", centerMode = false }) {
       {/* Posts */}
       <div className="feed__posts">
         {loading && posts.length === 0 ? (
-          <div className="feed__loading">
-            <div className="feed__spinner" />
-            <span>{t("feed.loading_posts")}</span>
+          // Skeleton loaders instead of spinner
+          <div className="feed__skeletons">
+            <PostSkeleton />
+            <PostSkeleton />
+            <PostSkeleton />
           </div>
+        ) : isNewUser ? (
+          // Welcome card for new users
+          <WelcomeCard t={t} />
         ) : posts.length === 0 ? (
           <div className="feed__empty">
             <p>{t("feed.no_posts")}</p>
@@ -106,14 +178,14 @@ export default function Feed({ feedType = "global", centerMode = false }) {
               />
             ))}
 
-            {/* Load More */}
-            {hasMore && (
-              <div className="feed__load-more">
-                <button onClick={loadMore} disabled={loading} className="feed__load-more-btn">
-                  {loading ? t("common.loading") : t("common.load_more")}
-                </button>
-              </div>
-            )}
+            {/* Infinite scroll sentinel */}
+            <div ref={sentinelRef} className="feed__sentinel">
+              {loading && hasMore && (
+                <div className="feed__loading-more">
+                  <div className="feed__spinner" />
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>

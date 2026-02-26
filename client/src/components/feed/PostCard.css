@@ -4,6 +4,7 @@
 
 .post-card {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-3);
   padding: var(--space-4);
   border-bottom: 1px solid var(--border-subtle);
@@ -106,24 +107,70 @@
   color: var(--codex-teal);
 }
 
-/* ── Question Badge ───────────────────────────────────────── */
+/* ── Question Badge ───────────────────────────────────────── 
+   Academic aesthetic: Amber gold for pending (like a highlighter 
+   marking important text), emerald green for solved (knowledge gained).
+   Features a subtle pulsing glow to draw attention.
+   ──────────────────────────────────────────────────────────── */
 .post-card__question-badge {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-3);
+  gap: var(--space-2);
+  padding: var(--space-1-5) var(--space-3);
   margin-bottom: var(--space-2);
-  background: var(--state-warning-bg);
-  border: 1px solid rgba(234, 179, 8, 0.3);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
   font-weight: 600;
+}
+
+.post-card__question-badge--open {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(245, 158, 11, 0.1));
+  border: 1px solid rgba(234, 179, 8, 0.4);
   color: var(--state-warning);
 }
 
+.post-card__question-badge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
+}
+
+.post-card__question-badge-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* Subtle pulsing glow for pending questions */
+.post-card__question-badge-pulse {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 20% 50%,
+    rgba(251, 191, 36, 0.3) 0%,
+    transparent 60%
+  );
+  animation: questionPulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes questionPulse {
+  0%, 100% { 
+    opacity: 0.4; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8; 
+    transform: scale(1.05);
+  }
+}
+
+/* Solved state - confident emerald green */
 .post-card__question-badge--solved {
-  background: var(--state-success-bg);
-  border-color: rgba(34, 197, 94, 0.3);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(22, 163, 74, 0.1));
+  border: 1px solid rgba(34, 197, 94, 0.4);
   color: var(--state-success);
 }
 
@@ -134,6 +181,21 @@
   color: var(--ink-primary);
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+/* ── Image ────────────────────────────────────────────────── */
+.post-card__image {
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+}
+
+.post-card__image img {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
 }
 
 /* ── Code Block ───────────────────────────────────────────── */
@@ -194,6 +256,12 @@
   padding: 0;
   font-size: inherit;
   color: inherit;
+}
+
+/* Override highlight.js background */
+.post-card__code-content code.hljs {
+  background: transparent;
+  padding: 0;
 }
 
 /* ── Link Preview ─────────────────────────────────────────── */
@@ -274,59 +342,163 @@
   text-decoration: underline;
 }
 
-/* ── Actions ──────────────────────────────────────────────── */
+/* ── Actions - Twitter-style minimal ─────────────────────── */
 .post-card__actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  max-width: 425px;
-  margin-left: -8px;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  margin-left: -10px;
 }
 
 .post-card__action {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2);
+  gap: var(--space-1);
+  padding: 0;
   background: none;
   border: none;
-  border-radius: var(--radius-full);
-  color: var(--ink-tertiary);
-  font-size: var(--text-sm);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: color 0.15s ease;
 }
 
-.post-card__action:hover {
+.post-card__action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--ink-tertiary);
+  transition: all 0.15s ease;
+}
+
+.post-card__action-count {
+  font-size: 13px;
+  color: var(--ink-tertiary);
+  min-width: 24px;
+  padding-right: var(--space-3);
+  transition: color 0.15s ease;
+}
+
+/* Comment - Blue */
+.post-card__action--comment:hover .post-card__action-icon {
+  color: rgb(29, 155, 240);
+  background: rgba(29, 155, 240, 0.1);
+}
+.post-card__action--comment:hover .post-card__action-count {
+  color: rgb(29, 155, 240);
+}
+
+/* Repost - Green */
+.post-card__action--repost:hover:not(:disabled) .post-card__action-icon {
+  color: rgb(0, 186, 124);
+  background: rgba(0, 186, 124, 0.1);
+}
+.post-card__action--repost:hover:not(:disabled) .post-card__action-count {
+  color: rgb(0, 186, 124);
+}
+.post-card__action--repost:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Like - Pink/Red */
+.post-card__action--like:hover .post-card__action-icon {
+  color: rgb(249, 24, 128);
+  background: rgba(249, 24, 128, 0.1);
+}
+.post-card__action--like:hover .post-card__action-count {
+  color: rgb(249, 24, 128);
+}
+.post-card__action--like.post-card__action--active .post-card__action-icon {
+  color: rgb(249, 24, 128);
+}
+.post-card__action--like.post-card__action--active .post-card__action-count {
+  color: rgb(249, 24, 128);
+}
+
+/* Bookmark - Blue */
+.post-card__action--bookmark:hover .post-card__action-icon {
+  color: rgb(29, 155, 240);
+  background: rgba(29, 155, 240, 0.1);
+}
+.post-card__action--bookmark.post-card__action--active .post-card__action-icon {
+  color: rgb(29, 155, 240);
+}
+
+/* Share - Teal */
+.post-card__action--share:hover .post-card__action-icon {
   color: var(--codex-teal);
   background: rgba(20, 184, 166, 0.1);
 }
-
-.post-card__action--repost:hover {
-  color: var(--codex-emerald);
-  background: rgba(16, 185, 129, 0.1);
+.post-card__action--share.post-card__action--copied .post-card__action-icon {
+  color: var(--state-success);
+}
+.post-card__action-copied-text {
+  font-size: 11px;
+  color: var(--state-success);
+  font-weight: 500;
+  animation: fadeIn 0.2s ease;
 }
 
-.post-card__action--like:hover,
-.post-card__action--liked {
-  color: var(--codex-rose);
-  background: rgba(244, 63, 94, 0.1);
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.post-card__action--bookmarked {
-  color: var(--codex-violet);
-  background: rgba(139, 92, 246, 0.1);
+/* Loading state */
+.post-card__action--loading {
+  pointer-events: none;
+}
+.post-card__action--loading .post-card__action-icon {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 640px) {
+  .post-card {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .post-card__avatar {
+    width: 38px;
+    height: 38px;
+  }
+
   .post-card__author {
     flex-wrap: nowrap;
     overflow: hidden;
   }
 
+  .post-card__name {
+    font-size: var(--text-sm);
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .post-card__badge {
     display: none;
+  }
+
+  .post-card__handle {
+    font-size: var(--text-xs);
+  }
+
+  .post-card__time {
+    font-size: var(--text-xs);
+  }
+
+  .post-card__text {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
   }
 
   .post-card__link {
@@ -336,6 +508,48 @@
   .post-card__link-image {
     width: 100%;
     height: 120px;
+  }
+
+  .post-card__code-content {
+    font-size: var(--text-xs);
+    padding: var(--space-3);
+  }
+
+  .post-card__actions {
+    max-width: 100%;
+    margin-left: -4px;
+  }
+
+  .post-card__action {
+    gap: var(--space-1);
+    padding: var(--space-2);
+    font-size: var(--text-xs);
+    min-height: 36px;
+    min-width: 36px;
+  }
+
+  .post-card__action svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .post-card__tags {
+    gap: var(--space-1);
+    margin-bottom: var(--space-2);
+  }
+
+  .post-card__tag {
+    font-size: var(--text-xs);
+  }
+
+  .post-card__repost-indicator {
+    margin-left: 44px;
+    font-size: 11px;
+  }
+
+  .post-card__dropdown {
+    min-width: 130px;
+    right: -8px;
   }
 }
 
@@ -389,8 +603,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-4) var(--space-2);
-  margin-left: 56px;
+  flex-basis: 100%;
+  margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) 0;
+  padding: var(--space-2) var(--space-4);
+  background: rgba(0, 186, 124, 0.05);
+  border-bottom: 1px solid var(--border-subtle);
   color: var(--ink-tertiary);
   font-size: var(--text-xs);
 }
@@ -399,6 +616,46 @@
   width: 14px;
   height: 14px;
   color: var(--codex-emerald);
+  flex-shrink: 0;
+}
+
+/* ── Reply Indicator ──────────────────────────────────────── */
+.post-card--reply {
+  border-left: 3px solid var(--codex-teal);
+}
+
+.post-card__reply-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-basis: 100%;
+  margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) 0;
+  padding: var(--space-2) var(--space-4);
+  background: rgba(20, 184, 166, 0.05);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink-tertiary);
+  font-size: var(--text-xs);
+}
+
+.post-card__reply-indicator svg {
+  width: 14px;
+  height: 14px;
+  color: var(--codex-teal);
+  flex-shrink: 0;
+}
+
+.post-card__reply-link {
+  color: var(--codex-teal);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.post-card__reply-link:hover {
+  text-decoration: underline;
+}
+
+.post-card__reply-secondary {
+  color: var(--ink-quaternary);
 }
 
 /* ── Loading State ────────────────────────────────────────── */

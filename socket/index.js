@@ -74,11 +74,12 @@ io.on("connection", (socket) => {
 
   /**
    * Clients join a profile room to receive live follower updates.
-   *   socket.emit('join-profile', { userId: 5 })
+   * Accepts { userId: 5 } or { profileId: 5 }
    */
   socket.on("join-profile", (data) => {
-    if (data && data.userId) {
-      const room = `profile.${data.userId}`;
+    const id = data?.userId || data?.profileId;
+    if (id) {
+      const room = `profile.${id}`;
       socket.join(room);
       console.log(`[Socket.io] ${socket.id} joined room ${room}`);
     }
@@ -86,11 +87,11 @@ io.on("connection", (socket) => {
 
   /**
    * Leave a profile room.
-   *   socket.emit('leave-profile', { userId: 5 })
    */
   socket.on("leave-profile", (data) => {
-    if (data && data.userId) {
-      const room = `profile.${data.userId}`;
+    const id = data?.userId || data?.profileId;
+    if (id) {
+      const room = `profile.${id}`;
       socket.leave(room);
       console.log(`[Socket.io] ${socket.id} left room ${room}`);
     }
@@ -140,9 +141,19 @@ redisSubscriber.psubscribe(pattern, (err) => {
 });
 
 redisSubscriber.on("pmessage", (_pattern, channel, rawMessage) => {
-  // Strip the prefix to get the original Laravel channel name
-  // e.g. "tfg-database-user.3" → "user.3"
-  const laravelChannel = channel.replace(REDIS_PREFIX, "");
+  // Enhanced prefix stripping to handle various Laravel naming conventions
+  // (hyphens, underscores, or colons)
+  let laravelChannel = channel;
+
+  if (channel.startsWith(REDIS_PREFIX)) {
+    laravelChannel = channel.slice(REDIS_PREFIX.length);
+  } else {
+    // Fallback search if the prefix isn't exactly at the start
+    laravelChannel = channel
+      .replace("tfg-database-", "")
+      .replace("tfg_database_", "")
+      .replace("laravel_database_", "");
+  }
 
   subscribedChannels.add(laravelChannel);
 
@@ -161,6 +172,7 @@ redisSubscriber.on("pmessage", (_pattern, channel, rawMessage) => {
     // Laravel channel "user.3"  → Socket.io room "user.3"
     // Laravel channel "post.1"  → Socket.io room "post.1"
     io.to(laravelChannel).emit(eventName, eventData);
+    console.log(`[Socket.io] Emitted ${eventName} to room ${laravelChannel}`);
   } catch (err) {
     console.error(
       `[Socket.io] Error processing message from ${channel}:`,
