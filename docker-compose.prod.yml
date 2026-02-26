@@ -18,7 +18,7 @@ services:
     volumes:
       - ./docker/nginx/default.prod.conf:/etc/nginx/templates/default.conf.template:ro
       - client_build:/var/www/html/client/dist:ro
-      - certbot_conf:/etc/letsencrypt:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
       - certbot_www:/var/www/certbot:ro
     environment:
       - DOMAIN=${DOMAIN}
