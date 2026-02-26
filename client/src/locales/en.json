@@ -326,5 +326,32 @@
     "be_first_comment": "Be the first to comment!",
     "not_found": "Post not found",
     "back": "Back"
+  },
+  "messages": {
+    "title": "Messages",
+    "conversations": "Conversations",
+    "new_conversation": "New conversation",
+    "search_users": "Search users...",
+    "no_conversations": "No conversations yet",
+    "no_conversations_subtitle": "Start a conversation with someone",
+    "select_conversation": "Select a conversation",
+    "select_conversation_subtitle": "Choose a conversation from the list or start a new one",
+    "type_message": "Type a message...",
+    "send": "Send",
+    "typing": "typing...",
+    "you": "You",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "no_results": "No users found",
+    "loading": "Loading...",
+    "error_loading": "Error loading messages",
+    "error_sending": "Error sending message",
+    "restriction": {
+      "title": "Limited conversation",
+      "not_following": "You can only send one message to users you don't follow. Follow {{name}} to have a full conversation.",
+      "message_sent": "You've already sent your message. {{name}} needs to follow you back for you to send more messages.",
+      "follow_to_unlock": "Follow to unlock",
+      "waiting_response": "Waiting for response"
+    }
   }
 }

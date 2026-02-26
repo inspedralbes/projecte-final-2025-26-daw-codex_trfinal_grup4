@@ -8,6 +8,7 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:8080";
 
 const rooms = new Set(); // Track joined rooms for auto-rejoin
 let socket = null;
+let authToken = null; // Store auth token for P2P messaging
 
 const socketService = {
   /**
@@ -19,6 +20,8 @@ const socketService = {
     if (socket && socket.connected) {
       return socket;
     }
+
+    authToken = token; // Store token for later use
 
     socket = io(SOCKET_URL, {
       path: "/socket.io/",
@@ -44,6 +47,20 @@ const socketService = {
 
     return socket;
   },
+
+  /**
+   * Update the auth token (after login)
+   * @param {string} token - New auth token
+   */
+  setAuthToken: (token) => {
+    authToken = token;
+  },
+
+  /**
+   * Get the current auth token
+   * @returns {string|null}
+   */
+  getAuthToken: () => authToken,
 
   /**
    * Get the current socket instance
@@ -152,6 +169,128 @@ const socketService = {
   },
 
   /**
+   * Join a chat room for live messages
+   * @param {number} userId - Current user ID
+   * @param {number} partnerId - Chat partner ID
+   */
+  joinChatRoom: (userId, partnerId) => {
+    if (socket) {
+      socket.emit("join-chat", { userId, partnerId });
+      const ids = [userId, partnerId].sort((a, b) => a - b);
+      rooms.add(`chat.${ids[0]}-${ids[1]}`);
+      console.log(`[Socket.io] Joined room: chat.${ids[0]}-${ids[1]}`);
+    }
+  },
+
+  /**
+   * Leave a chat room
+   * @param {number} userId - Current user ID
+   * @param {number} partnerId - Chat partner ID
+   */
+  leaveChatRoom: (userId, partnerId) => {
+    if (socket) {
+      socket.emit("leave-chat", { userId, partnerId });
+      const ids = [userId, partnerId].sort((a, b) => a - b);
+      rooms.delete(`chat.${ids[0]}-${ids[1]}`);
+      console.log(`[Socket.io] Left room: chat.${ids[0]}-${ids[1]}`);
+    }
+  },
+
+  /**
+   * Send typing indicator
+   * @param {number} userId - Current user ID
+   * @param {number} partnerId - Chat partner ID
+   * @param {boolean} isTyping - Whether the user is typing
+   */
+  sendTypingIndicator: (userId, partnerId, isTyping = true) => {
+    if (socket) {
+      socket.emit("typing", { userId, partnerId, isTyping });
+    }
+  },
+
+  /**
+   * Send a P2P message via socket
+   * @param {number} receiverId - Receiver user ID
+   * @param {string} content - Message content
+   * @param {string} tempId - Temporary ID for optimistic update
+   * @returns {Promise<{success: boolean, message?: object, error?: string}>}
+   */
+  sendMessage: (receiverId, content, tempId) => {
+    return new Promise((resolve) => {
+      if (!socket || !socket.connected) {
+        console.error("[Socket.io] sendMessage: Not connected");
+        resolve({ success: false, error: "Not connected" });
+        return;
+      }
+      
+      if (!authToken) {
+        console.error("[Socket.io] sendMessage: No auth token");
+        resolve({ success: false, error: "Not authenticated" });
+        return;
+      }
+
+      console.log("[Socket.io] Sending message:", { receiverId, contentLength: content?.length, tempId, hasToken: !!authToken });
+
+      // Timeout in case server doesn't respond
+      const timeout = setTimeout(() => {
+        console.error("[Socket.io] sendMessage: Timeout");
+        resolve({ success: false, error: "Server timeout" });
+      }, 10000);
+
+      socket.emit(
+        "send-message",
+        { receiverId, content, tempId, token: authToken },
+        (response) => {
+          clearTimeout(timeout);
+          console.log("[Socket.io] sendMessage response:", response);
+          resolve(response || { success: false, error: "No response" });
+        }
+      );
+    });
+  },
+
+  /**
+   * Mark messages as read via socket (P2P)
+   * @param {number} userId - Current user ID
+   * @param {number} partnerId - Partner ID whose messages to mark read
+   */
+  markMessagesRead: (userId, partnerId) => {
+    if (socket && authToken) {
+      socket.emit("mark-read", { userId, partnerId, token: authToken });
+    }
+  },
+
+  /**
+   * Listen for new messages
+   * @param {Function} callback - Handler function
+   */
+  onMessage: (callback) => {
+    if (socket) {
+      socket.on("new.message", callback);
+    }
+  },
+
+  /**
+   * Listen for messages read events
+   * @param {Function} callback - Handler function
+   */
+  onMessagesRead: (callback) => {
+    if (socket) {
+      socket.on("messages.read", callback);
+    }
+  },
+
+  /**
+   * Listen for typing indicator
+   * @param {Function} callback - Handler function
+   */
+  onTyping: (callback) => {
+    if (socket) {
+      socket.on("user.typing", callback);
+    }
+  },
+
+  /**
    * Rejoin all tracked rooms (called on connect)
    */
   rejoinRooms: () => {
@@ -161,6 +300,10 @@ const socketService = {
         if (type === "user") socket.emit("join", { userId: id });
         if (type === "post") socket.emit("join-post", { postId: id });
         if (type === "profile") socket.emit("join-profile", { userId: id });
+        if (type === "chat") {
+          const [userId, partnerId] = id.split("-");
+          socket.emit("join-chat", { userId: parseInt(userId), partnerId: parseInt(partnerId) });
+        }
         console.log("[Socket.io] Rejoined room: " + room);
       });
     }

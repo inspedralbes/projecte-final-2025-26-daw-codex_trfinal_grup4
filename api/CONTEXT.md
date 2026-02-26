@@ -731,6 +731,34 @@
 - **Autor:** @iker
 - Actualització de `CONTEXT.md` amb el resum de les darreres funcionalitats de real-time i gestió de perfils.
 
+### 2026-02-25 – Sistema de Xat amb restriccions de seguiment mutu
+
+- **Autor:** @copilot (IA)
+- **Nous Fitxers:**
+    - `app/Services/ChatService.php`: Lògica de negoci per xat amb restriccions de seguiment mutu.
+        - `areMutualFollowers()`: Comprova si dos usuaris es segueixen mútuament.
+        - `canSendMessage()`: Retorna si l'usuari pot enviar missatge (restricció: 1 missatge si no és mutu).
+        - `getConversationStatus()`: Obté l'estat de la conversa (mutual, restricted, messagesRemaining).
+        - `getConversations()`: Llista de converses amb últim missatge i unread count.
+        - `getMessages()`: Paginació de missatges d'una conversa.
+        - `markAsRead()`: Marca missatges com a llegits.
+        - `getUnreadCount()`: Compta missatges no llegits totals.
+    - `app/Http/Controllers/ChatController.php`: 7 endpoints RESTful per xat.
+    - `app/Events/NewMessageEvent.php`: Broadcast de nous missatges via Redis→Socket.io.
+    - `app/Events/MessageReadEvent.php`: Broadcast de missatges llegits.
+    - `app/Http/Requests/StoreMessageRequest.php`: Validació de missatges.
+- **Noves Rutes API (`routes/api.php`):**
+    - `GET /api/chat/conversations` → Llista converses
+    - `GET /api/chat/conversations/{userId}` → Missatges amb usuari
+    - `POST /api/chat/messages` → Enviar missatge
+    - `POST /api/chat/conversations/{userId}/read` → Marcar com llegits
+    - `GET /api/chat/unread` → Comptador no llegits
+    - `GET /api/chat/can-message/{userId}` → Verificar si pot enviar
+    - `GET /api/chat/search-users` → Cercar usuaris per nova conversa
+- **Regles de Negoci:**
+    - Si els usuaris NO es segueixen mútuament: només 1 missatge permès per direcció.
+    - Si els usuaris ES segueixen mútuament: conversa completa sense límits.
+
 ---
 
 ## 📚 Documentació Relacionada

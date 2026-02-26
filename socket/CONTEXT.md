@@ -229,6 +229,33 @@
   - `interaction.removed`: Sincronitza la eliminació de likes/bookmarks per mantenir l'estat local del client sense refrescar.
 - **Client Side**: `socketService.js` actualitzat amb el mètode genèric `.on()` per capturar aquests nous events.
 
+### 2026-02-25 – Sistema de Xat Real-Time
+
+- **Autor:** @copilot (IA)
+- **Nous Events Socket.io:**
+  - `join-chat`: Client s'uneix a una sala de xat (`{ recipientId: N }`). Sala creada amb IDs ordenats.
+  - `leave-chat`: Client deixa la sala de xat.
+  - `typing`: Indicador de tecleig a la conversa.
+- **Broadcast Events (Laravel → Redis → Socket.io):**
+  - `new.message`: Nou missatge rebut (payload: message object complet).
+  - `messages.read`: Missatges marcats com llegits (payload: conversation_user_id, read_by_id).
+- **Room Naming Convention:**
+  - Sales de xat: `chat.{minId}.{maxId}` (IDs ordenats per consistència).
+  - Exemple: conversa entre usuaris 5 i 12 → `chat.5.12`.
+### 2026-02-26 – Sistema de Xat P2P (Peer-to-Peer)
+
+- **Autor:** @copilot (IA)
+- **Nous Events Socket.io (P2P):**
+  - `send-message`: Client envia missatge directament via socket (`{ receiverId, content, tempId, token }`).
+    - El socket valida i persisteix el missatge cridant l'API internament.
+    - Emet `new.message` a la room del xat amb `tempId` per actualització optimista.
+    - Retorna callback amb `{ success, message, error }`.
+  - `mark-read`: Client marca missatges com llegits via socket (`{ partnerId, userId, token }`).
+    - El socket crida l'API per persistir i emet `messages.read` a la room.
+- **Avantatges P2P:**
+  - Latència reduïda: missatge arriba immediatament sense esperar resposta HTTP.
+  - Actualització optimista: UI s'actualitza abans de confirmació del servidor.
+  - Gestió de duplicats: `tempId` identifica missatges temporals per substituir amb l'`id` real.
 ---
 
 ## 📚 Documentació Relacionada

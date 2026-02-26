@@ -326,5 +326,32 @@
     "be_first_comment": "Sigues el primer a comentar!",
     "not_found": "Publicació no trobada",
     "back": "Tornar"
+  },
+  "messages": {
+    "title": "Missatges",
+    "conversations": "Converses",
+    "new_conversation": "Nova conversa",
+    "search_users": "Cercar usuaris...",
+    "no_conversations": "No tens converses",
+    "no_conversations_subtitle": "Comença una conversa amb algú",
+    "select_conversation": "Selecciona una conversa",
+    "select_conversation_subtitle": "Tria una conversa de la llista o inicia'n una de nova",
+    "type_message": "Escriu un missatge...",
+    "send": "Enviar",
+    "typing": "escrivint...",
+    "you": "Tu",
+    "today": "Avui",
+    "yesterday": "Ahir",
+    "no_results": "No s'han trobat usuaris",
+    "loading": "Carregant...",
+    "error_loading": "Error en carregar missatges",
+    "error_sending": "Error en enviar missatge",
+    "restriction": {
+      "title": "Conversa limitada",
+      "not_following": "Només pots enviar un missatge a usuaris que no segueixes. Segueix a {{name}} per tenir una conversa completa.",
+      "message_sent": "Ja has enviat el teu missatge. {{name}} ha de seguir-te perquè puguis enviar més missatges.",
+      "follow_to_unlock": "Seguir per desbloquejar",
+      "waiting_response": "Esperant resposta"
+    }
   }
 }
