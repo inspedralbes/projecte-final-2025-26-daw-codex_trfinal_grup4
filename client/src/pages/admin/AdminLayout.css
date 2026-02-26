@@ -1,0 +1,40 @@
+.admin-layout {
+  width: 100%;
+  animation: slideUp 0.4s ease-out;
+}
+
+.admin-content {
+  padding: 1rem 0;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Page Headers for Admin Sections */
+.admin-page-header {
+  margin-bottom: 2.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.admin-page-title {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: var(--ink-primary, #f8fafc);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
+}
+
+.admin-page-subtitle {
+  color: var(--ink-secondary, #94a3b8);
+  font-size: 1rem;
+}

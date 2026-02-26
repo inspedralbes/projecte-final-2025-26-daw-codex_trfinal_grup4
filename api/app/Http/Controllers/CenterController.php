@@ -25,9 +25,10 @@ class CenterController extends Controller
         // Try to resolve user from Sanctum token (optional auth)
         $user = auth('sanctum')->user();
 
-        // If authenticated admin, allow filtering by status
+        // If authenticated admin, allow filtering by status. 
+        // We use filled() to ignore empty strings from the frontend filter.
         if ($user && $user->role->value === 'admin') {
-            if ($request->has('status')) {
+            if ($request->filled('status')) {
                 $query->where('status', $request->status);
             }
         } else {

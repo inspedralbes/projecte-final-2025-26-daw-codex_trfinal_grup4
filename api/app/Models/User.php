@@ -34,6 +34,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'avatar',
         'bio',
         'is_blocked',
+        'ban_status',
         'google_id',
         'auth_provider',
         'email_verified_at',
@@ -66,6 +67,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password_set_at' => 'datetime',
             'role' => UserRole::class,
             'is_blocked' => 'boolean',
+            'ban_status' => 'string',
         ];
     }
 

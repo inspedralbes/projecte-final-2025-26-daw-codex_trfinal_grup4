@@ -1,0 +1,127 @@
+.admin-overview {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: var(--depth-1, #0f1520);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+    padding: 1.5rem;
+    border-radius: var(--radius-lg, 12px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: all var(--transition-fast);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+    background: var(--depth-2);
+}
+
+.stat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: var(--text-sm);
+    color: var(--ink-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.stat-value {
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    color: var(--ink-primary);
+}
+
+.stat-icon {
+    font-size: 1.25rem;
+    opacity: 0.8;
+}
+
+/* Accent colors using brand tokens */
+.stat-card--teal .stat-value {
+    color: var(--codex-teal-light);
+}
+
+.stat-card--violet .stat-value {
+    color: var(--codex-violet-light);
+}
+
+.stat-card--amber .stat-value {
+    color: var(--codex-amber);
+}
+
+.stat-card--emerald .stat-value {
+    color: var(--codex-emerald);
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+.chart-container {
+    background: var(--depth-1, #0f1520);
+    border: 1px solid var(--border-subtle);
+    padding: 1.75rem;
+    border-radius: var(--radius-xl, 16px);
+}
+
+.chart-container h3 {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--ink-primary);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+}
+
+.chart-pie {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pie-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--text-sm);
+    color: var(--ink-secondary);
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+@media (max-width: 1024px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}

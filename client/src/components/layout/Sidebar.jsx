@@ -152,14 +152,86 @@ const LogoutIcon = () => (
   </svg>
 );
 
+
+const ModerationIcon = ({ active }) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill={active ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+
+const UsersIcon = ({ active }) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill={active ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+
+const StatsIcon = ({ active }) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="18" y1="20" x2="18" y2="10" />
+    <line x1="12" y1="20" x2="12" y2="4" />
+    <line x1="6" y1="20" x2="6" y2="14" />
+  </svg>
+);
+
+const RequestsIcon = ({ active }) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill={active ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+    <polyline points="22,6 12,13 2,6" />
+  </svg>
+);
+
 const navItems = [
-  { path: "/", label: "sidebar.home", Icon: HomeIcon },
-  { path: "/explore", label: "sidebar.explore", Icon: ExploreIcon },
-  { path: "/center", label: "sidebar.center", Icon: CenterIcon },
-  { path: "/notifications", label: "sidebar.notifications", Icon: NotificationsIcon },
-  { path: "/messages", label: "sidebar.messages", Icon: MessagesIcon },
-  { path: "/profile", label: "sidebar.profile", Icon: ProfileIcon },
-  { path: "/more", label: "sidebar.more", Icon: MoreIcon },
+  { path: "/", label: "Feed Global", Icon: HomeIcon },
+  { path: "/explore", label: "Explorar", Icon: ExploreIcon },
+  { path: "/center", label: "Mi Centro", Icon: CenterIcon },
+  { path: "/notifications", label: "Notificaciones", Icon: NotificationsIcon },
+  { path: "/messages", label: "Mensajes", Icon: MessagesIcon },
+  { path: "/profile", label: "Perfil", Icon: ProfileIcon },
+  { path: "/admin", label: "Resumen", Icon: StatsIcon, adminOnly: true, end: true },
+  { path: "/admin/users", label: "Usuarios", Icon: UsersIcon, adminOnly: true },
+  { path: "/admin/moderation", label: "Moderación", Icon: ModerationIcon, adminOnly: true },
+  { path: "/admin/centers", label: "Centros", Icon: CenterIcon, adminOnly: true },
+  { path: "/admin/requests", label: "Solicitudes", Icon: RequestsIcon, adminOnly: true },
+  { path: "/more", label: "Más", Icon: MoreIcon },
 ];
 
 export default function Sidebar() {
@@ -173,11 +245,19 @@ export default function Sidebar() {
     navigate("/welcome");
   };
 
+  const visibleNavItems = navItems.filter(item => {
+    if (user && user.role === 'admin') {
+      // For Admin, show ONLY the admin-specific sections
+      return item.adminOnly;
+    }
+    return !item.adminOnly;
+  });
+
   return (
     <aside className="sidebar">
       <div className="sidebar__container">
         {/* Logo */}
-        <NavLink to="/" className="sidebar__logo">
+        <NavLink to={user?.role === 'admin' ? "/admin" : "/"} className="sidebar__logo">
           <span className="sidebar__logo-icon">
             <img
               src="/logo-transparent.png"
@@ -191,12 +271,16 @@ export default function Sidebar() {
 
         {/* Navigation */}
         <nav className="sidebar__nav">
-          {navItems.map(({ path, label, Icon }) => {
-            const isActive = location.pathname === path;
+          {visibleNavItems.map(({ path, label, Icon, end }) => {
+            const isActive = end
+              ? location.pathname === path
+              : location.pathname.startsWith(path) && (path !== '/' || location.pathname === '/');
+
             return (
               <NavLink
                 key={path}
                 to={path}
+                end={end}
                 className={`sidebar__nav-item ${isActive ? "sidebar__nav-item--active" : ""}`}
               >
                 <span className="sidebar__nav-icon">
@@ -208,13 +292,15 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Post Button */}
-        <button className="sidebar__post-btn">
-          <span className="sidebar__post-btn-icon">
-            <PenIcon />
-          </span>
-          <span className="sidebar__post-btn-text">{t("feed.publish")}</span>
-        </button>
+        {/* Post Button (Hidden for Admin) */}
+        {user?.role !== 'admin' && (
+          <button className="sidebar__post-btn">
+            <span className="sidebar__post-btn-icon">
+              <PenIcon />
+            </span>
+            <span className="sidebar__post-btn-text">Publicar</span>
+          </button>
+        )}
 
         {/* User Profile */}
         <div className="sidebar__user">

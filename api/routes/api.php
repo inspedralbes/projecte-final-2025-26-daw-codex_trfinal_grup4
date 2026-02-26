@@ -76,7 +76,9 @@ Route::get('/search', [SearchController::class, 'index']);
 Route::get('/leaderboard', [ProfileController::class, 'leaderboard']);
 
 // Centers (US#8) – public listing (active only), admins see all with filters
-Route::get('/centers', [CenterController::class, 'index']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/centers', [CenterController::class, 'index']);
+});
 Route::get('/centers/{center}', [CenterController::class, 'show']);
 
 /* ------------------------------------------------------------------ */
@@ -167,6 +169,26 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     /*  Admin-only routes (US#8)                                       */
     /* -------------------------------------------------------------- */
     Route::middleware('admin')->group(function () {
+        // Dashboard Stats
+        Route::get('/admin/stats', function () {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total_users' => \App\Models\User::count(),
+                    'total_centers' => \App\Models\Center::count(),
+                    'pending_requests' => \App\Models\CenterRequest::where('status', 'pending')->count(),
+                    'total_posts' => \App\Models\Post::count(),
+                ]
+            ]);
+        });
+
+        // User Management
+        Route::get('/admin/users', [\App\Http\Controllers\AdminUserController::class, 'index']);
+        Route::get('/admin/users/{user}', [\App\Http\Controllers\AdminUserController::class, 'show']);
+        Route::get('/admin/users/{user}/posts', [\App\Http\Controllers\AdminUserController::class, 'userPosts']);
+        Route::put('/admin/users/{user}', [\App\Http\Controllers\AdminUserController::class, 'update']);
+        Route::delete('/admin/users/{user}', [\App\Http\Controllers\AdminUserController::class, 'destroy']);
+
         // Center Request management
         Route::get('/center-requests', [CenterRequestController::class, 'index']);
         Route::get('/center-requests/{centerRequest}', [CenterRequestController::class, 'show']);
