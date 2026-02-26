@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CenterController;
 use App\Http\Controllers\CenterMemberController;
 use App\Http\Controllers\CenterRequestController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\GoogleAuthController;
@@ -142,6 +143,15 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
     Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
+
+    // Chat / Messages
+    Route::get('/chat/conversations', [ChatController::class, 'conversations']);
+    Route::get('/chat/conversations/{userId}', [ChatController::class, 'messages']);
+    Route::post('/chat/messages', [ChatController::class, 'store']);
+    Route::post('/chat/conversations/{userId}/read', [ChatController::class, 'markAsRead']);
+    Route::get('/chat/unread', [ChatController::class, 'unreadCount']);
+    Route::get('/chat/can-message/{userId}', [ChatController::class, 'canMessage']);
+    Route::get('/chat/search-users', [ChatController::class, 'searchUsers']);
 
     // Profile update (US#7)
     Route::put('/profile', [ProfileController::class, 'update']);

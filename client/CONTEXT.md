@@ -496,7 +496,7 @@ src/
 │   ├── CenterHub.jsx / CenterHub.css # Hub institucional
 │   ├── EmailVerification.jsx / .css # Pantalla verificació email pendent
 │   ├── ProfilePage.jsx              # Wrapper per Profile
-│   ├── Messages.jsx                 # (Pendent)
+│   ├── Messages.jsx / Messages.css  # Sistema de xat complet amb restriccions de seguiment
 │   └── More.jsx                     # Menú addicional
 ├── router/
 │   └── index.jsx                    # Rutes protegides + públiques + VerifiedRoute
