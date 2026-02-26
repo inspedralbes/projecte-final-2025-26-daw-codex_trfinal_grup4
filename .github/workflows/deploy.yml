@@ -275,21 +275,11 @@ jobs:
             if [ -d "$APP_DIR/.git" ]; then
               echo "📥 Pulling latest changes..."
               cd $APP_DIR
-              if git fetch origin $BRANCH && git reset --hard origin/$BRANCH; then
-                echo "✅ Pull successful."
-              else
-                echo "⚠️ Pull failed, re-cloning..."
-                cd ..
-                rm -rf "$APP_DIR"
-                git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
-              fi
-            elif [ -d "$APP_DIR" ]; then
-              echo "📥 Directory exists but is not a git repo. Re-cloning..."
-              rm -rf "$APP_DIR"
-              git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
+              git fetch origin $BRANCH
+              git reset --hard origin/$BRANCH
             else
-              echo "📥 Cloning repository..."
-              git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
+              echo "❌ ERROR: $APP_DIR no es un repositorio git. El deploy solo permite pull. Abortando."
+              exit 1
             fi
 
             cd $APP_DIR
