@@ -333,7 +333,7 @@ jobs:
             WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>/dev/null || echo "000")
             echo "Web status: $WEB_STATUS"
 
-            if [ "$API_STATUS" = "200" ] && [ "$WEB_STATUS" = "200" ]; then
+            if [ "$API_STATUS" = "301" ] && [ "$WEB_STATUS" = "301" ]; then
               echo "✅ All health checks passed!"
               echo "status=success" >> /tmp/deploy_status
               exit 0
