@@ -272,8 +272,9 @@ jobs:
             echo "══════════════════════════════════════"
 
             # ── 1. Clone or pull repo ──
-            if [ ! -d "$APP_DIR" ]; then
+            if [ ! -d "$APP_DIR" ] || [ -z "$(ls -A $APP_DIR 2>/dev/null)" ]; then
               echo "📥 Cloning repository..."
+              rm -rf "$APP_DIR"
               git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
             else
               echo "📥 Pulling latest changes..."
