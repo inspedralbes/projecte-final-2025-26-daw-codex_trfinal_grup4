@@ -275,25 +275,10 @@ jobs:
             if [ ! -d "$APP_DIR" ]; then
               echo "📥 Cloning repository..."
               git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
-            elif [ ! -d "$APP_DIR/.git" ]; then
-              echo "📥 Directory exists but is not a git repo. Re-cloning..."
-              if [ -f "$APP_DIR/.env" ]; then
-                echo "💾 Preserving .env file..."
-                mv "$APP_DIR/.env" /tmp/codex_env_backup
-              fi
-              rm -rf $APP_DIR
-              git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
-              if [ -f /tmp/codex_env_backup ]; then
-                mv /tmp/codex_env_backup "$APP_DIR/.env"
-                echo "✅ .env restored after clone"
-              fi
             else
               echo "📥 Pulling latest changes..."
               cd $APP_DIR
               git fetch origin $BRANCH
-              # Save current commit for rollback
-              PREVIOUS_COMMIT=$(git rev-parse HEAD)
-              echo "$PREVIOUS_COMMIT" > /tmp/codex_previous_commit
               git reset --hard origin/$BRANCH
             fi
 
