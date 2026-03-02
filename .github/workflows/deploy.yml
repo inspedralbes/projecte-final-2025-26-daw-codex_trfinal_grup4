@@ -388,7 +388,7 @@ jobs:
             done
 
             echo "🗑️ Caching config, routes & views..."
-            $COMPOSE exec -T api bash -c "php artisan config:cache & php artisan route:cache & wait"
+            $COMPOSE exec -T api sh -c "php artisan config:cache & php artisan route:cache & wait"
 
             echo "🔗 Creating storage symlink..."
             $COMPOSE exec -T api php artisan storage:link 2>/dev/null || true

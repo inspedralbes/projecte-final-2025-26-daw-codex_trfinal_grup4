@@ -45,6 +45,8 @@ services:
     volumes:
       - ./docker/php/php.prod.ini:/usr/local/etc/php/conf.d/custom.ini:ro
       - api_storage:/var/www/html/storage
+    env_file:
+      - api/.env
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
@@ -85,12 +87,11 @@ services:
       target: production
     container_name: tfg_socket_prod
     restart: always
+    env_file:
+      - socket/.env
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
     depends_on:
       redis:
         condition: service_healthy
