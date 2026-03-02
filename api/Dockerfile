@@ -64,13 +64,13 @@ WORKDIR /var/www/html
 FROM base AS production
 
 # Copiar primero composer.json y composer.lock para mejor caché
-COPY api/composer.json api/composer.lock* ./
+COPY composer.json composer.lock* ./
 
 # Instalar dependencias sin los ficheros de source
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Ahora copiar el resto del código
-COPY api/ .
+COPY . .
 
 # Ejecutar scripts de composer después de copiar todo
 RUN composer install --no-dev --optimize-autoloader --no-interaction

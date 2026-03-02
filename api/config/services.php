@@ -38,17 +38,10 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        // Dynamically construct redirect URI based on environment
-        // In production: use GOOGLE_REDIRECT_URI env var
-        // In development: use http://localhost:5173/auth/google/callback
-        'redirect' => env('GOOGLE_REDIRECT_URI', function () {
-            if (app()->isProduction()) {
-                // Production: construct from APP_URL
-                return rtrim(env('APP_URL'), '/') . '/auth/google/callback';
-            }
-            // Development
-            return 'http://localhost:5173/auth/google/callback';
-        }()),
+        'redirect' => env('GOOGLE_REDIRECT_URI') ??
+            (app()->isProduction()
+                ? rtrim(env('APP_URL', 'https://localhost'), '/') . '/auth/google/callback'
+                : 'http://localhost:5173/auth/google/callback'),
     ],
 
 ];
