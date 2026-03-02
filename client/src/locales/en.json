@@ -115,7 +115,12 @@
     "more": "More",
     "teacher": "Teacher",
     "admin": "Admin",
-    "student": "Student"
+    "student": "Student",
+    "admin_summary": "Summary",
+    "admin_users": "Users",
+    "admin_moderation": "Moderation",
+    "admin_centers": "Centers",
+    "admin_requests": "Requests"
   },
   "footer": {
     "terms": "Terms",

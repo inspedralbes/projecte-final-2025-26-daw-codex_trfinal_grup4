@@ -53,11 +53,12 @@ const VerifiedRoute = ({ children }) => {
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
-  if (!user || user.role !== 'admin') return <Navigate to="/" replace />;
+  if (!user || user.role !== "admin") return <Navigate to="/" replace />;
   return children;
 };
 
 export default function AppRouter() {
+  const { user } = useAuth();
   return (
     <Routes>
       {/* Public landing page (only if not logged in) */}
@@ -87,7 +88,10 @@ export default function AppRouter() {
             </VerifiedRoute>
           }
         >
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={user?.role === "admin" ? <Navigate to="/admin" replace /> : <Home />}
+          />
           <Route path="/post/:id" element={<PostDetail />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/notifications" element={<Notifications />} />

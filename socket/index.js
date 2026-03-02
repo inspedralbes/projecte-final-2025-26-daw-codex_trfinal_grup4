@@ -49,6 +49,15 @@ io.on("connection", (socket) => {
   });
 
   /**
+   * Clients join the admin room to receive global admin notifications.
+   *   socket.emit('join-admin')
+   */
+  socket.on("join-admin", () => {
+    socket.join("admin");
+    console.log(`[Socket.io] ${socket.id} joined room admin`);
+  });
+
+  /**
    * Clients join a post room to receive live comments.
    *   socket.emit('join-post', { postId: 1 })
    */
@@ -152,30 +161,34 @@ io.on("connection", (socket) => {
       hasTempId: !!data?.tempId,
       hasCallback: typeof callback === "function",
     });
-    
+
     const { receiverId, content, tempId, token } = data || {};
-    
+
     if (!receiverId || !content || !token) {
       console.log("[Socket.io] Missing required fields");
-      if (callback) callback({ success: false, error: "Missing required fields" });
+      if (callback)
+        callback({ success: false, error: "Missing required fields" });
       return;
     }
 
     try {
       // Call Laravel API to persist the message and validate restrictions
       const apiUrl = process.env.API_URL || "http://api:80";
-      console.log(`[Socket.io] Sending message to API: ${apiUrl}/api/chat/messages`, {
-        receiver_id: receiverId,
-        content: content.trim().substring(0, 50) + "...",
-      });
-      
+      console.log(
+        `[Socket.io] Sending message to API: ${apiUrl}/api/chat/messages`,
+        {
+          receiver_id: receiverId,
+          content: content.trim().substring(0, 50) + "...",
+        },
+      );
+
       const response = await fetch(`${apiUrl}/api/chat/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
-          "X-Socket-P2P": "true",  // Skip Laravel broadcast, socket handles it
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+          "X-Socket-P2P": "true", // Skip Laravel broadcast, socket handles it
         },
         body: JSON.stringify({
           receiver_id: parseInt(receiverId, 10),
@@ -187,7 +200,11 @@ io.on("connection", (socket) => {
       console.log(`[Socket.io] API response: ${response.status}`, result);
 
       if (!response.ok) {
-        if (callback) callback({ success: false, error: result.message || "Failed to send message" });
+        if (callback)
+          callback({
+            success: false,
+            error: result.message || "Failed to send message",
+          });
         return;
       }
 
@@ -206,10 +223,14 @@ io.on("connection", (socket) => {
 
       // Confirm to sender
       if (callback) callback({ success: true, message: result.message });
-
     } catch (err) {
-      console.error("[Socket.io] Error sending P2P message:", err.message, err.stack);
-      if (callback) callback({ success: false, error: err.message || "Server error" });
+      console.error(
+        "[Socket.io] Error sending P2P message:",
+        err.message,
+        err.stack,
+      );
+      if (callback)
+        callback({ success: false, error: err.message || "Server error" });
     }
   });
 
@@ -219,7 +240,7 @@ io.on("connection", (socket) => {
    */
   socket.on("mark-read", async (data) => {
     const { partnerId, userId, token } = data || {};
-    
+
     if (!partnerId || !token) return;
 
     try {
@@ -228,8 +249,8 @@ io.on("connection", (socket) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
         },
       });
 

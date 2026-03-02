@@ -115,7 +115,12 @@
     "more": "Més",
     "teacher": "Professor",
     "admin": "Admin",
-    "student": "Estudiant"
+    "student": "Estudiant",
+    "admin_summary": "Resum",
+    "admin_users": "Usuaris",
+    "admin_moderation": "Moderació",
+    "admin_centers": "Centres",
+    "admin_requests": "Sol·licituds"
   },
   "footer": {
     "terms": "Termes",
