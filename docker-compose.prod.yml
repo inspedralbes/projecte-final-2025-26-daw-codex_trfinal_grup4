@@ -43,6 +43,8 @@ services:
     container_name: tfg_api_prod
     restart: always
     volumes:
+      - ./.env:/var/www/html/.env:ro
+      - ./api/.env:/var/www/html/api/.env:ro
       - ./docker/php/php.prod.ini:/usr/local/etc/php/conf.d/custom.ini:ro
       - api_storage:/var/www/html/storage
     env_file:
