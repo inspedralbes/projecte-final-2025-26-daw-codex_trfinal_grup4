@@ -284,13 +284,13 @@ jobs:
 
             cd $APP_DIR
 
-            # ── 1.5. Copy .env from api to root ──
-            echo "📋 Setting up .env file..."
-            if [ -f "api/.env" ]; then
-              cp api/.env .env
-              echo "✅ .env copied to root"
+            # ── 1.5. Combine all .env files to root ──
+            echo "📋 Combining .env files from all services..."
+            if [ -f "api/.env" ] || [ -f "client/.env" ] || [ -f "socket/.env" ]; then
+              cat api/.env client/.env socket/.env 2>/dev/null > .env
+              echo "✅ .env combined successfully"
             else
-              echo "⚠️ Warning: api/.env not found"
+              echo "⚠️ Warning: No .env files found in services"
             fi
 
             # ── 2. Build & restart containers ──
