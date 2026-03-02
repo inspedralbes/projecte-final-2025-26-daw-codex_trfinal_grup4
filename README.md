@@ -81,17 +81,88 @@ docker compose -f docker-compose.dev.yml restart
 | Redis | localhost:6379 | Caché / Pub-Sub |
 
 ## 🏭 Desplegament a Producció
+
+### Requisits
+- Servidor Linux (Ubuntu 20.04+, Debian 10+, AlmaLinux 9+)
+- Docker >= 24.0
+- Docker Compose >= 2.20
+- Domini apuntant als servidors (DNS configurat)
+- Port 80 i 443 accessibles
+
+### Instal·lació ràpida (VPS/Servidor)
+
 ```bash
+# 1. Clonar repositori
+git clone https://github.com/inspedralbes/projecte-final-2025-26-daw-codex_trfinal_grup4.git
+cd projecte-final-2025-26-daw-codex_trfinal_grup4
+git checkout main
+
+# 2. Copiar i editar variables d'entorn
 cp .env.prod.example .env
-# ⚠️ Editar .env amb contrasenyes segures!
+
+# 3. IMPORTANT: Editar .env amb credencials SEGURES
+#    - Generar APP_KEY: php artisan key:generate (o generar base64 manual)
+#    - Definir DOMAIN=tu-dominio.com
+#    - Cambiar contrasenya BD, Redis, Mail
+#    - Afegir credencials Google OAuth
+nano .env
+
+# 4. Construir i aixecar contenidors
 docker compose -f docker-compose.prod.yml up --build -d
+
+# 5. Generar certificat SSL (Let's Encrypt via Certbot)
+docker compose -f docker-compose.prod.yml exec -T certbot certbot certonly \
+  --webroot -w /var/www/certbot \
+  -d tu-dominio.com
+
+# 6. Executar migracions (una sola vegada)
+docker compose -f docker-compose.prod.yml exec -T api php artisan migrate --force
+docker compose -f docker-compose.prod.yml exec -T api php artisan db:seed --force
+
+# 7. Reiniciar Nginx per carregar certificats
+docker compose -f docker-compose.prod.yml restart webserver
+
+# 8. Verificar (accedir a https://tu-dominio.com)
 ```
 
-## 🔗 Enllaços
-- **Repositori:** https://github.com/inspedralbes/projecte-final-2025-26-daw-codex_trfinal_grup4
-- **Gestor de tasques:** *(pendent)*
-- **Prototip gràfic:** *(pendent)*
-- **URL de producció:** *(pendent)*
+### Checklist Pre-Producció ✅
 
-## 📊 Estat
-🟡 **Infraestructura Docker completada** – Pendent de desenvolupament de l'aplicació.
+- [ ] Certificat SSL generat (`/etc/letsencrypt/live/tu-dominio.com/`)
+- [ ] `.env` amb credencials segures (no clonar de dev)
+- [ ] `DOMAIN` variable configurada correctament
+- [ ] Google OAuth credentials actualitzades amb URL de producció
+- [ ] Database backups configurats
+- [ ] Logs monitorizats
+- [ ] Firewall configurat (només ports 80, 443, SSH)
+- [ ] Email SMTP funcional
+
+### Renovació de Certificat SSL
+
+```bash
+# Manualll
+docker compose -f docker-compose.prod.yml exec -T certbot certbot renew
+
+# Automàtic (cron job cada mes)
+0 0 1 * * cd /path/to/project && docker compose -f docker-compose.prod.yml exec -T certbot certbot renew
+```
+
+### Monitorització & Manteniment
+
+```bash
+# Veure logs
+docker compose -f docker-compose.prod.yml logs -f
+
+# Backup de BD
+docker compose -f docker-compose.prod.yml exec -T mysql mysqldump -u root -p${DB_ROOT_PASSWORD} ${DB_DATABASE} > backup.sql
+
+# Restaurar BD
+docker compose -f docker-compose.prod.yml exec -T mysql mysql -u root -p${DB_ROOT_PASSWORD} ${DB_DATABASE} < backup.sql
+```
+
+### URL de Producció
+- 🌐 **App:** https://tu-dominio.com
+- 📡 **API:** https://tu-dominio.com/api
+- 💬 **Socket.io:** wss://tu-dominio.com/socket.io/
+- 🔒 **SSL:** Let's Encrypt (automàtic)
+
+
