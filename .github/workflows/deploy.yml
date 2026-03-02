@@ -284,6 +284,15 @@ jobs:
 
             cd $APP_DIR
 
+            # ── 1.5. Copy .env from api to root ──
+            echo "📋 Setting up .env file..."
+            if [ -f "api/.env" ]; then
+              cp api/.env .env
+              echo "✅ .env copied to root"
+            else
+              echo "⚠️ Warning: api/.env not found"
+            fi
+
             # ── 2. Build & restart containers ──
             echo "🏗️ Building and starting containers..."
             $COMPOSE down --remove-orphans
