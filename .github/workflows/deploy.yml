@@ -149,8 +149,19 @@ jobs:
       - name: Copy .env for testing
         working-directory: api
         run: |
-          cp .env.example .env 2>/dev/null || true
-          php artisan key:generate --force || true
+          cp .env.example .env
+          # Ensure test database configuration is set
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=tfg_test/' .env
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
+          sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=root/' .env
+          sed -i 's/CACHE_DRIVER=.*/CACHE_DRIVER=redis/' .env
+          sed -i 's/SESSION_DRIVER=.*/SESSION_DRIVER=redis/' .env
+          sed -i 's/REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
+          sed -i 's/REDIS_PORT=.*/REDIS_PORT=6379/' .env
+          php artisan key:generate --force
 
       - name: Run PHPUnit tests
         working-directory: api
