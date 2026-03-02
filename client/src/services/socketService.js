@@ -115,6 +115,28 @@ const socketService = {
   },
 
   /**
+   * Join the global admin room
+   */
+  joinAdminRoom: () => {
+    if (socket) {
+      socket.emit("join-admin");
+      rooms.add("admin");
+      console.log("[Socket.io] Joined room: admin");
+    }
+  },
+
+  /**
+   * Leave the admin room
+   */
+  leaveAdminRoom: () => {
+    if (socket) {
+      socket.emit("leave-admin"); // Optional: handle in server if needed, or just leave
+      rooms.delete("admin");
+      console.log("[Socket.io] Left room: admin");
+    }
+  },
+
+  /**
    * Listen for new notifications
    * @param {Function} callback - Handler function
    */
@@ -222,14 +244,19 @@ const socketService = {
         resolve({ success: false, error: "Not connected" });
         return;
       }
-      
+
       if (!authToken) {
         console.error("[Socket.io] sendMessage: No auth token");
         resolve({ success: false, error: "Not authenticated" });
         return;
       }
 
-      console.log("[Socket.io] Sending message:", { receiverId, contentLength: content?.length, tempId, hasToken: !!authToken });
+      console.log("[Socket.io] Sending message:", {
+        receiverId,
+        contentLength: content?.length,
+        tempId,
+        hasToken: !!authToken,
+      });
 
       // Timeout in case server doesn't respond
       const timeout = setTimeout(() => {
@@ -237,15 +264,11 @@ const socketService = {
         resolve({ success: false, error: "Server timeout" });
       }, 10000);
 
-      socket.emit(
-        "send-message",
-        { receiverId, content, tempId, token: authToken },
-        (response) => {
-          clearTimeout(timeout);
-          console.log("[Socket.io] sendMessage response:", response);
-          resolve(response || { success: false, error: "No response" });
-        }
-      );
+      socket.emit("send-message", { receiverId, content, tempId, token: authToken }, (response) => {
+        clearTimeout(timeout);
+        console.log("[Socket.io] sendMessage response:", response);
+        resolve(response || { success: false, error: "No response" });
+      });
     });
   },
 
@@ -300,6 +323,7 @@ const socketService = {
         if (type === "user") socket.emit("join", { userId: id });
         if (type === "post") socket.emit("join-post", { postId: id });
         if (type === "profile") socket.emit("join-profile", { userId: id });
+        if (room === "admin") socket.emit("join-admin");
         if (type === "chat") {
           const [userId, partnerId] = id.split("-");
           socket.emit("join-chat", { userId: parseInt(userId), partnerId: parseInt(partnerId) });
@@ -316,6 +340,16 @@ const socketService = {
   onProfileUpdate: (callback) => {
     if (socket) {
       socket.on("profile.updated", callback);
+    }
+  },
+
+  /**
+   * Listen for admin events
+   * @param {Function} callback - Handler function
+   */
+  onAdminEvent: (callback) => {
+    if (socket) {
+      socket.on("admin.new_request", callback);
     }
   },
 

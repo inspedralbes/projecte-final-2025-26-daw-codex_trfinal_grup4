@@ -79,6 +79,9 @@ class CenterRequestController extends Controller
 
         $centerRequest = CenterRequest::create($data);
 
+        // Notify admins via Socket/Redis
+        event(new \App\Events\CenterRequestCreated($centerRequest->load('user:id,name,username')));
+
         return $this->success($centerRequest, 'Center request submitted successfully. An admin will review it.', 201);
     }
 

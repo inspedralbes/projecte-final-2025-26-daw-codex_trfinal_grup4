@@ -8,6 +8,10 @@
   min-height: 100vh;
 }
 
+.app-layout--admin {
+  grid-template-columns: var(--sidebar-width) 1fr;
+}
+
 /* ── Mobile Header (hidden on desktop) ────────────────────── */
 .mobile-header {
   display: none;
@@ -28,6 +32,10 @@
 @media (max-width: 1280px) {
   .app-layout {
     grid-template-columns: var(--sidebar-collapsed) 1fr var(--widget-width);
+  }
+
+  .app-layout--admin {
+    grid-template-columns: var(--sidebar-collapsed) 1fr;
   }
 }
 
@@ -130,5 +138,43 @@
 
   .main-content {
     border: none;
+  }
+}
+
+/* ── Admin Toast Notifications ─────────────────────────── */
+.ar-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--depth-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--ink-primary);
+  z-index: var(--z-fixed);
+  box-shadow: var(--shadow-xl);
+  animation: toastSlideUp 0.3s var(--ease-out);
+  max-width: 400px;
+}
+
+.ar-toast--success {
+  border-left: 4px solid var(--state-success);
+}
+
+.ar-toast--info {
+  border-left: 4px solid var(--codex-teal);
+}
+
+@keyframes toastSlideUp {
+  from {
+    transform: translateY(100%) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
   }
 }
