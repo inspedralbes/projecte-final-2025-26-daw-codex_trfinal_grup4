@@ -66,14 +66,14 @@ FROM base AS production
 # Copiar primero composer.json y composer.lock para mejor caché
 COPY composer.json composer.lock* ./
 
-# Instalar dependencias sin los ficheros de source
+# Instalar dependencias sin los ficheros de source (--no-scripts para evitar errores pre-instalación)
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Ahora copiar el resto del código
+# Ahora copiar el resto del código (necesario para que los scripts funcionen correctamente)
 COPY . .
 
-# Ejecutar scripts de composer después de copiar todo
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Ejecutar scripts de composer después de copiar todo el código
+RUN composer dump-autoload --no-interaction --no-dev --optimize
 
 # Permisos
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
