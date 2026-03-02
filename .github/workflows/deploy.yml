@@ -346,12 +346,46 @@ jobs:
             $COMPOSE up -d
 
             # ── 3. Wait for MySQL to be healthy ──
-            echo "⏳ Waiting for MySQL..."
-            timeout 120 bash -c "until $COMPOSE exec -T mysql mysqladmin ping -h localhost -u root -p\"\$DB_ROOT_PASSWORD\" --silent 2>/dev/null; do sleep 3; done" || true
+            echo "⏳ Waiting for MySQL to be ready..."
+            MAX_ATTEMPTS=60
+            ATTEMPT=1
+            while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+              if $COMPOSE exec -T mysql mysqladmin ping -h localhost -u root -p"$DB_ROOT_PASSWORD" --silent 2>/dev/null; then
+                echo "✅ MySQL is ready!"
+                break
+              fi
+              echo "  Attempt $ATTEMPT/$MAX_ATTEMPTS - MySQL not ready yet, waiting..."
+              sleep 2
+              ATTEMPT=$((ATTEMPT + 1))
+            done
 
-            # ── 4. Run Laravel post-deploy commands (OPTIMIZED) ──
+            # ── 4. Wait for API container to be ready ──
+            echo "⏳ Waiting for API container to be ready..."
+            MAX_ATTEMPTS=30
+            ATTEMPT=1
+            while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+              if $COMPOSE exec -T api php artisan tinker --execute="echo 'OK';" 2>/dev/null | grep -q "OK"; then
+                echo "✅ API is ready!"
+                break
+              fi
+              echo "  Attempt $ATTEMPT/$MAX_ATTEMPTS - API not ready yet, waiting..."
+              sleep 2
+              ATTEMPT=$((ATTEMPT + 1))
+            done
+
+            # ── 5. Run Laravel post-deploy commands with retry ──
             echo "⚙️ Running Laravel migrations..."
-            $COMPOSE exec -T api php artisan migrate --force
+            MAX_ATTEMPTS=5
+            ATTEMPT=1
+            while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+              if $COMPOSE exec -T api php artisan migrate --force; then
+                echo "✅ Migrations completed successfully!"
+                break
+              fi
+              echo "❌ Migration attempt $ATTEMPT/$MAX_ATTEMPTS failed, retrying..."
+              sleep 5
+              ATTEMPT=$((ATTEMPT + 1))
+            done
 
             echo "🗑️ Caching config, routes & views..."
             $COMPOSE exec -T api bash -c "php artisan config:cache & php artisan route:cache & wait"
@@ -359,7 +393,7 @@ jobs:
             echo "🔗 Creating storage symlink..."
             $COMPOSE exec -T api php artisan storage:link 2>/dev/null || true
 
-            # ── 5. Cleanup old Docker images ──
+            # ── 6. Cleanup old Docker images ──
             echo "🧹 Cleaning up unused Docker images..."
             docker image prune -f
 
