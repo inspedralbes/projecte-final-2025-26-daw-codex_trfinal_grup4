@@ -255,7 +255,9 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
-          command_timeout: 10m
+          timeout: 30m
+          command_timeout: 30m
+          script_stop: true
           script: |
             set -e
 
@@ -296,7 +298,15 @@ jobs:
             # ── 2. Build & restart containers ──
             echo "🏗️ Building and starting containers..."
             $COMPOSE down --remove-orphans
-            $COMPOSE up --build -d
+            
+            # Build in background to prevent timeout
+            echo "📦 Building Docker images (this may take a while)..."
+            $COMPOSE build --pull --no-cache api client socket &
+            BUILD_PID=$!
+            wait $BUILD_PID
+            
+            echo "🚀 Starting containers..."
+            $COMPOSE up -d
 
             # ── 3. Wait for MySQL to be healthy ──
             echo "⏳ Waiting for MySQL..."
@@ -330,50 +340,77 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
+          timeout: 10m
+          command_timeout: 10m
           script: |
             echo "🩺 Running health checks..."
-            sleep 8
+            sleep 10
+            
+            APP_DIR="/opt/codex"
+            cd $APP_DIR
+            
+            MAX_ATTEMPTS=30
+            ATTEMPT=1
+            API_HEALTHY=0
+            WEB_HEALTHY=0
 
-            # Check API
-            API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/posts 2>/dev/null || echo "000")
-            echo "API status: $API_STATUS"
-
-            # Check Frontend
-            WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>/dev/null || echo "000")
-            echo "Web status: $WEB_STATUS"
-
-            if [ "$API_STATUS" = "301" ] && [ "$WEB_STATUS" = "301" ]; then
-              echo "✅ All health checks passed!"
-              echo "status=success" >> /tmp/deploy_status
-              exit 0
-            else
-              echo "❌ Health check failed! API=$API_STATUS WEB=$WEB_STATUS"
-              echo "status=failed" >> /tmp/deploy_status
-              exit 1
-            fi
+            while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+              echo "Attempt $ATTEMPT/$MAX_ATTEMPTS..."
+              
+              # Check API
+              API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health 2>/dev/null || echo "000")
+              echo "  API status: $API_STATUS"
+              
+              # Check Frontend
+              WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>/dev/null || echo "000")
+              echo "  Web status: $WEB_STATUS"
+              
+              if [ "$API_STATUS" = "200" ]; then
+                API_HEALTHY=1
+              fi
+              
+              if [ "$WEB_STATUS" = "200" ] || [ "$WEB_STATUS" = "301" ]; then
+                WEB_HEALTHY=1
+              fi
+              
+              if [ "$API_HEALTHY" = "1" ] && [ "$WEB_HEALTHY" = "1" ]; then
+                echo "✅ All health checks passed!"
+                exit 0
+              fi
+              
+              ATTEMPT=$((ATTEMPT + 1))
+              sleep 2
+            done
+            
+            echo "❌ Health check failed after $MAX_ATTEMPTS attempts"
+            echo "API_STATUS=$API_STATUS WEB_STATUS=$WEB_STATUS"
+            exit 1
 
       # ── Automatic Rollback if health check fails ──
       - name: 🔄 Rollback on failure
-        if: failure()
+        if: failure() && steps.health.outcome == 'failure'
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
+          timeout: 15m
+          command_timeout: 15m
           script: |
-            APP_DIR="${{ secrets.APP_DIR }}"
+            APP_DIR="/opt/codex"
             COMPOSE="docker compose -f docker-compose.prod.yml"
 
             echo "══════════════════════════════════════"
             echo "  🔄 ROLLING BACK TO PREVIOUS VERSION"
             echo "══════════════════════════════════════"
 
-            cd $APP_DIR
+            cd $APP_DIR || exit 1
 
             # Get previous commit
-            if [ -f /tmp/codex_previous_commit ]; then
-              PREVIOUS_COMMIT=$(cat /tmp/codex_previous_commit)
+            PREVIOUS_COMMIT=$(git rev-parse HEAD~1 2>/dev/null)
+            
+            if [ -n "$PREVIOUS_COMMIT" ]; then
               echo "↩️ Rolling back to commit: ${PREVIOUS_COMMIT:0:8}"
               git reset --hard $PREVIOUS_COMMIT
 
@@ -382,22 +419,21 @@ jobs:
               $COMPOSE up --build -d
 
               # Wait for MySQL
+              echo "⏳ Waiting for MySQL..."
               timeout 120 bash -c "until $COMPOSE exec -T mysql mysqladmin ping -h localhost -u root -p\"\$DB_ROOT_PASSWORD\" --silent 2>/dev/null; do sleep 3; done" || true
 
               # Re-run post-deploy
               $COMPOSE exec -T api php artisan migrate --force
               $COMPOSE exec -T api php artisan config:cache
-              $COMPOSE exec -T api php artisan route:cache
-              $COMPOSE exec -T api php artisan view:cache
 
               # Verify rollback
               sleep 5
-              API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/posts 2>/dev/null || echo "000")
+              API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health 2>/dev/null || echo "000")
               if [ "$API_STATUS" = "200" ]; then
                 echo "✅ Rollback successful! API responding."
               else
                 echo "❌ Rollback also failed! Manual intervention required."
-                echo "Run: cd $APP_DIR && docker compose -f docker-compose.prod.yml logs"
+                echo "Check logs: cd $APP_DIR && docker compose -f docker-compose.prod.yml logs -f api"
               fi
             else
               echo "⚠️ No previous commit found. Cannot rollback automatically."
