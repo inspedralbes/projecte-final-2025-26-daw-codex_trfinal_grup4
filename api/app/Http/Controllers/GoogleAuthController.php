@@ -21,11 +21,14 @@ class GoogleAuthController extends Controller
      *
      * Returns the Google OAuth redirect URL.
      * The frontend (React SPA) calls this to get the URL, then redirects the browser.
+     *
+     * Includes prompt=select_account to allow user to select their Google account.
      */
     public function redirect(): JsonResponse
     {
         $url = Socialite::driver('google')
             ->stateless()
+            ->with(['prompt' => 'select_account'])
             ->redirect()
             ->getTargetUrl();
 
