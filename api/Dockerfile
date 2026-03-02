@@ -44,8 +44,9 @@ RUN pecl install redis \
     && docker-php-ext-enable redis
 
 # Optimizaciones de OPCache
-RUN echo "opcache.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
-    echo "opcache.preload=/var/www/html/bootstrap/cache/preload.php" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
+RUN echo "opcache.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
+# NOTE: preload.php is generated during deploy via 'php artisan package:discover'
+# so we don't configure it here to avoid build errors
 
 # -------------------------------------------------------------
 #  Composer
