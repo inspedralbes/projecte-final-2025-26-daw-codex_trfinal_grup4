@@ -7,6 +7,11 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# Build args for Vite (baked into the static build)
+ARG VITE_API_URL
+ARG VITE_SOCKET_URL
+ARG VITE_GOOGLE_CLIENT_ID
+
 # Install dependencies first (better cache)
 COPY package*.json ./
 RUN npm ci

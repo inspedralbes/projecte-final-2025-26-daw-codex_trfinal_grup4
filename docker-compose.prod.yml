@@ -1,12 +1,13 @@
 # =============================================================
-#  Docker Compose – PRODUCCIÓN (Prod)
+#  Docker Compose – PRODUCCIÓN
+#  Un único .env en la raíz como fuente de verdad
 #  Levantar: docker compose -f docker-compose.prod.yml up --build -d
 # =============================================================
 
 services:
 
   # -----------------------------------------------------------
-  #  Nginx – Punto de entrada (Reverse Proxy + Static Server)
+  #  Nginx – Reverse Proxy
   # -----------------------------------------------------------
   webserver:
     image: nginx:1.25-alpine
@@ -42,13 +43,11 @@ services:
       target: production
     container_name: tfg_api_prod
     restart: always
+    env_file: .env
     volumes:
       - ./.env:/var/www/html/.env:ro
-      - ./api/.env:/var/www/html/api/.env:ro
       - ./docker/php/php.prod.ini:/usr/local/etc/php/conf.d/custom.ini:ro
       - api_storage:/var/www/html/storage
-    env_file:
-      - api/.env
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
@@ -61,21 +60,22 @@ services:
       - tfg_network
 
   # -----------------------------------------------------------
-  #  Frontend – React Build (genera archivos estáticos)
-  #  Este contenedor se ejecuta una vez, copia el build
-  #  al volumen compartido y finaliza.
+  #  Frontend – React Build (copia estáticos y sale)
   # -----------------------------------------------------------
   client:
     build:
       context: ./client
       dockerfile: Dockerfile
       target: production
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+        - VITE_SOCKET_URL=${VITE_SOCKET_URL}
+        - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
     container_name: tfg_client_prod
     restart: "no"
     volumes:
       - client_build:/output
-    # Copiar los archivos del build al volumen compartido
-    command: ["sh", "-c", "cp -r /app/dist/* /output/ && echo 'Build copied successfully'"]
+    command: ["sh", "-c", "cp -r /app/dist/* /output/ && echo 'Build copied'"]
     networks:
       - tfg_network
 
@@ -89,8 +89,7 @@ services:
       target: production
     container_name: tfg_socket_prod
     restart: always
-    env_file:
-      - socket/.env
+    env_file: .env
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -99,7 +98,6 @@ services:
         condition: service_healthy
     networks:
       - tfg_network
-    # Sin puertos expuestos – solo accesible via red interna
 
   # -----------------------------------------------------------
   #  MySQL 8.0
@@ -125,7 +123,6 @@ services:
       start_period: 60s
     networks:
       - tfg_network
-    # Sin puertos expuestos – solo accesible via red interna
 
   # -----------------------------------------------------------
   #  Redis
@@ -144,7 +141,6 @@ services:
       retries: 5
     networks:
       - tfg_network
-    # Sin puertos expuestos – solo accesible via red interna
 
   # -----------------------------------------------------------
   #  Certbot – Let's Encrypt SSL
@@ -159,26 +155,14 @@ services:
     networks:
       - tfg_network
 
-# =============================================================
-#  Volumes (persistentes)
-# =============================================================
 volumes:
   mysql_data:
-    driver: local
   redis_data:
-    driver: local
   api_storage:
-    driver: local
   client_build:
-    driver: local
   certbot_conf:
-    driver: local
   certbot_www:
-    driver: local
 
-# =============================================================
-#  Networks
-# =============================================================
 networks:
   tfg_network:
     driver: bridge
