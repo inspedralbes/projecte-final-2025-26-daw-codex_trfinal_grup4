@@ -3,8 +3,15 @@
 # =============================================================
 FROM php:8.3-fpm-alpine AS base
 
+# Etiqueta para identificar imagen
+LABEL maintainer="Codex Team"
+LABEL version="1.0"
+
+# Aumentar el tiempo de timeout para composer
+ENV COMPOSER_PROCESS_TIMEOUT=900
+
 # -------------------------------------------------------------
-#  System dependencies
+#  System dependencies (mantenidas en la misma capa para mejor caché)
 # -------------------------------------------------------------
 RUN apk add --no-cache \
     curl \
@@ -36,14 +43,19 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 RUN pecl install redis \
     && docker-php-ext-enable redis
 
+# Optimizaciones de OPCache
+RUN echo "opcache.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
+    echo "opcache.preload=/var/www/html/bootstrap/cache/preload.php" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini
+
 # -------------------------------------------------------------
 #  Composer
 # -------------------------------------------------------------
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# -------------------------------------------------------------
-#  Working directory
-# -------------------------------------------------------------
+# Permitir plugins de composer (para poder usar git en reqs)
+RUN composer config --global allow-plugins.cweagans/composer-patches true
+
+# Working directory
 WORKDIR /var/www/html
 
 # -------------------------------------------------------------
@@ -51,10 +63,20 @@ WORKDIR /var/www/html
 # -------------------------------------------------------------
 FROM base AS production
 
-COPY . /var/www/html
+# Copiar primero composer.json y composer.lock para mejor caché
+COPY api/composer.json api/composer.lock* ./
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction \
-    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+# Instalar dependencias sin los ficheros de source
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+# Ahora copiar el resto del código
+COPY api/ .
+
+# Ejecutar scripts de composer después de copiar todo
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Permisos
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 USER www-data
@@ -63,12 +85,11 @@ EXPOSE 9000
 CMD ["php-fpm"]
 
 # -------------------------------------------------------------
-#  Development stage – dependencies will be installed at runtime
-#  via volume mount + init script
+#  Development stage
 # -------------------------------------------------------------
 FROM base AS development
 
-# Add Xdebug for development
+# Add Xdebug para debugging
 RUN pecl install xdebug \
     && docker-php-ext-enable xdebug
 
