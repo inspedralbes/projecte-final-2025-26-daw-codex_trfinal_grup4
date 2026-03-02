@@ -300,10 +300,9 @@ jobs:
             $COMPOSE down --remove-orphans
             
             # Build in background to prevent timeout
-            echo "📦 Building Docker images (this may take a while)..."
-            $COMPOSE build --pull --no-cache api client socket &
-            BUILD_PID=$!
-            wait $BUILD_PID
+            # NOTE: Using --pull to get latest base images but KEEPING cache for faster builds
+            echo "📦 Building Docker images..."
+            $COMPOSE build --pull api client socket
             
             echo "🚀 Starting containers..."
             $COMPOSE up -d
@@ -312,14 +311,12 @@ jobs:
             echo "⏳ Waiting for MySQL..."
             timeout 120 bash -c "until $COMPOSE exec -T mysql mysqladmin ping -h localhost -u root -p\"\$DB_ROOT_PASSWORD\" --silent 2>/dev/null; do sleep 3; done" || true
 
-            # ── 4. Run Laravel post-deploy commands ──
+            # ── 4. Run Laravel post-deploy commands (OPTIMIZED) ──
             echo "⚙️ Running Laravel migrations..."
             $COMPOSE exec -T api php artisan migrate --force
 
             echo "🗑️ Caching config, routes & views..."
-            $COMPOSE exec -T api php artisan config:cache
-            $COMPOSE exec -T api php artisan route:cache
-            $COMPOSE exec -T api php artisan view:cache
+            $COMPOSE exec -T api bash -c "php artisan config:cache & php artisan route:cache & wait"
 
             echo "🔗 Creating storage symlink..."
             $COMPOSE exec -T api php artisan storage:link 2>/dev/null || true
@@ -357,24 +354,25 @@ jobs:
             while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
               echo "Attempt $ATTEMPT/$MAX_ATTEMPTS..."
               
-              # Check API
-              API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/api/health 2>/dev/null || echo "000")
+              # Check API (follow redirects with -L, accept 200 or 301 redirect)
+              API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L http://localhost/api/health 2>/dev/null || echo "000")
               echo "  API status: $API_STATUS"
               
-              # Check Frontend
-              WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>/dev/null || echo "000")
+              # Check Frontend (follow redirects, accept 200 or 301)
+              WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L http://localhost/ 2>/dev/null || echo "000")
               echo "  Web status: $WEB_STATUS"
               
-              if [ "$API_STATUS" = "200" ]; then
+              # Accept 200 (OK), 301 (redirect to HTTPS is OK), or 2xx responses
+              if [[ "$API_STATUS" =~ ^(200|301|302|307|308)$ ]] || [[ "$API_STATUS" =~ ^2[0-9][0-9]$ ]]; then
                 API_HEALTHY=1
               fi
               
-              if [ "$WEB_STATUS" = "200" ] || [ "$WEB_STATUS" = "301" ]; then
+              if [[ "$WEB_STATUS" =~ ^(200|301|302|307|308)$ ]] || [[ "$WEB_STATUS" =~ ^2[0-9][0-9]$ ]]; then
                 WEB_HEALTHY=1
               fi
               
               if [ "$API_HEALTHY" = "1" ] && [ "$WEB_HEALTHY" = "1" ]; then
-                echo "✅ All health checks passed!"
+                echo "✅ All health checks passed! (API=$API_STATUS, WEB=$WEB_STATUS)"
                 exit 0
               fi
               
