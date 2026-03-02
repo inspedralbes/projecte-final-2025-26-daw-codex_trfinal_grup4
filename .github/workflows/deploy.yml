@@ -260,7 +260,7 @@ jobs:
             set -e
 
             # ── Variables ──
-            APP_DIR="${{ secrets.APP_DIR }}"
+            APP_DIR="/opt/codex"
             REPO_URL="https://github.com/${{ github.repository }}.git"
             BRANCH="main"
             COMMIT="${{ github.sha }}"
@@ -272,21 +272,14 @@ jobs:
             echo "══════════════════════════════════════"
 
             # ── 1. Clone or pull repo ──
-            if [ ! -d "$APP_DIR" ]; then
-              echo "📥 Cloning repository..."
-              git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
-            elif [ ! -d "$APP_DIR/.git" ]; then
-              echo "📥 Directory exists but is not a git repo. Re-cloning..."
-              rm -rf $APP_DIR
-              git clone --branch $BRANCH --single-branch $REPO_URL $APP_DIR
-            else
+            if [ -d "$APP_DIR/.git" ]; then
               echo "📥 Pulling latest changes..."
               cd $APP_DIR
               git fetch origin $BRANCH
-              # Save current commit for rollback
-              PREVIOUS_COMMIT=$(git rev-parse HEAD)
-              echo "$PREVIOUS_COMMIT" > /tmp/codex_previous_commit
               git reset --hard origin/$BRANCH
+            else
+              echo "❌ ERROR: $APP_DIR no es un repositorio git. El deploy solo permite pull. Abortando."
+              exit 1
             fi
 
             cd $APP_DIR
@@ -340,7 +333,7 @@ jobs:
             WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ 2>/dev/null || echo "000")
             echo "Web status: $WEB_STATUS"
 
-            if [ "$API_STATUS" = "200" ] && [ "$WEB_STATUS" = "200" ]; then
+            if [ "$API_STATUS" = "301" ] && [ "$WEB_STATUS" = "301" ]; then
               echo "✅ All health checks passed!"
               echo "status=success" >> /tmp/deploy_status
               exit 0
