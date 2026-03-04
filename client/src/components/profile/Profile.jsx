@@ -508,8 +508,18 @@ export default function Profile({ username }) {
                 }
                 alt={user.name}
               />
+              {/* Medal badge for points – mobile only */}
+              <div className="profile-guay__points-medal">
+                <span className="profile-guay__medal-icon">🏅</span>
+                <span className="profile-guay__medal-value">
+                  {typeof user.reputation === "object"
+                    ? user.reputation?.score || 0
+                    : user.reputation || 0}
+                </span>
+              </div>
             </div>
           </div>
+
           <div className="profile-guay__actions-row">
             {isOwnProfile ? (
               <button
@@ -525,7 +535,16 @@ export default function Profile({ username }) {
                   onClick={() => navigate(`/messages?user=${user.id}`)}
                   title={t("profile.sendMessage")}
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                   </svg>
                 </button>
@@ -543,12 +562,39 @@ export default function Profile({ username }) {
 
       {/* 2. Main Identity Section */}
       <section className="profile-guay__info">
-        <div className="profile-guay__identity">
-          <div className="profile-guay__name-group">
-            <h1 className="profile-guay__name">{user.name}</h1>
-            <span className="profile-guay__role-badge">{roleName}</span>
+        <div className="profile-guay__info-top">
+          <div className="profile-guay__identity">
+            <div className="profile-guay__name-group">
+              <h1 className="profile-guay__name">{user.name}</h1>
+              <span className="profile-guay__role-badge">{roleName}</span>
+            </div>
+            <p className="profile-guay__username">@{user.username}</p>
           </div>
-          <p className="profile-guay__username">@{user.username}</p>
+
+          {/* Points badge — visible on mobile, next to identity */}
+          <div className="profile-guay__points-display">
+            <span className="profile-guay__points-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="8" r="7" />
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+              </svg>
+            </span>
+            <span className="profile-guay__points-number">
+              {typeof user.reputation === "object"
+                ? user.reputation?.score || 0
+                : user.reputation || 0}
+            </span>
+            <span className="profile-guay__points-label">{t("profile.points")}</span>
+          </div>
         </div>
 
         {user.bio && <p className="profile-guay__bio">{user.bio}</p>}
@@ -656,6 +702,28 @@ export default function Profile({ username }) {
           )}
         </div>
 
+        {/* Mobile stats: shown below metadata on mobile, hidden on desktop */}
+        <div className="profile-guay__mobile-stats">
+          <button
+            className="profile-guay__mobile-stat"
+            onClick={() => setFollowModal({ open: true, type: "followers" })}
+          >
+            <span className="profile-guay__mobile-stat-value">{user.followers_count || 0}</span>
+            <span className="profile-guay__mobile-stat-label">{t("profile.followers")}</span>
+          </button>
+          <button
+            className="profile-guay__mobile-stat"
+            onClick={() => setFollowModal({ open: true, type: "following" })}
+          >
+            <span className="profile-guay__mobile-stat-value">{user.following_count || 0}</span>
+            <span className="profile-guay__mobile-stat-label">{t("feed.tabs.following")}</span>
+          </button>
+          <div className="profile-guay__mobile-stat profile-guay__mobile-stat--noclk">
+            <span className="profile-guay__mobile-stat-value">{user.posts_count || 0}</span>
+            <span className="profile-guay__mobile-stat-label">{t("feed.posts_count")}</span>
+          </div>
+        </div>
+
         <div className="profile-guay__stats">
           <button
             className="profile-guay__stat-btn"
@@ -692,34 +760,112 @@ export default function Profile({ username }) {
           <button
             className={`profile-guay__nav-btn ${activeTab === "posts" ? "active" : ""}`}
             onClick={() => setActiveTab("posts")}
+            title={t("sidebar.profile")}
           >
-            {t("sidebar.profile")}
+            <span className="profile-guay__nav-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
+            </span>
+            <span className="profile-guay__nav-text">{t("sidebar.profile")}</span>
           </button>
           <button
             className={`profile-guay__nav-btn ${activeTab === "replies" ? "active" : ""}`}
             onClick={() => setActiveTab("replies")}
+            title={t("profile.replies")}
           >
-            {t("profile.replies")}
+            <span className="profile-guay__nav-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </span>
+            <span className="profile-guay__nav-text">{t("profile.replies")}</span>
           </button>
           <button
             className={`profile-guay__nav-btn ${activeTab === "questions" ? "active" : ""}`}
             onClick={() => setActiveTab("questions")}
+            title={t("widgets.recent_questions")}
           >
-            {t("widgets.recent_questions")}
+            <span className="profile-guay__nav-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </span>
+            <span className="profile-guay__nav-text">{t("widgets.recent_questions")}</span>
           </button>
           {isOwnProfile && (
             <>
               <button
                 className={`profile-guay__nav-btn ${activeTab === "likes" ? "active" : ""}`}
                 onClick={() => setActiveTab("likes")}
+                title={t("profile.likes")}
               >
-                {t("profile.likes")}
+                <span className="profile-guay__nav-icon">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                </span>
+                <span className="profile-guay__nav-text">{t("profile.likes")}</span>
               </button>
               <button
                 className={`profile-guay__nav-btn ${activeTab === "bookmarks" ? "active" : ""}`}
                 onClick={() => setActiveTab("bookmarks")}
+                title={t("profile.bookmarks")}
               >
-                {t("profile.bookmarks")}
+                <span className="profile-guay__nav-icon">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                  </svg>
+                </span>
+                <span className="profile-guay__nav-text">{t("profile.bookmarks")}</span>
               </button>
             </>
           )}

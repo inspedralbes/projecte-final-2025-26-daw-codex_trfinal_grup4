@@ -147,6 +147,17 @@
   flex: 1;
 }
 
+.profile-guay__info-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.profile-guay__points-display {
+  display: none;
+}
+
 .profile-guay__name-group {
   display: flex;
   align-items: center;
@@ -218,11 +229,10 @@
 .profile-guay__stats {
   display: flex;
   gap: var(--space-4);
-  background: var(--depth-2);
-  padding: var(--space-3) var(--space-6);
-  border-radius: var(--radius-2xl);
-  border: 1px solid var(--border-subtle);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  padding: var(--space-3) 0;
+  border-radius: 0;
+  border: none;
 }
 
 .profile-guay__stat-btn {
@@ -593,126 +603,429 @@
   color: var(--ink-primary);
 }
 
-@media (max-width: 640px) {
-  .profile__cover {
-    height: 120px;
-  }
+/* ── Desktop defaults for new mobile-only elements ─────────── */
+.profile-guay__mobile-stats {
+  display: none;
+}
 
-  .profile__card {
-    padding: 0 var(--space-4) var(--space-6);
-    margin-top: -48px;
-  }
+.profile-guay__points-medal {
+  display: none;
+}
 
-  .profile__avatar {
-    width: 88px;
-    height: 88px;
-    border-width: 3px;
-  }
+.profile-guay__nav-icon {
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
 
-  .profile__name {
-    font-size: 1.25rem;
-  }
-
-  .profile__username {
-    font-size: 0.85rem;
-  }
-
-  .profile__details {
-    max-width: 100%;
-  }
-
-  .profile__detail {
-    font-size: 0.8rem;
-  }
-
-  .profile__stats {
-    gap: var(--space-4);
-    padding: var(--space-3) 0;
-  }
-
-  .profile__stat-value {
-    font-size: 1rem;
-  }
-
-  .profile__stat-label {
-    font-size: 0.7rem;
-  }
-
-  .profile__bio {
-    font-size: 0.85rem;
-    max-width: 100%;
-    text-align: left;
-    padding: 0 var(--space-2);
-  }
-
-  .profile__edit-btn,
-  .profile__follow-btn {
-    width: 100%;
-    max-width: 280px;
-    padding: 10px 24px;
-  }
-
-  .profile__tabs {
-    margin-top: var(--space-2);
-  }
-
-  .profile__tab {
-    font-size: 0.8rem;
-    padding: var(--space-3);
-  }
-
+/* ── Responsive: Tablets & Small Screens ────────────────────── */
+@media (max-width: 768px) {
   .profile-guay__cover {
-    height: 160px;
+    height: 180px;
   }
 
   .profile-guay__avatar-row {
-    margin-top: -40px;
+    padding: 0 var(--space-4);
+    margin-top: -50px;
   }
 
   .profile-guay__avatar-box {
-    width: 100px;
-    height: 100px;
+    width: 110px;
+    height: 110px;
   }
 
-  .profile-guay__main-row {
-    flex-direction: column;
-    gap: var(--space-6);
-    align-items: center;
-    text-align: center;
-  }
-
-  .profile-guay__name-group {
-    justify-content: center;
-    flex-direction: column;
+  .profile-guay__info {
+    padding: var(--space-4);
   }
 
   .profile-guay__name {
     font-size: 1.5rem;
   }
 
+  .profile-guay__nav {
+    padding: 0 var(--space-2);
+  }
+
+  .profile-guay__nav-btn {
+    padding: var(--space-4) var(--space-4);
+    font-size: 0.875rem;
+  }
+
   .profile-guay__stats {
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
   }
 
   .profile-guay__stat-btn {
-    min-width: 70px;
+    min-width: 80px;
+  }
+
+  /* Edit modal */
+  .edit-modal {
+    max-width: 90vw;
+    padding: var(--space-6);
+  }
+}
+
+/* ── Responsive: Mobile ────────────────────────────────────── */
+@media (max-width: 640px) {
+  .profile-guay__cover {
+    height: 150px;
+  }
+
+  /* ── Avatar row: centered column ────────────────────────── */
+  .profile-guay__avatar-row {
+    flex-direction: column;
+    align-items: center;
+    margin-top: -45px;
+    gap: var(--space-3);
+    padding: 0 var(--space-4);
+  }
+
+  .profile-guay__avatar-container {
+    padding: 3px;
+  }
+
+  .profile-guay__avatar-box {
+    width: 80px;
+    height: 80px;
+    border-width: 3px;
+    position: relative;
+  }
+
+  /* ── Mobile inline stats ────────────────────────────────── */
+  .profile-guay__mobile-stats {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    justify-content: center;
+    padding: var(--space-3) 0;
+  }
+
+  .profile-guay__mobile-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
+    color: inherit;
+  }
+
+  .profile-guay__mobile-stat:not(.profile-guay__mobile-stat--noclk):hover {
+    background: var(--depth-3);
+  }
+
+  .profile-guay__mobile-stat--noclk {
+    cursor: default;
+  }
+
+  .profile-guay__mobile-stat-value {
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--ink-primary);
+    line-height: 1.2;
+  }
+
+  .profile-guay__mobile-stat-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Points medal badge on avatar ───────────────────────── */
+  .profile-guay__points-medal {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    position: absolute;
+    bottom: -6px;
+    right: -6px;
+    background: var(--depth-1);
+    border: 2px solid var(--codex-teal);
+    border-radius: var(--radius-full);
+    padding: 2px 6px;
+    z-index: 3;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .profile-guay__medal-icon {
+    font-size: 0.75rem;
+    line-height: 1;
+  }
+
+  .profile-guay__medal-value {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    color: var(--codex-teal);
+    line-height: 1;
+  }
+
+  /* ── Hide the desktop stats bar ─────────────────────────── */
+  .profile-guay__stats {
+    display: none;
+  }
+
+  /* ── Actions row ────────────────────────────────────────── */
+  .profile-guay__actions-row {
+    justify-content: center;
+    padding-bottom: var(--space-2);
+  }
+
+  .profile-guay__info {
+    padding: var(--space-4);
+  }
+
+  .profile-guay__info-top {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .profile-guay__identity {
+    text-align: left;
+    flex: 1;
+  }
+
+  .profile-guay__points-display {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: rgba(50, 201, 201, 0.08);
+    border: 1px solid rgba(50, 201, 201, 0.2);
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .profile-guay__points-icon {
+    line-height: 1;
+    color: var(--codex-teal);
+    display: flex;
+    align-items: center;
+  }
+
+  .profile-guay__points-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .profile-guay__points-number {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--codex-teal);
+    line-height: 1;
+  }
+
+  .profile-guay__points-label {
+    display: none;
+  }
+
+  .profile-guay__name-group {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .profile-guay__name {
+    font-size: 1.25rem;
+  }
+
+  .profile-guay__username {
+    font-size: 0.9rem;
+  }
+
+  .profile-guay__bio {
+    font-size: 0.9375rem;
+    max-width: 100%;
   }
 
   .profile-guay__metadata {
+    justify-content: flex-start;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .profile-guay__meta-item {
+    font-size: 0.8125rem;
+  }
+
+  /* ── Nav tabs: emojis only ──────────────────────────────── */
+  .profile-guay__nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0;
+    justify-content: space-around;
+  }
+
+  .profile-guay__nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .profile-guay__nav-text {
+    display: none;
+  }
+
+  .profile-guay__nav-icon {
+    display: flex;
+    align-items: center;
     justify-content: center;
   }
 
-  .profile__tab--active::after {
-    width: 48px;
+  .profile-guay__nav-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .profile-guay__nav-btn {
+    padding: var(--space-3) var(--space-2);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .profile-guay__nav-btn.active::after {
+    left: var(--space-3);
+    right: var(--space-3);
     height: 3px;
   }
 
-  .profile__role {
-    font-size: 0.7rem;
-    padding: 3px 12px;
+  /* Feed */
+  .profile-guay__feed {
+    padding: var(--space-2);
+    gap: var(--space-3);
+  }
+
+  .profile-guay__loading-feed,
+  .profile-guay__empty-feed {
+    padding: var(--space-10);
+  }
+
+  /* Edit modal */
+  .edit-modal {
+    max-width: 100%;
+    margin: var(--space-2);
+    padding: var(--space-4);
+    max-height: 95vh;
+    border-radius: var(--radius-xl);
+  }
+
+  .edit-modal__header {
     margin-bottom: var(--space-4);
+  }
+
+  .edit-modal__title {
+    font-size: 1.25rem;
+  }
+
+  .edit-modal__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .edit-modal__banner-section {
+    margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-4);
+  }
+
+  .edit-modal__banner {
+    height: 100px;
+  }
+
+  .edit-modal__avatar-section {
+    margin-top: -40px;
+    margin-bottom: var(--space-4);
+  }
+
+  .edit-modal__avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .edit-modal__field {
+    margin-bottom: var(--space-4);
+  }
+
+  .edit-modal__actions {
+    margin-top: var(--space-4);
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+}
+
+/* ── Responsive: Very Small Phones ─────────────────────────── */
+@media (max-width: 400px) {
+  .profile-guay__cover {
+    height: 120px;
+  }
+
+  .profile-guay__avatar-box {
+    width: 68px;
+    height: 68px;
+  }
+
+  .profile-guay__avatar-row {
+    margin-top: -32px;
+    gap: var(--space-2);
+  }
+
+  .profile-guay__mobile-stat-value {
+    font-size: 1rem;
+  }
+
+  .profile-guay__mobile-stat-label {
+    font-size: 0.625rem;
+  }
+
+  .profile-guay__name {
+    font-size: 1.125rem;
+  }
+
+  .profile-guay__role-badge {
+    font-size: 0.625rem;
+    padding: 2px 8px;
+  }
+
+  .profile-guay__btn {
+    padding: var(--space-2) var(--space-4);
+    font-size: 0.8125rem;
+  }
+
+  .profile-guay__nav-icon {
+    font-size: 1.1rem;
+  }
+
+  .profile-guay__nav-btn {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .profile-guay__points-medal {
+    padding: 1px 4px;
+  }
+
+  .profile-guay__medal-icon {
+    font-size: 0.625rem;
+  }
+
+  .profile-guay__medal-value {
+    font-size: 0.625rem;
+  }
+
+  .edit-modal {
+    padding: var(--space-3);
+  }
+
+  .edit-modal__avatar {
+    width: 64px;
+    height: 64px;
   }
 }
