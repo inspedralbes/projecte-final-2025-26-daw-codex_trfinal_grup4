@@ -8,6 +8,7 @@
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    flex-wrap: wrap;
 }
 
 .btn-back {
@@ -18,6 +19,8 @@
     border-radius: 8px;
     cursor: pointer;
     font-size: 0.9rem;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .audit-posts-list {
@@ -41,6 +44,7 @@
     align-items: center;
     gap: 1rem;
     font-size: 0.8rem;
+    flex-wrap: wrap;
 }
 
 .post-type.badge {
@@ -64,4 +68,15 @@
 .text-italic {
     font-style: italic;
     color: var(--codex-gray);
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .admin-sub-header {
+        gap: 0.75rem;
+    }
+
+    .audit-post-card {
+        padding: 1rem;
+    }
 }

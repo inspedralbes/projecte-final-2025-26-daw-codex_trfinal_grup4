@@ -8,6 +8,7 @@
     display: flex;
     justify-content: space-between;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .admin-search {
@@ -180,4 +181,130 @@
 
 .text-center {
     text-align: center;
+}
+
+/* ── Mobile: hide these on desktop ─────────────────────────── */
+.mobile-actions {
+    display: none;
+}
+
+/* ── Responsive – Expandable Cards ────────────────────────── */
+@media (max-width: 768px) {
+    .admin-search {
+        width: 100%;
+        flex: 1 1 100%;
+    }
+
+    /* Dissolve outer container */
+    .admin-table-container {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        overflow: visible;
+    }
+
+    /* Hide header */
+    .admin-table thead {
+        display: none;
+    }
+
+    /* Block layout */
+    .admin-table,
+    .admin-table tbody,
+    .admin-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    /* Each TR = a card */
+    .admin-table tr {
+        background: var(--depth-1, #0f1520);
+        border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+        border-radius: var(--radius-lg, 12px);
+        margin-bottom: 0.75rem;
+        overflow: hidden;
+        cursor: pointer;
+        transition: border-color 0.2s ease;
+    }
+
+    .admin-table tr:hover {
+        border-color: rgba(20, 184, 166, 0.25);
+    }
+
+    /* Empty state row */
+    .admin-table tr td[colspan] {
+        display: block;
+        padding: 1.25rem;
+        text-align: center;
+        border: none;
+        cursor: default;
+    }
+
+    /* Hide desktop Acciones column */
+    .admin-table td.td-actions {
+        display: none;
+    }
+
+    /* Summary cell – always visible */
+    .admin-table td.td-summary {
+        display: flex;
+        align-items: center;
+        padding: 0.875rem 1rem;
+        gap: 0.75rem;
+    }
+
+    /* Chevron indicator */
+    .admin-table td.td-summary::after {
+        content: '›';
+        margin-left: auto;
+        font-size: 1.3rem;
+        line-height: 1;
+        color: var(--ink-tertiary, #71717a);
+        transition: transform 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .admin-table tr.row-expanded td.td-summary::after {
+        transform: rotate(90deg);
+        color: var(--codex-teal, #14b8a6);
+    }
+
+    /* Show mobile action buttons inline in summary */
+    .mobile-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+    }
+
+    /* Detail cells – hidden by default */
+    .admin-table td.td-detail {
+        display: none;
+    }
+
+    /* Reveal on expand */
+    .admin-table tr.row-expanded td.td-detail {
+        display: grid;
+        grid-template-columns: 90px 1fr;
+        align-items: center;
+        padding: 0.6rem 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 0.875rem;
+        gap: 0.75rem;
+    }
+
+    /* Label from data-label */
+    .admin-table tr.row-expanded td.td-detail::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--ink-tertiary, #71717a);
+        white-space: nowrap;
+    }
+
+    .admin-pagination {
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
 }

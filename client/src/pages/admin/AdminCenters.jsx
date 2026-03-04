@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import api from "@/services/api";
+import { FileText, Trash2 } from "lucide-react";
 import "./AdminCenters.css";
 
 export default function AdminCenters() {
     const [centers, setCenters] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState("");
+    const [expandedCenterId, setExpandedCenterId] = useState(null);
 
     const fetchCenters = async () => {
         setLoading(true);
@@ -99,17 +101,31 @@ export default function AdminCenters() {
                         ) : centers.length === 0 ? (
                             <tr><td colSpan="6" className="text-center">No se encontraron centros.</td></tr>
                         ) : centers.map(center => (
-                            <tr key={center.id}>
-                                <td>
+                            <tr
+                                key={center.id}
+                                className={expandedCenterId === center.id ? 'row-expanded' : ''}
+                                onClick={() => setExpandedCenterId(expandedCenterId === center.id ? null : center.id)}
+                            >
+                                {/* Summary – always visible on mobile */}
+                                <td className="td-summary">
                                     <div className="center-info">
                                         {center.logo && <img src={center.logo} alt="" className="center-logo-sm" />}
                                         <div className="center-name">{center.name}</div>
                                     </div>
+                                    {/* Mobile-only quick actions */}
+                                    <div className="mobile-actions" onClick={(e) => e.stopPropagation()}>
+                                        {center.justificante && (
+                                            <button onClick={() => handleDownloadJustificante(center.id)} className="btn-icon" title="Ver Justificante"><FileText size={14} /></button>
+                                        )}
+                                        <button onClick={() => handleDeleteCenter(center.id)} className="btn-icon btn-delete" title="Eliminar"><Trash2 size={14} /></button>
+                                    </div>
                                 </td>
-                                <td>{center.domain}</td>
-                                <td>{center.city || '-'}</td>
-                                <td>{center.users_count || 0}</td>
-                                <td>
+
+                                {/* Detail cells – expandable on click */}
+                                <td data-label="Dominio" className="td-detail">{center.domain}</td>
+                                <td data-label="Ciudad" className="td-detail">{center.city || '-'}</td>
+                                <td data-label="Usuarios" className="td-detail">{center.users_count || 0}</td>
+                                <td data-label="Estado" className="td-detail" onClick={(e) => e.stopPropagation()}>
                                     <select
                                         value={center.status}
                                         onChange={(e) => handleUpdateStatus(center.id, e.target.value)}
@@ -120,24 +136,14 @@ export default function AdminCenters() {
                                         <option value="rejected">Rechazado</option>
                                     </select>
                                 </td>
-                                <td>
+
+                                {/* Desktop-only full actions column */}
+                                <td className="td-actions">
                                     <div className="table-actions">
                                         {center.justificante && (
-                                            <button
-                                                onClick={() => handleDownloadJustificante(center.id)}
-                                                className="btn-icon"
-                                                title="Ver Justificante"
-                                            >
-                                                📄
-                                            </button>
+                                            <button onClick={() => handleDownloadJustificante(center.id)} className="btn-icon" title="Ver Justificante"><FileText size={15} /></button>
                                         )}
-                                        <button
-                                            onClick={() => handleDeleteCenter(center.id)}
-                                            className="btn-icon btn-delete"
-                                            title="Eliminar"
-                                        >
-                                            🗑️
-                                        </button>
+                                        <button onClick={() => handleDeleteCenter(center.id)} className="btn-icon btn-delete" title="Eliminar"><Trash2 size={15} /></button>
                                     </div>
                                 </td>
                             </tr>
