@@ -5,7 +5,6 @@
 # =============================================================
 
 services:
-
   # -----------------------------------------------------------
   #  Nginx – Reverse Proxy
   # -----------------------------------------------------------
@@ -19,6 +18,7 @@ services:
     volumes:
       - ./docker/nginx/default.prod.conf:/etc/nginx/templates/default.conf.template:ro
       - client_build:/var/www/html/client/dist:ro
+      - api_storage:/var/www/html/api_storage:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - certbot_www:/var/www/certbot:ro
     environment:
@@ -116,7 +116,17 @@ services:
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p${DB_ROOT_PASSWORD}",
+        ]
       interval: 15s
       timeout: 5s
       retries: 5
