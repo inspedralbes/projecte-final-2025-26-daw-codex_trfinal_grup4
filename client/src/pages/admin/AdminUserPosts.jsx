@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "@/services/api";
+import { ArrowLeft } from "lucide-react";
 import "./AdminUserPosts.css";
 
 export default function AdminUserPosts({ user, onBack }) {
@@ -23,7 +24,7 @@ export default function AdminUserPosts({ user, onBack }) {
     return (
         <div className="admin-user-posts">
             <div className="admin-sub-header">
-                <button onClick={onBack} className="btn-back">← Volver a usuarios</button>
+                <button onClick={onBack} className="btn-back"><ArrowLeft size={16} style={{ marginRight: '0.375rem', display: 'inline', verticalAlign: 'middle' }} />Volver a usuarios</button>
                 <h2>Actividad de {user.name} (@{user.username})</h2>
             </div>
 

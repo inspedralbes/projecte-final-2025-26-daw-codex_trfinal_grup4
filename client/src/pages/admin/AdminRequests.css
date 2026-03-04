@@ -252,53 +252,86 @@
     margin: 0;
 }
 
-/* Info box */
-.ar-modal__info {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 10px;
-    padding: 0.875rem 1rem;
-    font-size: 0.85rem;
-    color: var(--ink-secondary, #a1a1aa);
-    line-height: 1.65;
-}
-
-.ar-modal__info p {
-    margin: 0 0 0.6rem;
-    color: var(--ink-secondary, #a1a1aa);
-}
-
-.ar-modal__info ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+/* Review section */
+.ar-modal__review {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
 }
 
-.ar-modal__info li {
+.review-item {
     display: flex;
-    align-items: flex-start;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.review-label {
+    display: flex;
+    align-items: center;
     gap: 0.4rem;
+    color: var(--ink-tertiary, #71717a);
+    font-weight: 500;
 }
 
-.ar-modal--approve .ar-modal__info {
-    border-color: rgba(16, 185, 129, 0.15);
-    background: rgba(16, 185, 129, 0.04);
+.review-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--ink-primary, #f4f4f5);
+    font-weight: 600;
 }
 
-.ar-modal--reject .ar-modal__info {
-    border-color: rgba(239, 68, 68, 0.15);
-    background: rgba(239, 68, 68, 0.04);
+.review-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--depth-4, #0f172a);
 }
 
-.ar-modal__info code {
-    background: rgba(20, 184, 166, 0.12);
+.review-value code {
+    background: rgba(20, 184, 166, 0.1);
     color: var(--codex-teal, #14b8a6);
-    padding: 1px 5px;
+    padding: 2px 6px;
     border-radius: 4px;
-    font-size: 0.82em;
+    font-family: inherit;
+}
+
+/* Impact box */
+.ar-modal__impact {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.825rem;
+    line-height: 1.5;
+}
+
+.impact-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+}
+
+.ar-modal--approve .ar-modal__impact {
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    color: var(--codex-emerald, #10b981);
+}
+
+.ar-modal--reject .ar-modal__impact {
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.impact-body p {
+    margin: 0;
+    color: var(--ink-secondary, #a1a1aa);
 }
 
 /* Field */
@@ -429,4 +462,78 @@
     background: var(--depth-3, #1c2535);
     border: 1px solid rgba(239, 68, 68, 0.3);
     color: #ef4444;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .request-card {
+        padding: 1.25rem;
+    }
+
+    .ar-toast {
+        bottom: calc(var(--mobile-nav-height, 64px) + 0.75rem);
+        right: 1rem;
+        left: 1rem;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .request-card-body {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .request-message,
+    .admin-notes {
+        grid-column: span 1;
+    }
+
+    .request-card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .footer-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .btn-approve,
+    .btn-reject,
+    .btn-secondary {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .request-card-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .request-card {
+        padding: 1rem;
+    }
+
+    .footer-actions {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .ar-modal {
+        padding: 1.5rem;
+    }
+
+    .ar-modal__actions {
+        flex-direction: column-reverse;
+        gap: 0.5rem;
+    }
+
+    .ar-modal__btn {
+        width: 100%;
+        text-align: center;
+    }
 }

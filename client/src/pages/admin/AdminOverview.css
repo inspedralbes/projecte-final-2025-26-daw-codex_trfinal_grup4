@@ -125,3 +125,37 @@
         grid-template-columns: 1fr;
     }
 }
+
+@media (max-width: 768px) {
+    .admin-overview {
+        gap: 1.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.875rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+        min-width: 0;
+    }
+
+    .stat-value {
+        font-size: var(--text-2xl, 1.5rem);
+    }
+
+    .chart-container {
+        padding: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stat-card {
+        padding: 0.875rem;
+    }
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "@/services/api";
-import "./AdminRequests.css";
+import { CheckCircle, XCircle, FileText, CheckCheck, X, User, Building2, AtSign, Info } from "lucide-react";
 
 // ── Custom modal for approve / reject ───────────────────────
 function ActionModal({ mode, request, onConfirm, onClose }) {
@@ -34,40 +34,56 @@ function ActionModal({ mode, request, onConfirm, onClose }) {
 
                 {/* Header */}
                 <div className="ar-modal__header">
-                    <span className="ar-modal__icon">{isApprove ? "✅" : "❌"}</span>
+                    <span className="ar-modal__icon">
+                        {isApprove ? <CheckCircle size={32} color="#10b981" /> : <XCircle size={32} color="#ef4444" />}
+                    </span>
                     <div>
                         <h3 className="ar-modal__title">
-                            {isApprove ? "Aprobar solicitud" : "Rechazar solicitud"}
+                            {isApprove ? "Aprobar Solicitud" : "Rechazar Solicitud"}
                         </h3>
-                        <p className="ar-modal__subtitle">
-                            <strong>{request.full_name}</strong> — {request.center_name}
-                        </p>
+                        <p className="ar-modal__subtitle">Revisa los datos antes de confirmar</p>
                     </div>
                 </div>
 
-                {/* Info box */}
-                <div className="ar-modal__info">
-                    {isApprove ? (
-                        <>
-                            <p>Al aprobar esta solicitud:</p>
-                            <ul>
-                                <li>🏫 Se <strong>creará el centro</strong> <em>{request.center_name}</em> con el dominio <code>@{request.domain}</code></li>
-                                <li>👨‍🏫 El usuario <strong>@{request.user?.username}</strong> será <strong>promovido a Profesor</strong> y asignado como responsable del centro</li>
-                                <li>📧 El centro estará activo de inmediato para todos los usuarios con ese dominio</li>
-                            </ul>
-                        </>
-                    ) : (
-                        <>
-                            <p>Al rechazar esta solicitud el usuario recibirá una notificación con el motivo. <strong>Debes indicar el motivo del rechazo.</strong></p>
-                        </>
-                    )}
+                {/* Request Review Details */}
+                <div className="ar-modal__review">
+                    <div className="review-item">
+                        <span className="review-label"><User size={14} /> Solicitante</span>
+                        <div className="review-value">
+                            <img src={request.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${request.user?.username}`} alt="" className="review-avatar" />
+                            <span>{request.full_name} (@{request.user?.username})</span>
+                        </div>
+                    </div>
+                    <div className="review-item">
+                        <span className="review-label"><Building2 size={14} /> Centro</span>
+                        <div className="review-value">{request.center_name}</div>
+                    </div>
+                    <div className="review-item">
+                        <span className="review-label"><AtSign size={14} /> Dominio</span>
+                        <div className="review-value"><code>@{request.domain}</code></div>
+                    </div>
+                </div>
+
+                {/* Info / Impact Box */}
+                <div className="ar-modal__impact">
+                    <div className="impact-header">
+                        <Info size={16} />
+                        <span>{isApprove ? "Impacto de la aprobación" : "Consecuencia del rechazo"}</span>
+                    </div>
+                    <div className="impact-body">
+                        {isApprove ? (
+                            <p>Se creará el centro oficial, se promocionará al usuario a <strong>Profesor</strong> y el centro quedará activo inmediatamente.</p>
+                        ) : (
+                            <p>La solicitud será denegada y se notificará al usuario con el motivo indicado debajo.</p>
+                        )}
+                    </div>
                 </div>
 
                 {/* Notes / reason textarea */}
                 <div className="ar-modal__field">
                     <label className="ar-modal__label">
                         {isApprove
-                            ? "Notas para el administrador (opcional)"
+                            ? "Notas del administrador (opcional)"
                             : <>Motivo del rechazo <span className="ar-modal__required">*</span></>
                         }
                     </label>
@@ -75,8 +91,8 @@ function ActionModal({ mode, request, onConfirm, onClose }) {
                         className="ar-modal__textarea"
                         rows={3}
                         placeholder={isApprove
-                            ? "Ej: Se ha verificado la documentación correctamente."
-                            : "Ej: La documentación aportada no es suficiente para verificar la vinculación con el centro."
+                            ? "Ej: Documentación verificada."
+                            : "Explica brevemente por qué se rechaza..."
                         }
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
@@ -96,7 +112,7 @@ function ActionModal({ mode, request, onConfirm, onClose }) {
                     >
                         {loading
                             ? "Procesando..."
-                            : isApprove ? "Confirmar aprobación" : "Confirmar rechazo"
+                            : isApprove ? "Aprobar Ahora" : "Rechazar Solicitud"
                         }
                     </button>
                 </div>
@@ -114,7 +130,7 @@ function Toast({ message, type, onDone }) {
 
     return (
         <div className={`ar-toast ar-toast--${type}`}>
-            <span>{type === "success" ? "✅" : "❌"}</span>
+            <span>{type === "success" ? <CheckCheck size={18} /> : <X size={18} />}</span>
             <span>{message}</span>
         </div>
     );
@@ -260,7 +276,8 @@ export default function AdminRequests() {
                                 onClick={() => handleDownloadJustificante(req.id)}
                                 className="btn-secondary"
                             >
-                                Ver Justificante 📄
+                                <FileText size={14} style={{ marginRight: '0.375rem', display: 'inline' }} />
+                                Ver Justificante
                             </button>
 
                             {req.status === 'pending' && (
@@ -269,13 +286,15 @@ export default function AdminRequests() {
                                         onClick={() => setModal({ mode: "approve", request: req })}
                                         className="btn-approve"
                                     >
-                                        Aprobar ✅
+                                        <CheckCircle size={14} style={{ marginRight: '0.375rem', display: 'inline' }} />
+                                        Aprobar
                                     </button>
                                     <button
                                         onClick={() => setModal({ mode: "reject", request: req })}
                                         className="btn-reject"
                                     >
-                                        Rechazar ❌
+                                        <XCircle size={14} style={{ marginRight: '0.375rem', display: 'inline' }} />
+                                        Rechazar
                                     </button>
                                 </div>
                             )}

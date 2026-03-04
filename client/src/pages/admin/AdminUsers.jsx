@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "@/services/api";
 import AdminUserPosts from "./AdminUserPosts";
+import { Eye, Clock, Unlock, Ban } from "lucide-react";
 import "./AdminUsers.css";
 
 export default function AdminUsers() {
@@ -10,6 +11,7 @@ export default function AdminUsers() {
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState(null);
     const [auditingUser, setAuditingUser] = useState(null);
+    const [expandedUserId, setExpandedUserId] = useState(null);
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -111,8 +113,13 @@ export default function AdminUsers() {
                         ) : users.length === 0 ? (
                             <tr><td colSpan="5" className="text-center">No se encontraron usuarios.</td></tr>
                         ) : users.map(user => (
-                            <tr key={user.id}>
-                                <td>
+                            <tr
+                                key={user.id}
+                                className={expandedUserId === user.id ? 'row-expanded' : ''}
+                                onClick={() => setExpandedUserId(expandedUserId === user.id ? null : user.id)}
+                            >
+                                {/* Summary – always visible on mobile */}
+                                <td className="td-summary">
                                     <div className="user-info">
                                         <img
                                             src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
@@ -124,21 +131,37 @@ export default function AdminUsers() {
                                             <div className="user-handle">@{user.username}</div>
                                         </div>
                                     </div>
+                                    {/* Mobile-only quick actions */}
+                                    <div className="mobile-actions" onClick={(e) => e.stopPropagation()}>
+                                        <button onClick={() => setAuditingUser(user)} className="btn-icon" title="Ver Actividad"><Eye size={14} /></button>
+                                        <button
+                                            onClick={() => handleToggleBlock(user)}
+                                            className={`btn-icon ${user.is_blocked ? 'btn-unblock' : 'btn-block'}`}
+                                            title={user.is_blocked ? 'Quitar Time out' : 'Time out'}
+                                        >{user.is_blocked ? <Unlock size={14} /> : <Clock size={14} />}</button>
+                                        <button
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                if (!window.confirm(`¿Marcar a ${user.name} para baneo?`)) return;
+                                                try { await api.put(`/admin/users/${user.id}`, { ban_status: 'flagged' }); fetchUsers(); } catch (e) { alert('Error'); }
+                                            }}
+                                            className="btn-icon btn-delete"
+                                            title="Reportar para Baneo"
+                                        ><Ban size={14} /></button>
+                                    </div>
                                 </td>
-                                <td>{user.email}</td>
-                                <td>
-                                    <select
-                                        value={user.role}
-                                        onChange={(e) => handleChangeRole(user, e.target.value)}
-                                        className="role-select"
-                                    >
+
+                                {/* Detail cells – expandable on click */}
+                                <td data-label="Email" className="td-detail">{user.email}</td>
+                                <td data-label="Rol" className="td-detail" onClick={(e) => e.stopPropagation()}>
+                                    <select value={user.role} onChange={(e) => handleChangeRole(user, e.target.value)} className="role-select">
                                         <option value="userNormal">User</option>
                                         <option value="student">Estudiante</option>
                                         <option value="teacher">Profesor</option>
                                         <option value="admin">Admin</option>
                                     </select>
                                 </td>
-                                <td>
+                                <td data-label="Estado" className="td-detail">
                                     {user.ban_status === 'flagged' ? (
                                         <span className="status-badge status-blocked">Reportado</span>
                                     ) : user.ban_status === 'banned' ? (
@@ -149,35 +172,24 @@ export default function AdminUsers() {
                                         </span>
                                     )}
                                 </td>
-                                <td>
+
+                                {/* Desktop-only full actions column */}
+                                <td className="td-actions">
                                     <div className="table-actions">
-                                        <button
-                                            onClick={() => setAuditingUser(user)}
-                                            className="btn-icon btn-audit"
-                                            title="Ver Actividad (Audit)"
-                                        >
-                                            👁️
-                                        </button>
+                                        <button onClick={() => setAuditingUser(user)} className="btn-icon btn-audit" title="Ver Actividad (Audit)"><Eye size={15} /></button>
                                         <button
                                             onClick={() => handleToggleBlock(user)}
                                             className={`btn-icon ${user.is_blocked ? 'btn-unblock' : 'btn-block'}`}
-                                            title={user.is_blocked ? "Quitar Time out" : "Poner en Time out"}
-                                        >
-                                            {user.is_blocked ? '🔓' : '⏳'}
-                                        </button>
+                                            title={user.is_blocked ? 'Quitar Time out' : 'Poner en Time out'}
+                                        >{user.is_blocked ? <Unlock size={15} /> : <Clock size={15} />}</button>
                                         <button
                                             onClick={async () => {
                                                 if (!window.confirm(`¿Marcar a ${user.name} para baneo? Pasará a la lista de moderación.`)) return;
-                                                try {
-                                                    await api.put(`/admin/users/${user.id}`, { ban_status: 'flagged' });
-                                                    fetchUsers();
-                                                } catch (e) { alert("Error"); }
+                                                try { await api.put(`/admin/users/${user.id}`, { ban_status: 'flagged' }); fetchUsers(); } catch (e) { alert('Error'); }
                                             }}
                                             className="btn-icon btn-delete"
                                             title="Reportar para Baneo"
-                                        >
-                                            🚫
-                                        </button>
+                                        ><Ban size={15} /></button>
                                     </div>
                                 </td>
                             </tr>

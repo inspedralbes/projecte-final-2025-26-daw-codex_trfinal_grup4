@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "@/services/api";
+import { Users, Building2, InboxIcon, FileText } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import "./AdminOverview.css";
 
@@ -24,10 +25,10 @@ export default function AdminOverview() {
     if (loading) return <div className="admin-loading">Cargando estadísticas...</div>;
 
     const statItems = [
-        { label: "Usuarios Totales", value: stats?.total_users || 0, color: "teal", icon: "👥" },
-        { label: "Centros", value: stats?.total_centers || 0, color: "violet", icon: "🏢" },
-        { label: "Solicitudes", value: stats?.pending_requests || 0, color: "amber", icon: "📩" },
-        { label: "Publicaciones", value: stats?.total_posts || 0, color: "emerald", icon: "📝" },
+        { label: "Usuarios Totales", value: stats?.total_users || 0, color: "teal", icon: <Users size={20} /> },
+        { label: "Centros", value: stats?.total_centers || 0, color: "violet", icon: <Building2 size={20} /> },
+        { label: "Solicitudes", value: stats?.pending_requests || 0, color: "amber", icon: <InboxIcon size={20} /> },
+        { label: "Publicaciones", value: stats?.total_posts || 0, color: "emerald", icon: <FileText size={20} /> },
     ];
 
     // Mock data for charts if backend doesn't provide enough history yet

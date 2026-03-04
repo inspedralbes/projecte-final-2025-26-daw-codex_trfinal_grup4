@@ -4,7 +4,11 @@
 }
 
 .admin-content {
-  padding: 1rem 0;
+  padding: 1.5rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @keyframes slideUp {
@@ -37,4 +41,33 @@
 .admin-page-subtitle {
   color: var(--ink-secondary, #94a3b8);
   font-size: 1rem;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .admin-content {
+    padding: 1rem 1rem;
+  }
+
+  .admin-page-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .admin-page-title {
+    font-size: 1.35rem;
+  }
+
+  .admin-page-subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 0.75rem 0.75rem;
+  }
+
+  .admin-page-title {
+    font-size: 1.15rem;
+  }
 }
