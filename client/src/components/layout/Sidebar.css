@@ -82,6 +82,25 @@
   font-weight: 600;
 }
 
+/* ── Locked nav item (generic email → center disabled) ──── */
+.sidebar__nav-item--locked {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  color: var(--ink-muted, var(--ink-tertiary));
+  opacity: 0.45;
+  cursor: not-allowed;
+  position: relative;
+  user-select: none;
+}
+
+.sidebar__nav-lock {
+  font-size: 0.7rem;
+  margin-left: auto;
+}
+
 .sidebar__nav-icon {
   display: flex;
   align-items: center;

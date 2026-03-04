@@ -120,7 +120,8 @@
     "admin_users": "Usuarios",
     "admin_moderation": "Moderación",
     "admin_centers": "Centros",
-    "admin_requests": "Solicitudes"
+    "admin_requests": "Solicitudes",
+    "center_locked_tooltip": "Necesitas un email institucional para acceder al centro"
   },
   "footer": {
     "terms": "Términos",
@@ -202,6 +203,12 @@
   "center": {
     "no_center_title": "No perteneces a ningún centro",
     "no_center_desc": "Contacta con tu administrador para unirte a un centro educativo.",
+    "no_center_desc_extended": "Tu email pertenece a una organización pero no tienes un centro asociado. ¿Quieres solicitar la creación de una zona privada para tu centro educativo?",
+    "generic_email_title": "Función no disponible",
+    "generic_email_desc": "Para acceder a la zona de centro necesitas registrarte con un email institucional (de tu centro educativo).",
+    "pending_request_title": "Solicitud en proceso",
+    "pending_request_desc": "Tu solicitud de centro está siendo revisada por un administrador. Te notificaremos cuando sea aprobada.",
+    "request_center": "Solicitar creación de centro",
     "loading": "Cargando centro...",
     "default_name": "Centro Educativo",
     "private": "Privado",
@@ -242,6 +249,13 @@
     "website": "Sitio web",
     "no_description": "Sin descripción",
     "no_website": "Sin sitio web"
+  },
+  "center_prompt": {
+    "title": "¿Tu organización es un centro educativo?",
+    "description": "Hemos detectado que tu email pertenece a una organización. Si es un centro educativo, puedes crear una zona privada para compartir recursos con tus compañeros.",
+    "create_center": "Sí, quiero crear una zona para mi centro",
+    "not_now": "Ahora no",
+    "note": "Puedes hacerlo más tarde desde la sección Mi Centro."
   },
   "teacher_modal": {
     "title": "Verificación de Profesor",

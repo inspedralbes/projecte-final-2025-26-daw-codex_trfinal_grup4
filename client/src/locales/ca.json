@@ -120,7 +120,8 @@
     "admin_users": "Usuaris",
     "admin_moderation": "Moderació",
     "admin_centers": "Centres",
-    "admin_requests": "Sol·licituds"
+    "admin_requests": "Sol·licituds",
+    "center_locked_tooltip": "Necessites un email institucional per accedir al centre"
   },
   "footer": {
     "terms": "Termes",
@@ -202,6 +203,12 @@
   "center": {
     "no_center_title": "No pertanys a cap centre",
     "no_center_desc": "Contacta amb el teu administrador per unir-te a un centre educatiu.",
+    "no_center_desc_extended": "El teu email pertany a una organització però no tens un centre associat. Vols sol·licitar la creació d'una zona privada per al teu centre educatiu?",
+    "generic_email_title": "Funció no disponible",
+    "generic_email_desc": "Per accedir a la zona de centre necessites registrar-te amb un email institucional (del teu centre educatiu).",
+    "pending_request_title": "Sol·licitud en procés",
+    "pending_request_desc": "La teva sol·licitud de centre està sent revisada per un administrador. Et notificarem quan sigui aprovada.",
+    "request_center": "Sol·licitar creació de centre",
     "loading": "Carregant centre...",
     "default_name": "Centre Educatiu",
     "private": "Privat",
@@ -242,6 +249,13 @@
     "website": "Lloc web",
     "no_description": "Sense descripció",
     "no_website": "Sense lloc web"
+  },
+  "center_prompt": {
+    "title": "La teva organització és un centre educatiu?",
+    "description": "Hem detectat que el teu email pertany a una organització. Si és un centre educatiu, pots crear una zona privada per compartir recursos amb els teus companys.",
+    "create_center": "Sí, vull crear una zona per al meu centre",
+    "not_now": "Ara no",
+    "note": "Pots fer-ho més tard des de la secció El Meu Centre."
   },
   "teacher_modal": {
     "title": "Verificació de Professor",

@@ -39,6 +39,7 @@ class AuthController extends Controller
             'email_verified' => false,
             'auth_provider'  => 'local',
             'needs_password' => false,
+            'center_check'   => $this->authService->buildCenterCheck($user),
         ], 'User registered successfully. Please check your email to verify your account.', 201);
     }
 
@@ -70,6 +71,7 @@ class AuthController extends Controller
             'email_verified' => $user->hasVerifiedEmail(),
             'auth_provider'  => $user->auth_provider,
             'needs_password' => $user->needsPassword(),
+            'center_check'   => $this->authService->buildCenterCheck($user),
         ], 'Logged in successfully');
     }
 
@@ -96,7 +98,21 @@ class AuthController extends Controller
             'email_verified' => $user->hasVerifiedEmail(),
             'auth_provider'  => $user->auth_provider,
             'needs_password' => $user->needsPassword(),
+            'center_check'   => $this->authService->buildCenterCheck($user),
         ], 'Authenticated user');
+    }
+
+    /**
+     * POST /api/dismiss-center-prompt (auth:sanctum)
+     * User dismisses the center creation prompt.
+     * They can still request a center later from "Mi Centro".
+     */
+    public function dismissCenterPrompt(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->update(['center_prompt_dismissed' => true]);
+
+        return $this->success(null, 'Center prompt dismissed');
     }
 
     /**

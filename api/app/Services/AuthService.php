@@ -4,12 +4,39 @@ namespace App\Services;
 
 use App\Enums\UserRole;
 use App\Models\Center;
+use App\Models\CenterRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AuthService
 {
+    /**
+     * Generic email domains (free providers).
+     * Users with these domains CANNOT request center creation.
+     */
+    private const GENERIC_DOMAINS = [
+        'gmail.com', 'googlemail.com',
+        'yahoo.com', 'yahoo.es', 'yahoo.co.uk', 'yahoo.fr', 'yahoo.de',
+        'hotmail.com', 'hotmail.es', 'hotmail.co.uk', 'hotmail.fr',
+        'outlook.com', 'outlook.es', 'outlook.fr',
+        'live.com', 'live.es',
+        'msn.com',
+        'icloud.com', 'me.com', 'mac.com',
+        'aol.com',
+        'protonmail.com', 'proton.me', 'pm.me',
+        'zoho.com',
+        'mail.com',
+        'gmx.com', 'gmx.es', 'gmx.net',
+        'yandex.com', 'yandex.ru',
+        'tutanota.com', 'tuta.io',
+        'fastmail.com',
+        'hey.com',
+        'mail.ru',
+        'inbox.com',
+        'seznam.cz',
+    ];
+
     /**
      * Register a new user (local auth).
      * Detects the email domain to auto-assign a center and role.
@@ -158,22 +185,83 @@ class AuthService
     }
 
     /**
+     * Check if an email belongs to a generic/free provider.
+     */
+    public function isGenericEmail(string $email): bool
+    {
+        return in_array($this->extractDomain($email), self::GENERIC_DOMAINS, true);
+    }
+
+    /**
      * Check if a given email domain matches a registered active center.
      * Also indicates if the user can request creating a center for that domain.
+     *
+     * Added: is_generic flag to indicate free email providers.
      */
     public function detectCenter(string $email): array
     {
         $domain = $this->extractDomain($email);
+        $isGeneric = $this->isGenericEmail($email);
 
         $activeCenter = Center::where('domain', $domain)->where('status', 'active')->first();
         $pendingCenter = Center::where('domain', $domain)->where('status', 'pending')->first();
 
+        // Check if this user already has a pending request
+        $hasPendingRequest = CenterRequest::where('domain', $domain)
+            ->where('status', 'pending')
+            ->exists();
+
         return [
-            'has_center'      => $activeCenter !== null,
-            'center_name'     => $activeCenter?->name,
-            'center_city'     => $activeCenter?->city,
-            'is_pending'      => $pendingCenter !== null,
-            'can_request'     => $activeCenter === null && $pendingCenter === null,
+            'has_center'          => $activeCenter !== null,
+            'center_name'         => $activeCenter?->name,
+            'center_city'         => $activeCenter?->city,
+            'is_pending'          => $pendingCenter !== null || $hasPendingRequest,
+            'can_request'         => !$isGeneric && $activeCenter === null && !$hasPendingRequest,
+            'is_generic'          => $isGeneric,
+        ];
+    }
+
+    /**
+     * Build the center_check payload to include in login/register responses.
+     * This tells the frontend what to show after authentication.
+     */
+    public function buildCenterCheck(User $user): array
+    {
+        $isGeneric = $this->isGenericEmail($user->email);
+
+        // User already has a center → no prompt needed
+        if ($user->center_id) {
+            return [
+                'needs_center_prompt' => false,
+                'is_generic_email'    => $isGeneric,
+                'has_center'          => true,
+            ];
+        }
+
+        // Generic email → can never create a center
+        if ($isGeneric) {
+            return [
+                'needs_center_prompt' => false,
+                'is_generic_email'    => true,
+                'has_center'          => false,
+            ];
+        }
+
+        // Non-generic email without center → check if they already dismissed or have pending request
+        $domain = $this->extractDomain($user->email);
+
+        $hasPendingRequest = CenterRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->exists();
+
+        $centerDetection = $this->detectCenter($user->email);
+
+        return [
+            'needs_center_prompt' => !$hasPendingRequest && !$user->center_prompt_dismissed,
+            'is_generic_email'    => false,
+            'has_center'          => false,
+            'has_pending_request' => $hasPendingRequest,
+            'detected_center'     => $centerDetection['has_center'] ? $centerDetection['center_name'] : null,
         ];
     }
 }

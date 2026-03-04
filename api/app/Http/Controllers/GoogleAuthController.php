@@ -93,6 +93,7 @@ class GoogleAuthController extends Controller
             'is_new_user'    => $isNew,
             'auth_provider'  => $user->auth_provider,
             'needs_password' => $user->needsPassword(),
+            'center_check'   => $this->authService->buildCenterCheck($user),
         ], $message, $isNew ? 201 : 200);
     }
 }
