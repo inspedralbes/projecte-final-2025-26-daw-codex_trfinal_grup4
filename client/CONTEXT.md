@@ -118,6 +118,21 @@
 
 ## 📅 Registre de canvis
 
+### 2026-03-04 – Refinament UI del Perfil (Responsive, Punts i Traduccions)
+
+- **Autor:** @iker
+- **Millores UI (Mòbil & Desktop):**
+  - Transformats els emojis de les nav tabs (Posts, Respostes, etc.) per **icones SVG** propis de Codex per a una estètica més neta.
+  - Modificada la barra d'estadístiques d'escriptori (`.profile-guay__stats`) eliminant vores i fons per a un look transparent.
+  - **Identitat & Punts (Mòbil):**
+    - S'ha dissenyat un component combinat on la info de l'usuari queda a l'esquerra i els punts es mostren com un badge destacat a la dreta amb una icona de medalla (SVG).
+    - Alinear a l'esquerra els textos del perfil a mòbil (nom d'usuari, bio).
+  - **Stats Inline (Mòbil):**
+    - S'han resituat les "Stats" (Seguidors/Seguint/Posts) just abans de la secció de tabs, sota els links de portfolio i web (estil Instagram).
+    - Restaurat el `.profile-guay__avatar-row` al layout vertical amb centrat òptim (avatar + botons junts).
+- **Traduccions (i18n):**
+  - Instal·lada la clau traduïda `profile.links.portfolio` a `ca.json`, `es.json` i `en.json`.
+
 ### 2026-02-24 – Suport Multidioma (i18n), Estabilització de l'Entorn i Fix de Referències
 
 - **Autor:** @iker
