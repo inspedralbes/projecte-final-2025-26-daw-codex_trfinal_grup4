@@ -42,6 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'linkedin_url',
         'portfolio_url',
         'external_url',
+        'center_prompt_dismissed',
     ];
 
     /**
@@ -69,6 +70,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'role' => UserRole::class,
             'is_blocked' => 'boolean',
             'ban_status' => 'string',
+            'center_prompt_dismissed' => 'boolean',
         ];
     }
 

@@ -15,6 +15,7 @@ export const PASSWORD_REQUIREMENTS = [
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [centerCheck, setCenterCheck] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Feedback message state: { type: 'success' | 'error' | 'info', messageKey: string, params?: object }
@@ -39,6 +40,7 @@ export const AuthProvider = ({ children }) => {
           const userData = data.user || data;
           setUser(userData);
           setEmailVerified(data.email_verified ?? !!userData.email_verified_at);
+          if (data.center_check) setCenterCheck(data.center_check);
         } catch (error) {
           console.error("Session expired or invalid token", error);
           localStorage.removeItem("token");
@@ -72,12 +74,13 @@ export const AuthProvider = ({ children }) => {
       // Update state
       setUser(userData);
       setEmailVerified(data.email_verified ?? !!userData.email_verified_at);
+      if (data.center_check) setCenterCheck(data.center_check);
 
       setAuthMessage({
         type: "success",
         text: i18next.t("auth.login_success"),
       });
-      return { success: true };
+      return { success: true, centerCheck: data.center_check };
     } catch (error) {
       console.error("Login error", error);
 
@@ -109,12 +112,13 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", token);
       setUser(newUser);
       setEmailVerified(data.email_verified ?? false);
+      if (data.center_check) setCenterCheck(data.center_check);
 
       setAuthMessage({
         type: "success",
         text: i18next.t("auth.register_success"),
       });
-      return { success: true };
+      return { success: true, centerCheck: data.center_check };
     } catch (error) {
       console.error("Register error", error);
 
@@ -137,6 +141,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("token");
       setUser(null);
       setEmailVerified(false);
+      setCenterCheck(null);
       setAuthMessage({ type: "info", text: i18next.t("auth.logout_info") });
     }
   };
@@ -221,6 +226,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", token);
       setUser(userData);
       setEmailVerified(data.email_verified ?? !!userData.email_verified_at);
+      if (data.center_check) setCenterCheck(data.center_check);
 
       const msgKey = data.is_new_user ? "auth.register_success" : "auth.login_success";
       setAuthMessage({ type: "success", text: i18next.t(msgKey) });
@@ -229,6 +235,7 @@ export const AuthProvider = ({ children }) => {
         success: true,
         isNewUser: data.is_new_user,
         needsPassword: data.needs_password,
+        centerCheck: data.center_check,
       };
     } catch (error) {
       console.error("Google login error", error);
@@ -248,8 +255,24 @@ export const AuthProvider = ({ children }) => {
       const userData = data.user || data;
       setUser(userData);
       setEmailVerified(data.email_verified ?? !!userData.email_verified_at);
+      if (data.center_check) setCenterCheck(data.center_check);
     } catch (error) {
       console.error("refreshUser failed", error);
+    }
+  };
+
+  /**
+   * Dismiss the center creation prompt.
+   * User can still request a center later from "Mi Centro".
+   */
+  const dismissCenterPrompt = async () => {
+    try {
+      await api.post("/dismiss-center-prompt");
+      setCenterCheck((prev) => prev ? { ...prev, needs_center_prompt: false } : prev);
+    } catch (error) {
+      console.error("dismissCenterPrompt failed", error);
+      // Dismiss locally anyway
+      setCenterCheck((prev) => prev ? { ...prev, needs_center_prompt: false } : prev);
     }
   };
 
@@ -305,6 +328,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     emailVerified,
+    centerCheck,
     login,
     register,
     registerWithCenterRequest,
@@ -312,6 +336,7 @@ export const AuthProvider = ({ children }) => {
     loginWithGoogle,
     logout,
     refreshUser,
+    dismissCenterPrompt,
     isAuthenticated: !!user,
     authMessage,
     setAuthMessage,

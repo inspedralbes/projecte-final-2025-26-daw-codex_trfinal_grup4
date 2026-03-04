@@ -3,10 +3,12 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import PostCard from "@/components/feed/PostCard";
 import PostInput from "@/components/feed/PostInput";
+import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal";
 import { usePosts } from "@/hooks/usePosts";
 import { useTags } from "@/hooks/useTags";
 import { useAuth } from "@/hooks/useAuth";
 import centerService from "@/services/centerService";
+import api from "@/services/api";
 import "./CenterHub.css";
 
 // Icons
@@ -176,7 +178,7 @@ const MemberCard = ({ member, isTeacher, onRoleChange, onBlock, onUnblock }) => 
 
 export default function CenterHub() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, centerCheck, refreshUser } = useAuth();
   const [activeChannel, setActiveChannel] = useState("all");
   const [activeTab, setActiveTab] = useState("posts");
   const [centerInfo, setCenterInfo] = useState(null);
@@ -358,15 +360,7 @@ export default function CenterHub() {
 
   // No center assigned
   if (!centerId) {
-    return (
-      <div className="center-hub">
-        <div className="center-hub__no-center">
-          <span className="center-hub__no-center-icon">🏫</span>
-          <h2>{t("center.no_center_title")}</h2>
-          <p>{t("center.no_center_desc")}</p>
-        </div>
-      </div>
-    );
+    return <NoCenterView user={user} t={t} centerCheck={centerCheck} refreshUser={refreshUser} />;
   }
 
   // Loading state
@@ -717,6 +711,81 @@ export default function CenterHub() {
 
       {/* Content */}
       {renderContent()}
+    </div>
+  );
+}
+
+/**
+ * NoCenterView – Shown when user has no center.
+ * - Generic email → locked message
+ * - Non-generic email → option to request a center or shows pending status
+ */
+function NoCenterView({ user, t, centerCheck, refreshUser }) {
+  const [showTeacherModal, setShowTeacherModal] = useState(false);
+  const [teacherLoading, setTeacherLoading] = useState(false);
+
+  const isGeneric = centerCheck?.is_generic_email ?? false;
+  const hasPendingRequest = centerCheck?.has_pending_request ?? false;
+  const domain = user?.email ? user.email.split("@")[1] : "";
+
+  const handleTeacherConfirm = async (centerRequestData) => {
+    setTeacherLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("center_name", centerRequestData.center_name);
+      formData.append("domain", centerRequestData.domain);
+      formData.append("full_name", centerRequestData.full_name);
+      formData.append("justificante", centerRequestData.justificante);
+      if (centerRequestData.city) {
+        formData.append("city", centerRequestData.city);
+      }
+      await api.upload("/center-requests", formData);
+      setShowTeacherModal(false);
+      if (refreshUser) await refreshUser();
+    } catch (error) {
+      console.error("Center request error:", error);
+    } finally {
+      setTeacherLoading(false);
+    }
+  };
+
+  return (
+    <div className="center-hub">
+      <div className="center-hub__no-center">
+        <span className="center-hub__no-center-icon">🏫</span>
+
+        {isGeneric ? (
+          <>
+            <h2>{t("center.generic_email_title")}</h2>
+            <p>{t("center.generic_email_desc")}</p>
+          </>
+        ) : hasPendingRequest ? (
+          <>
+            <h2>{t("center.pending_request_title")}</h2>
+            <p>{t("center.pending_request_desc")}</p>
+          </>
+        ) : (
+          <>
+            <h2>{t("center.no_center_title")}</h2>
+            <p>{t("center.no_center_desc_extended")}</p>
+            <button
+              className="center-hub__request-btn"
+              onClick={() => setShowTeacherModal(true)}
+            >
+              🏫 {t("center.request_center")}
+            </button>
+          </>
+        )}
+      </div>
+
+      {showTeacherModal && (
+        <TeacherVerificationModal
+          email={user?.email}
+          loading={teacherLoading}
+          onConfirm={handleTeacherConfirm}
+          onCancel={() => setShowTeacherModal(false)}
+        />
+      )}
     </div>
   );
 }

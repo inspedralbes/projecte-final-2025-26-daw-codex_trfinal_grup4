@@ -120,7 +120,8 @@
     "admin_users": "Users",
     "admin_moderation": "Moderation",
     "admin_centers": "Centers",
-    "admin_requests": "Requests"
+    "admin_requests": "Requests",
+    "center_locked_tooltip": "You need an institutional email to access the center"
   },
   "footer": {
     "terms": "Terms",
@@ -202,6 +203,12 @@
   "center": {
     "no_center_title": "You do not belong to any center",
     "no_center_desc": "Contact your administrator to join an educational center.",
+    "no_center_desc_extended": "Your email belongs to an organization but you don't have an associated center. Would you like to request the creation of a private zone for your educational center?",
+    "generic_email_title": "Feature not available",
+    "generic_email_desc": "To access the center zone you need to sign up with an institutional email (from your educational center).",
+    "pending_request_title": "Request in progress",
+    "pending_request_desc": "Your center request is being reviewed by an administrator. We will notify you when it is approved.",
+    "request_center": "Request center creation",
     "loading": "Loading center...",
     "default_name": "Educational Center",
     "private": "Private",
@@ -242,6 +249,13 @@
     "website": "Website",
     "no_description": "No description",
     "no_website": "No website"
+  },
+  "center_prompt": {
+    "title": "Is your organization an educational center?",
+    "description": "We detected that your email belongs to an organization. If it is an educational center, you can create a private zone to share resources with your peers.",
+    "create_center": "Yes, I want to create a zone for my center",
+    "not_now": "Not now",
+    "note": "You can do this later from the My Center section."
   },
   "teacher_modal": {
     "title": "Teacher Verification",

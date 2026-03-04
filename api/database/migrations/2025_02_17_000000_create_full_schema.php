@@ -55,11 +55,15 @@ return new class extends Migration
             $table->string('banner')->nullable();
             $table->text('bio')->nullable();
             $table->boolean('is_blocked')->default(false); // Bloqueado por profesor/admin
+            $table->string('ban_status')->default('active'); // active, banned, etc.
 
             // Redes Sociales
             $table->string('linkedin_url')->nullable();
             $table->string('portfolio_url')->nullable();
             $table->string('external_url')->nullable(); // Twitter/Instagram
+
+            // Center prompt
+            $table->boolean('center_prompt_dismissed')->default(false);
 
             $table->rememberToken();
             $table->timestamps();

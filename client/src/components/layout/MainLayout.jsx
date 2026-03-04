@@ -3,13 +3,63 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Sidebar from "./Sidebar";
 import RightSection from "./RightSection";
+import CenterPromptModal from "@/components/center/CenterPromptModal";
+import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal";
 import socketService from "@/services/socketService";
+import api from "@/services/api";
 import "./MainLayout.css";
 
 export default function MainLayout() {
-  const { user } = useAuth();
+  const { user, centerCheck, dismissCenterPrompt, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [adminNotification, setAdminNotification] = useState(null);
+  const [showCenterPrompt, setShowCenterPrompt] = useState(false);
+  const [showTeacherModal, setShowTeacherModal] = useState(false);
+  const [teacherModalLoading, setTeacherModalLoading] = useState(false);
+
+  // Show center prompt modal after login if needed
+  useEffect(() => {
+    if (centerCheck?.needs_center_prompt && !centerCheck?.is_generic_email && !centerCheck?.has_center) {
+      // Small delay so the main layout renders first
+      const timer = setTimeout(() => setShowCenterPrompt(true), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [centerCheck]);
+
+  const handleDismissCenterPrompt = async () => {
+    setShowCenterPrompt(false);
+    await dismissCenterPrompt();
+  };
+
+  const handleCreateCenter = () => {
+    setShowCenterPrompt(false);
+    setShowTeacherModal(true);
+  };
+
+  const handleTeacherConfirm = async (centerRequestData) => {
+    setTeacherModalLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("center_name", centerRequestData.center_name);
+      formData.append("domain", centerRequestData.domain);
+      formData.append("full_name", centerRequestData.full_name);
+      formData.append("justificante", centerRequestData.justificante);
+      if (centerRequestData.city) {
+        formData.append("city", centerRequestData.city);
+      }
+
+      await api.upload("/center-requests", formData);
+      setShowTeacherModal(false);
+      await dismissCenterPrompt();
+      await refreshUser();
+    } catch (error) {
+      console.error("Center request error:", error);
+    } finally {
+      setTeacherModalLoading(false);
+    }
+  };
+
+  const userDomain = user?.email ? user.email.split("@")[1] : "";
 
   // Admin Real-time Logic
   useEffect(() => {
@@ -112,6 +162,25 @@ export default function MainLayout() {
             <div style={{ fontSize: "0.85rem", opacity: 0.9 }}>{adminNotification.message}</div>
           </div>
         </div>
+      )}
+
+      {/* Center Prompt Modal – shown post-login for non-generic emails without a center */}
+      {showCenterPrompt && (
+        <CenterPromptModal
+          domain={userDomain}
+          onCreateCenter={handleCreateCenter}
+          onDismiss={handleDismissCenterPrompt}
+        />
+      )}
+
+      {/* Teacher Verification Modal – center creation form */}
+      {showTeacherModal && (
+        <TeacherVerificationModal
+          email={user?.email}
+          loading={teacherModalLoading}
+          onConfirm={handleTeacherConfirm}
+          onCancel={() => setShowTeacherModal(false)}
+        />
       )}
     </div>
   );

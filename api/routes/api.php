@@ -95,6 +95,7 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/dismiss-center-prompt', [AuthController::class, 'dismissCenterPrompt']);
 
     // Email Verification (authenticated)
     Route::post('/email/resend', [VerificationController::class, 'resend'])

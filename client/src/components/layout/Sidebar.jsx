@@ -221,7 +221,7 @@ const RequestsIcon = ({ active }) => (
 const navItems = [
   { path: "/", label: "sidebar.home", Icon: HomeIcon },
   { path: "/explore", label: "sidebar.explore", Icon: ExploreIcon },
-  { path: "/center", label: "sidebar.center", Icon: CenterIcon },
+  { path: "/center", label: "sidebar.center", Icon: CenterIcon, centerItem: true },
   { path: "/notifications", label: "sidebar.notifications", Icon: NotificationsIcon },
   { path: "/profile", label: "sidebar.profile", Icon: ProfileIcon },
   { path: "/messages", label: "sidebar.messages", Icon: MessagesIcon },
@@ -242,7 +242,9 @@ export default function Sidebar() {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, centerCheck } = useAuth();
+
+  const isGenericEmail = centerCheck?.is_generic_email ?? false;
 
   const handleLogout = async () => {
     await logout();
@@ -251,7 +253,6 @@ export default function Sidebar() {
 
   const visibleNavItems = navItems.filter((item) => {
     if (user && user.role === "admin") {
-      // For Admin, show ONLY the admin-specific sections
       return item.adminOnly;
     }
     return !item.adminOnly;
@@ -275,10 +276,27 @@ export default function Sidebar() {
 
         {/* Navigation */}
         <nav className="sidebar__nav">
-          {visibleNavItems.map(({ path, label, Icon, end }) => {
+          {visibleNavItems.map(({ path, label, Icon, end, centerItem }) => {
+            const isLocked = centerItem && isGenericEmail;
             const isActive = end
               ? location.pathname === path
               : location.pathname.startsWith(path) && (path !== "/" || location.pathname === "/");
+
+            if (isLocked) {
+              return (
+                <div
+                  key={path}
+                  className="sidebar__nav-item sidebar__nav-item--locked"
+                  title={t("sidebar.center_locked_tooltip")}
+                >
+                  <span className="sidebar__nav-icon">
+                    <Icon active={false} />
+                  </span>
+                  <span className="sidebar__nav-label">{t(label)}</span>
+                  <span className="sidebar__nav-lock">🔒</span>
+                </div>
+              );
+            }
 
             return (
               <NavLink
