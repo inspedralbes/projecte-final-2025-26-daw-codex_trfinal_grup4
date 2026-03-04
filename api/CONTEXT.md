@@ -121,11 +121,11 @@
 
 ### Connexions (definides a `api/.env`)
 
-| Servei  | Host      | Port | Credencials                 |
-| ------- | --------- | ---- | --------------------------- |
-| MySQL   | `mysql`   | 3306 | `tfg_user` / `tfg_password` |
-| Redis   | `redis`   | 6379 | sense password (dev)        |
-| Mailpit | `mailpit` | 1025 | -                           |
+| Servei  | Host                              | Port | Credencials                           |
+| ------- | --------------------------------- | ---- | ------------------------------------- |
+| MySQL   | `mysql`                           | 3306 | `tfg_user` / `tfg_password`           |
+| Redis   | `redis`                           | 6379 | sense password (dev)                  |
+| Mail    | `mail.codex.daw.inspedralbes.cat` | 25   | `noreply` (auth via Hestia)           |
 
 ### Drivers configurats
 
@@ -136,7 +136,7 @@
 | Sessions      | `redis`          |
 | Cues          | `redis`          |
 | Broadcasting  | `redis`          |
-| Correu        | `smtp` (Mailpit) |
+| Correu        | `smtp` (Hestia)  |
 
 ### Extensions PHP disponibles
 
@@ -766,6 +766,26 @@
   - Afegit check `$request->hasHeader('X-Socket-P2P')` abans de fer `event(new NewMessageEvent(...))`.
   - Si existeix el header, el socket ja emet l'event directament i Laravel no ha de fer broadcast duplicat.
   - Això permet que el sistema P2P funcioni sense que arribin dos missatges al client.
+
+### 2026-03-04 – Configuració Correu Producció (Hestia Mail Server)
+
+- **Autor:** @copilot (IA)
+- **Configuració de correu per producció:**
+    - Migrat de Mailpit (dev) a **Hestia Mail Server** per producció
+    - Servidor: `mail.codex.daw.inspedralbes.cat` (IP: `187.33.146.183`)
+    - Port: 25 (sense TLS per compatibilitat) o 587 (amb TLS)
+    - Username: `noreply` (sense domini)
+    - From address: `noreply@codex.daw.inspedralbes.cat`
+- **DNS configurat correctament:**
+    - SPF: `v=spf1 a mx ip4:187.33.146.183 -all`
+    - DKIM: Activat amb clau RSA 2048-bit
+    - DMARC: `v=DMARC1; p=quarantine; pct=100`
+    - MX: `mail.codex.daw.inspedralbes.cat` (prioritat 10)
+- **Actualitzat `docker-compose.dev.yml`:**
+    - Afegit `extra_hosts` per a resolució DNS dins dels contenidors Docker
+    - Mapeja `mail.codex.daw.inspedralbes.cat` a `187.33.146.183`
+- **Fitxers modificats:** `.env`, `.env.prod.example`, `docker-compose.dev.yml`, `config/cors.php`, `bootstrap/app.php`
+- **Nota:** Per a desenvolupament local es pot seguir usant Mailpit canviant `.env`
 
 ---
 

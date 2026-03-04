@@ -41,6 +41,8 @@ services:
       - APP_ENV=local
       - APP_DEBUG=true
       - FRONTEND_URL=http://localhost:5173
+    extra_hosts:
+      - "mail.codex.daw.inspedralbes.cat:187.33.146.183"
     depends_on:
       mysql:
         condition: service_healthy

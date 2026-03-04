@@ -111,8 +111,10 @@ Sistema de elevación con 6 niveles (`--surface-depth-0` a `--surface-depth-5`) 
 | `/center` | CenterHub | Dashboard del centro educativo |
 | `/explore` | Explore | Búsqueda y descubrimiento |
 | `/notifications` | Notifications | Stream de actividad |
-| `/profile` | Profile | Perfil de desarrollador |
-| `/messages` | Messages | Chat (pendiente) |
+| `/profile/:username` | Profile | Perfil de desarrollador |
+| `/messages` | Messages | Chat P2P con restricciones de seguimiento |
+| `/auth/google/callback` | GoogleCallback | Callback OAuth de Google |
+| `/verify-email` | EmailVerification | Verificación de email pendiente |
 
 ### Arquitectura de Componentes
 ```
@@ -150,10 +152,28 @@ Para detalles específicos sobre la implementación técnica de cada microservic
 
 ---
 
-## 9. Próximos Pasos
-- [ ] Integración con API real (reemplazar mockApi)
-- [ ] Sistema de autenticación con validación de dominios educativos
-- [ ] WebSocket para notificaciones en tiempo real
-- [ ] Chat/Mensajes directos
-- [ ] Sistema de puntos y gamificación
-- [ ] Moderación para profesores en Hub del Centro
+## 9. Estado de Implementación
+
+### Completado ✅
+- [x] Integración con API real (Laravel 11 + Sanctum)
+- [x] Sistema de autenticación con validación de dominios educativos
+- [x] Login con Google (OAuth 2.0)
+- [x] Verificación de email
+- [x] WebSocket para notificaciones en tiempo real (Socket.io + Redis)
+- [x] Chat/Mensajes directos (P2P con restricciones de seguimiento mutuo)
+- [x] Sistema de puntos y gamificación (ReputationService + Badges)
+- [x] Moderación para profesores en Hub del Centro (bloquear, expulsar, cambiar roles)
+- [x] Feed Global y del Centro (Walled Garden)
+- [x] Sistema de posts con snippets de código (syntax highlighting)
+- [x] Interacciones: likes, bookmarks, reposts, comentarios
+- [x] Sistema de seguimiento de usuarios y etiquetas
+- [x] Búsqueda global y por centro
+- [x] Perfil de usuario con stats en tiempo real
+- [x] Soporte multi-idioma (Catalán, Español, Inglés)
+- [x] Servidor de correo producción (Hestia + DKIM/SPF/DMARC)
+
+### Pendiente 🔄
+- [ ] Panel de administración para gestionar centros pendientes
+- [ ] Estadísticas y analytics del centro
+- [ ] Sistema de menciones (@usuario)
+- [ ] Notificaciones push (PWA)
