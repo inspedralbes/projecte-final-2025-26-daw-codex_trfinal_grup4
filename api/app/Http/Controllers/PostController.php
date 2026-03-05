@@ -164,13 +164,20 @@ class PostController extends Controller
             $centerId = $user->center_id;
         }
 
+        $imageUrl = null;
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('posts', 'public');
+            $imageUrl = $path;
+        }
+
         $post = Post::create([
             'user_id'       => $user->id,
             'center_id'     => $centerId,
             'type'          => $request->input('type', 'news'),
-            'content'       => $this->sanitizer->sanitizeHtml($request->input('content')),
-            'code_snippet'  => $this->sanitizer->sanitizeCode($request->input('code_snippet')),
-            'code_language' => $this->sanitizer->sanitizePlain($request->input('code_language')),
+            'content'       => $request->input('content') ? $this->sanitizer->sanitizeHtml($request->input('content')) : null,
+            'image_url'     => $imageUrl,
+            'code_snippet'  => $request->input('code_snippet') ? $this->sanitizer->sanitizeCode($request->input('code_snippet')) : null,
+            'code_language' => $request->input('code_language') ? $this->sanitizer->sanitizePlain($request->input('code_language')) : null,
         ]);
 
         // Attach tags (create if they don't exist)
@@ -252,6 +259,10 @@ class PostController extends Controller
         }
         if ($request->has('code_language')) {
             $data['code_language'] = $this->sanitizer->sanitizePlain($request->input('code_language'));
+        }
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('posts', 'public');
+            $data['image_url'] = $path;
         }
 
         // Allow changing visibility (global <-> center)

@@ -46,6 +46,7 @@ class Post extends Model
         'type',
         'is_solved',
         'content',
+        'image_url',
         'code_snippet',
         'code_language',
     ];

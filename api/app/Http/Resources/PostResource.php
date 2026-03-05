@@ -38,6 +38,7 @@ class PostResource extends JsonResource
             'id'            => $this->id,
             'type'          => $this->type,
             'content'       => $this->content,
+            'image_url'     => $this->image_url ? \Illuminate\Support\Facades\Storage::url($this->image_url) : null,
             'code_snippet'  => $this->code_snippet,
             'code_language' => $this->code_language,
             'is_solved'     => $this->is_solved,
@@ -76,6 +77,7 @@ class PostResource extends JsonResource
             'original_post' => $this->whenLoaded('originalPost', fn () => $this->originalPost ? [
                 'id'           => $this->originalPost->id,
                 'content'      => $this->originalPost->content,
+                'image_url'    => $this->originalPost->image_url ? \Illuminate\Support\Facades\Storage::url($this->originalPost->image_url) : null,
                 'code_snippet' => $this->originalPost->code_snippet,
                 'code_language'=> $this->originalPost->code_language,
                 'type'         => $this->originalPost->type,

@@ -18,7 +18,7 @@ const postsService = {
     if (params.page) query.set("page", params.page);
     if (params.tag) query.set("tag", params.tag);
     if (params.type) query.set("type", params.type);
-    
+
     const queryString = query.toString();
     return api.get(`/posts${queryString ? `?${queryString}` : ""}`);
   },
@@ -43,7 +43,7 @@ const postsService = {
     const query = new URLSearchParams();
     if (params.page) query.set("page", params.page);
     if (params.tag) query.set("tag", params.tag);
-    
+
     const queryString = query.toString();
     return api.get(`/center/posts${queryString ? `?${queryString}` : ""}`);
   },
@@ -59,15 +59,13 @@ const postsService = {
 
   /**
    * Create a new post
-   * @param {Object} postData - Post data
-   * @param {string} postData.content - Text content (optional if code_snippet exists)
-   * @param {string} postData.code_snippet - Code content (optional)
-   * @param {string} postData.code_language - Programming language
-   * @param {string} postData.type - Post type (news|question)
-   * @param {Array<string>} postData.tags - Tag names (max 5)
+   * @param {Object} postData - Post data or FormData
    * @returns {Promise<Object>} Created post
    */
   createPost: async (postData) => {
+    if (postData._formData) {
+      return api.upload("/posts", postData._formData);
+    }
     return api.post("/posts", postData);
   },
 
