@@ -19,6 +19,7 @@ class PostResource extends JsonResource
         $user = auth('sanctum')->user();
         $userLiked = false;
         $userBookmarked = false;
+        $userReposted = false;
 
         if ($user) {
             $userLiked = Interaction::where('user_id', $user->id)
@@ -31,6 +32,12 @@ class PostResource extends JsonResource
                 ->where('interactable_type', \App\Models\Post::class)
                 ->where('interactable_id', $this->id)
                 ->where('type', 'bookmark')
+                ->exists();
+
+            // Check if user has reposted this post (or its original)
+            $targetId = $this->original_post_id ?? $this->id;
+            $userReposted = \App\Models\Post::where('user_id', $user->id)
+                ->where('original_post_id', $targetId)
                 ->exists();
         }
 
@@ -72,6 +79,7 @@ class PostResource extends JsonResource
             // User interaction status
             'user_liked'     => $userLiked,
             'user_bookmarked'=> $userBookmarked,
+            'user_reposted'  => $userReposted,
 
             // Repost – original post data
             'original_post' => $this->whenLoaded('originalPost', fn () => $this->originalPost ? [

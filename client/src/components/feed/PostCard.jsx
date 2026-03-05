@@ -22,13 +22,27 @@ const HeartIcon = ({ filled }) => (
 );
 
 const CommentIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+  >
     <path d="M1.751 10c0-4.42 3.58-8 8-8h4.5c4.42 0 8 3.58 8 8s-3.58 8-8 8h-1.5l-4.5 4v-4h-.5c-4.42 0-8-3.58-8-8z" />
   </svg>
 );
 
 const RepostIcon = ({ active }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+  >
     <path d="M4 12V9a4 4 0 014-4h12M20 12v3a4 4 0 01-4 4H4M7 8L4 5l3-3M17 16l3 3-3 3" />
   </svg>
 );
@@ -45,7 +59,14 @@ const BookmarkIcon = ({ filled }) => (
 );
 
 const ShareIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+  >
     <path d="M12 2l7 7h-4v6h-6v-6H5l7-7zM5 18h14v2H5v-2z" />
   </svg>
 );
@@ -81,7 +102,16 @@ const VerifiedIcon = () => (
 
 // Question badge icons
 const QuestionMarkIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <circle cx="12" cy="12" r="10" />
     <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
     <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -89,7 +119,16 @@ const QuestionMarkIcon = () => (
 );
 
 const CheckCircleIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
     <polyline points="22 4 12 14.01 9 11.01" />
   </svg>
@@ -103,9 +142,29 @@ export const QuestionBadge = ({ solved }) => {
     >
       <span className="post-card__question-badge-icon">
         {solved ? (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
         ) : (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
         )}
       </span>
       <span className="post-card__question-badge-text">
@@ -187,7 +246,7 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
   // Syntax highlighting
   useEffect(() => {
     if (codeRef.current && post.code_snippet) {
-      codeRef.current.removeAttribute('data-highlighted');
+      codeRef.current.removeAttribute("data-highlighted");
       hljs.highlightElement(codeRef.current);
     }
   }, [post.code_snippet, post.code_language]);
@@ -195,34 +254,63 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
   // Extract URLs for link preview
   const detectedUrls = useMemo(() => extractUrls(post.content), [post.content]);
   const previewUrl = detectedUrls.length > 0 ? detectedUrls[0] : null;
-  const previewDomain = previewUrl ? (() => { try { return new URL(previewUrl).hostname; } catch { return previewUrl; } })() : null;
+  const previewDomain = previewUrl
+    ? (() => {
+        try {
+          return new URL(previewUrl).hostname;
+        } catch {
+          return previewUrl;
+        }
+      })()
+    : null;
 
   // Extract user from post (API returns user object)
   const author = post.user || post.author || {};
   const isVerified = author.role === "teacher" || author.role === "admin";
   const badge = getRoleBadge(author);
 
+  // Handle reply display
+  const isReply = post.type === "reply";
+  const replyToPost = post.reply_to_post;
+  const replyToComment = post.reply_to_comment;
+
+  // Handle repost display target (fallback to post if not repost)
+  const isRepost = post.is_repost || !!post.original_post;
+  const originalPost = post.original_post;
+  const targetPost = isRepost && originalPost ? originalPost : post;
+
+  // Extract target user details
+  const targetAuthor = targetPost.user || targetPost.author || {};
+  const isTargetVerified = targetAuthor.role === "teacher" || targetAuthor.role === "admin";
+  const targetBadge = getRoleBadge(targetAuthor);
+  const targetAvatarUrl =
+    targetAuthor.avatar ||
+    `https://api.dicebear.com/7.x/avataaars/svg?seed=${targetAuthor.username || targetAuthor.name || "user"}`;
+
   // Use interactions hook for API calls
   const { liked, bookmarked, likesCount, toggleLike, toggleBookmark } = useInteractions({
-    postId: post.id,
-    likesCount: post.likes_count || post.stats?.likes || 0,
-    bookmarksCount: post.bookmarks_count || post.stats?.bookmarks || 0,
-    userLiked: post.user_liked || false,
-    userBookmarked: post.user_bookmarked || false,
+    postId: targetPost.id,
+    likesCount: targetPost.likes_count || targetPost.stats?.likes || 0,
+    bookmarksCount: targetPost.bookmarks_count || targetPost.stats?.bookmarks || 0,
+    userLiked: targetPost.user_liked || false,
+    userBookmarked: targetPost.user_bookmarked || false,
   });
 
-  const commentsCount = post.comments_count || post.stats?.comments || 0;
-  const repostsCount = post.reposts_count || post.stats?.reposts || 0;
+  const commentsCount = targetPost.comments_count || targetPost.stats?.comments || 0;
+  const repostsCount = targetPost.reposts_count || targetPost.stats?.reposts || 0;
+
+  // Local active state check for repost
+  const userReposted = targetPost.user_reposted || false;
 
   const handleLike = useCallback(async () => {
     await toggleLike();
     if (onInteractionUpdate) {
-      onInteractionUpdate(post.id, {
+      onInteractionUpdate(targetPost.id, {
         likes_count: liked ? likesCount - 1 : likesCount + 1,
         user_liked: !liked,
       });
     }
-  }, [toggleLike, onInteractionUpdate, post.id, liked, likesCount]);
+  }, [toggleLike, onInteractionUpdate, targetPost.id, liked, likesCount]);
 
   const handleBookmark = useCallback(async () => {
     await toggleBookmark();
@@ -232,14 +320,20 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
     if (reposting) return;
     setReposting(true);
     try {
-      await postsService.repost(post.id);
-      // Could show success toast here
+      await postsService.repost(targetPost.id);
+      // Let real-time handle count increment, but trigger optional optimistic update
+      if (onInteractionUpdate) {
+        onInteractionUpdate(targetPost.id, {
+          reposts_count: repostsCount + 1,
+          user_reposted: true,
+        });
+      }
     } catch (err) {
       console.error("Error reposting:", err);
     } finally {
       setReposting(false);
     }
-  }, [post.id, reposting]);
+  }, [targetPost.id, reposting, repostsCount, onInteractionUpdate]);
 
   const handleDelete = useCallback(async () => {
     if (onDelete && window.confirm(t("feed.delete_confirm"))) {
@@ -249,18 +343,18 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
   }, [onDelete, post.id]);
 
   const handleShare = useCallback(async () => {
-    const url = `${window.location.origin}/post/${post.id}`;
+    const url = `${window.location.origin}/post/${targetPost.id}`;
     try {
       await navigator.clipboard.writeText(url);
       setShowCopied(true);
       setTimeout(() => setShowCopied(false), 2000);
     } catch {
       // Fallback for older browsers
-      const input = document.createElement('input');
+      const input = document.createElement("input");
       input.value = url;
       document.body.appendChild(input);
       input.select();
-      document.execCommand('copy');
+      document.execCommand("copy");
       document.body.removeChild(input);
       setShowCopied(true);
       setTimeout(() => setShowCopied(false), 2000);
@@ -274,20 +368,8 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
     return num;
   };
 
-  const isOwner = currentUser?.id === author.id;
-  const postType = post.type || "news";
-  const avatarUrl =
-    author.avatar ||
-    `https://api.dicebear.com/7.x/avataaars/svg?seed=${author.username || author.name || "user"}`;
-
-  // Handle repost display
-  const isRepost = post.is_repost || !!post.original_post;
-  const originalPost = post.original_post;
-
-  // Handle reply display
-  const isReply = post.type === "reply";
-  const replyToPost = post.reply_to_post;
-  const replyToComment = post.reply_to_comment;
+  const isOwner = currentUser?.id === targetAuthor.id;
+  const postType = targetPost.type || "news";
 
   return (
     <article className={`post-card ${isReply ? "post-card--reply" : ""} ${className}`}>
@@ -307,8 +389,8 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
           <ReplyToIcon />
           <span>
             {t("post.replying_to")}{" "}
-            <a 
-              href="#" 
+            <a
+              href="#"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -320,10 +402,9 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
             </a>
             {replyToComment && (
               <>
-                {" "}&middot;{" "}
-                <span className="post-card__reply-secondary">
-                  @{replyToComment.user?.username}
-                </span>
+                {" "}
+                &middot;{" "}
+                <span className="post-card__reply-secondary">@{replyToComment.user?.username}</span>
               </>
             )}
           </span>
@@ -331,7 +412,7 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
       )}
 
       <div className="post-card__avatar">
-        <img src={avatarUrl} alt={author.name || "Usuario"} />
+        <img src={targetAvatarUrl} alt={targetAuthor.name || "Usuario"} />
       </div>
 
       <div className="post-card__content">
@@ -339,11 +420,11 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
         <header className="post-card__header">
           <div className="post-card__author">
             <span className="post-card__name">
-              {author.name || "Usuario"}
-              {isVerified && <VerifiedIcon />}
+              {targetAuthor.name || "Usuario"}
+              {isTargetVerified && <VerifiedIcon />}
             </span>
-            <span className="post-card__handle">@{author.username || "user"}</span>
-            {badge && <span className="post-card__badge">{badge}</span>}
+            <span className="post-card__handle">@{targetAuthor.username || "user"}</span>
+            {targetBadge && <span className="post-card__badge">{targetBadge}</span>}
             <span className="post-card__dot">·</span>
             <span className="post-card__time">{relativeTime}</span>
           </div>
@@ -353,7 +434,7 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
             </button>
             {showMenu && (
               <div className="post-card__dropdown">
-                {isOwner && (
+                {currentUser?.id === post.user?.id && (
                   <button
                     onClick={handleDelete}
                     className="post-card__dropdown-item post-card__dropdown-item--danger"
@@ -373,17 +454,17 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
         {postType === "question" && <QuestionBadge solved={post.is_solved || post.solved} />}
 
         {/* Text Content */}
-        <p className="post-card__text">{post.content}</p>
+        <p className="post-card__text">{targetPost.content}</p>
 
         {/* Image */}
-        {post.image_url && (
+        {targetPost.image_url && (
           <div className="post-card__image">
-            <img src={post.image_url} alt="" loading="lazy" />
+            <img src={targetPost.image_url} alt="" loading="lazy" />
           </div>
         )}
 
         {/* Code Block with Syntax Highlighting */}
-        {post.code_snippet && (
+        {targetPost.code_snippet && (
           <div className="post-card__code">
             <div className="post-card__code-header">
               <div className="post-card__code-dots">
@@ -391,10 +472,15 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
                 <span />
                 <span />
               </div>
-              <span className="post-card__code-lang">{post.code_language || "code"}</span>
+              <span className="post-card__code-lang">{targetPost.code_language || "code"}</span>
             </div>
             <pre className="post-card__code-content">
-              <code ref={codeRef} className={post.code_language ? `language-${post.code_language}` : ''}>{post.code_snippet}</code>
+              <code
+                ref={codeRef}
+                className={targetPost.code_language ? `language-${targetPost.code_language}` : ""}
+              >
+                {targetPost.code_snippet}
+              </code>
             </pre>
           </div>
         )}
@@ -413,15 +499,17 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
             </div>
             <div className="post-card__link-content">
               <span className="post-card__link-title">{previewDomain}</span>
-              <span className="post-card__link-url">{previewUrl.length > 60 ? previewUrl.substring(0, 60) + '...' : previewUrl}</span>
+              <span className="post-card__link-url">
+                {previewUrl.length > 60 ? previewUrl.substring(0, 60) + "..." : previewUrl}
+              </span>
             </div>
           </a>
         )}
 
         {/* Tags */}
-        {post.tags && post.tags.length > 0 && (
+        {targetPost.tags && targetPost.tags.length > 0 && (
           <div className="post-card__tags">
-            {post.tags.map((tag) => {
+            {targetPost.tags.map((tag) => {
               const tagName = typeof tag === "string" ? tag : tag.name || tag.slug;
               return (
                 <a key={tagName} href="#" className="post-card__tag">
@@ -434,49 +522,82 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
 
         {/* Actions - Twitter style */}
         <div className="post-card__actions">
-          <button 
-            className="post-card__action post-card__action--comment"
-            onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.id}`); }}
-            title={t('feed.comment')}
-          >
-            <span className="post-card__action-icon"><CommentIcon /></span>
-            {commentsCount > 0 && <span className="post-card__action-count">{formatNumber(commentsCount)}</span>}
-          </button>
-          
           <button
-            className={`post-card__action post-card__action--repost ${reposting ? "post-card__action--loading" : ""}`}
-            onClick={(e) => { e.stopPropagation(); handleRepost(); }}
-            disabled={reposting || isOwner}
-            title={isOwner ? t('feed.cant_repost_own') : t('feed.repost')}
+            className="post-card__action post-card__action--comment"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/post/${targetPost.id}`);
+            }}
+            title={t("feed.comment")}
           >
-            <span className="post-card__action-icon"><RepostIcon /></span>
-            {repostsCount > 0 && <span className="post-card__action-count">{formatNumber(repostsCount)}</span>}
+            <span className="post-card__action-icon">
+              <CommentIcon />
+            </span>
+            {commentsCount > 0 && (
+              <span className="post-card__action-count">{formatNumber(commentsCount)}</span>
+            )}
           </button>
-          
+
+          <button
+            className={`post-card__action post-card__action--repost ${reposting ? "post-card__action--loading" : ""} ${userReposted ? "post-card__action--active-repost" : ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRepost();
+            }}
+            disabled={reposting || isOwner}
+            title={isOwner ? t("feed.cant_repost_own") : t("feed.repost")}
+          >
+            <span className="post-card__action-icon">
+              <RepostIcon />
+            </span>
+            {repostsCount > 0 && (
+              <span className="post-card__action-count">{formatNumber(repostsCount)}</span>
+            )}
+          </button>
+
           <button
             className={`post-card__action post-card__action--like ${liked ? "post-card__action--active" : ""}`}
-            onClick={(e) => { e.stopPropagation(); handleLike(); }}
-            title={liked ? t('feed.unlike') : t('feed.like')}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleLike();
+            }}
+            title={liked ? t("feed.unlike") : t("feed.like")}
           >
-            <span className="post-card__action-icon"><HeartIcon filled={liked} /></span>
-            {likesCount > 0 && <span className="post-card__action-count">{formatNumber(likesCount)}</span>}
+            <span className="post-card__action-icon">
+              <HeartIcon filled={liked} />
+            </span>
+            {likesCount > 0 && (
+              <span className="post-card__action-count">{formatNumber(likesCount)}</span>
+            )}
           </button>
-          
+
           <button
             className={`post-card__action post-card__action--bookmark ${bookmarked ? "post-card__action--active" : ""}`}
-            onClick={(e) => { e.stopPropagation(); handleBookmark(); }}
-            title={bookmarked ? t('feed.unbookmark') : t('feed.bookmark')}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleBookmark();
+            }}
+            title={bookmarked ? t("feed.unbookmark") : t("feed.bookmark")}
           >
-            <span className="post-card__action-icon"><BookmarkIcon filled={bookmarked} /></span>
+            <span className="post-card__action-icon">
+              <BookmarkIcon filled={bookmarked} />
+            </span>
           </button>
 
           <button
             className={`post-card__action post-card__action--share ${showCopied ? "post-card__action--copied" : ""}`}
-            onClick={(e) => { e.stopPropagation(); handleShare(); }}
-            title={t('feed.share')}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleShare();
+            }}
+            title={t("feed.share")}
           >
-            <span className="post-card__action-icon"><ShareIcon /></span>
-            {showCopied && <span className="post-card__action-copied-text">{t('feed.link_copied')}</span>}
+            <span className="post-card__action-icon">
+              <ShareIcon />
+            </span>
+            {showCopied && (
+              <span className="post-card__action-copied-text">{t("feed.link_copied")}</span>
+            )}
           </button>
         </div>
       </div>
