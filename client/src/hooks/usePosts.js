@@ -71,10 +71,10 @@ export function usePosts({
         }
 
         const data = response.data || response;
-        const newPosts = data.data || data;
+        const newPosts = Array.isArray(data) ? data : data.data || data;
 
-        // Handle pagination metadata
-        const meta = data.meta || {};
+        // Handle pagination metadata (might be in response.meta or data itself if raw paginator is nested)
+        const meta = response.meta || data.meta || data || {};
         const lastPage = meta.last_page || 1;
         setHasMore(pageNum < lastPage);
 

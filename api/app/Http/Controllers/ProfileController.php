@@ -90,12 +90,22 @@ class ProfileController extends Controller
         }
 
         $posts = $user->posts()
-            ->with(['user:id,name,username,avatar', 'center:id,name', 'tags:id,name,slug,color'])
-            ->withCount(['likedByUsers as likes_count', 'comments', 'bookmarkedByUsers as bookmarks_count'])
+            ->with(['user', 'center', 'tags', 'originalPost.user'])
+            ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts'])
             ->latest()
-            ->paginate(15);
+            ->paginate(request()->input('per_page', 15));
 
-        return $this->success($posts);
+        return response()->json([
+            'success' => true,
+            'message' => 'User posts retrieved successfully',
+            'data'    => \App\Http\Resources\PostResource::collection($posts),
+            'meta'    => [
+                'current_page' => $posts->currentPage(),
+                'last_page'    => $posts->lastPage(),
+                'per_page'     => $posts->perPage(),
+                'total'        => $posts->total(),
+            ],
+        ]);
     }
 
     /**
