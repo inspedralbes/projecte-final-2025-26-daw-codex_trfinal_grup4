@@ -20,6 +20,8 @@ import Landing from "@/pages/Landing";
 import GoogleCallback from "@/pages/GoogleCallback";
 import CenterHub from "@/pages/CenterHub";
 import EmailVerification from "@/pages/EmailVerification";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 
 // Admin Pages
 import AdminLayout from "@/pages/admin/AdminLayout";
@@ -73,6 +75,10 @@ export default function AppRouter() {
 
       {/* Google OAuth callback */}
       <Route path="/auth/google/callback" element={<GoogleCallback />} />
+
+      {/* Password reset flow (public) */}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Email verification screen (authenticated but unverified) */}
       <Route element={<ProtectedRoute />}>

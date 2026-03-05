@@ -17,6 +17,10 @@
     "load_more": "Cargar más",
     "delete": "Eliminar"
   },
+  "home": {
+    "email_verified_success": "✅ ¡Tu email ha sido verificado correctamente! Ya tienes acceso completo.",
+    "email_already_verified": "Tu email ya estaba verificado."
+  },
   "widgets": {
     "trending": "Tendencias",
     "no_trends": "No hay tendencias",
@@ -156,6 +160,7 @@
     "register_here": "Regístrate aquí",
     "email": "Correo electrónico",
     "password": "Contraseña",
+    "forgot_password_link": "¿Olvidaste tu contraseña?",
     "confirm_password": "Confirmar Contraseña",
     "username": "Nombre de usuario",
     "full_name": "Nombre completo",
@@ -198,8 +203,26 @@
       "password_requirements": "La contraseña no cumple todos los requisitos.",
       "passwords_dont_match": "Las contraseñas no coinciden.",
       "google_failed": "Error al conectar con Google. Inténtalo de nuevo.",
-      "google_no_code": "No se recibió código de autorización de Google."
+      "google_no_code": "No se recibió código de autorización de Google.",
+      "invalid_verification_link": "El enlace de verificación no es válido o ha expirado."
     }
+  },
+  "forgot_password": {
+    "title": "¿Olvidaste tu contraseña?",
+    "description": "Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.",
+    "send_link": "Enviar enlace",
+    "success_message": "Si existe una cuenta con ese email, recibirás un enlace para restablecer tu contraseña en los próximos minutos.",
+    "back_to_login": "Volver a iniciar sesión"
+  },
+  "reset_password": {
+    "title": "Restablecer contraseña",
+    "description": "Introduce tu nueva contraseña.",
+    "new_password": "Nueva contraseña",
+    "reset_button": "Restablecer contraseña",
+    "success_message": "¡Contraseña actualizada correctamente!",
+    "invalid_link": "El enlace de restablecimiento es inválido o ha expirado.",
+    "request_new_link": "Solicitar un nuevo enlace",
+    "error": "No se pudo restablecer la contraseña. Inténtalo de nuevo."
   },
   "center": {
     "no_center_title": "No perteneces a ningún centro",

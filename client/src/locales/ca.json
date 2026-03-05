@@ -17,6 +17,10 @@
     "load_more": "Carregar més",
     "delete": "Eliminar"
   },
+  "home": {
+    "email_verified_success": "✅ El teu email s'ha verificat correctament! Ja tens accés complet.",
+    "email_already_verified": "El teu email ja estava verificat."
+  },
   "widgets": {
     "trending": "Tendències",
     "no_trends": "No hi ha tendències",
@@ -156,6 +160,7 @@
     "register_here": "Registra't aquí",
     "email": "Correu electrònic",
     "password": "Contrasenya",
+    "forgot_password_link": "Has oblidat la contrasenya?",
     "confirm_password": "Confirmar Contrasenya",
     "username": "Nom d'usuari",
     "full_name": "Nom complet",
@@ -198,8 +203,26 @@
       "password_requirements": "La contrasenya no compleix tots els requisits.",
       "passwords_dont_match": "Les contrasenyes no coincideixen.",
       "google_failed": "Error en connectar amb Google. Torna-ho a provar.",
-      "google_no_code": "No s'ha rebut codi d'autorització de Google."
+      "google_no_code": "No s'ha rebut codi d'autorització de Google.",
+      "invalid_verification_link": "L'enllaç de verificació no és vàlid o ha caducat."
     }
+  },
+  "forgot_password": {
+    "title": "Has oblidat la contrasenya?",
+    "description": "Introdueix el teu email i t'enviarem un enllaç per restablir la teva contrasenya.",
+    "send_link": "Enviar enllaç",
+    "success_message": "Si existeix un compte amb aquest email, rebràs un enllaç per restablir la teva contrasenya en els pròxims minuts.",
+    "back_to_login": "Tornar a iniciar sessió"
+  },
+  "reset_password": {
+    "title": "Restablir contrasenya",
+    "description": "Introdueix la teva nova contrasenya.",
+    "new_password": "Nova contrasenya",
+    "reset_button": "Restablir contrasenya",
+    "success_message": "Contrasenya actualitzada correctament!",
+    "invalid_link": "L'enllaç de restabliment és invàlid o ha caducat.",
+    "request_new_link": "Sol·licitar un nou enllaç",
+    "error": "No s'ha pogut restablir la contrasenya. Torna-ho a provar."
   },
   "center": {
     "no_center_title": "No pertanys a cap centre",

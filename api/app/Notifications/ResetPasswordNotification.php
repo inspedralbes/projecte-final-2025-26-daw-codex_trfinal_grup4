@@ -31,13 +31,13 @@ class ResetPasswordNotification extends Notification
         $resetUrl = $frontendUrl . '/reset-password?token=' . $this->token . '&email=' . urlencode($notifiable->email);
 
         return (new MailMessage)
-            ->subject('Reset your password – Codex')
-            ->greeting('Hello! 🔑')
-            ->line('We received a request to reset the password for your Codex account.')
-            ->action('Reset Password', $resetUrl)
-            ->line('This link will expire in 60 minutes.')
-            ->line('If you did not request a password reset, please ignore this email. Your password will remain unchanged.')
-            ->salutation('– The Codex Team');
+            ->subject('Restablecer contraseña – Codex')
+            ->greeting('¡Hola!')
+            ->line('Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Codex.')
+            ->action('Restablecer contraseña', $resetUrl)
+            ->line('Este enlace expirará en 60 minutos.')
+            ->line('Si no solicitaste un cambio de contraseña, puedes ignorar este mensaje. Tu contraseña no será modificada.')
+            ->salutation('– El equipo de Codex');
     }
 
     /**

@@ -3,7 +3,7 @@
 > **Nombre del Proyecto:** Codex  
 > **Tipo:** Red Social Académica Vertical  
 > **Público Objetivo:** Estudiantes, Profesores y Alumni de FP Informática en España (DAM, DAW, ASIX).  
-> **Estado:** Frontend UI implementado ✓
+> **Estado:** MVP funcional con autenticación, email y chat responsive ✓
 
 ---
 
@@ -112,9 +112,11 @@ Sistema de elevación con 6 niveles (`--surface-depth-0` a `--surface-depth-5`) 
 | `/explore` | Explore | Búsqueda y descubrimiento |
 | `/notifications` | Notifications | Stream de actividad |
 | `/profile/:username` | Profile | Perfil de desarrollador |
-| `/messages` | Messages | Chat P2P con restricciones de seguimiento |
+| `/messages` | Messages | Chat P2P responsive con restricciones de seguimiento |
 | `/auth/google/callback` | GoogleCallback | Callback OAuth de Google |
 | `/verify-email` | EmailVerification | Verificación de email pendiente |
+| `/forgot-password` | ForgotPassword | Solicitar enlace de recuperación de contraseña |
+| `/reset-password` | ResetPassword | Restablecer contraseña con token |
 
 ### Arquitectura de Componentes
 ```
@@ -123,7 +125,10 @@ src/
 │   ├── Landing.jsx          # Auth + Hero
 │   ├── Explore.jsx          # Search + Widgets
 │   ├── Notifications.jsx    # Activity stream
-│   └── CenterHub.jsx        # Hub institucional
+│   ├── Messages.jsx         # Chat P2P responsive
+│   ├── CenterHub.jsx        # Hub institucional
+│   ├── ForgotPassword.jsx   # Recuperar contraseña
+│   └── ResetPassword.jsx    # Restablecer contraseña
 ├── components/
 │   ├── layout/
 │   │   ├── MainLayout.jsx   # Shell 3-columnas
@@ -135,6 +140,10 @@ src/
 │   │   └── PostCard.jsx     # Tarjeta de post
 │   └── profile/
 │       └── Profile.jsx      # Perfil de usuario
+├── locales/
+│   ├── es.json              # Traducciones español
+│   ├── ca.json              # Traducciones catalán
+│   └── en.json              # Traducciones inglés
 └── styles/
     ├── variables.css        # Design tokens
     ├── base.css             # Reset + Typography
@@ -158,9 +167,11 @@ Para detalles específicos sobre la implementación técnica de cada microservic
 - [x] Integración con API real (Laravel 11 + Sanctum)
 - [x] Sistema de autenticación con validación de dominios educativos
 - [x] Login con Google (OAuth 2.0)
-- [x] Verificación de email
+- [x] Verificación de email con redirección al frontend
+- [x] Recuperación de contraseña (forgot/reset password flow)
 - [x] WebSocket para notificaciones en tiempo real (Socket.io + Redis)
 - [x] Chat/Mensajes directos (P2P con restricciones de seguimiento mutuo)
+- [x] Página de Mensajes responsive (mobile-first con transiciones)
 - [x] Sistema de puntos y gamificación (ReputationService + Badges)
 - [x] Moderación para profesores en Hub del Centro (bloquear, expulsar, cambiar roles)
 - [x] Feed Global y del Centro (Walled Garden)
@@ -169,8 +180,9 @@ Para detalles específicos sobre la implementación técnica de cada microservic
 - [x] Sistema de seguimiento de usuarios y etiquetas
 - [x] Búsqueda global y por centro
 - [x] Perfil de usuario con stats en tiempo real
-- [x] Soporte multi-idioma (Catalán, Español, Inglés)
+- [x] Soporte multi-idioma completo (Catalán, Español, Inglés)
 - [x] Servidor de correo producción (Hestia + DKIM/SPF/DMARC)
+- [x] Emails en español para mejor entregabilidad
 
 ### Pendiente 🔄
 - [ ] Panel de administración para gestionar centros pendientes

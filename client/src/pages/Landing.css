@@ -349,6 +349,23 @@
   margin-top: var(--space-1);
 }
 
+.auth-card__forgot-password {
+  text-align: right;
+  margin-top: var(--space-1);
+}
+
+.auth-card__forgot-password a {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.auth-card__forgot-password a:hover {
+  color: var(--accent-primary);
+  text-decoration: underline;
+}
+
 .auth-card__submit {
   display: flex;
   align-items: center;

@@ -28,14 +28,16 @@ class VerifyEmailNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $verificationUrl = $this->verificationUrl($notifiable);
+        $userName = $notifiable->name ?? 'there';
 
         return (new MailMessage)
-            ->subject('Verify your email address – Codex')
-            ->greeting('Welcome to Codex! 🚀')
-            ->line('Please click the button below to verify your email address.')
-            ->action('Verify Email', $verificationUrl)
-            ->line('If you did not create an account, no further action is required.')
-            ->salutation('– The Codex Team');
+            ->subject('Confirma tu cuenta en Codex')
+            ->greeting('Hola ' . $userName . ',')
+            ->line('Gracias por registrarte en Codex, la red social académica para estudiantes de FP en Informática.')
+            ->line('Para completar tu registro y acceder a todas las funcionalidades, confirma tu dirección de correo electrónico:')
+            ->action('Confirmar mi cuenta', $verificationUrl)
+            ->line('Este enlace expirará en 60 minutos.')
+            ->line('Si no has creado una cuenta en Codex, puedes ignorar este mensaje.');
     }
 
     /**

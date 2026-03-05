@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { PASSWORD_REQUIREMENTS } from "@/context/AuthContext";
@@ -94,12 +94,23 @@ export default function Landing() {
   const { login, register, registerWithCenterRequest, checkDomain, authMessage, clearAuthMessage } =
     useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // State
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+
+  // Handle error from verification redirect
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam === "invalid_link") {
+      setError(t("landing.errors.invalid_verification_link", "El enlace de verificación es inválido o ha expirado."));
+      searchParams.delete("error");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, t]);
 
   // Fields
   const [name, setName] = useState("");
@@ -449,6 +460,13 @@ export default function Landing() {
                   </div>
                 )}
               </div>
+
+              {/* Forgot password link - only in login mode */}
+              {isLogin && (
+                <div className="auth-card__forgot-password">
+                  <Link to="/forgot-password">{t("landing.forgot_password_link")}</Link>
+                </div>
+              )}
 
               {!isLogin && (
                 <div className="auth-card__input-group">

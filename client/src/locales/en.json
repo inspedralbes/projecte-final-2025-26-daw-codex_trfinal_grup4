@@ -17,6 +17,10 @@
     "load_more": "Load more",
     "delete": "Delete"
   },
+  "home": {
+    "email_verified_success": "✅ Your email has been verified successfully! You now have full access.",
+    "email_already_verified": "Your email was already verified."
+  },
   "widgets": {
     "trending": "Trending",
     "no_trends": "No trends available",
@@ -156,6 +160,7 @@
     "register_here": "Register here",
     "email": "Email",
     "password": "Password",
+    "forgot_password_link": "Forgot your password?",
     "confirm_password": "Confirm Password",
     "username": "Username",
     "full_name": "Full name",
@@ -198,8 +203,26 @@
       "password_requirements": "The password does not meet all requirements.",
       "passwords_dont_match": "Passwords do not match.",
       "google_failed": "Failed to connect with Google. Please try again.",
-      "google_no_code": "No authorization code received from Google."
+      "google_no_code": "No authorization code received from Google.",
+      "invalid_verification_link": "The verification link is invalid or has expired."
     }
+  },
+  "forgot_password": {
+    "title": "Forgot your password?",
+    "description": "Enter your email and we'll send you a link to reset your password.",
+    "send_link": "Send link",
+    "success_message": "If an account exists with that email, you'll receive a password reset link in the next few minutes.",
+    "back_to_login": "Back to login"
+  },
+  "reset_password": {
+    "title": "Reset password",
+    "description": "Enter your new password.",
+    "new_password": "New password",
+    "reset_button": "Reset password",
+    "success_message": "Password updated successfully!",
+    "invalid_link": "The reset link is invalid or has expired.",
+    "request_new_link": "Request a new link",
+    "error": "Could not reset password. Please try again."
   },
   "center": {
     "no_center_title": "You do not belong to any center",

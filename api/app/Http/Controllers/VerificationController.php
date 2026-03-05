@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class VerificationController extends Controller
@@ -16,19 +17,27 @@ class VerificationController extends Controller
      * GET /api/email/verify/{id}/{hash}
      * Verify the user's email address.
      * This is the link the user clicks from the email.
+     * Redirects to frontend after verification.
      */
-    public function verify(Request $request, int $id, string $hash): JsonResponse
+    public function verify(Request $request, int $id, string $hash): RedirectResponse
     {
-        $user = User::findOrFail($id);
+        $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
+
+        $user = User::find($id);
+
+        // User not found
+        if (!$user) {
+            return redirect($frontendUrl . '/welcome?error=invalid_link');
+        }
 
         // Check if hash matches
         if (!hash_equals(sha1($user->getEmailForVerification()), $hash)) {
-            return $this->error('Invalid verification link.', 403);
+            return redirect($frontendUrl . '/welcome?error=invalid_link');
         }
 
         // Check if already verified
         if ($user->hasVerifiedEmail()) {
-            return $this->success(['already_verified' => true], 'Email already verified.');
+            return redirect($frontendUrl . '/?verified=already');
         }
 
         // Mark as verified
@@ -36,7 +45,7 @@ class VerificationController extends Controller
             event(new Verified($user));
         }
 
-        return $this->success(['verified' => true], 'Email verified successfully.');
+        return redirect($frontendUrl . '/?verified=success');
     }
 
     /**
