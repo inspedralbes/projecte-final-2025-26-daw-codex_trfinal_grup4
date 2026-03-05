@@ -81,9 +81,17 @@
   background: var(--depth-4);
 }
 
-.post-input__code-dots span:first-child { background: #ff5f56; }
-.post-input__code-dots span:nth-child(2) { background: #ffbd2e; }
-.post-input__code-dots span:last-child { background: #27ca40; }
+.post-input__code-dots span:first-child {
+  background: #ff5f56;
+}
+
+.post-input__code-dots span:nth-child(2) {
+  background: #ffbd2e;
+}
+
+.post-input__code-dots span:last-child {
+  background: #27ca40;
+}
 
 .post-input__code-lang {
   padding: var(--space-1) var(--space-2);
@@ -545,4 +553,54 @@
     font-size: var(--text-xs);
     padding: var(--space-3);
   }
+}
+
+/* ── Ban / Timeout Notice ─────────────────────────────────── */
+.post-input--sanctioned {
+  background: rgba(239, 68, 68, 0.03);
+  border-bottom-color: rgba(239, 68, 68, 0.15);
+}
+
+.post-input__ban-notice {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+
+.post-input__ban-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.post-input__ban-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.post-input__ban-text strong {
+  font-size: var(--text-base);
+  color: #ef4444;
+}
+
+.post-input__ban-reason {
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.post-input__ban-expiry {
+  font-size: var(--text-sm);
+  color: var(--ink-tertiary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.post-input__ban-expiry strong {
+  color: var(--ink-secondary);
+  font-size: inherit;
 }

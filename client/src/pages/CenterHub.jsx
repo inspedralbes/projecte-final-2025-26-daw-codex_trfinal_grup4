@@ -94,7 +94,7 @@ const RoleBadge = ({ role }) => {
     admin: { label: "Admin", color: "rose", icon: <ShieldIcon /> },
   };
   const config = roleConfig[role] || roleConfig.student;
-  
+
   return (
     <span className={`center-hub__role-badge center-hub__role-badge--${config.color}`}>
       {config.icon}
@@ -103,76 +103,175 @@ const RoleBadge = ({ role }) => {
   );
 };
 
+// Confirmation modal before blocking
+const BlockConfirmModal = ({ member, onConfirm, onCancel }) => (
+  <div className="center-hub__modal-overlay" role="dialog" aria-modal="true">
+    <div className="center-hub__modal">
+      <h3 className="center-hub__modal-title">¿Bloquear usuario?</h3>
+      <p className="center-hub__modal-body">
+        Vas a bloquear a <strong>{member.name}</strong> (@{member.username}).
+        No podrá acceder al hub del centro ni interactuar con su contenido.
+      </p>
+      <div className="center-hub__modal-actions">
+        <button
+          className="center-hub__action-btn center-hub__action-btn--demote"
+          onClick={onCancel}
+        >
+          Cancelar
+        </button>
+        <button
+          className="center-hub__action-btn center-hub__action-btn--block"
+          onClick={onConfirm}
+        >
+          Sí, bloquear
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+// Confirmation modal before role change
+const RoleChangeConfirmModal = ({ member, newRole, onConfirm, onCancel }) => {
+  const isPromoting = newRole === "teacher";
+  return (
+    <div className="center-hub__modal-overlay" role="dialog" aria-modal="true">
+      <div className="center-hub__modal">
+        <h3 className="center-hub__modal-title">
+          {isPromoting ? "¿Ascender a profesor?" : "¿Descender a estudiante?"}
+        </h3>
+        <p className="center-hub__modal-body">
+          Vas a cambiar el rol de <strong>{member.name}</strong> (@{member.username})
+          {" "}a <strong>{isPromoting ? "Profesor" : "Estudiante"}</strong>.
+          {isPromoting
+            ? " Tendrá acceso a las herramientas de moderación del centro."
+            : " Perderá los permisos de moderación del centro."}
+        </p>
+        <div className="center-hub__modal-actions">
+          <button
+            className="center-hub__action-btn center-hub__action-btn--demote"
+            onClick={onCancel}
+          >
+            Cancelar
+          </button>
+          <button
+            className={`center-hub__action-btn center-hub__action-btn--${isPromoting ? "promote" : "demote"}`}
+            onClick={onConfirm}
+          >
+            {isPromoting ? "Sí, ascender" : "Sí, descender"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Member card component
 const MemberCard = ({ member, isTeacher, onRoleChange, onBlock, onUnblock }) => {
   const { t } = useTranslation();
-  
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [pendingRole, setPendingRole] = useState(null); // null | "teacher" | "student"
+
+  const handleBlockClick = () => setShowBlockModal(true);
+  const handleBlockConfirm = () => {
+    setShowBlockModal(false);
+    onBlock(member.id);
+  };
+
+  const handleRoleClick = (newRole) => setPendingRole(newRole);
+  const handleRoleConfirm = () => {
+    const role = pendingRole;
+    setPendingRole(null);
+    onRoleChange(member.id, role);
+  };
+
   return (
-    <div className={`center-hub__member-card ${member.is_blocked ? "center-hub__member-card--blocked" : ""}`}>
-      <Link to={`/profile/${member.username}`} className="center-hub__member-avatar">
-        {member.avatar ? (
-          <img src={member.avatar} alt={member.name} />
-        ) : (
-          <span>{member.name?.charAt(0)?.toUpperCase() || "?"}</span>
-        )}
-      </Link>
-      <div className="center-hub__member-info">
-        <Link to={`/profile/${member.username}`} className="center-hub__member-name">
-          {member.name}
-          <RoleBadge role={member.role} />
-        </Link>
-        <span className="center-hub__member-username">@{member.username}</span>
-        {member.bio && <p className="center-hub__member-bio">{member.bio}</p>}
-        <div className="center-hub__member-stats">
-          <span>{member.posts_count || 0} {t("profile.posts")}</span>
-          <span>·</span>
-          <span>{member.comments_count || 0} {t("center.comments")}</span>
-        </div>
-      </div>
-      
-      {/* Admin actions for teachers */}
-      {isTeacher && member.role !== "admin" && (
-        <div className="center-hub__member-actions">
-          {member.is_blocked ? (
-            <button 
-              className="center-hub__action-btn center-hub__action-btn--unblock"
-              onClick={() => onUnblock(member.id)}
-              title={t("center.unblock_user")}
-            >
-              Desbloquear
-            </button>
+    <>
+      <div className={`center-hub__member-card ${member.is_blocked ? "center-hub__member-card--blocked" : ""}`}>
+        <Link to={`/profile/${member.username}`} className="center-hub__member-avatar">
+          {member.avatar ? (
+            <img src={member.avatar} alt={member.name} />
           ) : (
-            <>
-              {member.role === "student" && (
-                <button 
-                  className="center-hub__action-btn center-hub__action-btn--promote"
-                  onClick={() => onRoleChange(member.id, "teacher")}
-                  title={t("center.promote_to_teacher")}
-                >
-                  → Profesor
-                </button>
-              )}
-              {member.role === "teacher" && (
-                <button 
-                  className="center-hub__action-btn center-hub__action-btn--demote"
-                  onClick={() => onRoleChange(member.id, "student")}
-                  title={t("center.demote_to_student")}
-                >
-                  → Estudiante
-                </button>
-              )}
-              <button 
-                className="center-hub__action-btn center-hub__action-btn--block"
-                onClick={() => onBlock(member.id)}
-                title={t("center.block_user")}
-              >
-                Bloquear
-              </button>
-            </>
+            <span>{member.name?.charAt(0)?.toUpperCase() || "?"}</span>
           )}
+        </Link>
+        <div className="center-hub__member-info">
+          <Link to={`/profile/${member.username}`} className="center-hub__member-name">
+            {member.name}
+            <RoleBadge role={member.role} />
+            {member.is_blocked && (
+              <span className="center-hub__blocked-badge">🚫 Bloqueado</span>
+            )}
+          </Link>
+          <span className="center-hub__member-username">@{member.username}</span>
+          {member.bio && <p className="center-hub__member-bio">{member.bio}</p>}
+          <div className="center-hub__member-stats">
+            <span>{member.posts_count || 0} {t("profile.posts")}</span>
+            <span>·</span>
+            <span>{member.comments_count || 0} {t("center.comments")}</span>
+          </div>
         </div>
+
+        {/* Admin actions for teachers */}
+        {isTeacher && member.role !== "admin" && (
+          <div className="center-hub__member-actions">
+            {member.is_blocked ? (
+              <button
+                className="center-hub__action-btn center-hub__action-btn--unblock"
+                onClick={() => onUnblock(member.id)}
+                title={t("center.unblock_user")}
+              >
+                Desbloquear
+              </button>
+            ) : (
+              <>
+                {member.role === "student" && (
+                  <button
+                    className="center-hub__action-btn center-hub__action-btn--promote"
+                    onClick={() => handleRoleClick("teacher")}
+                    title={t("center.promote_to_teacher")}
+                  >
+                    → Profesor
+                  </button>
+                )}
+                {member.role === "teacher" && (
+                  <button
+                    className="center-hub__action-btn center-hub__action-btn--demote"
+                    onClick={() => handleRoleClick("student")}
+                    title={t("center.demote_to_student")}
+                  >
+                    → Estudiante
+                  </button>
+                )}
+                <button
+                  className="center-hub__action-btn center-hub__action-btn--block"
+                  onClick={handleBlockClick}
+                  title={t("center.block_user")}
+                >
+                  Bloquear
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {showBlockModal && (
+        <BlockConfirmModal
+          member={member}
+          onConfirm={handleBlockConfirm}
+          onCancel={() => setShowBlockModal(false)}
+        />
       )}
-    </div>
+
+      {pendingRole && (
+        <RoleChangeConfirmModal
+          member={member}
+          newRole={pendingRole}
+          onConfirm={handleRoleConfirm}
+          onCancel={() => setPendingRole(null)}
+        />
+      )}
+    </>
   );
 };
 
@@ -183,13 +282,13 @@ export default function CenterHub() {
   const [activeTab, setActiveTab] = useState("posts");
   const [centerInfo, setCenterInfo] = useState(null);
   const [loadingCenter, setLoadingCenter] = useState(true);
-  
+
   // Members state
   const [members, setMembers] = useState([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [membersSearch, setMembersSearch] = useState("");
   const [membersFilter, setMembersFilter] = useState("all");
-  
+
   // Admin state
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ description: "", website: "" });
@@ -229,9 +328,9 @@ export default function CenterHub() {
         const response = await centerService.getCenter(centerId);
         const data = response.data || response;
         setCenterInfo(data);
-        setEditForm({ 
-          description: data.description || "", 
-          website: data.website || "" 
+        setEditForm({
+          description: data.description || "",
+          website: data.website || ""
         });
       } catch (err) {
         console.error("Error fetching center info:", err);
@@ -246,14 +345,21 @@ export default function CenterHub() {
   // Fetch members when tab is active
   const fetchMembers = useCallback(async () => {
     if (!centerId) return;
-    
+
     try {
       setLoadingMembers(true);
       const params = {};
       if (membersSearch) params.search = membersSearch;
       if (membersFilter !== "all") params.role = membersFilter;
-      
-      const response = await centerService.getCenterMembers(centerId, params);
+
+      let response;
+      if (isTeacher) {
+        // Teachers use the privileged endpoint that returns is_blocked status
+        response = await centerService.getMembers(params);
+      } else {
+        response = await centerService.getCenterMembers(centerId, params);
+      }
+
       const data = response.data?.data || response.data || [];
       setMembers(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -262,7 +368,7 @@ export default function CenterHub() {
     } finally {
       setLoadingMembers(false);
     }
-  }, [centerId, membersSearch, membersFilter]);
+  }, [centerId, membersSearch, membersFilter, isTeacher]);
 
   useEffect(() => {
     if (activeTab === "members" || activeTab === "admin") {
@@ -340,7 +446,7 @@ export default function CenterHub() {
         center_id: centerId,
         visibility: "center",
       };
-      
+
       // Force question type when creating from questions tab
       if (isQuestionsTab) {
         finalPostData.type = "question";
@@ -350,7 +456,7 @@ export default function CenterHub() {
           finalPostData.tags = ["dubtes-recents", ...existingTags].slice(0, 5);
         }
       }
-      
+
       await createPost(finalPostData);
       return { success: true };
     } catch (err) {
@@ -361,6 +467,31 @@ export default function CenterHub() {
   // No center assigned
   if (!centerId) {
     return <NoCenterView user={user} t={t} centerCheck={centerCheck} refreshUser={refreshUser} />;
+  }
+
+  // User is blocked from this center
+  if (user?.is_blocked) {
+    return (
+      <div className="center-hub">
+        <div className="center-hub__blocked-view">
+          <div className="center-hub__blocked-icon">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <h2 className="center-hub__blocked-title">Acceso restringido al centro</h2>
+          <p className="center-hub__blocked-desc">
+            Un profesor o administrador te ha bloqueado en este centro.
+            No puedes acceder al hub del centro ni interactuar con su contenido.
+          </p>
+          <p className="center-hub__blocked-contact">
+            Si crees que es un error, contacta con tu tutor o administrador del centro.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Loading state
@@ -458,7 +589,7 @@ export default function CenterHub() {
             <h3 className="center-hub__admin-title">
               <SettingsIcon /> {t("center.settings")}
             </h3>
-            
+
             {isEditing ? (
               <div className="center-hub__edit-form">
                 <div className="center-hub__form-group">
@@ -480,13 +611,13 @@ export default function CenterHub() {
                   />
                 </div>
                 <div className="center-hub__form-actions">
-                  <button 
+                  <button
                     className="center-hub__btn center-hub__btn--secondary"
                     onClick={() => setIsEditing(false)}
                   >
                     {t("common.cancel")}
                   </button>
-                  <button 
+                  <button
                     className="center-hub__btn center-hub__btn--primary"
                     onClick={handleSaveCenter}
                     disabled={savingCenter}
@@ -525,7 +656,7 @@ export default function CenterHub() {
                     )}
                   </p>
                 </div>
-                <button 
+                <button
                   className="center-hub__btn center-hub__btn--primary"
                   onClick={() => setIsEditing(true)}
                 >

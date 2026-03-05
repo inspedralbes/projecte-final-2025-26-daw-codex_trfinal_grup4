@@ -41,9 +41,11 @@ async function request(endpoint, options = {}) {
   const response = await fetch(url, config);
 
   if (!response.ok) {
-    // TODO: implement proper error handling
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `HTTP ${response.status}`);
+    const errorBody = await response.json().catch(() => ({}));
+    const err = new Error(errorBody.message || `HTTP ${response.status}`);
+    err.status = response.status;
+    err.data = errorBody;
+    throw err;
   }
 
   return response.json();

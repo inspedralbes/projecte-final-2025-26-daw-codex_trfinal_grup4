@@ -84,14 +84,14 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/centers/{center}', [CenterController::class, 'show']);
 
 // Center members – requires authentication (any center member can view)
-Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/centers/{center}/members', [CenterController::class, 'members']);
 });
 
 /* ------------------------------------------------------------------ */
-/*  Protected Routes (auth:sanctum + not-blocked)                      */
+/*  Protected Routes (auth:sanctum)                                    */
 /* ------------------------------------------------------------------ */
-Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -130,10 +130,12 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     Route::post('/users/{user}/follow', [FollowController::class, 'toggle']);
     Route::get('/users/{user}/follow-status', [FollowController::class, 'status']);
 
-    // Center Hub (US#5) – "Walled Garden"
-    Route::get('/center/posts', [PostController::class, 'centerPosts']);
-    Route::get('/center/tags', [TagController::class, 'centerTags']);
-    Route::get('/center/search', [SearchController::class, 'centerSearch']);
+    // Center Hub (US#5) – "Walled Garden" (blocked users cannot access center)
+    Route::middleware('not-blocked')->group(function () {
+        Route::get('/center/posts', [PostController::class, 'centerPosts']);
+        Route::get('/center/tags', [TagController::class, 'centerTags']);
+        Route::get('/center/search', [SearchController::class, 'centerSearch']);
+    });
 
     // Tags – follow/unfollow + notifications
     Route::post('/tags/{tag}/follow', [TagController::class, 'toggleFollow']);
@@ -204,6 +206,8 @@ Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
         Route::get('/admin/users/{user}', [\App\Http\Controllers\AdminUserController::class, 'show']);
         Route::get('/admin/users/{user}/posts', [\App\Http\Controllers\AdminUserController::class, 'userPosts']);
         Route::put('/admin/users/{user}', [\App\Http\Controllers\AdminUserController::class, 'update']);
+        Route::post('/admin/users/{user}/ban', [\App\Http\Controllers\AdminUserController::class, 'ban']);
+        Route::post('/admin/users/{user}/unban', [\App\Http\Controllers\AdminUserController::class, 'unban']);
         Route::delete('/admin/users/{user}', [\App\Http\Controllers\AdminUserController::class, 'destroy']);
 
         // Center Request management
