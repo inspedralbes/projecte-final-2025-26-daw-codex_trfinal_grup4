@@ -173,17 +173,18 @@ io.on("connection", (socket) => {
 
     try {
       // Call Laravel API to persist the message and validate restrictions
-      // Use API_URL which points to the public HTTPS endpoint
-      const apiUrl = process.env.API_URL || "http://localhost:8080";
+      // VITE_API_URL already includes /api (e.g., https://domain.com/api)
+      // API_URL is the base URL without /api (e.g., https://domain.com)
+      const apiUrl = process.env.VITE_API_URL || `${process.env.API_URL || "http://localhost:8080"}/api`;
       console.log(
-        `[Socket.io] Sending message to API: ${apiUrl}/api/chat/messages`,
+        `[Socket.io] Sending message to API: ${apiUrl}/chat/messages`,
         {
           receiver_id: receiverId,
           content: content.trim().substring(0, 50) + "...",
         },
       );
 
-      const response = await fetch(`${apiUrl}/api/chat/messages`, {
+      const response = await fetch(`${apiUrl}/chat/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -245,9 +246,9 @@ io.on("connection", (socket) => {
     if (!partnerId || !token) return;
 
     try {
-      // Use API_URL which points to the public HTTPS endpoint
-      const apiUrl = process.env.API_URL || "http://localhost:8080";
-      await fetch(`${apiUrl}/api/chat/conversations/${partnerId}/read`, {
+      // VITE_API_URL already includes /api
+      const apiUrl = process.env.VITE_API_URL || `${process.env.API_URL || "http://localhost:8080"}/api`;
+      await fetch(`${apiUrl}/chat/conversations/${partnerId}/read`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
