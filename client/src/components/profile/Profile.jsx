@@ -508,15 +508,6 @@ export default function Profile({ username }) {
                 }
                 alt={user.name}
               />
-              {/* Medal badge for points – mobile only */}
-              <div className="profile-guay__points-medal">
-                <span className="profile-guay__medal-icon">🏅</span>
-                <span className="profile-guay__medal-value">
-                  {typeof user.reputation === "object"
-                    ? user.reputation?.score || 0
-                    : user.reputation || 0}
-                </span>
-              </div>
             </div>
           </div>
 
