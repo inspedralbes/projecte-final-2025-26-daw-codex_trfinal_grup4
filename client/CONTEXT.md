@@ -547,6 +547,27 @@
   - `client/src/pages/Explore.jsx`
   - `api/app/Http/Controllers/ProfileController.php`
 
+### 2026-03-05 – Millores Responsive Mòbil (Login, Sidebar, Explore)
+
+- **Autor:** @copilot (IA)
+- **Login Mòbil Simplificat:**
+  - En pantalles < 640px, el contingut del hero (badge, títol, subtítol, features) s'oculta completament.
+  - Només es mostra el formulari d'autenticació centrat a la pantalla.
+  - Afegit `min-height: 100dvh` i `align-content: center` per centrar el card.
+- **Fix Candau Centre a Mòbil:**
+  - Reemplaçat l'emoji 🔒 per un icona SVG que es renderitza consistentment.
+  - En desktop: mostra l'icona de candau al costat del text "Centre".
+  - En mòbil: l'icona de candau s'oculta per estalviar espai, però l'ítem es veu amb opacitat reduïda (0.45) i `cursor: not-allowed`.
+- **Explore Responsive Millorat:**
+  - Afegit `max-width: 100%` i `box-sizing: border-box` a tots els contenidors.
+  - Widgets amb `overflow: hidden` per evitar desbordament horitzontal.
+  - Text llarg de trends i usuaris suggerits es trunca amb `text-overflow: ellipsis`.
+  - Grid i resultats de cerca amb `width: 100%` i `max-width: 100vw`.
+- **Fitxers modificats:**
+  - `client/src/pages/Landing.css`
+  - `client/src/components/layout/Sidebar.jsx` / `.css`
+  - `client/src/pages/Explore.css`
+
 ---
 
 ## 🎨 Estructura actual de components

@@ -97,8 +97,18 @@
 }
 
 .sidebar__nav-lock {
-  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-left: auto;
+  width: 16px;
+  height: 16px;
+  color: var(--ink-muted);
+}
+
+.sidebar__nav-lock svg {
+  width: 14px;
+  height: 14px;
 }
 
 .sidebar__nav-icon {
@@ -374,5 +384,24 @@
   .sidebar__nav-icon svg {
     width: 22px;
     height: 22px;
+  }
+
+  /* Mobile locked nav item */
+  .sidebar__nav-item--locked {
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-1) var(--space-2);
+    width: auto;
+    height: 100%;
+    border-radius: 0;
+    justify-content: center;
+    align-items: center;
+    min-width: 56px;
+    position: relative;
+  }
+
+  /* Hide lock icon on mobile, use opacity to indicate disabled */
+  .sidebar__nav-lock {
+    display: none;
   }
 }
