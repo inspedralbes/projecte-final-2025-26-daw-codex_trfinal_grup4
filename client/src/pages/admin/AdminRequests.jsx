@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "@/services/api";
 import { CheckCircle, XCircle, FileText, CheckCheck, X, User, Building2, AtSign, Info } from "lucide-react";
+import "./AdminRequests.css";
 
 // ── Custom modal for approve / reject ───────────────────────
 function ActionModal({ mode, request, onConfirm, onClose }) {

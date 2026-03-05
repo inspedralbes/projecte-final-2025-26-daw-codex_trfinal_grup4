@@ -4,6 +4,31 @@
     gap: 1.5rem;
 }
 
+.admin-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.admin-select {
+    background: var(--depth-1, #0f1520);
+    border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+    border-radius: var(--radius-md, 8px);
+    padding: 0.65rem 1rem;
+    color: var(--ink-primary, white);
+    font-size: var(--text-sm, 0.9rem);
+    cursor: pointer;
+    transition: border-color 0.15s;
+    min-width: 180px;
+}
+
+.admin-select:focus {
+    outline: none;
+    border-color: var(--codex-teal, #14b8a6);
+}
+
+
 .requests-list {
     display: flex;
     flex-direction: column;

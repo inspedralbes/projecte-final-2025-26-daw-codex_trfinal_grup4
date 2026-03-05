@@ -140,6 +140,20 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
 
   const hasCenterAccess = !!user?.center_id;
 
+  // ── Ban / Timeout check ───────────────────────────────────────
+  const isBanned = user?.ban_status === "banned";
+  const isTimeout = user?.ban_status === "timeout";
+  const isSanctioned = isBanned || isTimeout || user?.is_blocked;
+
+  const formatBanExpiry = (dateStr) => {
+    if (!dateStr) return null;
+    return new Date(dateStr).toLocaleString("es-ES", {
+      weekday: "long", day: "numeric", month: "long",
+      year: "numeric", hour: "2-digit", minute: "2-digit",
+    });
+  };
+
+
   // Sync isQuestion with forceQuestion prop when tab changes
   useEffect(() => {
     setIsQuestion(forceQuestion);
@@ -237,6 +251,43 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
   const avatarUrl =
     user?.avatar ||
     `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || "developer"}`;
+
+  // Show ban / timeout notice instead of the form
+  if (isSanctioned) {
+    return (
+      <div className="post-input post-input--sanctioned">
+        <div className="post-input__avatar">
+          <img src={avatarUrl} alt={t("common.user")} />
+        </div>
+        <div className="post-input__ban-notice">
+          <div className="post-input__ban-icon">
+            {isBanned ? "🚫" : "⏱"}
+          </div>
+          <div className="post-input__ban-text">
+            <strong>
+              {isBanned
+                ? "Tu cuenta ha sido baneada"
+                : "Tu cuenta está en timeout"}
+            </strong>
+            {user?.ban_reason && (
+              <p className="post-input__ban-reason">
+                Motivo: {user.ban_reason}
+              </p>
+            )}
+            {user?.ban_expires_at && (
+              <p className="post-input__ban-expiry">
+                Tu timeout acabará el{" "}
+                <strong>{formatBanExpiry(user.ban_expires_at)}</strong>
+              </p>
+            )}
+            {isBanned && !user?.ban_expires_at && (
+              <p className="post-input__ban-expiry">Este baneo es permanente.</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="post-input">
