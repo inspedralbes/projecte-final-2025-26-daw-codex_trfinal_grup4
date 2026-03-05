@@ -8,6 +8,7 @@ use App\Services\ReputationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
@@ -177,7 +178,7 @@ class ProfileController extends Controller
             'name'          => 'sometimes|string|max:255',
             'username'      => 'sometimes|string|max:50|unique:users,username,' . $user->id . '|regex:/^[a-zA-Z0-9_]+$/',
             'bio'           => 'sometimes|nullable|string|max:1000',
-            'avatar'        => 'sometimes|nullable|image|max:5120', 
+            'avatar'        => 'sometimes|nullable|image|max:5120',
             'banner'        => 'sometimes|nullable|image|max:8192', // 8 MB max for banner
             'linkedin_url'  => 'sometimes|nullable|url|max:500',
             'portfolio_url' => 'sometimes|nullable|url|max:500',
@@ -247,6 +248,8 @@ class ProfileController extends Controller
     public function leaderboard(Request $request): JsonResponse
     {
         $limit = min($request->input('limit', 10), 50);
+        // Use Sanctum guard directly to get authenticated user on public route
+        $currentUserId = Auth::guard('sanctum')->user()?->id;
 
         $users = User::withCount(['posts', 'comments', 'followers'])
             ->with('center:id,name')
@@ -254,9 +257,15 @@ class ProfileController extends Controller
             ->take($limit)
             ->get();
 
-        $leaderboard = $users->map(function ($user, $index) {
+        $leaderboard = $users->map(function ($user, $index) use ($currentUserId) {
             $reputation = $this->reputationService->calculateReputation($user);
             $badge = $this->reputationService->getBadge($reputation);
+
+            // Check if current user follows this user
+            $isFollowing = false;
+            if ($currentUserId && $currentUserId !== $user->id) {
+                $isFollowing = $user->followers()->where('follower_id', $currentUserId)->exists();
+            }
 
             return [
                 'rank'       => $index + 1,
@@ -269,6 +278,7 @@ class ProfileController extends Controller
                 'score'      => $reputation,
                 'badge'      => $badge['emoji'] ?? '🔰',
                 'badge_name' => $badge['name'] ?? 'Novato',
+                'is_following' => $isFollowing,
                 'stats'      => [
                     'posts'     => $user->posts_count,
                     'comments'  => $user->comments_count,

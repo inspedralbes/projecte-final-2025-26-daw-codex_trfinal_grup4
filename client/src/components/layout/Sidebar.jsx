@@ -326,16 +326,6 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Post Button (Hidden for Admin) */}
-        {user?.role !== "admin" && (
-          <button className="sidebar__post-btn">
-            <span className="sidebar__post-btn-icon">
-              <PenIcon />
-            </span>
-            <span className="sidebar__post-btn-text">{t("feed.publish")}</span>
-          </button>
-        )}
-
         {/* User Profile */}
         <div className="sidebar__user">
           <div className="sidebar__user-avatar">

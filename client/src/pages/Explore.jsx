@@ -247,6 +247,15 @@ export default function Explore() {
           .filter((u) => u.username !== user?.username)
           .slice(0, 6);
         setSuggestedUsers(suggestions);
+        
+        // Initialize followingMap with the is_following status from API
+        const initialFollowingMap = {};
+        allUsers.forEach((u) => {
+          if (u.is_following !== undefined) {
+            initialFollowingMap[u.id] = u.is_following;
+          }
+        });
+        setFollowingMap(initialFollowingMap);
       } catch (err) {
         console.error("Error fetching suggested users:", err);
         setSuggestedUsers([]);

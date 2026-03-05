@@ -525,6 +525,28 @@
   - `api/app/Http/Controllers/ChatController.php`
   - `api/app/Services/ChatService.php`
 
+### 2026-03-05 – Correccions UI i Fix Botó Seguir a Explore
+
+- **Autor:** @copilot (IA)
+- **Eliminat Botó "Publicar" del Sidebar:**
+  - Eliminat el botó gran de "Publicar" que apareixia a la barra lateral perquè no calia.
+- **Fix Filtre Notificacions de Centre:**
+  - Afegits tipus de notificació `center_request_approved`, `center_request_rejected`, `center_announcement`, `center_post` al mapNotificationType de `Notifications.jsx`.
+  - Ara les notificacions relacionades amb centres es filtren correctament sota la categoria "school".
+- **Botó de Missatge més Gran al Perfil:**
+  - Augmentat el tamany del botó de missatge a `Profile.jsx` de 32x32px a 44x44px.
+  - SVG ara usa 100% width/height per adaptar-se al contenidor CSS.
+- **Fix Estat Botó Seguir a Explore:**
+  - Backend: `ProfileController::leaderboard()` canviat per usar `Auth::guard('sanctum')->user()` per obtenir correctament l'usuari autenticat en ruta pública.
+  - Frontend: `Explore.jsx` inicialitza correctament el `followingMap` amb el camp `is_following` de l'API.
+  - Resultat: Els usuaris ja seguits mostren "Siguiendo" correctament a la secció "A quien seguir".
+- **Fitxers modificats:**
+  - `client/src/components/layout/Sidebar.jsx`
+  - `client/src/pages/Notifications.jsx`
+  - `client/src/components/profile/Profile.jsx` / `.css`
+  - `client/src/pages/Explore.jsx`
+  - `api/app/Http/Controllers/ProfileController.php`
+
 ---
 
 ## 🎨 Estructura actual de components

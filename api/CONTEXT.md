@@ -802,6 +802,16 @@
     - `api/app/Http/Controllers/ChatController.php`
     - `api/app/Services/ChatService.php`
 
+### 2026-03-05 – Fix is_following al Leaderboard en Ruta Pública
+
+- **Autor:** @copilot (IA)
+- **Problema:** El camp `is_following` del endpoint `/api/leaderboard` sempre tornava `false` encara que l'usuari estigués autenticat.
+- **Causa:** La ruta era pública (sense middleware `auth:sanctum`) i `$request->user()` retornava `null` perquè no hi havia middleware forçant l'autenticació.
+- **Solució:** Canviat `$request->user()` per `Auth::guard('sanctum')->user()` que resol correctament l'usuari autenticat a partir del Bearer token sense requerir middleware obligatori.
+- **Impacte:** Ara els usuaris veuen correctament "Siguiendo" als usuaris que ja segueixen a la secció "A quien seguir" de la pàgina Explore.
+- **Fitxers modificats:**
+    - `api/app/Http/Controllers/ProfileController.php` (afegit `use Illuminate\Support\Facades\Auth;`, canviat `leaderboard()` per usar `Auth::guard('sanctum')`)
+
 ---
 
 ## 📚 Documentació Relacionada
