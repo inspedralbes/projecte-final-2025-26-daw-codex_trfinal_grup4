@@ -19,7 +19,11 @@ export default function MainLayout() {
 
   // Show center prompt modal after login if needed
   useEffect(() => {
-    if (centerCheck?.needs_center_prompt && !centerCheck?.is_generic_email && !centerCheck?.has_center) {
+    if (
+      centerCheck?.needs_center_prompt &&
+      !centerCheck?.is_generic_email &&
+      !centerCheck?.has_center
+    ) {
       // Small delay so the main layout renders first
       const timer = setTimeout(() => setShowCenterPrompt(true), 800);
       return () => clearTimeout(timer);
@@ -103,19 +107,11 @@ export default function MainLayout() {
         </div>
         <div className="mobile-header__logo" onClick={() => navigate("/")}>
           <span className="mobile-header__logo-icon">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="4 17 10 11 4 5" />
-              <line x1="12" y1="19" x2="20" y2="19" />
-            </svg>
+            <img
+              src="/logo-transparent.png"
+              alt="XC Logo"
+              style={{ width: "24px", height: "24px", objectFit: "contain" }}
+            />
           </span>
           <span className="mobile-header__logo-text">Codex</span>
         </div>

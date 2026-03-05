@@ -98,7 +98,6 @@
     justify-content: center;
     width: 30px;
     height: 30px;
-    background: linear-gradient(135deg, var(--codex-teal), var(--codex-violet));
     border-radius: var(--radius-md);
     color: white;
   }
