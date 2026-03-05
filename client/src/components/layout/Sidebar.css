@@ -108,6 +108,25 @@
   width: 28px;
   height: 28px;
   flex-shrink: 0;
+  position: relative;
+}
+
+.sidebar__nav-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .sidebar__nav-label {
@@ -319,8 +338,8 @@
     position: relative;
   }
 
-  /* Show only first 5 items in mobile (Feed, Explore, Center, Notifications, Profile) */
-  .sidebar__nav-item:nth-child(n+6) {
+  /* Show only first 3 items in mobile (Home, Explore, Center) - Notifications and Profile are in header */
+  .sidebar__nav-item:nth-child(n+4) {
     display: none;
   }
 

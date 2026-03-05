@@ -32,7 +32,8 @@ class ChatService
      * Check if the sender can send a message to the receiver.
      * Rules:
      * - If mutual followers: unlimited messages
-     * - If not mutual followers: only 1 message allowed from sender to receiver
+     * - If not mutual followers: only 1 message allowed from sender to receiver,
+     *   UNLESS the receiver has already replied (conversation is established)
      */
     public function canSendMessage(User $sender, User $receiver): array
     {
@@ -52,6 +53,21 @@ class ChatService
                 'can_send' => true,
                 'reason' => 'mutual_followers',
                 'is_mutual' => true,
+            ];
+        }
+
+        // Check if the receiver has already sent a message to the sender
+        // (conversation is established - both can continue chatting)
+        $receiverHasReplied = ChatMessage::query()
+            ->where('sender_id', $receiver->id)
+            ->where('receiver_id', $sender->id)
+            ->exists();
+
+        if ($receiverHasReplied) {
+            return [
+                'can_send' => true,
+                'reason' => 'conversation_established',
+                'is_mutual' => false,
             ];
         }
 
@@ -119,9 +135,9 @@ class ChatService
                   ->orWhere('receiver_id', $user->id);
             })
             ->select(DB::raw('
-                CASE 
-                    WHEN sender_id = ' . $user->id . ' THEN receiver_id 
-                    ELSE sender_id 
+                CASE
+                    WHEN sender_id = ' . $user->id . ' THEN receiver_id
+                    ELSE sender_id
                 END as partner_id
             '))
             ->distinct()

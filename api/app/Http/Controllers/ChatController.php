@@ -8,6 +8,7 @@ use App\Http\Requests\StoreMessageRequest;
 use App\Models\ChatMessage;
 use App\Models\User;
 use App\Services\ChatService;
+use App\Services\NotificationService;
 use App\Services\SanitizationService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +20,8 @@ class ChatController extends Controller
 
     public function __construct(
         private readonly ChatService $chatService,
-        private readonly SanitizationService $sanitization
+        private readonly SanitizationService $sanitization,
+        private readonly NotificationService $notificationService
     ) {}
 
     /**
@@ -123,6 +125,16 @@ class ChatController extends Controller
         if (!$request->hasHeader('X-Socket-P2P')) {
             event(new NewMessageEvent($message, $canSend['is_mutual']));
         }
+
+        // Create notification for the receiver
+        $this->notificationService->create(
+            userId: $receiver->id,
+            senderId: $sender->id,
+            type: 'message',
+            notifiableType: ChatMessage::class,
+            notifiableId: $message->id,
+            message: 'te ha enviado un mensaje'
+        );
 
         return $this->success([
             'message' => [

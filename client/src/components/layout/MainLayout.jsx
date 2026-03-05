@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useSocket } from "@/context/SocketContext";
 import Sidebar from "./Sidebar";
 import RightSection from "./RightSection";
 import CenterPromptModal from "@/components/center/CenterPromptModal";
@@ -11,6 +12,7 @@ import "./MainLayout.css";
 
 export default function MainLayout() {
   const { user, centerCheck, dismissCenterPrompt, refreshUser } = useAuth();
+  const { unreadCount, unreadMessagesCount } = useSocket();
   const navigate = useNavigate();
   const [adminNotification, setAdminNotification] = useState(null);
   const [showCenterPrompt, setShowCenterPrompt] = useState(false);
@@ -116,6 +118,24 @@ export default function MainLayout() {
           <span className="mobile-header__logo-text">Codex</span>
         </div>
         <div className="mobile-header__actions">
+          <button className="mobile-header__action" onClick={() => navigate("/messages")}>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+            {unreadMessagesCount > 0 && (
+              <span className="mobile-header__badge">{unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}</span>
+            )}
+          </button>
           <button className="mobile-header__action" onClick={() => navigate("/notifications")}>
             <svg
               width="22"
@@ -130,6 +150,9 @@ export default function MainLayout() {
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
+            {unreadCount > 0 && (
+              <span className="mobile-header__badge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+            )}
           </button>
         </div>
       </header>

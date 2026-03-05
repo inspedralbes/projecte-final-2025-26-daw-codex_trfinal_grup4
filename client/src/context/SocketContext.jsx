@@ -2,8 +2,10 @@
  * Socket Context
  * Provides Socket.io connection and real-time event handling throughout the app
  */
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import socketService from "@/services/socketService";
+import notificationsService from "@/services/notificationsService";
+import chatService from "@/services/chatService";
 import { useAuth } from "@/hooks/useAuth";
 
 const SocketContext = createContext(null);
@@ -20,6 +22,10 @@ export const SocketProvider = ({ children }) => {
   const { user } = useAuth();
   const [isConnected, setIsConnected] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  
+  // Track which conversation is currently open (to avoid incrementing unread for active chat)
+  const activeConversationRef = useRef(null);
 
   // Connect socket when user is authenticated
   useEffect(() => {
@@ -44,6 +50,22 @@ export const SocketProvider = ({ children }) => {
       if (socket.connected) {
         handleConnect();
       }
+
+      // Fetch initial unread count from API
+      notificationsService.getNotifications({ page: 1 })
+        .then((response) => {
+          const data = response.data || response;
+          const meta = data.meta || {};
+          setUnreadCount(meta.unread_count || 0);
+        })
+        .catch((err) => console.error("Error fetching notification count:", err));
+
+      // Fetch initial unread messages count from API
+      chatService.getUnreadCount()
+        .then((response) => {
+          setUnreadMessagesCount(response.unread_count || 0);
+        })
+        .catch((err) => console.error("Error fetching unread messages count:", err));
 
       return () => {
         socket.off("connect", handleConnect);
@@ -71,6 +93,34 @@ export const SocketProvider = ({ children }) => {
 
     return () => {
       socketService.off("new.notification", handleNotification);
+    };
+  }, [user]);
+
+  // Handle real-time messages (global listener)
+  useEffect(() => {
+    if (!user) return;
+
+    const handleNewMessage = (message) => {
+      console.log("[Socket] New message (global):", message);
+      
+      const senderId = parseInt(message.sender_id, 10);
+      const activeChat = activeConversationRef.current;
+      
+      // Only increment counter for messages from others AND not in the active conversation
+      if (senderId !== user.id && senderId !== activeChat) {
+        setUnreadMessagesCount((prev) => prev + 1);
+      }
+      
+      // Dispatch custom event for ALL messages (including own for tempId replacement)
+      window.dispatchEvent(
+        new CustomEvent("codex:message", { detail: message })
+      );
+    };
+
+    socketService.onMessage(handleNewMessage);
+
+    return () => {
+      socketService.off("new.message", handleNewMessage);
     };
   }, [user]);
 
@@ -112,16 +162,49 @@ export const SocketProvider = ({ children }) => {
     setUnreadCount(0);
   }, []);
 
+  // Subscribe to new messages globally
+  const onNewMessage = useCallback((callback) => {
+    const handleMsg = (event) => callback(event.detail);
+    window.addEventListener("codex:message", handleMsg);
+    return () => window.removeEventListener("codex:message", handleMsg);
+  }, []);
+
+  // Set unread messages count (for when fetched from API or updater function)
+  const setMessagesCount = useCallback((countOrUpdater) => {
+    setUnreadMessagesCount(countOrUpdater);
+  }, []);
+
+  // Decrement unread messages count
+  const decrementMessagesUnread = useCallback(() => {
+    setUnreadMessagesCount((prev) => Math.max(0, prev - 1));
+  }, []);
+
+  // Set active conversation (to prevent incrementing unread for messages in this chat)
+  const setActiveChat = useCallback((userId) => {
+    activeConversationRef.current = userId ? parseInt(userId, 10) : null;
+  }, []);
+
+  // Reset unread messages count
+  const resetMessagesUnread = useCallback(() => {
+    setUnreadMessagesCount(0);
+  }, []);
+
   const value = {
     isConnected,
     unreadCount,
+    unreadMessagesCount,
     setNotificationCount,
     decrementUnread,
     resetUnread,
+    setMessagesCount,
+    decrementMessagesUnread,
+    resetMessagesUnread,
+    setActiveChat,
     joinPost,
     leavePost,
     onNewComment,
     onNewNotification,
+    onNewMessage,
   };
 
   return (

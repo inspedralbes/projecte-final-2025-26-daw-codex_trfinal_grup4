@@ -787,6 +787,21 @@
 - **Fitxers modificats:** `.env`, `.env.prod.example`, `docker-compose.dev.yml`, `config/cors.php`, `bootstrap/app.php`
 - **Nota:** Per a desenvolupament local es pot seguir usant Mailpit canviant `.env`
 
+### 2026-03-05 – Notificacions de Missatges i Millora Permisos de Xat
+
+- **Autor:** @copilot (IA)
+- **Notificacions de Missatges:**
+    - `ChatController::store()` ara crea una notificació de tipus `message` per al receptor quan s'envia un missatge.
+    - Utilitza el `NotificationService` existent amb `notifiableType: ChatMessage::class`.
+- **Millora Permisos de Xat (ChatService):**
+    - `canSendMessage()` ara permet continuar la conversa si l'altre usuari ja ha respost.
+    - Regla anterior: Si no es segueixen mútuament, només 1 missatge permès.
+    - Regla nova: Si l'altre ha respost (existeix missatge en direcció inversa), la conversa es considera establerta i ambdós poden continuar.
+    - Nou return `reason: 'conversation_established'` quan el receptor ja ha respost.
+- **Fitxers modificats:**
+    - `api/app/Http/Controllers/ChatController.php`
+    - `api/app/Services/ChatService.php`
+
 ---
 
 ## 📚 Documentació Relacionada

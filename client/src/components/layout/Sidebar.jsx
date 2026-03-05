@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useSocket } from "@/context/SocketContext";
 import "./Sidebar.css";
 
 // Navigation icons
@@ -243,6 +244,7 @@ export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, centerCheck } = useAuth();
+  const { unreadCount, unreadMessagesCount } = useSocket();
 
   const isGenericEmail = centerCheck?.is_generic_email ?? false;
 
@@ -307,6 +309,16 @@ export default function Sidebar() {
               >
                 <span className="sidebar__nav-icon">
                   <Icon active={isActive} />
+                  {path === "/notifications" && unreadCount > 0 && (
+                    <span className="sidebar__nav-badge">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                  {path === "/messages" && unreadMessagesCount > 0 && (
+                    <span className="sidebar__nav-badge">
+                      {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
+                    </span>
+                  )}
                 </span>
                 <span className="sidebar__nav-label">{t(label)}</span>
               </NavLink>

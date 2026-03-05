@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -133,6 +134,22 @@ const CheckIcon = () => (
   </svg>
 );
 
+const MessageIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+    <polyline points="22,6 12,13 2,6" />
+  </svg>
+);
+
 const LoadingSpinner = () => (
   <div className="notif__spinner">
     <svg
@@ -162,6 +179,7 @@ const mapNotificationType = (type) => {
     center: "school",
     milestone: "milestone",
     bookmark: "snippet-saved",
+    message: "message",
   };
   return typeMap[type] || "comment";
 };
@@ -205,6 +223,8 @@ const getNotificationIcon = (type) => {
       return <CheckIcon />;
     case "milestone":
       return <StarIcon />;
+    case "message":
+      return <MessageIcon />;
     default:
       return <CommentIcon />;
   }
@@ -226,6 +246,8 @@ const getIconClass = (type) => {
       return "notif__icon--success";
     case "snippet-saved":
       return "notif__icon--code";
+    case "message":
+      return "notif__icon--message";
     default:
       return "notif__icon--default";
   }
@@ -233,6 +255,7 @@ const getIconClass = (type) => {
 
 export default function Notifications() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
   const {
     notifications,
@@ -287,7 +310,11 @@ export default function Notifications() {
         console.error("Error marking as read:", err);
       }
     }
-    // TODO: Navigate to relevant content based on notification type
+    
+    // Navigate to relevant content based on notification type
+    if (notif.type === 'message' && notif.sender) {
+      navigate(`/messages?user=${notif.sender.id}`);
+    }
   };
 
   if (loading) {

@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useCallback } from "react";
 import notificationsService from "@/services/notificationsService";
+import { useSocket } from "@/context/SocketContext";
 
 /**
  * Hook for managing notifications
@@ -13,9 +14,11 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  
+  // Get global unread count from SocketContext
+  const { unreadCount, setNotificationCount, decrementUnread, resetUnread } = useSocket();
 
   const fetchNotifications = useCallback(async (pageNum = 1, append = false) => {
     try {
@@ -26,9 +29,9 @@ export function useNotifications() {
       const data = response.data || response;
       const newNotifications = data.data || data;
       
-      // Meta contains unread_count
+      // Meta contains unread_count - sync with global context
       const meta = data.meta || {};
-      setUnreadCount(meta.unread_count || 0);
+      setNotificationCount(meta.unread_count || 0);
       
       const lastPage = meta.last_page || 1;
       setHasMore(pageNum < lastPage);
@@ -46,7 +49,7 @@ export function useNotifications() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setNotificationCount]);
 
   // Initial fetch
   useEffect(() => {
@@ -74,12 +77,12 @@ export function useNotifications() {
           n.id === notificationId ? { ...n, read_at: new Date().toISOString() } : n
         )
       );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
+      decrementUnread();
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message };
     }
-  }, []);
+  }, [decrementUnread]);
 
   // Mark all as read
   const markAllAsRead = useCallback(async () => {
@@ -88,12 +91,12 @@ export function useNotifications() {
       setNotifications((prev) =>
         prev.map((n) => ({ ...n, read_at: n.read_at || new Date().toISOString() }))
       );
-      setUnreadCount(0);
+      resetUnread();
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message };
     }
-  }, []);
+  }, [resetUnread]);
 
   // Delete notification
   const deleteNotification = useCallback(async (notificationId) => {
@@ -106,18 +109,17 @@ export function useNotifications() {
       setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
       
       if (wasUnread) {
-        setUnreadCount((prev) => Math.max(0, prev - 1));
+        decrementUnread();
       }
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message };
     }
-  }, [notifications]);
+  }, [notifications, decrementUnread]);
 
-  // Add notification (from real-time event)
+  // Add notification (from real-time event) - unread count is handled by SocketContext
   const addNotification = useCallback((notification) => {
     setNotifications((prev) => [notification, ...prev]);
-    setUnreadCount((prev) => prev + 1);
   }, []);
 
   return {

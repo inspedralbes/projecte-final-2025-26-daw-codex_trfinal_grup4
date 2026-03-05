@@ -264,6 +264,19 @@
   - Latència reduïda: missatge arriba immediatament sense esperar resposta HTTP.
   - Actualització optimista: UI s'actualitza abans de confirmació del servidor.
   - Gestió de duplicats: `tempId` identifica missatges temporals per substituir amb l'`id` real.
+
+### 2026-03-05 – Fix Emissió Missatges i Room Personal
+
+- **Autor:** @copilot (IA)
+- **Fix Parsing Resposta API:**
+  - Corregit l'accés a les dades del missatge: ara extreu `result.data.message` en lloc de `result.message`.
+  - El backend Laravel retorna `{ success, message, data }` on `data.message` conté l'objecte del missatge.
+- **Emissió a Room Personal:**
+  - Ara s'emet `new.message` tant a la room del xat (`chat.{min}-{max}`) com a la room personal del receptor (`user.{receiverId}`).
+  - Això garanteix que el receptor rebi el missatge encara que no tingui el xat obert.
+- **Fitxers modificats:**
+  - `socket/index.js`
+
 ---
 
 ## 📚 Documentació Relacionada

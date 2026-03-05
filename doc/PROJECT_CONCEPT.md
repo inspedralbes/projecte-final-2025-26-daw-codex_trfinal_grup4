@@ -172,6 +172,10 @@ Para detalles específicos sobre la implementación técnica de cada microservic
 - [x] WebSocket para notificaciones en tiempo real (Socket.io + Redis)
 - [x] Chat/Mensajes directos (P2P con restricciones de seguimiento mutuo)
 - [x] Página de Mensajes responsive (mobile-first con transiciones)
+- [x] Mensajes traducidos (i18n completo: es, ca, en)
+- [x] Notificaciones de mensajes nuevos con badge en sidebar
+- [x] Chat en tiempo real (emisión a room personal del receptor)
+- [x] Header móvil con acceso a mensajes y notificaciones
 - [x] Sistema de puntos y gamificación (ReputationService + Badges)
 - [x] Moderación para profesores en Hub del Centro (bloquear, expulsar, cambiar roles)
 - [x] Feed Global y del Centro (Walled Garden)

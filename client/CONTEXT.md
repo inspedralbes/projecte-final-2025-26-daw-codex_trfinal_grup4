@@ -489,6 +489,42 @@
   - `client/src/components/profile/Profile.jsx` / `.css`
   - `client/src/locales/{es,ca,en}.json`
 
+### 2026-03-05 – Missatges Real-Time, Notificacions i Responsive Mòbil
+
+- **Autor:** @copilot (IA)
+- **Traduccions pàgina Missatges (i18n):**
+  - `Messages.jsx` ara utilitza `useTranslation()` per a tot el text de la UI.
+  - Noves claus: `messages.title`, `messages.search_placeholder`, `messages.no_conversations`, `messages.select_conversation`, `messages.start_conversation`, `messages.type_message`, `messages.send`, `messages.restriction_limit`, `messages.restriction_first`, `messages.new_conversation`, `messages.search_users`, `messages.no_users_found`, `messages.start_chat`.
+  - Traduccions afegides a `es.json`, `ca.json`, `en.json`.
+- **Notificacions de Missatges:**
+  - Backend (`ChatController`) crea notificació tipus `message` quan s'envia un missatge.
+  - Frontend (`Notifications.jsx`) mostra notificacions de missatge amb icona de sobre i redirigeix a `/messages?user={senderId}`.
+  - CSS nou: `.notif__icon--message` amb color teal.
+- **Badges de No Llegits al Sidebar:**
+  - `SocketContext.jsx` gestiona `unreadCount` (notificacions) i `unreadMessagesCount` (missatges) globalment.
+  - `Sidebar.jsx` mostra badges vermells amb comptador a les icones de notificacions i missatges.
+  - CSS nou: `.sidebar__nav-badge` estil badge mínim.
+- **Tracking de Conversa Activa:**
+  - `SocketContext.jsx` inclou `activeConversationRef` per evitar incrementar el comptador de no llegits si el missatge és de la conversa que estàs veient.
+  - `Messages.jsx` crida `setActiveChat(userId)` en obrir conversa i `setActiveChat(null)` en tancar.
+- **Fix Real-Time Chat:**
+  - Corregit `socket/index.js`: extreu correctament `result.data.message` de la resposta API (abans accedia a `result.message` que és el text d'èxit).
+  - Afegida emissió a la room personal `user.{receiverId}` perquè el receptor rebi el missatge encara que no tingui el xat obert.
+- **Responsive Mòbil:**
+  - `MainLayout.jsx`: Afegits botons de missatges i notificacions al header mòbil amb badges de comptador.
+  - CSS nou: `.mobile-header__badge` per a badges al header mòbil.
+  - `Sidebar.css`: Reduït bottom nav mòbil a només 3 ítems (Home, Explore, Center) – notificacions i perfil accessibles des del header.
+- **Fitxers modificats:**
+  - `client/src/pages/Messages.jsx`
+  - `client/src/pages/Notifications.jsx` / `.css`
+  - `client/src/context/SocketContext.jsx`
+  - `client/src/components/layout/Sidebar.jsx` / `.css`
+  - `client/src/components/layout/MainLayout.jsx` / `.css`
+  - `client/src/locales/{es,ca,en}.json`
+  - `socket/index.js`
+  - `api/app/Http/Controllers/ChatController.php`
+  - `api/app/Services/ChatService.php`
+
 ---
 
 ## 🎨 Estructura actual de components

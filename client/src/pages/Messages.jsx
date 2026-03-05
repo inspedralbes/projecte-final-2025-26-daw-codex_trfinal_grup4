@@ -108,7 +108,7 @@ const Avatar = ({ src, name, size = 48, online }) => {
 
 // ─── Time Formatting ─────────────────────────────────────────────────────────
 
-const formatMessageTime = (dateString) => {
+const formatMessageTime = (dateString, t) => {
   const date = new Date(dateString);
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
@@ -120,13 +120,13 @@ const formatMessageTime = (dateString) => {
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
   if (date.toDateString() === yesterday.toDateString()) {
-    return "Ayer";
+    return t("messages.yesterday");
   }
   
   return date.toLocaleDateString([], { day: "numeric", month: "short" });
 };
 
-const formatConversationTime = (dateString) => {
+const formatConversationTime = (dateString, t) => {
   if (!dateString) return "";
   const date = new Date(dateString);
   const now = new Date();
@@ -135,7 +135,7 @@ const formatConversationTime = (dateString) => {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return "Ahora";
+  if (diffMins < 1) return t("messages.now");
   if (diffMins < 60) return `${diffMins}m`;
   if (diffHours < 24) return `${diffHours}h`;
   if (diffDays < 7) return `${diffDays}d`;
@@ -144,7 +144,7 @@ const formatConversationTime = (dateString) => {
 
 // ─── Conversation List Item ─────────────────────────────────────────────────
 
-const ConversationItem = ({ conversation, isActive, onClick }) => {
+const ConversationItem = ({ conversation, isActive, onClick, t }) => {
   const { partner, last_message, unread_count, is_mutual } = conversation;
   
   return (
@@ -158,14 +158,14 @@ const ConversationItem = ({ conversation, isActive, onClick }) => {
           <span className="msg__conv-name">
             {partner.name}
             {!is_mutual && (
-              <span className="msg__conv-restricted" title="Conversación limitada">
+              <span className="msg__conv-restricted" title={t("messages.restriction.title")}>
                 <LockIcon />
               </span>
             )}
           </span>
           {last_message && (
             <span className="msg__conv-time">
-              {formatConversationTime(last_message.created_at)}
+              {formatConversationTime(last_message.created_at, t)}
             </span>
           )}
         </div>
@@ -173,7 +173,7 @@ const ConversationItem = ({ conversation, isActive, onClick }) => {
           {last_message ? (
             <>
               <span className="msg__conv-text">
-                {last_message.sender_id === partner.id ? "" : "Tú: "}
+                {last_message.sender_id === partner.id ? "" : `${t("messages.you")}: `}
                 {last_message.content.slice(0, 40)}
                 {last_message.content.length > 40 ? "..." : ""}
               </span>
@@ -182,7 +182,7 @@ const ConversationItem = ({ conversation, isActive, onClick }) => {
               )}
             </>
           ) : (
-            <span className="msg__conv-empty">Sin mensajes aún</span>
+            <span className="msg__conv-empty">{t("messages.no_messages")}</span>
           )}
         </div>
       </div>
@@ -220,7 +220,7 @@ const MessageBubble = ({ message, showAvatar, partnerAvatar, partnerName }) => {
 
 // ─── Restriction Banner ──────────────────────────────────────────────────────
 
-const RestrictionBanner = ({ isMutual, canSend, restrictionReason }) => {
+const RestrictionBanner = ({ isMutual, canSend, restrictionReason, t }) => {
   if (isMutual) return null;
   
   return (
@@ -228,17 +228,17 @@ const RestrictionBanner = ({ isMutual, canSend, restrictionReason }) => {
       {!isMutual && (
         <div className="msg__restriction-badge">
           <LockIcon />
-          <span>Conversación limitada</span>
+          <span>{t("messages.restriction.title")}</span>
         </div>
       )}
       {!canSend && restrictionReason === "message_limit_reached" && (
         <p className="msg__restriction-text">
-          Ya has enviado tu mensaje. <strong>Espera a que te siga</strong> para continuar la conversación.
+          {t("messages.restriction.message_sent")}
         </p>
       )}
       {canSend && !isMutual && (
         <p className="msg__restriction-text">
-          Puedes enviar <strong>1 mensaje</strong>. Si os seguís mutuamente, podréis conversar sin límites.
+          {t("messages.restriction.not_following")}
         </p>
       )}
     </div>
@@ -247,7 +247,7 @@ const RestrictionBanner = ({ isMutual, canSend, restrictionReason }) => {
 
 // ─── New Conversation Search ─────────────────────────────────────────────────
 
-const NewConversationModal = ({ isOpen, onClose, onSelectUser }) => {
+const NewConversationModal = ({ isOpen, onClose, onSelectUser, t }) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -286,7 +286,7 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser }) => {
     <div className="msg__modal-overlay" onClick={onClose}>
       <div className="msg__modal" onClick={(e) => e.stopPropagation()}>
         <div className="msg__modal-header">
-          <h3>Nueva conversación</h3>
+          <h3>{t("messages.new_conversation")}</h3>
           <button className="msg__modal-close" onClick={onClose}>×</button>
         </div>
         <div className="msg__modal-search">
@@ -294,7 +294,7 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser }) => {
           <input
             ref={inputRef}
             type="text"
-            placeholder="Buscar usuario..."
+            placeholder={t("messages.search_users")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -306,7 +306,7 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser }) => {
             </div>
           )}
           {!loading && results.length === 0 && query.length >= 2 && (
-            <p className="msg__modal-empty">No se encontraron usuarios</p>
+            <p className="msg__modal-empty">{t("messages.no_results")}</p>
           )}
           {results.map((user) => (
             <div
@@ -323,7 +323,7 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser }) => {
                 <span className="msg__modal-user-username">@{user.username}</span>
               </div>
               {user.is_mutual && (
-                <span className="msg__modal-mutual" title="Os seguís mutuamente">
+                <span className="msg__modal-mutual" title={t("messages.mutual_followers")}>
                   <UsersIcon />
                 </span>
               )}
@@ -337,27 +337,27 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser }) => {
 
 // ─── Empty States ────────────────────────────────────────────────────────────
 
-const EmptyConversations = ({ onNewConversation }) => (
+const EmptyConversations = ({ onNewConversation, t }) => (
   <div className="msg__empty">
     <div className="msg__empty-icon">
       <MessageCircleIcon />
     </div>
-    <h3>Sin conversaciones</h3>
-    <p>Inicia una nueva conversación para conectar con otros desarrolladores.</p>
+    <h3>{t("messages.no_conversations")}</h3>
+    <p>{t("messages.no_conversations_subtitle")}</p>
     <button className="msg__empty-btn" onClick={onNewConversation}>
       <PlusIcon />
-      Nueva conversación
+      {t("messages.new_conversation")}
     </button>
   </div>
 );
 
-const EmptyChat = () => (
+const EmptyChat = ({ t }) => (
   <div className="msg__empty-chat">
     <div className="msg__empty-icon">
       <MessageCircleIcon />
     </div>
-    <h3>Tus mensajes</h3>
-    <p>Selecciona una conversación o inicia una nueva</p>
+    <h3>{t("messages.select_conversation")}</h3>
+    <p>{t("messages.select_conversation_subtitle")}</p>
   </div>
 );
 
@@ -366,7 +366,7 @@ const EmptyChat = () => (
 export default function Messages() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const socket = useSocket();
+  const { resetMessagesUnread, setMessagesCount, setActiveChat, onNewMessage } = useSocket();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -387,6 +387,12 @@ export default function Messages() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const activeConversationRef = useRef(null);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    activeConversationRef.current = activeConversation;
+  }, [activeConversation]);
 
   // Get active conversation from URL
   const activeUserId = searchParams.get("user");
@@ -397,6 +403,12 @@ export default function Messages() {
       try {
         const data = await chatService.getConversations();
         setConversations(data.conversations || []);
+        // Sync unread count with context
+        const totalUnread = (data.conversations || []).reduce(
+          (sum, c) => sum + (c.unread_count || 0),
+          0
+        );
+        setMessagesCount(totalUnread);
       } catch (err) {
         console.error("Error loading conversations:", err);
       } finally {
@@ -404,7 +416,12 @@ export default function Messages() {
       }
     };
     loadConversations();
-  }, []);
+  }, [setMessagesCount]);
+
+  // Clear active chat when component unmounts
+  useEffect(() => {
+    return () => setActiveChat(null);
+  }, [setActiveChat]);
 
   // Load messages when active conversation changes
   useEffect(() => {
@@ -414,6 +431,7 @@ export default function Messages() {
       setPartner(null);
       setConversationStatus(null);
       setMobileView("list");
+      setActiveChat(null);
       return;
     }
 
@@ -427,10 +445,30 @@ export default function Messages() {
         setActiveConversation(parseInt(activeUserId));
         setMobileView("chat");
         
+        // Tell context which conversation is active (to prevent incrementing unread)
+        setActiveChat(activeUserId);
+        
         // Join chat room for real-time updates
         if (user?.id) {
           socketService.joinChatRoom(user.id, parseInt(activeUserId));
         }
+
+        // Reset unread count for this conversation and update global counter
+        // Use functional update to get current conversations without adding to deps
+        setConversations((prev) => {
+          const idx = prev.findIndex((c) => c.partner?.id === parseInt(activeUserId));
+          if (idx !== -1 && prev[idx].unread_count > 0) {
+            const unreadToRemove = prev[idx].unread_count;
+            // Defer the context update to avoid render-time setState
+            setTimeout(() => {
+              setMessagesCount((current) => Math.max(0, current - unreadToRemove));
+            }, 0);
+            const updated = [...prev];
+            updated[idx] = { ...updated[idx], unread_count: 0 };
+            return updated;
+          }
+          return prev;
+        });
       } catch (err) {
         console.error("Error loading messages:", err);
       } finally {
@@ -440,13 +478,14 @@ export default function Messages() {
 
     loadMessages();
 
-    // Cleanup: leave chat room
+    // Cleanup: leave chat room and clear active chat
     return () => {
       if (user?.id && activeUserId) {
         socketService.leaveChatRoom(user.id, parseInt(activeUserId));
       }
+      setActiveChat(null);
     };
-  }, [activeUserId, user?.id]);
+  }, [activeUserId, user?.id, setMessagesCount, setActiveChat]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -456,11 +495,25 @@ export default function Messages() {
   // Real-time message handling
   useEffect(() => {
     const handleNewMessage = (data) => {
+      // Use ref to get the CURRENT value of activeConversation
+      const currentActiveConversation = activeConversationRef.current;
+      
+      console.log("[Messages] Received message:", data, "activeConversation:", currentActiveConversation, "user.id:", user?.id);
+      
+      // Convert IDs to numbers for comparison
+      const senderId = parseInt(data.sender_id, 10);
+      const receiverId = parseInt(data.receiver_id, 10);
+      const activeId = parseInt(currentActiveConversation, 10);
+      const userId = parseInt(user?.id, 10);
+      
       // Add message if it's for the current conversation
-      if (
-        (data.sender_id === activeConversation && data.receiver_id === user?.id) ||
-        (data.sender_id === user?.id && data.receiver_id === activeConversation)
-      ) {
+      const isForCurrentChat = 
+        (senderId === activeId && receiverId === userId) ||
+        (senderId === userId && receiverId === activeId);
+        
+      console.log("[Messages] isForCurrentChat:", isForCurrentChat, { senderId, receiverId, activeId, userId });
+      
+      if (isForCurrentChat) {
         setMessages((prev) => {
           // If this message has a tempId, replace the optimistic message
           if (data.tempId) {
@@ -471,9 +524,9 @@ export default function Messages() {
               updated[tempIndex] = {
                 id: data.id,
                 content: data.content,
-                sender_id: data.sender_id,
-                receiver_id: data.receiver_id,
-                is_own: data.sender_id === user?.id,
+                sender_id: senderId,
+                receiver_id: receiverId,
+                is_own: senderId === userId,
                 is_read: data.is_read,
                 created_at: data.created_at,
               };
@@ -487,23 +540,32 @@ export default function Messages() {
           return [...prev, {
             id: data.id,
             content: data.content,
-            sender_id: data.sender_id,
-            receiver_id: data.receiver_id,
-            is_own: data.sender_id === user?.id,
+            sender_id: senderId,
+            receiver_id: receiverId,
+            is_own: senderId === userId,
             is_read: data.is_read,
             created_at: data.created_at,
           }];
         });
 
         // Mark as read if we're viewing this conversation (using P2P)
-        if (data.sender_id === activeConversation && user?.id) {
-          socketService.markMessagesRead(user.id, activeConversation);
+        if (senderId === activeId && userId) {
+          socketService.markMessagesRead(userId, activeId);
+          
+          // When we receive a message from the other user, we can now reply
+          // (they responded, so we're no longer at the 1-message limit)
+          setConversationStatus((prev) => {
+            if (prev && !prev.can_send) {
+              return { ...prev, can_send: true, reason: 'partner_replied' };
+            }
+            return prev;
+          });
         }
       }
 
       // Update conversation list
       setConversations((prev) => {
-        const partnerId = data.sender_id === user?.id ? data.receiver_id : data.sender_id;
+        const partnerId = senderId === userId ? receiverId : senderId;
         const existingIndex = prev.findIndex((c) => c.partner.id === partnerId);
         
         if (existingIndex === -1) {
@@ -519,10 +581,10 @@ export default function Messages() {
         conv.last_message = {
           id: data.id,
           content: data.content,
-          sender_id: data.sender_id,
+          sender_id: senderId,
           created_at: data.created_at,
         };
-        if (data.sender_id !== user?.id && partnerId !== activeConversation) {
+        if (senderId !== userId && partnerId !== activeId) {
           conv.unread_count = (conv.unread_count || 0) + 1;
         }
         updated.splice(existingIndex, 1);
@@ -532,31 +594,39 @@ export default function Messages() {
     };
 
     const handleTyping = (data) => {
-      if (data.userId === activeConversation) {
+      const typingUserId = parseInt(data.userId, 10);
+      const activeId = parseInt(activeConversationRef.current, 10);
+      if (typingUserId === activeId) {
         setTyping(data.isTyping);
       }
     };
 
     const handleMessagesRead = (data) => {
-      if (data.reader_id === activeConversation) {
+      const readerId = parseInt(data.reader_id, 10);
+      const activeId = parseInt(activeConversationRef.current, 10);
+      const userId = parseInt(user?.id, 10);
+      if (readerId === activeId) {
         setMessages((prev) =>
           prev.map((m) =>
-            m.sender_id === user?.id ? { ...m, is_read: true } : m
+            m.sender_id === userId ? { ...m, is_read: true } : m
           )
         );
       }
     };
 
-    socketService.onMessage(handleNewMessage);
+    // Listen ONLY via context's CustomEvent (SocketContext already listens to socket)
+    const unsubscribeContext = onNewMessage(handleNewMessage);
+
+    // Typing and read events still need direct socket listeners
     socketService.onTyping(handleTyping);
     socketService.onMessagesRead(handleMessagesRead);
 
     return () => {
-      socketService.off("new.message", handleNewMessage);
+      unsubscribeContext();
       socketService.off("user.typing", handleTyping);
       socketService.off("messages.read", handleMessagesRead);
     };
-  }, [activeConversation, user?.id]);
+  }, [user?.id, onNewMessage]); // Removed activeConversation - using ref instead
 
   // Send message (P2P via socket)
   const handleSend = async () => {
@@ -691,11 +761,11 @@ export default function Messages() {
       {/* Conversation List */}
       <aside className={`msg__sidebar ${mobileView === "chat" ? "hidden-mobile" : ""}`}>
         <div className="msg__sidebar-header">
-          <h1 className="msg__title">Mensajes</h1>
+          <h1 className="msg__title">{t("messages.title")}</h1>
           <button
             className="msg__new-btn"
             onClick={() => setShowNewModal(true)}
-            title="Nueva conversación"
+            title={t("messages.new_conversation")}
           >
             <PlusIcon />
           </button>
@@ -703,7 +773,7 @@ export default function Messages() {
         
         <div className="msg__search">
           <SearchIcon />
-          <input type="text" placeholder="Buscar conversación..." />
+          <input type="text" placeholder={t("messages.search_conversation")} />
         </div>
 
         <div className="msg__conv-list">
@@ -712,7 +782,7 @@ export default function Messages() {
               <LoadingSpinner />
             </div>
           ) : conversations.length === 0 ? (
-            <EmptyConversations onNewConversation={() => setShowNewModal(true)} />
+            <EmptyConversations onNewConversation={() => setShowNewModal(true)} t={t} />
           ) : (
             conversations.map((conv) => (
               <ConversationItem
@@ -720,6 +790,7 @@ export default function Messages() {
                 conversation={conv}
                 isActive={conv.partner.id === activeConversation}
                 onClick={() => selectConversation(conv.partner.id)}
+                t={t}
               />
             ))
           )}
@@ -729,7 +800,7 @@ export default function Messages() {
       {/* Chat Area */}
       <main className={`msg__chat ${mobileView === "list" ? "hidden-mobile" : ""}`}>
         {!activeConversation ? (
-          <EmptyChat />
+          <EmptyChat t={t} />
         ) : loadingMessages ? (
           <div className="msg__loading">
             <LoadingSpinner />
@@ -751,14 +822,14 @@ export default function Messages() {
                   <h2 className="msg__chat-name">{partner?.name}</h2>
                   <span className="msg__chat-username">
                     @{partner?.username}
-                    {typing && <span className="msg__typing-indicator">escribiendo...</span>}
+                    {typing && <span className="msg__typing-indicator">{t("messages.typing")}</span>}
                   </span>
                 </div>
               </div>
               {conversationStatus?.is_mutual && (
-                <span className="msg__mutual-badge" title="Os seguís mutuamente">
+                <span className="msg__mutual-badge" title={t("messages.mutual_followers")}>
                   <UsersIcon />
-                  Mutuo
+                  {t("messages.mutual")}
                 </span>
               )}
             </header>
@@ -768,6 +839,7 @@ export default function Messages() {
               isMutual={conversationStatus?.is_mutual}
               canSend={canSend}
               restrictionReason={conversationStatus?.restriction_reason}
+              t={t}
             />
 
             {/* Messages */}
@@ -798,8 +870,8 @@ export default function Messages() {
                     className="msg__input"
                     placeholder={
                       conversationStatus?.is_mutual
-                        ? "Escribe un mensaje..."
-                        : "Tienes 1 mensaje disponible..."
+                        ? t("messages.type_message")
+                        : t("messages.type_message_limited")
                     }
                     value={newMessage}
                     onChange={handleInputChange}
@@ -817,7 +889,7 @@ export default function Messages() {
               ) : (
                 <div className="msg__input-disabled">
                   <LockIcon />
-                  <span>Esperando a que te siga para continuar</span>
+                  <span>{t("messages.waiting_follow")}</span>
                 </div>
               )}
             </div>
@@ -830,6 +902,7 @@ export default function Messages() {
         isOpen={showNewModal}
         onClose={() => setShowNewModal(false)}
         onSelectUser={handleNewUserSelect}
+        t={t}
       />
     </div>
   );

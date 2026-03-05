@@ -116,7 +116,21 @@
 }
 
 .notif__item--unread {
-  background: color-mix(in srgb, var(--codex-teal) 5%, var(--surface-depth-1));
+  background: color-mix(in srgb, var(--codex-teal) 8%, var(--surface-depth-1));
+  border-left: 3px solid var(--codex-teal);
+  position: relative;
+}
+
+.notif__item--unread::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -1px;
+  width: 6px;
+  height: 6px;
+  background: var(--codex-teal);
+  border-radius: 50%;
+  transform: translateY(-50%);
 }
 
 .notif__item--unread:hover {
@@ -162,6 +176,11 @@
 .notif__icon--code {
   background: var(--codex-violet-muted);
   color: var(--codex-violet);
+}
+
+.notif__icon--message {
+  background: color-mix(in srgb, #3b82f6 20%, transparent);
+  color: #3b82f6;
 }
 
 .notif__icon--default {

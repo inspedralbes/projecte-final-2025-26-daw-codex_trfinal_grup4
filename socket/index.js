@@ -210,21 +210,31 @@ io.on("connection", (socket) => {
         return;
       }
 
+      // The API wraps in { success, message, data }
+      const messageData = result.data?.message || result.message;
+      
       // Broadcast to the chat room (both sender and receiver)
-      const senderId = result.message.sender_id;
+      const senderId = messageData.sender_id;
       const ids = [senderId, receiverId].sort((a, b) => a - b);
       const chatRoom = `chat.${ids[0]}-${ids[1]}`;
 
       // Emit with tempId so sender can match and update local state
       io.to(chatRoom).emit("new.message", {
-        ...result.message,
+        ...messageData,
         tempId: tempId,
       });
 
-      console.log(`[Socket.io] P2P message sent in room ${chatRoom}`);
+      // Also emit to receiver's personal room so they receive
+      // the message even if they don't have the chat open
+      io.to(`user.${receiverId}`).emit("new.message", {
+        ...messageData,
+        tempId: tempId,
+      });
+
+      console.log(`[Socket.io] P2P message sent in room ${chatRoom} and user.${receiverId}`);
 
       // Confirm to sender
-      if (callback) callback({ success: true, message: result.message });
+      if (callback) callback({ success: true, message: messageData });
     } catch (err) {
       console.error(
         "[Socket.io] Error sending P2P message:",
