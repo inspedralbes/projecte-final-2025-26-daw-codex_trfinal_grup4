@@ -173,7 +173,11 @@ io.on("connection", (socket) => {
 
     try {
       // Call Laravel API to persist the message and validate restrictions
-      const apiUrl = process.env.API_URL || "http://api:80";
+      // In production (Docker), use internal network. Otherwise use external API_URL
+      const isProduction = process.env.NODE_ENV === "production";
+      const apiUrl = isProduction
+        ? (process.env.INTERNAL_API_URL || "http://api:80")
+        : (process.env.API_URL || "http://localhost:8080");
       console.log(
         `[Socket.io] Sending message to API: ${apiUrl}/api/chat/messages`,
         {
