@@ -231,6 +231,7 @@ class ChatController extends Controller
 
         $users = User::query()
             ->where('id', '!=', $currentUser->id)
+            ->where('role', '!=', 'admin')
             ->where(function ($q) use ($query) {
                 $q->where('username', 'like', "%{$query}%")
                   ->orWhere('name', 'like', "%{$query}%");

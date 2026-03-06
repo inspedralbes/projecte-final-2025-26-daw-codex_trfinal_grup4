@@ -21,7 +21,7 @@ class NotificationController extends Controller
         $user = $request->user();
 
         $query = Notification::where('user_id', $user->id)
-            ->with(['sender:id,name,username,avatar'])
+            ->with(['sender:id,name,username,avatar', 'notifiable'])
             ->latest();
 
         if ($request->boolean('unread_only')) {
@@ -106,15 +106,25 @@ class NotificationController extends Controller
 
     /**
      * Format notification for API response.
+     * Includes center_id when the notifiable is a center-scoped Post.
      */
     private function formatNotification(Notification $n): array
     {
+        $centerId = null;
+
+        // If the notifiable is a Post, include its center_id so the
+        // frontend can filter center-related notifications properly.
+        if ($n->notifiable_type === \App\Models\Post::class && $n->notifiable) {
+            $centerId = $n->notifiable->center_id;
+        }
+
         return [
             'id'         => $n->id,
             'type'       => $n->type,
             'message'    => $n->message,
             'read_at'    => $n->read_at,
             'created_at' => $n->created_at,
+            'center_id'  => $centerId,
             'sender'     => $n->sender ? [
                 'id'       => $n->sender->id,
                 'name'     => $n->sender->name,

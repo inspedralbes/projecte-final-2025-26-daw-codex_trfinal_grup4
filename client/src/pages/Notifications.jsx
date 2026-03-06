@@ -290,11 +290,13 @@ export default function Notifications() {
 
   const filteredNotifications = notifications.filter((n) => {
     const mappedType = mapNotificationType(n.type);
+    const isCenterRelated = mappedType === "school" || !!n.center_id;
     if (filter === "all") return true;
-    if (filter === "social") return ["like", "follow", "repost", "mention"].includes(mappedType);
-    if (filter === "school") return mappedType === "school";
+    if (filter === "social")
+      return ["like", "follow", "repost", "mention"].includes(mappedType) && !isCenterRelated;
+    if (filter === "school") return isCenterRelated;
     if (filter === "code")
-      return ["answer", "snippet-saved", "accepted", "comment"].includes(mappedType);
+      return ["answer", "snippet-saved", "accepted", "comment"].includes(mappedType) && !isCenterRelated;
     return true;
   });
 

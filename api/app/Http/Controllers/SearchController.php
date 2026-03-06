@@ -73,6 +73,7 @@ class SearchController extends Controller
                       ->orWhere('username', 'LIKE', "%{$query}%")
                       ->orWhere('bio', 'LIKE', "%{$query}%");
                 })
+                ->where('role', '!=', 'admin')
                 ->select('id', 'name', 'username', 'avatar', 'bio', 'role', 'center_id')
                 ->with('center:id,name')
                 ->limit(20)
@@ -162,6 +163,7 @@ class SearchController extends Controller
         $members = [];
         if (!$isTagSearch) {
             $members = User::where('center_id', $user->center_id)
+                ->where('role', '!=', 'admin')
                 ->where(function ($q) use ($query) {
                     $q->where('name', 'LIKE', "%{$query}%")
                       ->orWhere('username', 'LIKE', "%{$query}%");

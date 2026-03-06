@@ -810,13 +810,13 @@ export default function CenterHub() {
           className={`center-hub__nav-tab ${activeTab === "posts" ? "center-hub__nav-tab--active" : ""}`}
           onClick={() => setActiveTab("posts")}
         >
-          {t("sidebar.profile")}
+          {t("center.posts_tab")}
         </button>
         <button
           className={`center-hub__nav-tab ${activeTab === "questions" ? "center-hub__nav-tab--active" : ""}`}
           onClick={() => setActiveTab("questions")}
         >
-          {t("widgets.recent_questions")}
+          {t("center.questions_tab")}
         </button>
         <button
           className={`center-hub__nav-tab ${activeTab === "resources" ? "center-hub__nav-tab--active" : ""}`}
@@ -835,7 +835,7 @@ export default function CenterHub() {
             className={`center-hub__nav-tab center-hub__nav-tab--admin ${activeTab === "admin" ? "center-hub__nav-tab--active" : ""}`}
             onClick={() => setActiveTab("admin")}
           >
-            <SettingsIcon /> {t("center.admin")}
+            <SettingsIcon /> {t("center.admin_tab")}
           </button>
         )}
       </nav>

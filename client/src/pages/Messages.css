@@ -468,8 +468,10 @@
 .msg__bubble {
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-xl);
-  max-width: 100%;
+  max-width: 70%;
+  min-width: 80px;
   position: relative;
+  overflow: hidden;
 }
 
 .msg__bubble.own {
@@ -490,6 +492,11 @@
   line-height: 1.5;
   margin: 0;
   word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .msg__bubble.own .msg__bubble-text {
