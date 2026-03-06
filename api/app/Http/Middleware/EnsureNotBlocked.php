@@ -11,6 +11,7 @@ class EnsureNotBlocked
     /**
      * Handle an incoming request.
      * Auto-lifts expired timeouts, then blocks active bans/timeouts.
+     * Revokes all tokens on permanent ban to force re-authentication.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -21,7 +22,7 @@ class EnsureNotBlocked
         }
 
         // Auto-lift expired timeout
-        if ($user->ban_expires_at && $user->ban_expires_at->isPast()) {
+        if ($user->ban_status === 'timeout' && $user->ban_expires_at && $user->ban_expires_at->isPast()) {
             $user->update([
                 'is_blocked'     => false,
                 'ban_status'     => 'active',
@@ -33,18 +34,24 @@ class EnsureNotBlocked
 
         // Block if user is blocked (permanent ban or active timeout)
         if ($user->is_blocked) {
-            $isPermanent = is_null($user->ban_expires_at);
+            $isPermanent = $user->ban_status === 'banned';
             $message = $isPermanent
                 ? 'Tu cuenta ha sido baneada permanentemente.'
-                : 'Tu cuenta está en timeout hasta ' . $user->ban_expires_at->format('d/m/Y \a las H:i') . '.';
+                : 'Tu cuenta está en timeout hasta ' . ($user->ban_expires_at ? $user->ban_expires_at->format('d/m/Y \a las H:i') : 'nueva orden') . '.';
 
             if ($user->ban_reason) {
                 $message .= ' Motivo: ' . $user->ban_reason;
             }
 
+            // Revoke all tokens on permanent ban to force re-auth
+            if ($isPermanent) {
+                $user->tokens()->delete();
+            }
+
             return response()->json([
                 'success'        => false,
                 'message'        => $message,
+                'is_banned'      => true,
                 'ban_status'     => $user->ban_status,
                 'ban_reason'     => $user->ban_reason,
                 'ban_expires_at' => $user->ban_expires_at,

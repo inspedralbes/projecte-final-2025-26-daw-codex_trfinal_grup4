@@ -11,10 +11,21 @@ class EnsureIsAdmin
     /**
      * Handle an incoming request.
      * Only allows users with role 'admin' to proceed.
+     * Token must be valid and user must not be blocked.
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || $request->user()->role->value !== 'admin') {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated. Valid token required.',
+                'errors'  => null,
+            ], 401);
+        }
+
+        if (!$user->isAdmin()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Forbidden. Admin access required.',

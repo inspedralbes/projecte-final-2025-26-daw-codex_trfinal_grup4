@@ -75,9 +75,40 @@ class GoogleAuthController extends Controller
         $user = $result['user'];
         $isNew = $result['is_new'];
 
-        // Check if user is blocked
+        // Auto-lift expired timeout
+        if ($user->ban_status === 'timeout' && $user->ban_expires_at && $user->ban_expires_at->isPast()) {
+            $user->update([
+                'is_blocked'     => false,
+                'ban_status'     => 'active',
+                'ban_reason'     => null,
+                'ban_expires_at' => null,
+            ]);
+        }
+
+        // Block banned/timeout users from logging in
         if ($user->is_blocked) {
-            return $this->error('Your account has been suspended.', 403);
+            $isPermanent = $user->ban_status === 'banned';
+            $message = $isPermanent
+                ? 'Tu cuenta ha sido baneada permanentemente.'
+                : 'Tu cuenta está en timeout hasta ' . ($user->ban_expires_at ? $user->ban_expires_at->format('d/m/Y \a las H:i') : 'nueva orden') . '.';
+
+            if ($user->ban_reason) {
+                $message .= ' Motivo: ' . $user->ban_reason;
+            }
+
+            if ($isPermanent) {
+                $user->tokens()->delete();
+            }
+
+            return response()->json([
+                'success'        => false,
+                'message'        => $message,
+                'is_banned'      => true,
+                'ban_status'     => $user->ban_status,
+                'ban_reason'     => $user->ban_reason,
+                'ban_expires_at' => $user->ban_expires_at,
+                'errors'         => null,
+            ], 403);
         }
 
         $token = $user->createToken('google_auth_token')->plainTextToken;

@@ -89,10 +89,12 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Protected Routes (auth:sanctum)                                    */
+/*  Protected Routes – Session/Read-only (auth:sanctum)                */
+/*  These work even for banned users so they can see their ban status, */
+/*  close session, verify email, etc.                                  */
 /* ------------------------------------------------------------------ */
 Route::middleware('auth:sanctum')->group(function () {
-    // Auth
+    // Auth – session management (must work for banned users)
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/dismiss-center-prompt', [AuthController::class, 'dismissCenterPrompt']);
@@ -102,10 +104,31 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('throttle:6,1'); // Max 6 per minute
     Route::get('/email/status', [VerificationController::class, 'status']);
 
-    // Password management (authenticated)
+    // Password management (authenticated – needed even if banned)
     Route::post('/password/set', [PasswordController::class, 'set']);     // Google users set first password
     Route::put('/password/update', [PasswordController::class, 'update']); // Change existing password
 
+    // Notifications – read-only (banned users should see ban notification)
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/count', [NotificationController::class, 'count']);
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
+
+    // Chat – read-only (banned users can see past conversations)
+    Route::get('/chat/conversations', [ChatController::class, 'conversations']);
+    Route::get('/chat/conversations/{userId}', [ChatController::class, 'messages']);
+    Route::get('/chat/unread', [ChatController::class, 'unreadCount']);
+
+    // Center request status (read-only)
+    Route::get('/center-requests/my', [CenterRequestController::class, 'myRequests']);
+});
+
+/* ------------------------------------------------------------------ */
+/*  Protected Routes – Write/Action (auth:sanctum + not-blocked)       */
+/*  Banned/timeout users CANNOT perform any write actions.             */
+/* ------------------------------------------------------------------ */
+Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
     // Posts (US#2)
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{post}', [PostController::class, 'update']);
@@ -130,46 +153,33 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/users/{user}/follow', [FollowController::class, 'toggle']);
     Route::get('/users/{user}/follow-status', [FollowController::class, 'status']);
 
-    // Center Hub (US#5) – "Walled Garden" (blocked users cannot access center)
-    Route::middleware('not-blocked')->group(function () {
-        Route::get('/center/posts', [PostController::class, 'centerPosts']);
-        Route::get('/center/tags', [TagController::class, 'centerTags']);
-        Route::get('/center/search', [SearchController::class, 'centerSearch']);
-    });
+    // Center Hub (US#5) – "Walled Garden"
+    Route::get('/center/posts', [PostController::class, 'centerPosts']);
+    Route::get('/center/tags', [TagController::class, 'centerTags']);
+    Route::get('/center/search', [SearchController::class, 'centerSearch']);
 
     // Tags – follow/unfollow + notifications
     Route::post('/tags/{tag}/follow', [TagController::class, 'toggleFollow']);
     Route::patch('/tags/{tag}/notify', [TagController::class, 'toggleNotify']);
     Route::get('/tags/followed', [TagController::class, 'followed']);
 
-    // Notifications
-    Route::get('/notifications', [NotificationController::class, 'index']);
-    Route::get('/notifications/count', [NotificationController::class, 'count']);
-    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
-    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
-    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
-
-    // Chat / Messages
-    Route::get('/chat/conversations', [ChatController::class, 'conversations']);
-    Route::get('/chat/conversations/{userId}', [ChatController::class, 'messages']);
+    // Chat – write actions (banned users cannot send messages)
     Route::post('/chat/messages', [ChatController::class, 'store']);
     Route::post('/chat/conversations/{userId}/read', [ChatController::class, 'markAsRead']);
-    Route::get('/chat/unread', [ChatController::class, 'unreadCount']);
     Route::get('/chat/can-message/{userId}', [ChatController::class, 'canMessage']);
     Route::get('/chat/search-users', [ChatController::class, 'searchUsers']);
 
     // Profile update (US#7)
     Route::put('/profile', [ProfileController::class, 'update']);
 
-    // Center Requests – any authenticated user can request to create a center
+    // Center Requests – any authenticated non-blocked user can request
     Route::post('/center-requests', [CenterRequestController::class, 'store']);
-    Route::get('/center-requests/my', [CenterRequestController::class, 'myRequests']);
 
-    // Centers – create request with justificante (any authenticated user)
+    // Centers – create request with justificante
     Route::post('/centers', [CenterController::class, 'store']);
 
     /* -------------------------------------------------------------- */
-    /*  Teacher-only routes (teacher or admin)                         */
+    /*  Teacher-only routes (teacher or admin + not-blocked)            */
     /* -------------------------------------------------------------- */
     Route::middleware('teacher')->group(function () {
         // Edit center portal (teacher edits own center)
@@ -185,7 +195,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     /* -------------------------------------------------------------- */
-    /*  Admin-only routes (US#8)                                       */
+    /*  Admin-only routes (US#8) – admin + not-blocked                  */
     /* -------------------------------------------------------------- */
     Route::middleware('admin')->group(function () {
         // Dashboard Stats

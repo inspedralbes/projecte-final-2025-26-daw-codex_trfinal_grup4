@@ -11,6 +11,7 @@ class EnsureIsTeacher
     /**
      * Handle an incoming request.
      * Only allows users with role 'teacher' or 'admin' to proceed.
+     * Token must be valid and user must not be blocked.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -19,12 +20,12 @@ class EnsureIsTeacher
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthenticated.',
+                'message' => 'Unauthenticated. Valid token required.',
                 'errors'  => null,
             ], 401);
         }
 
-        if ($user->role->value !== 'teacher' && $user->role->value !== 'admin') {
+        if (!$user->isTeacherOrAdmin()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Forbidden. Teacher or admin access required.',
