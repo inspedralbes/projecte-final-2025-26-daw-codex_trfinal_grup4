@@ -35,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'banner',
         'bio',
         'is_blocked',
+        'center_blocked',
         'ban_status',
         'ban_reason',
         'ban_expires_at',
@@ -72,6 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'ban_expires_at' => 'datetime',
             'role' => UserRole::class,
             'is_blocked' => 'boolean',
+            'center_blocked' => 'boolean',
             'ban_status' => 'string',
             'center_prompt_dismissed' => 'boolean',
         ];
@@ -99,6 +101,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isTeacherOrAdmin(): bool
     {
         return $this->isTeacher() || $this->isAdmin();
+    }
+
+    /**
+     * Check if the user has been blocked from their center by a teacher.
+     */
+    public function isCenterBlocked(): bool
+    {
+        return (bool) $this->center_blocked;
     }
 
     /**

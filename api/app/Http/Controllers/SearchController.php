@@ -121,6 +121,10 @@ class SearchController extends Controller
             return $this->error('You are not associated with any center', 403);
         }
 
+        if ($user->isCenterBlocked()) {
+            return $this->error('You have been blocked from accessing your center hub.', 403);
+        }
+
         $query = $request->input('q');
 
         // Strip # from query for tag searches

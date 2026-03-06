@@ -74,6 +74,10 @@ class PostController extends Controller
             return $this->error('You are not associated with any center', 403);
         }
 
+        if ($user->isCenterBlocked()) {
+            return $this->error('You have been blocked from accessing your center hub.', 403);
+        }
+
         $query = Post::centerFiltered()
             ->with(['user', 'center', 'tags', 'originalPost.user'])
             ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts'])

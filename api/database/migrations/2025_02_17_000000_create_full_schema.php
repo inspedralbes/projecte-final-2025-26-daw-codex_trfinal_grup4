@@ -54,8 +54,11 @@ return new class extends Migration
             $table->string('avatar')->nullable();
             $table->string('banner')->nullable();
             $table->text('bio')->nullable();
-            $table->boolean('is_blocked')->default(false); // Bloqueado por profesor/admin
-            $table->string('ban_status')->default('active'); // active, banned, etc.
+            $table->boolean('is_blocked')->default(false); // Bloqueado globalmente por admin (ban/timeout)
+            $table->boolean('center_blocked')->default(false); // Bloqueado del centro por profesor
+            $table->string('ban_status')->default('active'); // active, flagged, banned, timeout
+            $table->string('ban_reason')->nullable(); // Motivo del ban/timeout
+            $table->timestamp('ban_expires_at')->nullable(); // Expiración del timeout
 
             // Redes Sociales
             $table->string('linkedin_url')->nullable();

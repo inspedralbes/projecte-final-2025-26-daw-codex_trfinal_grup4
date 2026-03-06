@@ -152,6 +152,7 @@ class AuthController extends Controller
             'ban_status'     => $user->ban_status,
             'ban_reason'     => $user->ban_reason,
             'ban_expires_at' => $user->ban_expires_at,
+            'center_blocked' => $user->center_blocked,
         ], 'Authenticated user');
     }
 

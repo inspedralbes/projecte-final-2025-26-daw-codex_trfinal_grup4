@@ -26,16 +26,16 @@ class CenterMemberController extends Controller
         }
 
         $query = User::where('center_id', $centerId)
-            ->select('id', 'name', 'username', 'email', 'role', 'avatar', 'is_blocked', 'created_at');
+            ->select('id', 'name', 'username', 'email', 'role', 'avatar', 'is_blocked', 'center_blocked', 'created_at');
 
         // Filter by role
         if ($request->has('role')) {
             $query->where('role', $request->role);
         }
 
-        // Filter by blocked status
+        // Filter by center-blocked status
         if ($request->has('is_blocked')) {
-            $query->where('is_blocked', filter_var($request->is_blocked, FILTER_VALIDATE_BOOLEAN));
+            $query->where('center_blocked', filter_var($request->is_blocked, FILTER_VALIDATE_BOOLEAN));
         }
 
         // Search by name/username/email
@@ -110,7 +110,8 @@ class CenterMemberController extends Controller
 
     /**
      * PATCH /api/center/members/{user}/block
-     * Teacher: block a student. Blocked users cannot interact.
+     * Teacher: block a student from center hub. Blocked users cannot access center content.
+     * This is a center-level block, NOT a global ban (admin only).
      */
     public function block(Request $request, User $user): JsonResponse
     {
@@ -133,21 +134,21 @@ class CenterMemberController extends Controller
             return $this->error('Cannot block admin users.', 403);
         }
 
-        if ($user->is_blocked) {
-            return $this->error('User is already blocked.', 422);
+        if ($user->center_blocked) {
+            return $this->error('User is already blocked from this center.', 422);
         }
 
-        $user->update(['is_blocked' => true]);
+        $user->update(['center_blocked' => true]);
 
         return $this->success(
-            $user->only(['id', 'name', 'username', 'role', 'is_blocked']),
-            'User has been blocked.'
+            $user->only(['id', 'name', 'username', 'role', 'center_blocked']),
+            'User has been blocked from the center hub.'
         );
     }
 
     /**
      * PATCH /api/center/members/{user}/unblock
-     * Teacher: unblock a student.
+     * Teacher: unblock a student from center hub.
      */
     public function unblock(Request $request, User $user): JsonResponse
     {
@@ -157,15 +158,15 @@ class CenterMemberController extends Controller
             return $this->error('This user does not belong to your center.', 403);
         }
 
-        if (!$user->is_blocked) {
-            return $this->error('User is not blocked.', 422);
+        if (!$user->center_blocked) {
+            return $this->error('User is not blocked from this center.', 422);
         }
 
-        $user->update(['is_blocked' => false]);
+        $user->update(['center_blocked' => false]);
 
         return $this->success(
-            $user->only(['id', 'name', 'username', 'role', 'is_blocked']),
-            'User has been unblocked.'
+            $user->only(['id', 'name', 'username', 'role', 'center_blocked']),
+            'User has been unblocked from the center hub.'
         );
     }
 
@@ -190,9 +191,9 @@ class CenterMemberController extends Controller
         }
 
         $user->update([
-            'center_id'  => null,
-            'role'       => UserRole::UserNormal->value,
-            'is_blocked' => false,
+            'center_id'      => null,
+            'role'           => UserRole::UserNormal->value,
+            'center_blocked' => false,
         ]);
 
         return $this->success(null, 'User removed from center.');

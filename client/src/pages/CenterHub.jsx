@@ -186,7 +186,7 @@ const MemberCard = ({ member, isTeacher, onRoleChange, onBlock, onUnblock }) => 
 
   return (
     <>
-      <div className={`center-hub__member-card ${member.is_blocked ? "center-hub__member-card--blocked" : ""}`}>
+      <div className={`center-hub__member-card ${member.center_blocked ? "center-hub__member-card--blocked" : ""}`}>
         <Link to={`/profile/${member.username}`} className="center-hub__member-avatar">
           {member.avatar ? (
             <img src={member.avatar} alt={member.name} />
@@ -198,7 +198,7 @@ const MemberCard = ({ member, isTeacher, onRoleChange, onBlock, onUnblock }) => 
           <Link to={`/profile/${member.username}`} className="center-hub__member-name">
             {member.name}
             <RoleBadge role={member.role} />
-            {member.is_blocked && (
+            {member.center_blocked && (
               <span className="center-hub__blocked-badge">🚫 Bloqueado</span>
             )}
           </Link>
@@ -214,7 +214,7 @@ const MemberCard = ({ member, isTeacher, onRoleChange, onBlock, onUnblock }) => 
         {/* Admin actions for teachers */}
         {isTeacher && member.role !== "admin" && (
           <div className="center-hub__member-actions">
-            {member.is_blocked ? (
+            {member.center_blocked ? (
               <button
                 className="center-hub__action-btn center-hub__action-btn--unblock"
                 onClick={() => onUnblock(member.id)}
@@ -470,7 +470,7 @@ export default function CenterHub() {
   }
 
   // User is blocked from this center
-  if (user?.is_blocked) {
+  if (user?.center_blocked) {
     return (
       <div className="center-hub">
         <div className="center-hub__blocked-view">

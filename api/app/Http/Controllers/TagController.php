@@ -51,6 +51,10 @@ class TagController extends Controller
             return $this->error('You are not associated with any center', 403);
         }
 
+        if ($user->isCenterBlocked()) {
+            return $this->error('You have been blocked from accessing your center hub.', 403);
+        }
+
         $followedTagIds = $user->followedTags()->pluck('tags.id')->toArray();
 
         $tags = Tag::whereHas('posts', fn ($q) => $q->where('center_id', $user->center_id))
