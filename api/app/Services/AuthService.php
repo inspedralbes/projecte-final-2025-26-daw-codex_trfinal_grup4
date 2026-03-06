@@ -229,6 +229,15 @@ class AuthService
     {
         $isGeneric = $this->isGenericEmail($user->email);
 
+        // Admin users never need a center prompt
+        if ($user->isAdmin()) {
+            return [
+                'needs_center_prompt' => false,
+                'is_generic_email'    => $isGeneric,
+                'has_center'          => false,
+            ];
+        }
+
         // User already has a center → no prompt needed
         if ($user->center_id) {
             return [

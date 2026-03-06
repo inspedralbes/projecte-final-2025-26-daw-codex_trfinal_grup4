@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'teacher' => \App\Http\Middleware\EnsureIsTeacher::class,
             'same-center' => \App\Http\Middleware\EnsureSameCenter::class,
             'not-blocked' => \App\Http\Middleware\EnsureNotBlocked::class,
+            'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

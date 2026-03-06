@@ -144,6 +144,18 @@ class CenterRequestController extends Controller
                 'status'      => 'approved',
                 'admin_notes' => $request->input('admin_notes'),
             ]);
+
+            // 4. Assign existing users with matching domain to this center
+            // Users without a center whose email matches the new center's domain
+            // become students of this center (excluding the requester, already set as teacher)
+            User::whereNull('center_id')
+                ->where('id', '!=', $centerRequest->user_id)
+                ->where('email', 'like', '%@' . $centerRequest->domain)
+                ->where('role', '!=', UserRole::Admin->value)
+                ->update([
+                    'center_id' => $center->id,
+                    'role'      => UserRole::Student->value,
+                ]);
         });
 
         $center->load('creator:id,name,username,email');

@@ -125,10 +125,10 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 /* ------------------------------------------------------------------ */
-/*  Protected Routes – Write/Action (auth:sanctum + not-blocked)       */
-/*  Banned/timeout users CANNOT perform any write actions.             */
+/*  Protected Routes – Write/Action (auth:sanctum + verified + not-blocked) */
+/*  Banned/timeout users and unverified emails CANNOT perform write actions. */
 /* ------------------------------------------------------------------ */
-Route::middleware(['auth:sanctum', 'not-blocked'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified', 'not-blocked'])->group(function () {
     // Posts (US#2)
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{post}', [PostController::class, 'update']);
