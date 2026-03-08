@@ -30,66 +30,66 @@ class DemoSeeder extends Seeder
         $password = Hash::make('password');
 
         // ─────────────────────────────────────────────────────────────
-        //  CENTERS
+        //  CENTERS (find or create by domain)
         // ─────────────────────────────────────────────────────────────
 
-        $pedralbesId = DB::table('centers')->insertGetId([
+        $findOrCreateCenter = function (string $domain, array $data) use ($now) {
+            $existing = DB::table('centers')->where('domain', $domain)->first();
+            if ($existing) return $existing->id;
+            return DB::table('centers')->insertGetId(array_merge($data, [
+                'domain'     => $domain,
+                'status'     => 'active',
+                'is_private' => false,
+                'created_at' => $now->copy()->subMonths(6),
+                'updated_at' => $now,
+            ]));
+        };
+
+        $pedralbesId = $findOrCreateCenter('inspedralbes.cat', [
             'name'        => 'Institut Pedralbes',
-            'domain'      => 'inspedralbes.cat',
             'city'        => 'Barcelona',
             'website'     => 'https://agora.xtec.cat/iespedralbes/',
             'description' => 'Centre educatiu de referència en DAW/DAM a Barcelona. Formem professionals en desenvolupament web i multiplataforma.',
-            'status'      => 'active',
-            'is_private'  => false,
-            'created_at'  => $now->copy()->subMonths(6),
-            'updated_at'  => $now,
         ]);
 
-        $balmesId = DB::table('centers')->insertGetId([
+        $balmesId = $findOrCreateCenter('jaumebalmes.net', [
             'name'        => 'IES Jaume Balmes',
-            'domain'      => 'jaumebalmes.net',
             'city'        => 'Barcelona',
             'website'     => 'https://www.iesjaumebalmes.cat/',
             'description' => 'Centro activo y verificado. Ciclos formativos de DAM, DAW y ASIX con más de 200 alumnos.',
-            'status'      => 'active',
-            'is_private'  => false,
-            'created_at'  => $now->copy()->subMonths(4),
-            'updated_at'  => $now,
         ]);
 
-        $campanarId = DB::table('centers')->insertGetId([
+        $campanarId = $findOrCreateCenter('iescampanar.es', [
             'name'        => 'IES Campanar',
-            'domain'      => 'iescampanar.es',
             'city'        => 'Valencia',
             'website'     => 'https://portal.edu.gva.es/iescampanar/',
             'description' => 'Gran oferta formativa en ciclos de informática. Especialistas en desarrollo web y ciberseguridad.',
-            'status'      => 'active',
-            'is_private'  => false,
-            'created_at'  => $now->copy()->subMonths(3),
-            'updated_at'  => $now,
         ]);
 
-        echo "✅ 3 Centers created\n";
+        echo "✅ 3 Centers ready\n";
 
         // ─────────────────────────────────────────────────────────────
         //  ADMIN (hidden from all public views)
         // ─────────────────────────────────────────────────────────────
 
-        DB::table('users')->insertGetId([
-            'name'              => 'Admin System',
-            'username'          => 'admin',
-            'email'             => 'admin@codex.com',
-            'password'          => $password,
-            'role'              => 'admin',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(8),
-            'updated_at'        => $now,
-        ]);
-
-        echo "✅ Admin created (hidden)\n";
+        if (!DB::table('users')->where('email', 'admin@codex.com')->exists()) {
+            DB::table('users')->insertGetId([
+                'name'              => 'Admin System',
+                'username'          => 'admin',
+                'email'             => 'admin@codex.com',
+                'password'          => $password,
+                'role'              => 'admin',
+                'is_blocked'        => false,
+                'auth_provider'     => 'local',
+                'email_verified_at' => $now,
+                'password_set_at'   => $now,
+                'created_at'        => $now->copy()->subMonths(8),
+                'updated_at'        => $now,
+            ]);
+            echo "✅ Admin created (hidden)\n";
+        } else {
+            echo "✅ Admin already exists\n";
+        }
 
         // ─────────────────────────────────────────────────────────────
         //  USERS — Institut Pedralbes (NOT created — looked up by email)
@@ -134,204 +134,96 @@ class DemoSeeder extends Seeder
         }
 
         // ─────────────────────────────────────────────────────────────
-        //  USERS — IES Jaume Balmes
+        //  USERS — Fictitious (find or create by email)
         // ─────────────────────────────────────────────────────────────
 
+        $findOrCreateUser = function (string $email, array $data) use ($now, $password) {
+            $existing = DB::table('users')->where('email', $email)->first();
+            if ($existing) return $existing->id;
+            return DB::table('users')->insertGetId(array_merge($data, [
+                'email'             => $email,
+                'password'          => $password,
+                'is_blocked'        => false,
+                'auth_provider'     => 'local',
+                'email_verified_at' => $now,
+                'password_set_at'   => $now,
+                'updated_at'        => $now,
+            ]));
+        };
+
+        // ── IES Jaume Balmes ──
         $balmesUsers = [];
 
-        $balmesUsers['teacher'] = DB::table('users')->insertGetId([
-            'center_id'         => $balmesId,
-            'name'              => 'Laura Martínez',
-            'username'          => 'lauramtz',
-            'email'             => 'laura.martinez@jaumebalmes.net',
-            'password'          => $password,
-            'role'              => 'teacher',
-            'bio'               => 'Profesora de ASIX y DAM. DevOps, Linux y seguridad informática. 🔒',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(3),
-            'updated_at'        => $now,
+        $balmesUsers['teacher'] = $findOrCreateUser('laura.martinez@jaumebalmes.net', [
+            'center_id' => $balmesId, 'name' => 'Laura Martínez', 'username' => 'lauramtz',
+            'role' => 'teacher', 'bio' => 'Profesora de ASIX y DAM. DevOps, Linux y seguridad informática. 🔒',
+            'created_at' => $now->copy()->subMonths(3),
         ]);
-
-        $balmesUsers['alex'] = DB::table('users')->insertGetId([
-            'center_id'         => $balmesId,
-            'name'              => 'Àlex Puig',
-            'username'          => 'alexpuig',
-            'email'             => 'alex.puig@jaumebalmes.net',
-            'password'          => $password,
-            'role'              => 'student',
-            'bio'               => 'DAM 2º año. Kotlin + Android Studio. Me flipa el desarrollo móvil 📱',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(3),
-            'updated_at'        => $now,
+        $balmesUsers['alex'] = $findOrCreateUser('alex.puig@jaumebalmes.net', [
+            'center_id' => $balmesId, 'name' => 'Àlex Puig', 'username' => 'alexpuig',
+            'role' => 'student', 'bio' => 'DAM 2º año. Kotlin + Android Studio. Me flipa el desarrollo móvil 📱',
+            'created_at' => $now->copy()->subMonths(3),
         ]);
-
-        $balmesUsers['marta'] = DB::table('users')->insertGetId([
-            'center_id'         => $balmesId,
-            'name'              => 'Marta Soler',
-            'username'          => 'martasoler',
-            'email'             => 'marta.soler@jaumebalmes.net',
-            'password'          => $password,
-            'role'              => 'student',
-            'bio'               => 'Amante del frontend. CSS art, animaciones y React ✨',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(2),
-            'updated_at'        => $now,
+        $balmesUsers['marta'] = $findOrCreateUser('marta.soler@jaumebalmes.net', [
+            'center_id' => $balmesId, 'name' => 'Marta Soler', 'username' => 'martasoler',
+            'role' => 'student', 'bio' => 'Amante del frontend. CSS art, animaciones y React ✨',
+            'created_at' => $now->copy()->subMonths(2),
         ]);
-
-        $balmesUsers['jordi'] = DB::table('users')->insertGetId([
-            'center_id'         => $balmesId,
-            'name'              => 'Jordi Vidal',
-            'username'          => 'jordividal',
-            'email'             => 'jordi.vidal@jaumebalmes.net',
-            'password'          => $password,
-            'role'              => 'student',
-            'bio'               => 'ASIX 1er año. Redes, Linux y algo de Python. Learning every day 💻',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(2),
-            'updated_at'        => $now,
+        $balmesUsers['jordi'] = $findOrCreateUser('jordi.vidal@jaumebalmes.net', [
+            'center_id' => $balmesId, 'name' => 'Jordi Vidal', 'username' => 'jordividal',
+            'role' => 'student', 'bio' => 'ASIX 1er año. Redes, Linux y algo de Python. Learning every day 💻',
+            'created_at' => $now->copy()->subMonths(2),
         ]);
-
-        $balmesUsers['nuria'] = DB::table('users')->insertGetId([
-            'center_id'         => $balmesId,
-            'name'              => 'Núria Ferrer',
-            'username'          => 'nuriaferrer',
-            'email'             => 'nuria.ferrer@jaumebalmes.net',
-            'password'          => $password,
-            'role'              => 'student',
-            'bio'               => 'DAW + diseño UX/UI. Figma + React = ❤️',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(1),
-            'updated_at'        => $now,
+        $balmesUsers['nuria'] = $findOrCreateUser('nuria.ferrer@jaumebalmes.net', [
+            'center_id' => $balmesId, 'name' => 'Núria Ferrer', 'username' => 'nuriaferrer',
+            'role' => 'student', 'bio' => 'DAW + diseño UX/UI. Figma + React = ❤️',
+            'created_at' => $now->copy()->subMonths(1),
         ]);
 
         DB::table('centers')->where('id', $balmesId)->update(['creator_id' => $balmesUsers['teacher']]);
+        echo "✅ 5 Balmes users ready\n";
 
-        echo "✅ 5 Balmes users created (1 teacher + 4 students)\n";
-
-        // ─────────────────────────────────────────────────────────────
-        //  USERS — IES Campanar
-        // ─────────────────────────────────────────────────────────────
-
+        // ── IES Campanar ──
         $campanarUsers = [];
 
-        $campanarUsers['teacher'] = DB::table('users')->insertGetId([
-            'center_id'         => $campanarId,
-            'name'              => 'Carlos Ruiz',
-            'username'          => 'carlosruiz',
-            'email'             => 'carlos.ruiz@iescampanar.es',
-            'password'          => $password,
-            'role'              => 'teacher',
-            'bio'               => 'Profesor de DAW en IES Campanar. Node.js, MongoDB y metodologías ágiles.',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(3),
-            'updated_at'        => $now,
+        $campanarUsers['teacher'] = $findOrCreateUser('carlos.ruiz@iescampanar.es', [
+            'center_id' => $campanarId, 'name' => 'Carlos Ruiz', 'username' => 'carlosruiz',
+            'role' => 'teacher', 'bio' => 'Profesor de DAW en IES Campanar. Node.js, MongoDB y metodologías ágiles.',
+            'created_at' => $now->copy()->subMonths(3),
+        ]);
+        $campanarUsers['pablo'] = $findOrCreateUser('pablo.herrero@iescampanar.es', [
+            'center_id' => $campanarId, 'name' => 'Pablo Herrero', 'username' => 'pabloherrero',
+            'role' => 'student', 'bio' => 'Aprendiendo desarrollo web. Me gusta Vue.js y probar tecnologías nuevas 🌐',
+            'created_at' => $now->copy()->subMonths(2),
+        ]);
+        $campanarUsers['elena'] = $findOrCreateUser('elena.garcia@iescampanar.es', [
+            'center_id' => $campanarId, 'name' => 'Elena García', 'username' => 'elenagarcia',
+            'role' => 'student', 'bio' => 'Backend developer en formación. Python + Django + SQL. También toco algo de ciberseguridad 🛡️',
+            'created_at' => $now->copy()->subMonths(2),
+        ]);
+        $campanarUsers['david'] = $findOrCreateUser('david.lopez@iescampanar.es', [
+            'center_id' => $campanarId, 'name' => 'David López', 'username' => 'davidlopez',
+            'role' => 'student', 'bio' => 'Unity Engine + C# para game dev. También me gusta el desarrollo web 🎮',
+            'created_at' => $now->copy()->subMonths(1),
         ]);
 
-        $campanarUsers['pablo'] = DB::table('users')->insertGetId([
-            'center_id'         => $campanarId,
-            'name'              => 'Pablo Herrero',
-            'username'          => 'pabloherrero',
-            'email'             => 'pablo.herrero@iescampanar.es',
-            'password'          => $password,
-            'role'              => 'student',
-            'bio'               => 'Aprendiendo desarrollo web. Me gusta Vue.js y probar tecnologías nuevas 🌐',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(2),
-            'updated_at'        => $now,
-        ]);
+        echo "✅ 4 Campanar users ready\n";
 
-        $campanarUsers['elena'] = DB::table('users')->insertGetId([
-            'center_id'         => $campanarId,
-            'name'              => 'Elena García',
-            'username'          => 'elenagarcia',
-            'email'             => 'elena.garcia@iescampanar.es',
-            'password'          => $password,
-            'role'              => 'student',
-            'bio'               => 'Backend developer en formación. Python + Django + SQL. También toco algo de ciberseguridad 🛡️',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(2),
-            'updated_at'        => $now,
-        ]);
-
-        $campanarUsers['david'] = DB::table('users')->insertGetId([
-            'center_id'         => $campanarId,
-            'name'              => 'David López',
-            'username'          => 'davidlopez',
-            'email'             => 'david.lopez@iescampanar.es',
-            'password'          => $password,
-            'role'              => 'student',
-            'bio'               => 'Unity Engine + C# para game dev. También me gusta el desarrollo web 🎮',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(1),
-            'updated_at'        => $now,
-        ]);
-
-        echo "✅ 4 Campanar users created (1 teacher + 3 students)\n";
-
-        // ─────────────────────────────────────────────────────────────
-        //  USERS — userNormal (no center)
-        // ─────────────────────────────────────────────────────────────
-
+        // ── Normal users (no center) ──
         $normalUsers = [];
 
-        $normalUsers['lucia'] = DB::table('users')->insertGetId([
-            'name'              => 'Lucía Romero',
-            'username'          => 'luciaromero',
-            'email'             => 'lucia.romero@gmail.com',
-            'password'          => $password,
-            'role'              => 'userNormal',
-            'bio'               => 'Autodidacta en programación. Python, JavaScript y mucha curiosidad 🧠',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(2),
-            'updated_at'        => $now,
+        $normalUsers['lucia'] = $findOrCreateUser('lucia.romero@gmail.com', [
+            'name' => 'Lucía Romero', 'username' => 'luciaromero',
+            'role' => 'userNormal', 'bio' => 'Autodidacta en programación. Python, JavaScript y mucha curiosidad 🧠',
+            'created_at' => $now->copy()->subMonths(2),
+        ]);
+        $normalUsers['sergio'] = $findOrCreateUser('sergio.navarro@outlook.com', [
+            'name' => 'Sergio Navarro', 'username' => 'sergionav',
+            'role' => 'userNormal', 'bio' => 'Ex-bootcamp. Ahora freelance haciendo webs con React y Node 💼',
+            'created_at' => $now->copy()->subMonths(1),
         ]);
 
-        $normalUsers['sergio'] = DB::table('users')->insertGetId([
-            'name'              => 'Sergio Navarro',
-            'username'          => 'sergionav',
-            'email'             => 'sergio.navarro@outlook.com',
-            'password'          => $password,
-            'role'              => 'userNormal',
-            'bio'               => 'Ex-bootcamp. Ahora freelance haciendo webs con React y Node 💼',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(1),
-            'updated_at'        => $now,
-        ]);
-
-        echo "✅ 2 normal users created\n";
+        echo "✅ 2 normal users ready\n";
 
         // Collect all user IDs for easy reference (filter out null Pedralbes users)
         $allUserIds = array_merge(
@@ -368,12 +260,13 @@ class DemoSeeder extends Seeder
         ];
 
         foreach ($tagData as $t) {
-            $tags[$t['slug']] = DB::table('tags')->insertGetId(array_merge($t, [
+            $existing = DB::table('tags')->where('slug', $t['slug'])->first();
+            $tags[$t['slug']] = $existing ? $existing->id : DB::table('tags')->insertGetId(array_merge($t, [
                 'created_at' => $now, 'updated_at' => $now,
             ]));
         }
 
-        echo "✅ " . count($tags) . " tags created\n";
+        echo "✅ " . count($tags) . " tags ready\n";
 
         // ─────────────────────────────────────────────────────────────
         //  FOLLOWS  (create a realistic social graph)
@@ -424,7 +317,9 @@ class DemoSeeder extends Seeder
 
         $followCount = 0;
         foreach ($follows as [$follower, $followed]) {
-            if (!$follower || !$followed) continue; // skip if Pedralbes user not found
+            if (!$follower || !$followed) continue;
+            $exists = DB::table('follows')->where('follower_id', $follower)->where('followed_id', $followed)->exists();
+            if ($exists) continue;
             DB::table('follows')->insert([
                 'follower_id' => $follower,
                 'followed_id' => $followed,
@@ -437,8 +332,16 @@ class DemoSeeder extends Seeder
         echo "✅ $followCount follows created\n";
 
         // ─────────────────────────────────────────────────────────────
-        //  POSTS — Global feed (news + questions, no center)
+        //  POSTS, COMMENTS, INTERACTIONS, NOTIFICATIONS
+        //  Skip if posts already exist (seeder already ran before)
         // ─────────────────────────────────────────────────────────────
+
+        if (DB::table('posts')->count() > 0) {
+            echo "\n⚠️  Posts already exist — skipping content creation (seeder was already run)\n";
+            echo "   Delete posts manually or run migrate:fresh if you want to re-seed content.\n";
+        } else {
+
+        // ── POST CREATION BLOCK START ──
 
         $postIds = [];
 
@@ -975,6 +878,8 @@ class DemoSeeder extends Seeder
         }
 
         echo "✅ $notifCount notifications created\n";
+
+        } // ── END OF POST CREATION BLOCK ──
 
         echo "\n🎉 Demo seeder completed!\n";
         echo "📧 Pedralbes accounts (must login with Google first!):\n";
