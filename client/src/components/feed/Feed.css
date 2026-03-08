@@ -4,6 +4,9 @@
 
 .feed {
   min-height: 100vh;
+  max-width: var(--feed-width);
+  margin: 0 auto;
+  width: 100%;
 }
 
 /* ── Header ───────────────────────────────────────────────── */
@@ -297,6 +300,11 @@
 
 /* ── Mobile Feed ──────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .feed {
+    max-width: 100vw;
+    border-radius: 0;
+  }
+
   .feed__header {
     position: sticky;
     top: var(--mobile-header-height);
