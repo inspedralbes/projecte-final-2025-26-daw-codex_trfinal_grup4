@@ -73,6 +73,7 @@ class FollowController extends Controller
     public function followers(Request $request, User $user): JsonResponse
     {
         $followers = $user->followers()
+            ->where('role', '!=', 'admin')
             ->select('users.id', 'name', 'username', 'avatar', 'bio', 'role')
             ->paginate($request->input('per_page', 20));
 
@@ -98,6 +99,7 @@ class FollowController extends Controller
     public function following(Request $request, User $user): JsonResponse
     {
         $following = $user->following()
+            ->where('role', '!=', 'admin')
             ->select('users.id', 'name', 'username', 'avatar', 'bio', 'role')
             ->paginate($request->input('per_page', 20));
 

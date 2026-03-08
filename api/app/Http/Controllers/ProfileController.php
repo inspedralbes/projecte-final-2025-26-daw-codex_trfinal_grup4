@@ -29,7 +29,7 @@ class ProfileController extends Controller
             ->with('center:id,name,domain,logo')
             ->first();
 
-        if (!$user) {
+        if (!$user || $user->role === \App\Enums\UserRole::Admin) {
             return $this->error('User not found', 404);
         }
 
@@ -251,7 +251,8 @@ class ProfileController extends Controller
         // Use Sanctum guard directly to get authenticated user on public route
         $currentUserId = Auth::guard('sanctum')->user()?->id;
 
-        $users = User::withCount(['posts', 'comments', 'followers'])
+        $users = User::where('role', '!=', 'admin')
+            ->withCount(['posts', 'comments', 'followers'])
             ->with('center:id,name')
             ->orderByDesc('posts_count')
             ->take($limit)

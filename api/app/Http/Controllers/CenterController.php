@@ -75,6 +75,7 @@ class CenterController extends Controller
         }
 
         $query = $center->users()
+            ->where('role', '!=', 'admin')
             ->select('id', 'name', 'username', 'role', 'avatar', 'bio', 'created_at')
             ->withCount(['posts', 'comments']);
 
