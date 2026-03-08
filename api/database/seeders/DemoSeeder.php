@@ -637,6 +637,132 @@ class DemoSeeder extends Seeder
             'created_at' => $now->copy()->subHours(120),
         ]);
 
+        // ─────────────────────────────────────────────────────────────
+        //  Even more global posts for a rich feed
+        // ─────────────────────────────────────────────────────────────
+
+        $px1 = $makePost([
+            'user_id' => $balmesUsers['jordi'],
+            'content' => "Acabo de instalar Arch Linux en mi portátil viejo y estoy flipando 🐧\n\nEl proceso de instalación manual te enseña TANTO sobre cómo funciona Linux por dentro: particiones, bootloader, networking, gestores de paquetes...\n\nNo es para el día a día de todo el mundo, pero como experiencia de aprendizaje es brutal. Ahora entiendo lo que hay detrás de Ubuntu.",
+            'created_at' => $now->copy()->subHours(130),
+        ]);
+
+        $px2 = $makePost([
+            'user_id' => $campanarUsers['elena'],
+            'content' => "🔐 Mini guía de CORS para los que estáis sufriendo con ello:\n\n1. CORS es una protección del NAVEGADOR, no del servidor\n2. El servidor decide qué orígenes permite con `Access-Control-Allow-Origin`\n3. Las peticiones con cookies necesitan `credentials: include` + `Allow-Credentials: true`\n4. Los preflight requests (OPTIONS) son automáticos para peticiones complejas\n5. En desarrollo, el proxy de Vite os ahorra muchos dolores de cabeza\n\nAntes de desesperaros, abrid las DevTools → Network y mirad los headers.",
+            'created_at' => $now->copy()->subHours(135),
+        ]);
+
+        $px3 = $makePost([
+            'user_id' => $normalUsers['sergio'],
+            'type'    => 'question',
+            'content' => "¿Alguien ha implementado pagos con Stripe en un proyecto real? Tengo un cliente que quiere una tienda online y no sé si usar Stripe Checkout (redirect) o Stripe Elements (integrado en mi web).\n\n¿Cuál es más fácil de implementar y más fiable?",
+            'created_at' => $now->copy()->subHours(140),
+        ]);
+
+        $px4 = $makePost([
+            'user_id' => $balmesUsers['marta'],
+            'content' => "💡 Truco de CSS que acabo de descubrir: `clamp()` para tipografía responsive sin media queries.\n\nEn vez de cambiar font-size en cada breakpoint, usáis una sola línea que escala automáticamente.",
+            'code_snippet' => "/* Tipografía fluid responsive */\nh1 {\n  font-size: clamp(1.8rem, 4vw, 3.5rem);\n}\n\nh2 {\n  font-size: clamp(1.4rem, 3vw, 2.5rem);\n}\n\np {\n  font-size: clamp(0.95rem, 1.5vw, 1.15rem);\n  line-height: 1.7;\n}\n\n/* También funciona para padding y margin */\n.container {\n  padding: clamp(1rem, 5vw, 4rem);\n}",
+            'code_language' => 'css',
+            'created_at' => $now->copy()->subHours(145),
+        ]);
+
+        $px5 = $makePost([
+            'user_id' => $pedralbesUsers['ike'],
+            'content' => "🚀 He automatizado el deploy de mi proyecto con GitHub Actions. Cada vez que hago push a main, se construye la imagen Docker, se sube al registry y se despliega en el servidor.\n\nEl pipeline tarda menos de 3 minutos. Adiós a conectarse por SSH y hacer pull manual.",
+            'code_snippet' => 'name: Deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build & Push Docker
+        run: |
+          docker build -t myapp:latest .
+          docker push registry/myapp:latest
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /app && docker compose pull && docker compose up -d',
+            'code_language' => 'yaml',
+            'created_at' => $now->copy()->subHours(150),
+        ]);
+
+        $px6 = $makePost([
+            'user_id' => $campanarUsers['david'],
+            'content' => "Para los que estáis aprendiendo Unity, os recomiendo esta estructura de carpetas para proyectos medianos:\n\n📁 Assets/\n├── 📁 Scripts/ (código organizado por feature)\n├── 📁 Prefabs/ (objetos reutilizables)\n├── 📁 Scenes/ (una por nivel/pantalla)\n├── 📁 Art/ (sprites, modelos, texturas)\n├── 📁 Audio/ (música, SFX)\n├── 📁 UI/ (elementos de interfaz)\n└── 📁 ScriptableObjects/ (datos configurables)\n\nMantener esto ordenado desde el principio os ahorrará muchos problemas luego.",
+            'created_at' => $now->copy()->subHours(155),
+        ]);
+
+        $px7 = $makePost([
+            'user_id' => $balmesUsers['alex'],
+            'type'    => 'question',
+            'content' => "¿Qué base de datos usáis para proyectos pequeños-medianos? He estado comparando:\n\n- SQLite: 0 configuración, un solo archivo\n- PostgreSQL: potente pero más setup\n- MySQL: el clásico, bien documentado\n- MongoDB: flexible pero difícil de escalar relaciones\n\n¿Para una app de gestión de tareas con usuarios, cuál elegiríais?",
+            'created_at' => $now->copy()->subHours(160),
+        ]);
+
+        $px8 = $makePost([
+            'user_id' => $normalUsers['lucia'],
+            'content' => "Hoy he aprendido sobre WebSockets y la diferencia con HTTP es brutal:\n\n📡 HTTP: el cliente pide → el servidor responde → conexión cerrada\n🔌 WebSocket: conexión permanente → ambos envían datos cuando quieran\n\nPara chats, notificaciones en tiempo real, juegos online... WebSocket es la respuesta. Socket.io lo hace súper fácil con Node.js.",
+            'code_snippet' => "// Servidor (Node.js + Socket.io)\nconst io = require('socket.io')(server);\n\nio.on('connection', (socket) => {\n  console.log('Usuario conectado:', socket.id);\n  \n  socket.on('message', (data) => {\n    // Broadcast a todos los demás\n    socket.broadcast.emit('message', data);\n  });\n  \n  socket.on('disconnect', () => {\n    console.log('Usuario desconectado');\n  });\n});",
+            'code_language' => 'javascript',
+            'created_at' => $now->copy()->subHours(165),
+        ]);
+
+        $px9 = $makePost([
+            'user_id' => $pedralbesUsers['pol'],
+            'content' => "Comparativa rápida Vue vs React después de usar ambos en proyectos reales:\n\n🟢 Vue:\n+ Más intuitivo para empezar\n+ v-model ahorra código\n+ Single File Components (.vue) son geniales\n- Menos ofertas de trabajo (de momento)\n\n🔵 React:\n+ Ecosistema enorme\n+ Más ofertas de trabajo\n+ JSX es puro JavaScript\n- Más verboso para formularios\n\nAmbos son excelentes. Aprended el que queráis, los conceptos se transfieren.",
+            'created_at' => $now->copy()->subHours(170),
+        ]);
+
+        $px10 = $makePost([
+            'user_id' => $balmesUsers['teacher'],
+            'content' => "📋 Checklist de seguridad web que repaso con mis alumnos antes de desplegar:\n\n□ HTTPS en todos los endpoints\n□ Validación de inputs (frontend Y backend)\n□ SQL injection → usar prepared statements\n□ XSS → sanitizar HTML, usar CSP headers\n□ CSRF → tokens en formularios\n□ Rate limiting en API\n□ Headers de seguridad (HSTS, X-Frame-Options)\n□ Contraseñas hasheadas (bcrypt/Argon2)\n□ Variables de entorno, NUNCA hardcodear secretos\n□ Dependencias actualizadas (npm audit)\n\n¿Añadiríais algo más?",
+            'created_at' => $now->copy()->subHours(175),
+        ]);
+
+        $px11 = $makePost([
+            'user_id' => $pedralbesUsers['marc'],
+            'content' => "He estado refactorizando un controlador de Laravel que tenía 400 líneas y lo he dejado en 80 usando Service classes.\n\nEl truco: extraer la lógica de negocio a un servicio dedicado. El controlador solo recibe la request, llama al servicio y devuelve la response.",
+            'code_snippet' => "// Antes (controlador gordo)\npublic function store(Request \$request) {\n    // 50 líneas de validación, cálculos, queries...\n}\n\n// Después (controlador limpio)\npublic function store(StorePostRequest \$request)\n{\n    \$post = \$this->postService->create(\$request->validated());\n    return new PostResource(\$post);\n}\n\n// La lógica vive en App\\Services\\PostService\nclass PostService\n{\n    public function create(array \$data): Post\n    {\n        // Toda la lógica aquí, testeable y reutilizable\n    }\n}",
+            'code_language' => 'php',
+            'created_at' => $now->copy()->subHours(180),
+        ]);
+
+        $px12 = $makePost([
+            'user_id' => $campanarUsers['pablo'],
+            'type'    => 'question',
+            'content' => "Estoy empezando con testing y no sé por dónde empezar. ¿Cuál es la diferencia práctica entre:\n\n- Unit tests\n- Integration tests\n- E2E tests\n\n¿Por cuál debería empezar? He visto que Jest es para unit tests y Cypress/Playwright para E2E, pero no tengo claro cuándo usar cada uno.",
+            'created_at' => $now->copy()->subHours(185),
+        ]);
+
+        $px13 = $makePost([
+            'user_id' => $balmesUsers['nuria'],
+            'content' => "He rediseñado mi portfolio personal y quiero compartir los principios que he seguido:\n\n1. 🎯 Above the fold: nombre + qué hago + CTA claro\n2. 🖼️ Máximo 4-5 proyectos destacados\n3. 📱 Mobile first (70% del tráfico es móvil)\n4. ⚡ Performance: imágenes WebP, lazy loading, < 3s de carga\n5. 🌙 Dark mode por defecto (somos devs)\n6. 📊 Google Analytics para ver qué miran los recruiters\n\nResultado: he pasado de 0 a 3 contactos de recruiters en 2 semanas.",
+            'created_at' => $now->copy()->subHours(190),
+        ]);
+
+        $px14 = $makePost([
+            'user_id' => $normalUsers['sergio'],
+            'content' => "💼 Consejos para freelancers que empiezan:\n\n1. Cobra por proyecto, NO por hora (al principio)\n2. Siempre contrato por escrito, aunque sea un amigo\n3. 50% por adelantado antes de escribir una línea de código\n4. Define el scope claramente — todo lo extra es otro presupuesto\n5. Automatiza la facturación\n6. Guarda el 30% para impuestos\n7. Portfolio > CV\n\nEl primer cliente es el más difícil. Después de ese, el boca a boca hace magia.",
+            'created_at' => $now->copy()->subHours(195),
+        ]);
+
+        $px15 = $makePost([
+            'user_id' => $campanarUsers['elena'],
+            'type'    => 'question',
+            'content' => "¿Alguien ha montado un reverse proxy con Nginx para servir varias apps en un mismo servidor?\n\nTengo un VPS y quiero:\n- app1.midominio.com → React app (puerto 3000)\n- app2.midominio.com → API Laravel (puerto 8000)\n- api.midominio.com → Node.js (puerto 4000)\n\n¿Es simplemente crear varios server blocks en Nginx? ¿Y el SSL cómo se gestiona para cada subdominio?",
+            'created_at' => $now->copy()->subHours(200),
+        ]);
+
         echo "✅ " . count($postIds) . " total posts created\n";
 
         // ─────────────────────────────────────────────────────────────
@@ -670,6 +796,22 @@ class DemoSeeder extends Seeder
             [$bp4, ['api-rest']],
             [$camp2, ['python', 'sql']],
             [$camp3, ['unity', 'csharp']],
+            // New extra posts
+            [$px1,  ['linux']],
+            [$px2,  ['api-rest', 'javascript']],
+            [$px3,  ['javascript', 'nodejs']],
+            [$px4,  ['css']],
+            [$px5,  ['docker', 'devops']],
+            [$px6,  ['unity', 'csharp']],
+            [$px7,  ['sql', 'mongodb', 'nodejs']],
+            [$px8,  ['javascript', 'nodejs']],
+            [$px9,  ['vuejs', 'react', 'javascript']],
+            [$px10, ['api-rest', 'linux', 'devops']],
+            [$px11, ['laravel', 'php']],
+            [$px12, ['javascript', 'react']],
+            [$px13, ['css', 'javascript']],
+            [$px14, ['javascript']],
+            [$px15, ['linux', 'devops', 'docker']],
         ];
 
         foreach ($tagAssignments as [$postId, $slugs]) {
@@ -737,6 +879,23 @@ class DemoSeeder extends Seeder
             // Comments on JS validation question (q4)
             [$q4, $pedralbesUsers['ike'], "Con vanilla JS puedes usar el evento 'input' en vez de 'change' para validar en tiempo real. Crea funciones de validación separadas y llámalas en cada input."],
             [$q4, $balmesUsers['nuria'], "Yo uso React Hook Form + Zod. La validación es declarativa y el rendimiento es excelente. Para vanilla JS, Yup también está bien."],
+
+            // Comments on new extra posts
+            [$px1, $campanarUsers['elena'], 'Yo hice lo mismo con mi portátil viejo y es la mejor forma de aprender Linux. Ahora entiendo todo lo que hace Ubuntu por detrás.'],
+            [$px1, $pedralbesUsers['marc'], 'Arch Wiki es la mejor documentación de Linux que existe, incluso si no usas Arch. La recomiendo para cualquier distro.'],
+            [$px2, $balmesUsers['alex'], 'Los errores de CORS me volvían loco hasta que entendí que es el navegador el que bloquea, no el servidor. Gracias por la explicación!'],
+            [$px3, $balmesUsers['teacher'], 'Stripe Checkout es mucho más rápido de implementar y maneja toda la UI de pago. Para empezar, Checkout. Stripe Elements cuando necesites más personalización.'],
+            [$px4, $campanarUsers['david'], 'clamp() es una maravilla. Lo uso para todo: font-size, padding, gap... Ya no necesito tantos breakpoints.'],
+            [$px5, $pedralbesUsers['iza'], 'GitHub Actions es brutal. Nosotros también lo usamos para el CI/CD del proyecto y se nota mucho no tener que hacer deploys manuales.'],
+            [$px7, $pedralbesUsers['ike'], 'Para tareas de gestión iría con PostgreSQL sin duda. Tiene JSON nativo para datos flexibles, pero con las ventajas de SQL para relaciones.'],
+            [$px7, $normalUsers['lucia'], 'SQLite está muy infravalorada. Para MVPs y prototipos es perfecta, y luego migras a PostgreSQL cuando escales.'],
+            [$px8, $campanarUsers['pablo'], 'WebSockets cambian completamente la experiencia del usuario. En nuestro proyecto usamos Socket.io y la diferencia con polling es abismal.'],
+            [$px9, $balmesUsers['marta'], 'Totalmente de acuerdo. Los conceptos (componentes, estado, reactividad) son iguales. Lo importante es entenderlos bien.'],
+            [$px10, $normalUsers['sergio'], 'Yo añadiría: logging centralizado. Tener un ELK stack o al menos Sentry para errores te salva la vida en producción.'],
+            [$px11, $balmesUsers['jordi'], 'Service classes son un game changer. También recomiendo Form Requests para la validación, así el controlador queda limpio.'],
+            [$px12, $balmesUsers['teacher'], 'La pirámide de testing: muchos unit tests, menos integration, pocos E2E. Empieza por unit tests con Jest, son los más rápidos de escribir y ejecutar.'],
+            [$px13, $pedralbesUsers['pol'], 'El dark mode por defecto es clave 😄 Buen trabajo Núria! ¿Usaste algún template o lo hiciste desde cero?'],
+            [$px15, $balmesUsers['alex'], 'Con Certbot y Let\'s Encrypt el SSL es gratis y automático. Usa `certbot --nginx -d app1.midominio.com -d app2.midominio.com` para generar certificados para todos los subdominios de una vez.'],
         ];
 
         $commentCount = 0;
@@ -783,6 +942,19 @@ class DemoSeeder extends Seeder
             [$cp2,  [$pedralbesUsers['marc'], $pedralbesUsers['pol'], $pedralbesUsers['iza']]],
             [$cp5,  [$pedralbesUsers['ike'], $pedralbesUsers['marc'], $pedralbesUsers['pol']]],
             [$bp2,  [$balmesUsers['alex'], $balmesUsers['jordi'], $balmesUsers['nuria'], $balmesUsers['teacher']]],
+            // Likes on new extra posts
+            [$px1,  [$campanarUsers['elena'], $pedralbesUsers['marc'], $balmesUsers['jordi'], $normalUsers['lucia']]],
+            [$px2,  [$balmesUsers['alex'], $pedralbesUsers['ike'], $campanarUsers['pablo'], $normalUsers['sergio'], $balmesUsers['teacher']]],
+            [$px4,  [$campanarUsers['david'], $balmesUsers['nuria'], $pedralbesUsers['pol'], $normalUsers['lucia'], $balmesUsers['alex']]],
+            [$px5,  [$pedralbesUsers['iza'], $pedralbesUsers['marc'], $balmesUsers['marta'], $campanarUsers['elena'], $normalUsers['sergio'], $balmesUsers['teacher']]],
+            [$px6,  [$campanarUsers['teacher'], $campanarUsers['pablo'], $balmesUsers['jordi']]],
+            [$px8,  [$campanarUsers['pablo'], $pedralbesUsers['ike'], $balmesUsers['alex'], $normalUsers['lucia']]],
+            [$px9,  [$balmesUsers['marta'], $pedralbesUsers['marc'], $campanarUsers['elena'], $normalUsers['sergio'], $balmesUsers['nuria']]],
+            [$px10, [$normalUsers['sergio'], $pedralbesUsers['iza'], $balmesUsers['teacher'], $campanarUsers['teacher'], $pedralbesUsers['ike'], $balmesUsers['alex'], $normalUsers['lucia']]],
+            [$px11, [$balmesUsers['jordi'], $pedralbesUsers['ike'], $pedralbesUsers['pol'], $campanarUsers['elena']]],
+            [$px13, [$pedralbesUsers['pol'], $balmesUsers['marta'], $campanarUsers['elena'], $normalUsers['lucia'], $balmesUsers['teacher']]],
+            [$px14, [$normalUsers['lucia'], $balmesUsers['alex'], $campanarUsers['david'], $pedralbesUsers['marc']]],
+            [$px15, [$balmesUsers['alex'], $pedralbesUsers['ike'], $campanarUsers['teacher'], $normalUsers['sergio']]],
         ];
 
         $likeCount = 0;
@@ -815,6 +987,14 @@ class DemoSeeder extends Seeder
             [$p9,  [$normalUsers['lucia'], $pedralbesUsers['pol'], $campanarUsers['pablo']]],
             [$p11, [$pedralbesUsers['ike'], $pedralbesUsers['marc'], $balmesUsers['alex']]],
             [$q2,  [$balmesUsers['nuria']]],
+            // Bookmarks on new posts
+            [$px2,  [$balmesUsers['alex'], $campanarUsers['pablo']]],
+            [$px4,  [$balmesUsers['nuria'], $campanarUsers['david']]],
+            [$px5,  [$pedralbesUsers['iza'], $normalUsers['sergio']]],
+            [$px10, [$normalUsers['sergio'], $balmesUsers['marta'], $pedralbesUsers['ike']]],
+            [$px11, [$balmesUsers['jordi'], $pedralbesUsers['pol']]],
+            [$px13, [$normalUsers['lucia'], $balmesUsers['marta']]],
+            [$px14, [$campanarUsers['elena'], $balmesUsers['alex']]],
         ];
 
         $bookmarkCount = 0;
