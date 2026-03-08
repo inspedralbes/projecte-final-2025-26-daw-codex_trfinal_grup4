@@ -112,8 +112,16 @@ class DemoSeeder extends Seeder
             if ($user) {
                 $pedralbesUsers[$key] = $user->id;
                 // Ensure they are linked to the Pedralbes center
+                $updates = [];
                 if (!$user->center_id) {
-                    DB::table('users')->where('id', $user->id)->update(['center_id' => $pedralbesId]);
+                    $updates['center_id'] = $pedralbesId;
+                }
+                // Iza becomes teacher of Pedralbes
+                if ($key === 'iza') {
+                    $updates['role'] = 'teacher';
+                }
+                if (!empty($updates)) {
+                    DB::table('users')->where('id', $user->id)->update($updates);
                 }
                 $pedralbesFound++;
             } else {
@@ -122,6 +130,7 @@ class DemoSeeder extends Seeder
         }
 
         // Link first found teacher/user as center creator
+        $pedralbesUsers['teacher'] = $pedralbesUsers['iza']; // Iza is the teacher
         $creatorId = $pedralbesUsers['iza'] ?? collect($pedralbesUsers)->filter()->first();
         if ($creatorId) {
             DB::table('centers')->where('id', $pedralbesId)->update(['creator_id' => $creatorId]);
