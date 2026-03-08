@@ -4,6 +4,7 @@
 
 .center-hub {
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* ── Banner ───────────────────────────────────────────────── */
@@ -100,14 +101,9 @@
 /* ── Channels ─────────────────────────────────────────────── */
 .center-hub__channels {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   padding: var(--space-6) var(--space-4) var(--space-3);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.center-hub__channels::-webkit-scrollbar {
-  display: none;
 }
 
 .center-hub__channel {
