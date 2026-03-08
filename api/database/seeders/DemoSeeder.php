@@ -333,15 +333,7 @@ class DemoSeeder extends Seeder
 
         // ─────────────────────────────────────────────────────────────
         //  POSTS, COMMENTS, INTERACTIONS, NOTIFICATIONS
-        //  Skip if posts already exist (seeder already ran before)
         // ─────────────────────────────────────────────────────────────
-
-        if (DB::table('posts')->count() > 0) {
-            echo "\n⚠️  Posts already exist — skipping content creation (seeder was already run)\n";
-            echo "   Delete posts manually or run migrate:fresh if you want to re-seed content.\n";
-        } else {
-
-        // ── POST CREATION BLOCK START ──
 
         $postIds = [];
 
@@ -878,8 +870,6 @@ class DemoSeeder extends Seeder
         }
 
         echo "✅ $notifCount notifications created\n";
-
-        } // ── END OF POST CREATION BLOCK ──
 
         echo "\n🎉 Demo seeder completed!\n";
         echo "📧 Pedralbes accounts (must login with Google first!):\n";
