@@ -11,11 +11,14 @@ use Carbon\Carbon;
  * DemoSeeder — Generates realistic demo data for the Codex platform presentation.
  *
  * Centers:
- *   1. Institut Pedralbes (Barcelona)        — 4 real students + 1 teacher
- *   2. IES Jaume Balmes (Barcelona)          — 4 students + 1 teacher
- *   3. IES Campanar (Valencia)               — 3 students + 1 teacher
+ *   1. Institut Pedralbes (Barcelona)        — 4 real accounts (NOT created, looked up by email)
+ *   2. IES Jaume Balmes (Barcelona)          — 4 students + 1 teacher (created)
+ *   3. IES Campanar (Valencia)               — 3 students + 1 teacher (created)
  *
  * Also creates 2 userNormal accounts (no center) and 1 admin (hidden from public).
+ *
+ * ⚠️  Real Pedralbes users must login with Google BEFORE running this seeder!
+ *     Their posts/interactions are only created if the accounts exist in the DB.
  *
  * Posts: ~50+ posts (news + questions), comments, likes, follows, tags.
  */
@@ -89,83 +92,46 @@ class DemoSeeder extends Seeder
         echo "✅ Admin created (hidden)\n";
 
         // ─────────────────────────────────────────────────────────────
-        //  USERS — Institut Pedralbes
+        //  USERS — Institut Pedralbes (NOT created — looked up by email)
+        //  These users must login with Google BEFORE running the seeder
+        //  so they exist in the DB with their real Google profile data.
         // ─────────────────────────────────────────────────────────────
 
+        $pedralbesEmails = [
+            'iza'  => 'a23izadelesp@inspedralbes.cat',
+            'ike'  => 'a23ikedelgra@inspedralbes.cat',
+            'marc' => 'a23marrojgon@inspedralbes.cat',
+            'pol'  => 'a23poldiabel@inspedralbes.cat',
+        ];
+
         $pedralbesUsers = [];
+        $pedralbesFound = 0;
 
-        // Teacher — Iza (a23izadelesp)
-        $pedralbesUsers['iza'] = DB::table('users')->insertGetId([
-            'center_id'         => $pedralbesId,
-            'name'              => 'Iza Del Espino',
-            'username'          => 'izadelesp',
-            'email'             => 'a23izadelesp@inspedralbes.cat',
-            'password'          => $password,
-            'role'              => 'teacher',
-            'bio'               => 'Profesor de DAW en Institut Pedralbes. Especialista en Laravel, React y arquitecturas cloud. 🚀',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(5),
-            'updated_at'        => $now,
-        ]);
+        foreach ($pedralbesEmails as $key => $email) {
+            $user = DB::table('users')->where('email', $email)->first();
+            if ($user) {
+                $pedralbesUsers[$key] = $user->id;
+                // Ensure they are linked to the Pedralbes center
+                if (!$user->center_id) {
+                    DB::table('users')->where('id', $user->id)->update(['center_id' => $pedralbesId]);
+                }
+                $pedralbesFound++;
+            } else {
+                $pedralbesUsers[$key] = null;
+            }
+        }
 
-        // Student — Ike (a23ikedelgra)
-        $pedralbesUsers['ike'] = DB::table('users')->insertGetId([
-            'center_id'         => $pedralbesId,
-            'name'              => 'Ike Del Gra',
-            'username'          => 'ikedelgra',
-            'email'             => 'a23ikedelgra@inspedralbes.cat',
-            'password'          => $password,
-            'role'              => 'student',
-            'bio'               => 'Estudiante de DAW 2º. Me encanta React y el desarrollo frontend. Aprendiendo Docker 🐳',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(4),
-            'updated_at'        => $now,
-        ]);
+        // Link first found teacher/user as center creator
+        $creatorId = $pedralbesUsers['iza'] ?? collect($pedralbesUsers)->filter()->first();
+        if ($creatorId) {
+            DB::table('centers')->where('id', $pedralbesId)->update(['creator_id' => $creatorId]);
+        }
 
-        // Student — Marc (a23marrojgon)
-        $pedralbesUsers['marc'] = DB::table('users')->insertGetId([
-            'center_id'         => $pedralbesId,
-            'name'              => 'Marc Roj Gonzalez',
-            'username'          => 'marrojgon',
-            'email'             => 'a23marrojgon@inspedralbes.cat',
-            'password'          => $password,
-            'role'              => 'student',
-            'bio'               => 'Backend enthusiast 🔧 Laravel + Node.js. Siempre buscando la solución más limpia.',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(4),
-            'updated_at'        => $now,
-        ]);
-
-        // Student — Pol (a23poldiabel)
-        $pedralbesUsers['pol'] = DB::table('users')->insertGetId([
-            'center_id'         => $pedralbesId,
-            'name'              => 'Pol Dia Bel',
-            'username'          => 'poldiabel',
-            'email'             => 'a23poldiabel@inspedralbes.cat',
-            'password'          => $password,
-            'role'              => 'student',
-            'bio'               => 'Full-stack en formación. Vue.js + MongoDB fan. También hago cosas con Unity 🎮',
-            'is_blocked'        => false,
-            'auth_provider'     => 'local',
-            'email_verified_at' => $now,
-            'password_set_at'   => $now,
-            'created_at'        => $now->copy()->subMonths(3),
-            'updated_at'        => $now,
-        ]);
-
-        // Link teacher as center creator
-        DB::table('centers')->where('id', $pedralbesId)->update(['creator_id' => $pedralbesUsers['iza']]);
-
-        echo "✅ 4 Pedralbes users created (1 teacher + 3 students)\n";
+        echo "✅ $pedralbesFound/4 Pedralbes users found (login with Google first!)\n";
+        foreach ($pedralbesEmails as $key => $email) {
+            $status = $pedralbesUsers[$key] ? '✓' : '✗ NOT FOUND';
+            echo "   $status — $email\n";
+        }
 
         // ─────────────────────────────────────────────────────────────
         //  USERS — IES Jaume Balmes
@@ -367,9 +333,9 @@ class DemoSeeder extends Seeder
 
         echo "✅ 2 normal users created\n";
 
-        // Collect all user IDs for easy reference
+        // Collect all user IDs for easy reference (filter out null Pedralbes users)
         $allUserIds = array_merge(
-            array_values($pedralbesUsers),
+            array_values(array_filter($pedralbesUsers)),
             array_values($balmesUsers),
             array_values($campanarUsers),
             array_values($normalUsers)
@@ -456,16 +422,19 @@ class DemoSeeder extends Seeder
             [$normalUsers['sergio'],   $pedralbesUsers['pol']],
         ];
 
+        $followCount = 0;
         foreach ($follows as [$follower, $followed]) {
+            if (!$follower || !$followed) continue; // skip if Pedralbes user not found
             DB::table('follows')->insert([
                 'follower_id' => $follower,
                 'followed_id' => $followed,
                 'created_at'  => $now->copy()->subDays(rand(1, 30)),
                 'updated_at'  => $now,
             ]);
+            $followCount++;
         }
 
-        echo "✅ " . count($follows) . " follows created\n";
+        echo "✅ $followCount follows created\n";
 
         // ─────────────────────────────────────────────────────────────
         //  POSTS — Global feed (news + questions, no center)
@@ -473,8 +442,11 @@ class DemoSeeder extends Seeder
 
         $postIds = [];
 
-        // Helper to insert a post and return its ID
+        // Helper to insert a post and return its ID (returns null if user doesn't exist)
         $makePost = function (array $data) use ($now, &$postIds) {
+            // Skip post if user_id is null (Pedralbes user not logged in yet)
+            if (empty($data['user_id'])) return null;
+
             $defaults = [
                 'type'       => 'news',
                 'center_id'  => null,
@@ -609,7 +581,8 @@ class DemoSeeder extends Seeder
             'created_at' => $now->copy()->subHours(60),
         ]);
 
-        echo "✅ " . count($postIds) . " global posts created\n";
+        $globalCount = count($postIds);
+        echo "✅ $globalCount global posts created\n";
 
         // ─────────────────────────────────────────────────────────────
         //  POSTS — Center-specific (Institut Pedralbes)
@@ -652,7 +625,8 @@ class DemoSeeder extends Seeder
             'created_at' => $now->copy()->subHours(72),
         ]);
 
-        echo "✅ 5 Pedralbes center posts created\n";
+        $pedralbesCenterPosts = count(array_filter([$cp1, $cp2, $cp3, $cp4, $cp5]));
+        echo "✅ $pedralbesCenterPosts/5 Pedralbes center posts created\n";
 
         // ─────────────────────────────────────────────────────────────
         //  POSTS — Center-specific (IES Jaume Balmes)
@@ -687,7 +661,7 @@ class DemoSeeder extends Seeder
             'created_at' => $now->copy()->subHours(42),
         ]);
 
-        echo "✅ 4 Balmes center posts created\n";
+        echo "✅ 4/4 Balmes center posts created\n";
 
         // ─────────────────────────────────────────────────────────────
         //  POSTS — Center-specific (IES Campanar)
@@ -717,7 +691,7 @@ class DemoSeeder extends Seeder
             'created_at' => $now->copy()->subHours(50),
         ]);
 
-        echo "✅ 3 Campanar center posts created\n";
+        echo "✅ 3/3 Campanar center posts created\n";
 
         // ─────────────────────────────────────────────────────────────
         //  More global posts for variety
@@ -804,6 +778,7 @@ class DemoSeeder extends Seeder
         ];
 
         foreach ($tagAssignments as [$postId, $slugs]) {
+            if (!$postId) continue; // skip if post wasn't created (user not found)
             foreach ($slugs as $slug) {
                 if (isset($tags[$slug])) {
                     DB::table('post_tag')->insert([
@@ -869,7 +844,9 @@ class DemoSeeder extends Seeder
             [$q4, $balmesUsers['nuria'], "Yo uso React Hook Form + Zod. La validación es declarativa y el rendimiento es excelente. Para vanilla JS, Yup también está bien."],
         ];
 
+        $commentCount = 0;
         foreach ($comments as [$postId, $userId, $content]) {
+            if (!$postId || !$userId) continue; // skip if user/post not found
             DB::table('comments')->insert([
                 'post_id'    => $postId,
                 'user_id'    => $userId,
@@ -877,12 +854,15 @@ class DemoSeeder extends Seeder
                 'created_at' => $now->copy()->subHours(rand(1, 48)),
                 'updated_at' => $now,
             ]);
+            $commentCount++;
         }
 
         // Mark q1 as solved (MongoDB question)
-        DB::table('posts')->where('id', $q1)->update(['is_solved' => true]);
+        if ($q1) {
+            DB::table('posts')->where('id', $q1)->update(['is_solved' => true]);
+        }
 
-        echo "✅ " . count($comments) . " comments created\n";
+        echo "✅ $commentCount comments created\n";
 
         // ─────────────────────────────────────────────────────────────
         //  LIKES (using interactions table — polymorphic)
@@ -912,7 +892,9 @@ class DemoSeeder extends Seeder
 
         $likeCount = 0;
         foreach ($likeTargets as [$postId, $userIds]) {
+            if (!$postId) continue; // skip if post wasn't created
             foreach ($userIds as $uid) {
+                if (!$uid) continue; // skip if user not found
                 DB::table('interactions')->insert([
                     'user_id'           => $uid,
                     'interactable_id'   => $postId,
@@ -942,7 +924,9 @@ class DemoSeeder extends Seeder
 
         $bookmarkCount = 0;
         foreach ($bookmarkTargets as [$postId, $userIds]) {
+            if (!$postId) continue; // skip if post wasn't created
             foreach ($userIds as $uid) {
+                if (!$uid) continue; // skip if user not found
                 DB::table('interactions')->insert([
                     'user_id'           => $uid,
                     'interactable_id'   => $postId,
@@ -974,7 +958,9 @@ class DemoSeeder extends Seeder
             [$normalUsers['lucia'], $pedralbesUsers['ike'], 'follow', 'App\\Models\\User', $pedralbesUsers['ike'], 'ha comenzado a seguirte'],
         ];
 
+        $notifCount = 0;
         foreach ($notifications as [$userId, $senderId, $type, $notifiableType, $notifiableId, $message]) {
+            if (!$userId || !$senderId || !$notifiableId) continue; // skip if user not found
             DB::table('notifications')->insert([
                 'user_id'          => $userId,
                 'sender_id'        => $senderId,
@@ -985,16 +971,19 @@ class DemoSeeder extends Seeder
                 'created_at'       => $now->copy()->subHours(rand(1, 24)),
                 'updated_at'       => $now,
             ]);
+            $notifCount++;
         }
 
-        echo "✅ " . count($notifications) . " notifications created\n";
+        echo "✅ $notifCount notifications created\n";
 
-        echo "\n🎉 Demo seeder completed! All users have password: 'password'\n";
-        echo "📧 Pedralbes accounts:\n";
-        echo "   - a23izadelesp@inspedralbes.cat (teacher)\n";
-        echo "   - a23ikedelgra@inspedralbes.cat (student)\n";
-        echo "   - a23marrojgon@inspedralbes.cat (student)\n";
-        echo "   - a23poldiabel@inspedralbes.cat (student)\n";
-        echo "🔑 Admin: admin@codex.com\n";
+        echo "\n🎉 Demo seeder completed!\n";
+        echo "📧 Pedralbes accounts (must login with Google first!):\n";
+        echo "   - a23izadelesp@inspedralbes.cat\n";
+        echo "   - a23ikedelgra@inspedralbes.cat\n";
+        echo "   - a23marrojgon@inspedralbes.cat\n";
+        echo "   - a23poldiabel@inspedralbes.cat\n";
+        echo "🔑 Fictitious users password: 'password'\n";
+        echo "🔑 Admin: admin@codex.com (password: 'password')\n";
+        echo "\n⚠️  If Pedralbes users show as NOT FOUND, they need to login with Google first, then re-run the seeder.\n";
     }
 }
