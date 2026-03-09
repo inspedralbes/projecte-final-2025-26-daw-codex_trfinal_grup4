@@ -911,6 +911,12 @@
     gap: var(--space-3);
   }
 
+  /* Ensure post cards inside profile feed fill container and don't overflow */
+  .profile-guay__feed .post-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
   .profile-guay__loading-feed,
   .profile-guay__empty-feed {
     padding: var(--space-10);

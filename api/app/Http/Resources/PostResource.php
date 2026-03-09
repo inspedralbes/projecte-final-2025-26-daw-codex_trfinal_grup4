@@ -98,6 +98,8 @@ class PostResource extends JsonResource
                 ] : null,
             ] : null),
             'is_repost'      => $this->original_post_id !== null,
+            // Center flag: true if this post belongs to a center
+            'is_center_post' => $this->center_id !== null,
         ];
     }
 }

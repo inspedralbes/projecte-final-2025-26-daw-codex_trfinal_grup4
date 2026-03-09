@@ -425,6 +425,10 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
             </span>
             <span className="post-card__handle">@{targetAuthor.username || "user"}</span>
             {targetBadge && <span className="post-card__badge">{targetBadge}</span>}
+            {/* Center post badge (visible when API marks it or center relation exists) */}
+            { (targetPost.is_center_post || targetPost.center) && (
+              <span className="post-card__center-badge">{targetPost.center?.name || 'Post del centro'}</span>
+            ) }
             <span className="post-card__dot">·</span>
             <span className="post-card__time">{relativeTime}</span>
           </div>
