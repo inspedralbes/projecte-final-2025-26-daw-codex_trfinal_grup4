@@ -1,29 +1,35 @@
-Nom del grup i integrants: 
-Grup 6 (Codex) Pol Diaz, Izan de la Cruz, Marc Rojano, Iker Delgado
+# Projecte Codex - Grup 6
 
-Pàgina web i si funciona o no a producció
-https://codex.daw.inspedralbes.cat/profile
+### Integrants
+* **Grup:** 6 (Codex)
+* **Membres:** Pol Diaz, Izan de la Cruz, Marc Rojano, Iker Delgado
 
-Frase resum de l'aplicació
-És una web que representa un foro d'informàtica similar a twitter però centrar per Centres d'educació
+### Aplicació en Producció
+* **URL:** [https://codex.daw.inspedralbes.cat/profile](https://codex.daw.inspedralbes.cat/profile)
+* **Estat:** Operativa
 
-URL del document del git amb el resultat de les proves d'usuari
-https://github.com/inspedralbes/projecte-final-2025-26-daw-codex_trfinal_grup4.git
+### Resum del Projecte
+Codex és un fòrum d'informàtica amb una dinàmica similar a Twitter, però enfocat exclusivament a la comunicació entre centres educatius.
 
-Copia del document del git amb el resultat de les proves 
-    Perfil de cadascun del tester, segurament:
-        Usuari jova (<25 anys) amb coneixements tècnics i familiaritzat amb entorns web.
-        Usuari jova (<25 anys) amb coneixements tècnics i familiaritzat amb entorns web.
-    Percentatge de l'aplicació provada (% d'històries)
-        Han fet servir el 80% de l'aplicació. Fa falta un 20% que és la part admin.
-    Bugs detectats? Problemes Usabilitat?
-        Falta que sigui més responsive. I falta sockets als missatges.
-    Possiblitats de millora, 
-        idees interessants:
-            Posar machine learning per posts reportables.
-            Fer els missatges amb WRTc
-        idees dubtoses
+---
 
-Conclusió: Què farem en la pròxima fase del projecte?
-Fer la web més responsive, fer els missatges encriptats i poder fer chats per grups. Millorar les notificacions del centre...
-Fer que la part d'Admin sigui completament funcional.
+### Proves d'Usuari
+* **Document de proves:** [Enllaç al Git](https://github.com/inspedralbes/projecte-final-2025-26-daw-codex_trfinal_grup4.git)
+* **Perfil dels testers:** Usuaris joves (<25 anys) amb coneixements tècnics i experiència en entorns web.
+* **Cobertura:** 80% de l'aplicació provada (pendent el mòdul d'administració).
+
+### Problemes Detectats (Bugs i Usabilitat)
+* **Responsivitat:** Cal millorar l'adaptació a diferents pantalles (mòbil/tauleta).
+* **Missatgeria:** Falta la implementació de Sockets per a la comunicació en temps real.
+
+### Idees de Millora
+* **Machine Learning:** Aplicar IA per a la detecció i moderació automàtica de posts reportables.
+* **WebRTC:** Implementar missatgeria mitjançant WebRTC per a millorar la connectivitat.
+
+---
+
+### Pròxima Fase: Full de Ruta
+1. **Disseny:** Fer la web 100% responsive.
+2. **Seguretat:** Implementar xats encriptats i xats de grup.
+3. **Funcionalitat:** Finalitzar el panell d'Administrador (Admin) perquè sigui 100% funcional.
+4. **Notificacions:** Millorar el sistema d'avisos del centre.

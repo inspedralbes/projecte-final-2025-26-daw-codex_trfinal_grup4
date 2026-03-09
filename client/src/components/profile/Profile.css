@@ -319,11 +319,21 @@
   border-radius: 4px 4px 0 0;
 }
 
+/* Content section wrapper for nav + feed */
+.profile-guay__content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 .profile-guay__feed {
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .profile-guay__loading-feed,
@@ -905,25 +915,74 @@
     height: 3px;
   }
 
-  /* Feed responsive for likes/saved/posts sections */
+  /* Feed responsive for likes/saved/posts/questions sections */
   .profile-guay__feed {
     padding: var(--space-2);
     gap: var(--space-2);
+    overflow-x: hidden;
   }
 
   /* Ensure post cards inside profile feed fill container and don't overflow */
   .profile-guay__feed .post-card {
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
     margin: 0;
     border-radius: var(--radius-md);
     background: var(--depth-1);
     border: 1px solid var(--border-subtle);
+    overflow: hidden;
   }
 
   /* Remove redundant bottom border as we use card borders */
   .profile-guay__feed .post-card {
     border-bottom: none;
+  }
+
+  /* Ensure all post card children respect container width */
+  .profile-guay__feed .post-card__content {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .profile-guay__feed .post-card__text {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .profile-guay__feed .post-card__code {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .profile-guay__feed .post-card__code-content {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  .profile-guay__feed .post-card__image {
+    max-width: 100%;
+  }
+
+  .profile-guay__feed .post-card__image img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .profile-guay__feed .post-card__link {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .profile-guay__feed .post-card__tags {
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+
+  .profile-guay__feed .post-card__actions {
+    flex-wrap: wrap;
+    max-width: 100%;
   }
 
   .profile-guay__loading-feed,
@@ -996,6 +1055,7 @@
     padding-left: var(--space-4);
     padding-right: var(--space-4);
     box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   /* Ensure feed and children cannot force horizontal scroll */
@@ -1003,6 +1063,15 @@
   .profile-guay__feed > * {
     width: 100%;
     min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Ensure all nested elements stay within bounds */
+  .profile-guay__feed .post-card *,
+  .profile-guay__feed pre,
+  .profile-guay__feed code {
+    max-width: 100%;
     box-sizing: border-box;
   }
 
@@ -1015,9 +1084,21 @@
     display: block;
   }
 
+  /* Handle code blocks overflow for questions/likes/bookmarks tabs */
+  .profile-guay__feed .post-card__code,
+  .profile-guay__feed .hljs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* If the app sets a mobile header height variable, make the sticky nav sit below it */
   .profile-guay__nav {
     top: var(--mobile-header-height, 56px);
+  }
+
+  /* Content section for all tabs */
+  .profile-guay__content {
+    overflow-x: hidden;
   }
 }
 
