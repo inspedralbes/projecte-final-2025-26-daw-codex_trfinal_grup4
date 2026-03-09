@@ -58,7 +58,7 @@ class InteractionController extends Controller
 
         if ($existing) {
             $existing->delete();
-            
+
             event(new InteractionRemoved(
                 $user->id,
                 $request->interactable_id,
@@ -153,6 +153,7 @@ class InteractionController extends Controller
     /**
      * GET /api/bookmarks
      * List the authenticated user's bookmarked posts.
+     * Center posts are only shown if the user belongs to that center.
      */
     public function bookmarks(Request $request): JsonResponse
     {
@@ -179,12 +180,20 @@ class InteractionController extends Controller
             ]);
         }
 
-        // Maintain order by using FIELD()
-        $posts = Post::whereIn('id', $postIds)
+        // Build query with center visibility filter:
+        // Only show center posts if the user belongs to the same center
+        $postsQuery = Post::whereIn('id', $postIds)
             ->with(['user', 'center', 'tags'])
             ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts'])
-            ->orderByRaw('FIELD(id, ' . implode(',', $postIds) . ')')
-            ->paginate($request->input('per_page', 15));
+            ->where(function ($query) use ($user) {
+                $query->whereNull('center_id'); // Global posts are always visible
+                if ($user->center_id) {
+                    $query->orWhere('center_id', $user->center_id); // User's own center posts
+                }
+            })
+            ->orderByRaw('FIELD(id, ' . implode(',', $postIds) . ')');
+
+        $posts = $postsQuery->paginate($request->input('per_page', 15));
 
         return response()->json([
             'success' => true,
@@ -202,6 +211,7 @@ class InteractionController extends Controller
     /**
      * GET /api/liked
      * List the authenticated user's liked posts.
+     * Center posts are only shown if the user belongs to that center.
      */
     public function liked(Request $request): JsonResponse
     {
@@ -228,12 +238,20 @@ class InteractionController extends Controller
             ]);
         }
 
-        // Maintain order by using FIELD()
-        $posts = Post::whereIn('id', $postIds)
+        // Build query with center visibility filter:
+        // Only show center posts if the user belongs to the same center
+        $postsQuery = Post::whereIn('id', $postIds)
             ->with(['user', 'center', 'tags'])
             ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts'])
-            ->orderByRaw('FIELD(id, ' . implode(',', $postIds) . ')')
-            ->paginate($request->input('per_page', 15));
+            ->where(function ($query) use ($user) {
+                $query->whereNull('center_id'); // Global posts are always visible
+                if ($user->center_id) {
+                    $query->orWhere('center_id', $user->center_id); // User's own center posts
+                }
+            })
+            ->orderByRaw('FIELD(id, ' . implode(',', $postIds) . ')');
+
+        $posts = $postsQuery->paginate($request->input('per_page', 15));
 
         return response()->json([
             'success' => true,

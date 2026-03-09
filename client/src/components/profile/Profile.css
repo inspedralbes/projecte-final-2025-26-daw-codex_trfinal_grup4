@@ -905,21 +905,37 @@
     height: 3px;
   }
 
-  /* Feed */
+  /* Feed responsive for likes/saved/posts sections */
   .profile-guay__feed {
     padding: var(--space-2);
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
 
   /* Ensure post cards inside profile feed fill container and don't overflow */
   .profile-guay__feed .post-card {
     width: 100%;
     box-sizing: border-box;
+    margin: 0;
+    border-radius: var(--radius-md);
+    background: var(--depth-1);
+    border: 1px solid var(--border-subtle);
+  }
+
+  /* Remove redundant bottom border as we use card borders */
+  .profile-guay__feed .post-card {
+    border-bottom: none;
   }
 
   .profile-guay__loading-feed,
   .profile-guay__empty-feed {
     padding: var(--space-10);
+    font-size: 0.875rem;
+  }
+
+  .profile-guay__load-more {
+    padding: var(--space-3);
+    font-size: 0.875rem;
+    border-radius: var(--radius-md);
   }
 
   /* Edit modal */
@@ -1007,6 +1023,11 @@
 
 /* ── Responsive: Very Small Phones ─────────────────────────── */
 @media (max-width: 400px) {
+  .profile-guay {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
   .profile-guay__cover {
     height: 120px;
   }
@@ -1031,6 +1052,27 @@
 
   .profile-guay__name {
     font-size: 1.125rem;
+  }
+
+  /* Feed section for likes/saved on very small phones */
+  .profile-guay__feed {
+    padding: var(--space-1);
+    gap: var(--space-1-5);
+  }
+
+  .profile-guay__feed .post-card {
+    border-radius: var(--radius-sm);
+  }
+
+  .profile-guay__loading-feed,
+  .profile-guay__empty-feed {
+    padding: var(--space-8);
+    font-size: 0.8125rem;
+  }
+
+  .profile-guay__load-more {
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.8125rem;
   }
 
   .profile-guay__role-badge {
