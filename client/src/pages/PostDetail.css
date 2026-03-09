@@ -6,6 +6,14 @@
   min-height: 100vh;
 }
 
+/* Constrain width like feed and center on larger screens */
+.post-detail {
+  max-width: var(--feed-width);
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* ── Header ─────────────────────────────────────────────── */
 .post-detail__header {
   display: flex;
@@ -18,6 +26,19 @@
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
+}
+
+/* On mobile, keep the header below the global mobile header */
+@media (max-width: 768px) {
+  .post-detail__header {
+    top: var(--mobile-header-height);
+  }
+
+  .post-detail {
+    max-width: 100vw;
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 .post-detail__back {
@@ -106,6 +127,22 @@
 
 .post-detail__comment-input::placeholder {
   color: var(--ink-quaternary);
+}
+
+/* Ensure images and code blocks inside post/card are responsive */
+.post-detail img,
+.post-detail video,
+.post-detail iframe {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.post-detail pre,
+.post-detail code,
+.post-detail .post-card__code-content {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .post-detail__comment-submit {
