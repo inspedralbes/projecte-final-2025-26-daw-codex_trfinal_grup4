@@ -142,6 +142,53 @@ class DemoSeeder extends Seeder
             echo "   $status — $email\n";
         }
 
+        // DEV friendly: if running in local/dev environment, ensure the
+        // test Pedralbes account `a23izadelesp@inspedralbes.cat` exists
+        // and create a couple of posts so the developer can inspect the
+        // profile UI without needing an external Google login.
+        if (app()->environment('local') || env('APP_ENV') === 'dev') {
+            $devEmail = 'a23izadelesp@inspedralbes.cat';
+            $devUserId = DB::table('users')->where('email', $devEmail)->value('id');
+
+            if (!$devUserId) {
+                // Use the existing helper to create a fictitious user in dev
+                $devUserId = $findOrCreateUser($devEmail, [
+                    'center_id' => $pedralbesId,
+                    'name' => 'Iza (dev)',
+                    'username' => 'a23izadelesp',
+                    'role' => 'teacher',
+                    'bio' => 'Cuenta de desarrollo para pruebas. No usar en producción.',
+                    'created_at' => $now->copy()->subDays(30),
+                ]);
+                echo "✅ Dev user created for Iza: $devEmail\n";
+            } else {
+                // Ensure the dev user is linked to Pedralbes and is teacher
+                DB::table('users')->where('id', $devUserId)->update([
+                    'center_id' => $pedralbesId,
+                    'role' => 'teacher',
+                ]);
+                echo "✅ Dev user exists and was linked to Pedralbes: $devEmail\n";
+            }
+
+            // Create a center-only post and a global post for the dev user
+            $devCenterPost = $makePost([
+                'user_id' => $devUserId,
+                'center_id' => $pedralbesId,
+                'content' => "(DEV) Post del centro: Probando visibilidad restringida. Solo miembros del centro deberían ver esto.",
+                'created_at' => $now->copy()->subMinutes(30),
+            ]);
+
+            $devGlobalPost = $makePost([
+                'user_id' => $devUserId,
+                'center_id' => null,
+                'content' => "(DEV) Post público: prueba de perfil y UI. Este post es visible para todo el mundo.",
+                'created_at' => $now->copy()->subMinutes(20),
+            ]);
+
+            if ($devCenterPost) echo "✅ Dev center post created (id: $devCenterPost)\n";
+            if ($devGlobalPost) echo "✅ Dev global post created (id: $devGlobalPost)\n";
+        }
+
         // ─────────────────────────────────────────────────────────────
         //  USERS — Fictitious (find or create by email)
         // ─────────────────────────────────────────────────────────────
