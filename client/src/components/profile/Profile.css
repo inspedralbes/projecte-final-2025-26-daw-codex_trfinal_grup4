@@ -967,6 +967,38 @@
   }
 }
 
+/* Mobile safety tweaks: avoid horizontal overflow and account for global header */
+@media (max-width: 640px) {
+  .profile-guay {
+    max-width: 100%;
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+    box-sizing: border-box;
+  }
+
+  /* Ensure feed and children cannot force horizontal scroll */
+  .profile-guay__feed,
+  .profile-guay__feed > * {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  /* Make images and media inside the feed responsive */
+  .profile-guay__feed img,
+  .profile-guay__feed video,
+  .profile-guay__feed iframe {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* If the app sets a mobile header height variable, make the sticky nav sit below it */
+  .profile-guay__nav {
+    top: var(--mobile-header-height, 56px);
+  }
+}
+
 /* ── Responsive: Very Small Phones ─────────────────────────── */
 @media (max-width: 400px) {
   .profile-guay__cover {

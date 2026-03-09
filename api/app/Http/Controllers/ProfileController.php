@@ -90,11 +90,31 @@ class ProfileController extends Controller
             return $this->error('User not found', 404);
         }
 
-        $posts = $user->posts()
+        // Build posts query. Center posts should only be visible to users
+        // who belong to the same center. If the requester is unauthenticated
+        // or belongs to a different center, only include global posts
+        // (center_id IS NULL).
+        $postsQuery = $user->posts()
             ->with(['user', 'center', 'tags', 'originalPost.user'])
             ->withCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts'])
-            ->latest()
-            ->paginate(request()->input('per_page', 15));
+            ->latest();
+
+        $authUser = auth('sanctum')->user();
+
+        if (!$authUser) {
+            // Public visitor: hide center posts
+            $postsQuery->whereNull('center_id');
+        } else {
+            // If authenticated but not in the same center as the profile owner,
+            // hide center posts. If they share the same center, show all posts.
+            if ($authUser->center_id && $user->center_id && $authUser->center_id === $user->center_id) {
+                // same center: show all posts (no extra filter)
+            } else {
+                $postsQuery->whereNull('center_id');
+            }
+        }
+
+        $posts = $postsQuery->paginate(request()->input('per_page', 15));
 
         return response()->json([
             'success' => true,
