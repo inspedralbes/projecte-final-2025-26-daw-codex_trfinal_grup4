@@ -15,7 +15,7 @@ class StoreMessageRequest extends FormRequest
     {
         return [
             'receiver_id' => ['required', 'integer', 'exists:users,id'],
-            'content' => ['required', 'string', 'max:5000', 'min:1'],
+            'content' => ['required', 'string', 'max:1000', 'min:1'],
         ];
     }
 
@@ -25,7 +25,7 @@ class StoreMessageRequest extends FormRequest
             'receiver_id.required' => 'El destinatario es obligatorio.',
             'receiver_id.exists' => 'El usuario destinatario no existe.',
             'content.required' => 'El mensaje no puede estar vacío.',
-            'content.max' => 'El mensaje no puede superar los 5000 caracteres.',
+            'content.max' => 'El mensaje no puede superar los 1000 caracteres.',
         ];
     }
 }

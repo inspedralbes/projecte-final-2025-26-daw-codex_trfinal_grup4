@@ -7,6 +7,10 @@ import chatService from "@/services/chatService";
 import socketService from "@/services/socketService";
 import "./Messages.css";
 
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const MAX_MESSAGE_LENGTH = 1000;
+
 // ─── Icons ───────────────────────────────────────────────────────────────────
 
 const SearchIcon = () => (
@@ -697,9 +701,16 @@ export default function Messages() {
     }
   };
 
-  // Handle input change with typing indicator
+  // Handle input change with typing indicator and character limit
   const handleInputChange = (e) => {
-    setNewMessage(e.target.value);
+    const value = e.target.value;
+    
+    // Enforce character limit
+    if (value.length > MAX_MESSAGE_LENGTH) {
+      return;
+    }
+    
+    setNewMessage(value);
     
     if (user?.id && activeConversation) {
       socketService.sendTypingIndicator(user.id, activeConversation, true);
@@ -865,23 +876,31 @@ export default function Messages() {
             <div className="msg__input-area">
               {canSend ? (
                 <>
-                  <textarea
-                    ref={inputRef}
-                    className="msg__input"
-                    placeholder={
-                      conversationStatus?.is_mutual
-                        ? t("messages.type_message")
-                        : t("messages.type_message_limited")
-                    }
-                    value={newMessage}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyPress}
-                    rows={1}
-                  />
+                  <div className="msg__input-wrapper">
+                    <textarea
+                      ref={inputRef}
+                      className={`msg__input ${newMessage.length > MAX_MESSAGE_LENGTH * 0.9 ? "msg__input--warning" : ""}`}
+                      placeholder={
+                        conversationStatus?.is_mutual
+                          ? t("messages.type_message")
+                          : t("messages.type_message_limited")
+                      }
+                      value={newMessage}
+                      onChange={handleInputChange}
+                      onKeyDown={handleKeyPress}
+                      rows={1}
+                      maxLength={MAX_MESSAGE_LENGTH}
+                    />
+                    {newMessage.length > MAX_MESSAGE_LENGTH * 0.7 && (
+                      <span className={`msg__char-counter ${newMessage.length >= MAX_MESSAGE_LENGTH ? "msg__char-counter--limit" : newMessage.length > MAX_MESSAGE_LENGTH * 0.9 ? "msg__char-counter--warning" : ""}`}>
+                        {newMessage.length}/{MAX_MESSAGE_LENGTH}
+                      </span>
+                    )}
+                  </div>
                   <button
                     className="msg__send-btn"
                     onClick={handleSend}
-                    disabled={!newMessage.trim() || sending}
+                    disabled={!newMessage.trim() || sending || newMessage.length > MAX_MESSAGE_LENGTH}
                   >
                     {sending ? <LoadingSpinner size={20} /> : <SendIcon />}
                   </button>

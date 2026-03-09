@@ -545,6 +545,7 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
+  padding-bottom: var(--space-6);
   border-top: 1px solid var(--border-subtle);
   background: var(--color-surface);
 }
@@ -571,6 +572,40 @@
 
 .msg__input::placeholder {
   color: var(--color-text-tertiary);
+}
+
+/* Input wrapper for character counter */
+.msg__input-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.msg__input-wrapper .msg__input {
+  width: 100%;
+}
+
+.msg__input--warning {
+  border-color: var(--state-warning);
+}
+
+.msg__char-counter {
+  position: absolute;
+  bottom: -18px;
+  right: 4px;
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+
+.msg__char-counter--warning {
+  color: var(--state-warning);
+}
+
+.msg__char-counter--limit {
+  color: var(--state-error);
+  font-weight: 700;
 }
 
 .msg__send-btn {
