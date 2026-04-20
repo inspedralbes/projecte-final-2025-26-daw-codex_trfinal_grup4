@@ -11,6 +11,41 @@ import "./Landing.css";
 // ── Symbol Sea: Canvas-based animated ASCII background ────────
 const SYMBOLS = "{}[]<>=>/*+-|\\;:!?#@&$%^~_.01";
 
+/**
+ * Brutalist scrambling text effect for i18n changes
+ */
+function GlitchText({ children }) {
+  const [displayText, setDisplayText] = useState(children);
+  const targetText = String(children);
+
+  useEffect(() => {
+    let iteration = 0;
+    const interval = setInterval(() => {
+      setDisplayText(prev => {
+        return targetText
+          .split("")
+          .map((char, index) => {
+            if (index < iteration) return targetText[index];
+            if (char === " ") return " ";
+            return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+          })
+          .join("");
+      });
+      
+      iteration += 1;
+      if (iteration > targetText.length) {
+        clearInterval(interval);
+        setDisplayText(targetText);
+      }
+    }, 40);
+
+    return () => clearInterval(interval);
+  }, [children]);
+
+  return <>{displayText}</>;
+}
+
+
 function SymbolSea({ errorTrigger = 0, isLightMode = false }) {
   const canvasRef = useRef(null);
   const mouseRef = useRef({ x: -1000, y: -1000 });
@@ -493,12 +528,13 @@ export default function Landing() {
           <div className="auth-card">
             <div className="auth-card__header">
               <h2 className="auth-card__title">
-                {isLogin ? t("landing.auth_title_login") : t("landing.auth_title_register")}
+                <GlitchText>{isLogin ? t("landing.auth_title_login") : t("landing.auth_title_register")}</GlitchText>
               </h2>
               <p className="auth-card__subtitle">
-                {isLogin ? t("landing.auth_subtitle_login") : t("landing.auth_subtitle_register")}
+                <GlitchText>{isLogin ? t("landing.auth_subtitle_login") : t("landing.auth_subtitle_register")}</GlitchText>
               </p>
             </div>
+
 
             {/* Success */}
             {successMsg && (
@@ -512,8 +548,9 @@ export default function Landing() {
               {!isLogin && (
                 <div className="auth-card__input-group">
                   <label className="auth-card__label" htmlFor="name">
-                    {t("landing.full_name")}
+                    <GlitchText>{t("landing.full_name")}</GlitchText>
                   </label>
+
                   <input
                     type="text"
                     id="name"
@@ -529,8 +566,9 @@ export default function Landing() {
 
               <div className="auth-card__input-group">
                 <label className="auth-card__label" htmlFor="email">
-                  {t("landing.email")}
+                  <GlitchText>{t("landing.email")}</GlitchText>
                 </label>
+
                 <input
                   type="email"
                   id="email"
@@ -567,8 +605,9 @@ export default function Landing() {
 
               <div className="auth-card__input-group">
                 <label className="auth-card__label" htmlFor="password">
-                  {t("landing.password")}
+                  <GlitchText>{t("landing.password")}</GlitchText>
                 </label>
+
                 <input
                   type="password"
                   id="password"

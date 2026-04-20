@@ -162,7 +162,6 @@ body:has(.landing--light) {
   background: var(--landing-fg-ghost);
 }
 
-/* ── Top Bar ───────────────────────────────────────────────── */
 .landing__top-bar {
   position: fixed;
   top: 0;
@@ -171,6 +170,40 @@ body:has(.landing--light) {
   padding: 16px 20px;
   display: flex;
   align-items: center;
+}
+
+/* ── Top Bar & Switcher Overrides ────────────────────────── */
+.landing__top-bar .language-switcher {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  gap: 12px;
+}
+
+.landing__top-bar .language-switcher__btn {
+  font-family: var(--landing-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--landing-fg-dim);
+  border-radius: 0;
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.landing__top-bar .language-switcher__btn:hover {
+  color: var(--landing-fg);
+  background: var(--landing-fg-ghost);
+}
+
+.landing__top-bar .language-switcher__btn--active {
+  color: var(--landing-bg);
+  background: var(--landing-fg);
+  border-color: var(--landing-fg);
+}
+
+.theme-toggle {
+  margin-left: 18px;
 }
 
 /* ── Hero Section (centered single column) ────────────────── */
