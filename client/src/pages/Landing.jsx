@@ -11,16 +11,26 @@ import "./Landing.css";
 // ── Symbol Sea: Canvas-based animated ASCII background ────────
 const SYMBOLS = "{}[]<>=>/*+-|\\;:!?#@&$%^~_.01";
 
-function SymbolSea({ intensity = 0 }) {
+function SymbolSea({ isError = false, isLoading = false }) {
   const canvasRef = useRef(null);
   const mouseRef = useRef({ x: -1000, y: -1000 });
   const particlesRef = useRef([]);
   const frameRef = useRef(null);
-  const intensityRef = useRef(intensity);
+  const errorEffectRef = useRef(0);
 
   useEffect(() => {
-    intensityRef.current = intensity;
-  }, [intensity]);
+    if (isError) {
+      errorEffectRef.current = 1.0;
+    }
+  }, [isError]);
+
+  useEffect(() => {
+    if (isLoading) {
+      // Small surge on every attempt
+      if (errorEffectRef.current < 0.3) errorEffectRef.current = 0.3;
+    }
+  }, [isLoading]);
+
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -37,24 +47,29 @@ function SymbolSea({ intensity = 0 }) {
     // Matrix projection logic
     const fov = 400;
 
-    // Create a 3D grid consisting of points
-    const GRID_SIZE_X = 50;
-    const GRID_SIZE_Z = 30;
-    const SPACING = 30;
-
+    // Create a 3D orbital particle swarm (Vortex / Galaxy)
+    const numParticles = 2500; 
     const points = [];
-    for (let x = 0; x < GRID_SIZE_X; x++) {
-      for (let z = 0; z < GRID_SIZE_Z; z++) {
-        points.push({
-          x: (x - GRID_SIZE_X / 2) * SPACING,
-          y: 0,
-          z: (z - GRID_SIZE_Z / 2) * SPACING,
-          baseY: 0,
-          char: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
-          changeTimer: Math.random() * 200,
-          opacityOffset: Math.random() * 0.1
-        });
-      }
+    
+    for (let i = 0; i < numParticles; i++) {
+      // Much larger radius and vertical spread to cover the entire screen
+      const radius = 50 + Math.random() * 2500; 
+      const angle = Math.random() * Math.PI * 2;
+      const height = (Math.random() - 0.5) * 3000; 
+      
+      points.push({
+        radius: radius,
+        angle: angle,
+        baseY: height,
+        // Fluid speeds
+        speed: (2500 - radius) * 0.000004 + 0.0005, 
+        char: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+        changeTimer: Math.random() * 200,
+        opacityOffset: Math.random() * 0.1,
+        vx: 0,
+        vy: 0,
+        vz: 0
+      });
     }
     particlesRef.current = points;
 
@@ -62,12 +77,15 @@ function SymbolSea({ intensity = 0 }) {
     const handleMouse = (e) => {
       mouseRef.current = { x: e.clientX, y: e.clientY };
     };
+    
     window.addEventListener("mousemove", handleMouse);
+
+
 
     // Render loop
     let time = 0;
     const animate = () => {
-      time += 0.05;
+      time += 0.02; // Slower time step
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -76,66 +94,75 @@ function SymbolSea({ intensity = 0 }) {
       const mx = mouseRef.current.x;
       const my = mouseRef.current.y;
       const cx = canvas.width / 2;
-      const cy = canvas.height / 2 + 100; // Shift down slightly
-      const currentIntensity = intensityRef.current;
+      const cy = canvas.height / 2; 
 
-      // Mouse normalized coordinates for slight camera rotation
-      const mouseXNorm = (mx - cx) / cx;
-      const mouseYNorm = (my - cy) / cy;
+      // Slowly decay error effect
+      if (errorEffectRef.current > 0) {
+        errorEffectRef.current *= 0.97;
+        if (errorEffectRef.current < 0.01) errorEffectRef.current = 0;
+      }
+      const err = errorEffectRef.current;
 
-      const angleY = time * 0.1 + mouseXNorm * 0.5; // Rotate around Y axis slowly
-      const angleX = 0.5 + Math.max(-0.2, Math.min(0.2, mouseYNorm * 0.2)); // Pitch
+      const TILT = 0.25; 
 
       for (let i = 0; i < points.length; i++) {
         const p = points[i];
 
-        // 1. Calculate undulating terrain (Waves)
-        // Add multiple sine waves based on x, z, and time to create a flowing surface
-        const wave1 = Math.sin(p.x * 0.01 + time) * 30;
-        const wave2 = Math.cos(p.z * 0.02 - time * 0.8) * 20;
-        const wave3 = Math.sin((p.x + p.z) * 0.015 + time * 1.2) * 15;
-        p.y = wave1 + wave2 + wave3;
-
-        // Apply typing intensity glitch/jump
-        if (currentIntensity > 0) {
-          p.y -= Math.random() * 20 * currentIntensity;
-          p.x += (Math.random() - 0.5) * 5 * currentIntensity;
+        // 1. Orbital logic
+        // Moderate speed boost during error/loading
+        const speedBoost = 1 + err * 5;
+        p.angle += p.speed * speedBoost; 
+        
+        const currentY = p.baseY + Math.sin(p.angle * 2 + time) * 100;
+        let currentRadius = p.radius;
+        
+        // Error panic jitter (only on real error)
+        if (err > 0.5) {
+          currentRadius += (Math.random() - 0.5) * 100 * (err - 0.5);
+          p.angle += (Math.random() - 0.5) * 0.05 * (err - 0.5);
         }
 
-        // 2. 3D Rotation (around X and Y axis)
-        // Rotate Y
-        let rx = p.x * Math.cos(angleY) - p.z * Math.sin(angleY);
-        let rz = p.x * Math.sin(angleY) + p.z * Math.cos(angleY);
-        
-        // Rotate X
-        let ry = p.y * Math.cos(angleX) - rz * Math.sin(angleX);
-        rz = p.y * Math.sin(angleX) + rz * Math.cos(angleX);
+        const x = currentRadius * Math.cos(p.angle);
+        const z = currentRadius * Math.sin(p.angle);
+        const y = currentY;
 
-        // Translate Z back so the camera is at Z=0
-        rz += 600;
+        // 2. 3D Rotation (Apply camera tilt on X axis)
+        let rx = x;
+        let ry = y * Math.cos(TILT) - z * Math.sin(TILT);
+        let rz = y * Math.sin(TILT) + z * Math.cos(TILT);
 
-        // Skip rendering if point is behind camera
+        rz += 1200;
+
         if (rz < 1) continue;
 
         // 3. Perspective Projection
         const scale = fov / rz;
-        const screenX = cx + rx * scale;
-        const screenY = cy + ry * scale;
+        let screenX = cx + rx * scale;
+        let screenY = cy + ry * scale;
 
-        // Determine opacity based on Z depth (fog effect)
-        let opacity = Math.max(0, Math.min(1, 1 - (rz - 200) / 1000));
-        
-        // Mouse hover interaction: push points away or highlight them
+        // 4. Mouse Repulsion (Screen space interactions)
         const dx = screenX - mx;
         const dy = screenY - my;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 100) {
-          opacity += 0.2;
+        
+        const safeRadius = 150;
+        if (dist < safeRadius) {
+          const force = (1 - dist / safeRadius);
+          const push = force * 60; 
+          screenX += (dx / dist) * push;
+          screenY += (dy / dist) * push;
         }
 
-        opacity = opacity * 0.4 + p.opacityOffset; // Max opacity 40-50%
+        // Determine base opacity
+        let opacity = Math.max(0, Math.min(1, 1 - (rz - 400) / 2500));
         
-        if (opacity <= 0.01) continue; // optimize
+        // Final opacity calc
+        const distToMouseNorm = Math.min(1, dist / 400);
+        const hoverBrightness = (1 - distToMouseNorm) * 0.4;
+
+        opacity = opacity * 0.3 + p.opacityOffset + hoverBrightness; 
+        
+        if (opacity <= 0.01) continue; 
 
         // Character change randomly over time
         p.changeTimer--;
@@ -144,7 +171,12 @@ function SymbolSea({ intensity = 0 }) {
           p.changeTimer = 100 + Math.random() * 300;
         }
 
-        ctx.fillStyle = `rgba(255, 255, 255, ${opacity.toFixed(3)})`;
+        // Deep red shift - Quadratic drop for sharper red
+        const r = 255;
+        const g = Math.floor(255 * Math.pow(1 - err, 2.5));
+        const b = Math.floor(255 * Math.pow(1 - err, 2.5));
+
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity.toFixed(3)})`;
         ctx.fillText(p.char, screenX, screenY);
       }
 
@@ -201,7 +233,7 @@ export default function Landing() {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [hasError, setHasError] = useState(false);
-  const [keyIntensity, setKeyIntensity] = useState(0);
+
 
   // Force body bg to pure black while on landing
   useEffect(() => {
@@ -252,21 +284,13 @@ export default function Landing() {
   useEffect(() => {
     if (error) {
       setHasError(true);
-      const timer = setTimeout(() => setHasError(false), 600);
+      const timer = setTimeout(() => setHasError(false), 2500);
       return () => clearTimeout(timer);
     }
+
   }, [error]);
 
-  // Keypress intensity for symbol sea
-  const handleKeyDown = useCallback(() => {
-    setKeyIntensity(1);
-    setTimeout(() => setKeyIntensity(0), 150);
-  }, []);
 
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
 
   const handleEmailChange = (e) => {
     const value = e.target.value;
@@ -400,7 +424,7 @@ export default function Landing() {
   return (
     <div className={`landing ${hasError ? "landing--error" : ""}`}>
       {/* Symbol Sea Background */}
-      <SymbolSea intensity={keyIntensity} />
+      <SymbolSea isError={hasError} isLoading={loading} />
 
       {/* Scanlines */}
       <div className="landing__scanline" />
