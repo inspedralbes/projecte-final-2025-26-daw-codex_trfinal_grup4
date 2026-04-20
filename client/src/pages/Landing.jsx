@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,87 +8,156 @@ import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import "./Landing.css";
 
-// Icons as inline SVGs for a minimal approach
-const CodeIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="16 18 22 12 16 6" />
-    <polyline points="8 6 2 12 8 18" />
-  </svg>
-);
+// ── Symbol Sea: Canvas-based animated ASCII background ────────
+const SYMBOLS = "{}[]<>=>/*+-|\\;:!?#@&$%^~_.01";
 
-const UsersIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-);
+function SymbolSea({ intensity = 0 }) {
+  const canvasRef = useRef(null);
+  const mouseRef = useRef({ x: -1000, y: -1000 });
+  const particlesRef = useRef([]);
+  const frameRef = useRef(null);
+  const intensityRef = useRef(intensity);
 
-const ShieldIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-  </svg>
-);
+  useEffect(() => {
+    intensityRef.current = intensity;
+  }, [intensity]);
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    // Initialize particles
+    const COLS = Math.floor(window.innerWidth / 18);
+    const ROWS = Math.floor(window.innerHeight / 22);
+    const total = COLS * ROWS;
+    const particles = [];
+
+    for (let i = 0; i < total; i++) {
+      const col = i % COLS;
+      const row = Math.floor(i / COLS);
+      particles.push({
+        x: col * 18 + 9,
+        y: row * 22 + 11,
+        baseX: col * 18 + 9,
+        baseY: row * 22 + 11,
+        char: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+        opacity: 0.04 + Math.random() * 0.06,
+        baseOpacity: 0.04 + Math.random() * 0.06,
+        speed: 0.3 + Math.random() * 0.7,
+        angle: Math.random() * Math.PI * 2,
+        changeTimer: Math.random() * 300,
+      });
+    }
+    particlesRef.current = particles;
+
+    // Mouse tracking
+    const handleMouse = (e) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("mousemove", handleMouse);
+
+    // Render loop
+    let time = 0;
+    const animate = () => {
+      time++;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      const mx = mouseRef.current.x;
+      const my = mouseRef.current.y;
+      const currentIntensity = intensityRef.current;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        // Slowly drift
+        p.angle += 0.002 * p.speed;
+        p.x = p.baseX + Math.sin(p.angle + time * 0.005) * 2;
+        p.y = p.baseY + Math.cos(p.angle * 0.7 + time * 0.003) * 1.5;
+
+        // Mouse repulsion
+        const dx = p.x - mx;
+        const dy = p.y - my;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const repelRadius = 120;
+
+        if (dist < repelRadius) {
+          const force = (1 - dist / repelRadius) * 15;
+          p.x += (dx / dist) * force;
+          p.y += (dy / dist) * force;
+          p.opacity = p.baseOpacity + (1 - dist / repelRadius) * 0.25;
+        } else {
+          p.opacity += (p.baseOpacity - p.opacity) * 0.05;
+        }
+
+        // Intensity-based boost (on keypress)
+        if (currentIntensity > 0) {
+          p.opacity = Math.min(p.opacity + currentIntensity * 0.02, 0.4);
+          p.x += Math.sin(time * 0.1 + i) * currentIntensity * 0.3;
+        }
+
+        // Character change
+        p.changeTimer--;
+        if (p.changeTimer <= 0) {
+          p.char = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+          p.changeTimer = 200 + Math.random() * 400;
+        }
+
+        // Draw
+        ctx.font = "12px 'JetBrains Mono', monospace";
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+        ctx.fillText(p.char, p.x, p.y);
+      }
+
+      frameRef.current = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", handleMouse);
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    };
+  }, []);
+
+  return (
+    <div className="landing__symbol-sea">
+      <canvas ref={canvasRef} />
+    </div>
+  );
+}
+
+// ── Icons ─────────────────────────────────────────────────────
 const CheckIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="3"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12" />
   </svg>
 );
 
 const XIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="3"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
+const ShieldIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+
+// ── Main Landing Component ────────────────────────────────────
 export default function Landing() {
   const { t } = useTranslation();
   const { login, register, registerWithCenterRequest, checkDomain, authMessage, clearAuthMessage } =
@@ -101,6 +170,14 @@ export default function Landing() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [hasError, setHasError] = useState(false);
+  const [keyIntensity, setKeyIntensity] = useState(0);
+
+  // Force body bg to pure black while on landing
+  useEffect(() => {
+    document.body.classList.add("landing-active");
+    return () => document.body.classList.remove("landing-active");
+  }, []);
 
   // Handle error from verification redirect
   useEffect(() => {
@@ -119,8 +196,8 @@ export default function Landing() {
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [showPasswordReqs, setShowPasswordReqs] = useState(false);
 
-  // School detection (real API)
-  const [domainInfo, setDomainInfo] = useState(null); // { has_center, center_name, can_request, ... }
+  // School detection
+  const [domainInfo, setDomainInfo] = useState(null);
   const [checkingDomain, setCheckingDomain] = useState(false);
   const debounceRef = useRef(null);
 
@@ -128,7 +205,7 @@ export default function Landing() {
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [pendingRegistrationData, setPendingRegistrationData] = useState(null);
 
-  // Auto-clear success message after 4s
+  // Auto-clear success message
   useEffect(() => {
     if (successMsg) {
       const timer = setTimeout(() => setSuccessMsg(""), 4000);
@@ -136,19 +213,36 @@ export default function Landing() {
     }
   }, [successMsg]);
 
-  // Show password requirements when user is typing password (only in register mode)
+  // Show password requirements
   useEffect(() => {
     setShowPasswordReqs(!isLogin && password.length > 0);
   }, [password, isLogin]);
 
+  // Error glitch effect
+  useEffect(() => {
+    if (error) {
+      setHasError(true);
+      const timer = setTimeout(() => setHasError(false), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  // Keypress intensity for symbol sea
+  const handleKeyDown = useCallback(() => {
+    setKeyIntensity(1);
+    setTimeout(() => setKeyIntensity(0), 150);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
   const handleEmailChange = (e) => {
     const value = e.target.value;
     setEmail(value);
-
-    // Reset domain info when email changes
     setDomainInfo(null);
 
-    // Debounced check-domain API call (only in register mode)
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
     if (!isLogin && value.includes("@") && value.split("@")[1]?.includes(".")) {
@@ -161,7 +255,6 @@ export default function Landing() {
     }
   };
 
-  // Check if all password requirements are met
   const allPasswordReqsMet = PASSWORD_REQUIREMENTS.every((req) => req.test(password));
   const passwordsMatch = password === passwordConfirmation && passwordConfirmation.length > 0;
 
@@ -173,7 +266,6 @@ export default function Landing() {
 
     try {
       if (isLogin) {
-        // LOGIN
         const result = await login(email, password);
         if (result.success) {
           setSuccessMsg(t("auth.login_success"));
@@ -182,22 +274,18 @@ export default function Landing() {
           setError(result.message);
         }
       } else {
-        // REGISTER - Client-side validations
         if (!allPasswordReqsMet) {
           setError(t("landing.errors.password_requirements"));
           setLoading(false);
           return;
         }
-
         if (password !== passwordConfirmation) {
           setError(t("landing.errors.passwords_dont_match"));
           setLoading(false);
           return;
         }
 
-        // Generate username from email part
         const username = email.split("@")[0] + Math.floor(Math.random() * 1000);
-
         const userData = {
           name,
           email,
@@ -206,7 +294,6 @@ export default function Landing() {
           password_confirmation: passwordConfirmation,
         };
 
-        // If domain has no center and can request → show verification modal
         if (domainInfo && domainInfo.can_request) {
           setPendingRegistrationData(userData);
           setShowVerificationModal(true);
@@ -214,9 +301,7 @@ export default function Landing() {
           return;
         }
 
-        // Normal registration (domain has center, or no domain info)
         const result = await register(userData);
-
         if (result.success) {
           setSuccessMsg(t("auth.register_success"));
           setTimeout(() => navigate("/"), 800);
@@ -231,13 +316,10 @@ export default function Landing() {
     }
   };
 
-  // Handle verification modal confirm
   const handleVerificationConfirm = async (centerData) => {
     setLoading(true);
     setError("");
-
     const result = await registerWithCenterRequest(pendingRegistrationData, centerData);
-
     if (result.success) {
       setShowVerificationModal(false);
       setSuccessMsg(t("landing.messages.check_review"));
@@ -245,7 +327,6 @@ export default function Landing() {
     } else {
       setError(result.message);
     }
-
     setLoading(false);
   };
 
@@ -264,7 +345,7 @@ export default function Landing() {
     clearAuthMessage();
   };
 
-  // ── Google OAuth ──
+  // Google OAuth
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
@@ -287,67 +368,26 @@ export default function Landing() {
   };
 
   return (
-    <div className="landing">
-      {/* Ambient background effects */}
-      <div className="landing__ambient">
-        <div className="landing__gradient landing__gradient--teal" />
-        <div className="landing__gradient landing__gradient--violet" />
-        <div className="landing__grid" />
-      </div>
+    <div className={`landing ${hasError ? "landing--error" : ""}`}>
+      {/* Symbol Sea Background */}
+      <SymbolSea intensity={keyIntensity} />
 
-      {/* Language selector – top right */}
+      {/* Scanlines */}
+      <div className="landing__scanline" />
+
+      {/* Language selector */}
       <div className="landing__top-bar">
         <LanguageSwitcher />
       </div>
 
-      {/* Hero Section */}
+      {/* Watermarks */}
+      <div className="landing__watermark">c0dex // v1.0</div>
+      <div className="landing__watermark-right">sys.auth.module</div>
+
+      {/* Main Container */}
       <main className="landing__hero">
-        <div className="landing__hero-content">
-          {/* Badge */}
-          <div className="landing__badge animate-slideDown">
-            <span className="landing__badge-dot" />
-            {t("landing.badge")}
-          </div>
-
-          {/* Headline */}
-          <h1 className="landing__title animate-slideUp">
-            {t("landing.hero_title_part1")}{" "}
-            <span className="landing__title-accent">{t("landing.hero_title_accent")}</span>{" "}
-            {t("landing.hero_title_part2")}
-          </h1>
-
-          {/* Subheadline */}
-          <p className="landing__subtitle animate-slideUp stagger-1">
-            {t("landing.hero_subtitle")}
-          </p>
-
-          {/* Features Grid */}
-          <div className="landing__features animate-slideUp stagger-2">
-            <div className="landing__feature">
-              <div className="landing__feature-icon">
-                <CodeIcon />
-              </div>
-              <div className="landing__feature-text">
-                <span className="landing__feature-title">
-                  {t("landing.features.snippets.title")}
-                </span>
-                <span className="landing__feature-desc">{t("landing.features.snippets.desc")}</span>
-              </div>
-            </div>
-            <div className="landing__feature">
-              <div className="landing__feature-icon landing__feature-icon--violet">
-                <UsersIcon />
-              </div>
-              <div className="landing__feature-text">
-                <span className="landing__feature-title">{t("landing.features.hub.title")}</span>
-                <span className="landing__feature-desc">{t("landing.features.hub.desc")}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Auth Card */}
-        <div className="landing__auth-card animate-slideUp stagger-3">
+        <div className="landing__auth-card">
           <div className="auth-card">
             <div className="auth-card__header">
               <h2 className="auth-card__title">
@@ -358,12 +398,12 @@ export default function Landing() {
               </p>
             </div>
 
-            {/* Success Message */}
+            {/* Success */}
             {successMsg && (
               <div className="auth-card__message auth-card__message--success">{successMsg}</div>
             )}
 
-            {/* Error Message */}
+            {/* Error */}
             {error && <div className="auth-card__message auth-card__message--error">{error}</div>}
 
             <form className="auth-card__form" onSubmit={handleSubmit}>
@@ -377,9 +417,10 @@ export default function Landing() {
                     id="name"
                     required
                     className="auth-card__input"
-                    placeholder="John Doe"
+                    placeholder="john_doe"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    autoComplete="name"
                   />
                 </div>
               )}
@@ -393,19 +434,20 @@ export default function Landing() {
                   id="email"
                   required
                   className={`auth-card__input ${!isLogin && domainInfo?.has_center ? "auth-card__input--verified" : ""}`}
-                  placeholder="tu.nombre@alu.iesjaume.es"
+                  placeholder="user@domain.dev"
                   value={email}
                   onChange={handleEmailChange}
+                  autoComplete="email"
                 />
                 {!isLogin && checkingDomain && (
-                  <div className="auth-card__verified" style={{ color: "var(--ink-tertiary)" }}>
+                  <div className="auth-card__verified" style={{ color: "rgba(255,255,255,0.4)" }}>
                     <span>{t("landing.messages.checking_domain")}</span>
                   </div>
                 )}
                 {!isLogin && domainInfo && !checkingDomain && (
                   <div
                     className="auth-card__verified"
-                    style={domainInfo.has_center ? {} : { color: "var(--codex-violet-light)" }}
+                    style={domainInfo.has_center ? {} : { color: "rgba(255,255,255,0.5)" }}
                   >
                     <ShieldIcon />
                     <span>
@@ -433,9 +475,9 @@ export default function Landing() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                 />
 
-                {/* Password Requirements - shown during registration while typing */}
                 {showPasswordReqs && (
                   <div className="auth-card__password-reqs">
                     <span className="auth-card__password-reqs-title">
@@ -461,7 +503,6 @@ export default function Landing() {
                 )}
               </div>
 
-              {/* Forgot password link - only in login mode */}
               {isLogin && (
                 <div className="auth-card__forgot-password">
                   <Link to="/forgot-password">{t("landing.forgot_password_link")}</Link>
@@ -487,6 +528,7 @@ export default function Landing() {
                     placeholder="••••••••"
                     value={passwordConfirmation}
                     onChange={(e) => setPasswordConfirmation(e.target.value)}
+                    autoComplete="new-password"
                   />
                   {passwordConfirmation.length > 0 && (
                     <div
@@ -512,17 +554,19 @@ export default function Landing() {
                 className="auth-card__submit"
                 disabled={loading || (!isLogin && (!allPasswordReqsMet || !passwordsMatch))}
               >
-                {loading ? (
-                  <div className="auth-card__spinner" />
-                ) : isLogin ? (
-                  t("landing.login")
-                ) : (
-                  t("landing.register")
-                )}
+                <span>
+                  {loading ? (
+                    <div className="auth-card__spinner" />
+                  ) : isLogin ? (
+                    t("landing.login")
+                  ) : (
+                    t("landing.register")
+                  )}
+                </span>
               </button>
             </form>
 
-            {/* Google OAuth divider + button */}
+            {/* Google OAuth */}
             <div className="auth-card__divider">
               {t("landing.or_continue_with")}
             </div>
@@ -537,7 +581,7 @@ export default function Landing() {
                 <div className="auth-card__spinner" />
               ) : (
                 <>
-                  <svg className="auth-card__google-icon" viewBox="0 0 24 24" width="20" height="20">
+                  <svg className="auth-card__google-icon" viewBox="0 0 24 24" width="18" height="18">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -553,7 +597,7 @@ export default function Landing() {
               <button
                 onClick={toggleMode}
                 className="auth-card__link"
-                style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                style={{ background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: 4 }}
               >
                 {isLogin ? t("landing.register_here") : t("landing.login")}
               </button>
@@ -561,8 +605,6 @@ export default function Landing() {
           </div>
         </div>
       </main>
-
-
 
       {/* Teacher Verification Modal */}
       {showVerificationModal && (

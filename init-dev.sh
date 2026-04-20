@@ -48,7 +48,7 @@ log_success "Compose: $COMPOSE_VERSION"
 divider "2/7 · Configurando variables de entorno"
 
 if [ ! -f .env ]; then
-    cp .env.dev .env
+    cp .env.dev.example .env
     log_success "Archivo .env creado desde .env.dev"
 else
     log_warn "Archivo .env ya existe – no se sobreescribe"
