@@ -34,29 +34,29 @@ function SymbolSea({ intensity = 0 }) {
     resize();
     window.addEventListener("resize", resize);
 
-    // Initialize particles
-    const COLS = Math.floor(window.innerWidth / 18);
-    const ROWS = Math.floor(window.innerHeight / 22);
-    const total = COLS * ROWS;
-    const particles = [];
+    // Matrix projection logic
+    const fov = 400;
 
-    for (let i = 0; i < total; i++) {
-      const col = i % COLS;
-      const row = Math.floor(i / COLS);
-      particles.push({
-        x: col * 18 + 9,
-        y: row * 22 + 11,
-        baseX: col * 18 + 9,
-        baseY: row * 22 + 11,
-        char: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
-        opacity: 0.04 + Math.random() * 0.06,
-        baseOpacity: 0.04 + Math.random() * 0.06,
-        speed: 0.3 + Math.random() * 0.7,
-        angle: Math.random() * Math.PI * 2,
-        changeTimer: Math.random() * 300,
-      });
+    // Create a 3D grid consisting of points
+    const GRID_SIZE_X = 50;
+    const GRID_SIZE_Z = 30;
+    const SPACING = 30;
+
+    const points = [];
+    for (let x = 0; x < GRID_SIZE_X; x++) {
+      for (let z = 0; z < GRID_SIZE_Z; z++) {
+        points.push({
+          x: (x - GRID_SIZE_X / 2) * SPACING,
+          y: 0,
+          z: (z - GRID_SIZE_Z / 2) * SPACING,
+          baseY: 0,
+          char: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+          changeTimer: Math.random() * 200,
+          opacityOffset: Math.random() * 0.1
+        });
+      }
     }
-    particlesRef.current = particles;
+    particlesRef.current = points;
 
     // Mouse tracking
     const handleMouse = (e) => {
@@ -67,55 +67,85 @@ function SymbolSea({ intensity = 0 }) {
     // Render loop
     let time = 0;
     const animate = () => {
-      time++;
+      time += 0.05;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
+      ctx.font = "12px 'JetBrains Mono', monospace";
 
       const mx = mouseRef.current.x;
       const my = mouseRef.current.y;
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2 + 100; // Shift down slightly
       const currentIntensity = intensityRef.current;
 
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
+      // Mouse normalized coordinates for slight camera rotation
+      const mouseXNorm = (mx - cx) / cx;
+      const mouseYNorm = (my - cy) / cy;
 
-        // Slowly drift
-        p.angle += 0.002 * p.speed;
-        p.x = p.baseX + Math.sin(p.angle + time * 0.005) * 2;
-        p.y = p.baseY + Math.cos(p.angle * 0.7 + time * 0.003) * 1.5;
+      const angleY = time * 0.1 + mouseXNorm * 0.5; // Rotate around Y axis slowly
+      const angleX = 0.5 + Math.max(-0.2, Math.min(0.2, mouseYNorm * 0.2)); // Pitch
 
-        // Mouse repulsion
-        const dx = p.x - mx;
-        const dy = p.y - my;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const repelRadius = 120;
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i];
 
-        if (dist < repelRadius) {
-          const force = (1 - dist / repelRadius) * 15;
-          p.x += (dx / dist) * force;
-          p.y += (dy / dist) * force;
-          p.opacity = p.baseOpacity + (1 - dist / repelRadius) * 0.25;
-        } else {
-          p.opacity += (p.baseOpacity - p.opacity) * 0.05;
-        }
+        // 1. Calculate undulating terrain (Waves)
+        // Add multiple sine waves based on x, z, and time to create a flowing surface
+        const wave1 = Math.sin(p.x * 0.01 + time) * 30;
+        const wave2 = Math.cos(p.z * 0.02 - time * 0.8) * 20;
+        const wave3 = Math.sin((p.x + p.z) * 0.015 + time * 1.2) * 15;
+        p.y = wave1 + wave2 + wave3;
 
-        // Intensity-based boost (on keypress)
+        // Apply typing intensity glitch/jump
         if (currentIntensity > 0) {
-          p.opacity = Math.min(p.opacity + currentIntensity * 0.02, 0.4);
-          p.x += Math.sin(time * 0.1 + i) * currentIntensity * 0.3;
+          p.y -= Math.random() * 20 * currentIntensity;
+          p.x += (Math.random() - 0.5) * 5 * currentIntensity;
         }
 
-        // Character change
+        // 2. 3D Rotation (around X and Y axis)
+        // Rotate Y
+        let rx = p.x * Math.cos(angleY) - p.z * Math.sin(angleY);
+        let rz = p.x * Math.sin(angleY) + p.z * Math.cos(angleY);
+        
+        // Rotate X
+        let ry = p.y * Math.cos(angleX) - rz * Math.sin(angleX);
+        rz = p.y * Math.sin(angleX) + rz * Math.cos(angleX);
+
+        // Translate Z back so the camera is at Z=0
+        rz += 600;
+
+        // Skip rendering if point is behind camera
+        if (rz < 1) continue;
+
+        // 3. Perspective Projection
+        const scale = fov / rz;
+        const screenX = cx + rx * scale;
+        const screenY = cy + ry * scale;
+
+        // Determine opacity based on Z depth (fog effect)
+        let opacity = Math.max(0, Math.min(1, 1 - (rz - 200) / 1000));
+        
+        // Mouse hover interaction: push points away or highlight them
+        const dx = screenX - mx;
+        const dy = screenY - my;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          opacity += 0.2;
+        }
+
+        opacity = opacity * 0.4 + p.opacityOffset; // Max opacity 40-50%
+        
+        if (opacity <= 0.01) continue; // optimize
+
+        // Character change randomly over time
         p.changeTimer--;
         if (p.changeTimer <= 0) {
           p.char = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-          p.changeTimer = 200 + Math.random() * 400;
+          p.changeTimer = 100 + Math.random() * 300;
         }
 
-        // Draw
-        ctx.font = "12px 'JetBrains Mono', monospace";
-        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
-        ctx.fillText(p.char, p.x, p.y);
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity.toFixed(3)})`;
+        ctx.fillText(p.char, screenX, screenY);
       }
 
       frameRef.current = requestAnimationFrame(animate);
