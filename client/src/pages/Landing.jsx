@@ -11,7 +11,7 @@ import "./Landing.css";
 // ── Symbol Sea: Canvas-based animated ASCII background ────────
 const SYMBOLS = "{}[]<>=>/*+-|\\;:!?#@&$%^~_.01";
 
-function SymbolSea({ isError = false }) {
+function SymbolSea({ errorTrigger = 0 }) {
   const canvasRef = useRef(null);
   const mouseRef = useRef({ x: -1000, y: -1000 });
   const particlesRef = useRef([]);
@@ -19,10 +19,11 @@ function SymbolSea({ isError = false }) {
   const errorEffectRef = useRef(0);
 
   useEffect(() => {
-    if (isError) {
+    if (errorTrigger > 0) {
       errorEffectRef.current = 1.0;
     }
-  }, [isError]);
+  }, [errorTrigger]);
+
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -226,6 +227,7 @@ export default function Landing() {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [hasError, setHasError] = useState(false);
+  const [errorCount, setErrorCount] = useState(0);
 
 
   // Force body bg to pure black while on landing
@@ -277,6 +279,7 @@ export default function Landing() {
   useEffect(() => {
     if (error) {
       setHasError(true);
+      setErrorCount(prev => prev + 1);
       const timer = setTimeout(() => setHasError(false), 2500);
       return () => clearTimeout(timer);
     }
@@ -417,7 +420,8 @@ export default function Landing() {
   return (
     <div className={`landing ${hasError ? "landing--error" : ""}`}>
       {/* Symbol Sea Background */}
-      <SymbolSea isError={hasError} />
+      <SymbolSea errorTrigger={errorCount} />
+
 
 
       {/* Scanlines */}
