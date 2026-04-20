@@ -11,7 +11,7 @@ import "./Landing.css";
 // ── Symbol Sea: Canvas-based animated ASCII background ────────
 const SYMBOLS = "{}[]<>=>/*+-|\\;:!?#@&$%^~_.01";
 
-function SymbolSea({ isError = false, isLoading = false }) {
+function SymbolSea({ isError = false }) {
   const canvasRef = useRef(null);
   const mouseRef = useRef({ x: -1000, y: -1000 });
   const particlesRef = useRef([]);
@@ -25,15 +25,8 @@ function SymbolSea({ isError = false, isLoading = false }) {
   }, [isError]);
 
   useEffect(() => {
-    if (isLoading) {
-      // Small surge on every attempt
-      if (errorEffectRef.current < 0.3) errorEffectRef.current = 0.3;
-    }
-  }, [isLoading]);
-
-
-  useEffect(() => {
     const canvas = canvasRef.current;
+
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
 
@@ -424,7 +417,8 @@ export default function Landing() {
   return (
     <div className={`landing ${hasError ? "landing--error" : ""}`}>
       {/* Symbol Sea Background */}
-      <SymbolSea isError={hasError} isLoading={loading} />
+      <SymbolSea isError={hasError} />
+
 
       {/* Scanlines */}
       <div className="landing__scanline" />
