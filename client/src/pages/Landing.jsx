@@ -622,8 +622,9 @@ export default function Landing() {
                 {showPasswordReqs && (
                   <div className="auth-card__password-reqs">
                     <span className="auth-card__password-reqs-title">
-                      {t("auth.password_requirements.title")}:
+                      <GlitchText>{t("auth.password_requirements.title")}</GlitchText>:
                     </span>
+
                     <ul className="auth-card__password-reqs-list">
                       {PASSWORD_REQUIREMENTS.map((req) => {
                         const met = req.test(password);
@@ -635,7 +636,8 @@ export default function Landing() {
                             <span className="auth-card__password-req-icon">
                               {met ? <CheckIcon /> : <XIcon />}
                             </span>
-                            {t(`auth.password_requirements.${req.id}`)}
+                            <GlitchText>{t(`auth.password_requirements.${req.id}`)}</GlitchText>
+
                           </li>
                         );
                       })}
@@ -646,15 +648,17 @@ export default function Landing() {
 
               {isLogin && (
                 <div className="auth-card__forgot-password">
-                  <Link to="/forgot-password">{t("landing.forgot_password_link")}</Link>
+                  <Link to="/forgot-password"><GlitchText>{t("landing.forgot_password_link")}</GlitchText></Link>
+
                 </div>
               )}
 
               {!isLogin && (
                 <div className="auth-card__input-group">
                   <label className="auth-card__label" htmlFor="password_confirmation">
-                    {t("landing.confirm_password")}
+                    <GlitchText>{t("landing.confirm_password")}</GlitchText>
                   </label>
+
                   <input
                     type="password"
                     id="password_confirmation"
@@ -682,9 +686,12 @@ export default function Landing() {
                       <span className="auth-card__match-icon">
                         {passwordsMatch ? <CheckIcon /> : <XIcon />}
                       </span>
-                      {passwordsMatch
-                        ? t("landing.messages.passwords_match")
-                        : t("landing.messages.passwords_dont_match")}
+                      <GlitchText>
+                        {passwordsMatch
+                          ? t("landing.messages.passwords_match")
+                          : t("landing.messages.passwords_dont_match")}
+                      </GlitchText>
+
                     </div>
                   )}
                 </div>
@@ -695,22 +702,25 @@ export default function Landing() {
                 className="auth-card__submit"
                 disabled={loading || (!isLogin && (!allPasswordReqsMet || !passwordsMatch))}
               >
-                <span>
+                <GlitchText>
                   {loading ? (
-                    <div className="auth-card__spinner" />
+                    "" 
                   ) : isLogin ? (
                     t("landing.login")
                   ) : (
                     t("landing.register")
                   )}
-                </span>
+                </GlitchText>
+                {loading && <div className="auth-card__spinner" />}
+
               </button>
             </form>
 
             {/* Google OAuth */}
             <div className="auth-card__divider">
-              {t("landing.or_continue_with")}
+              <GlitchText>{t("landing.or_continue_with")}</GlitchText>
             </div>
+
 
             <button
               type="button"
@@ -728,21 +738,23 @@ export default function Landing() {
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                   </svg>
-                  {t("landing.google_login")}
+                  <GlitchText>{t("landing.google_login")}</GlitchText>
+
                 </>
               )}
             </button>
 
             <p className="auth-card__footer">
-              {isLogin ? t("landing.no_account") : t("landing.already_account")}
+              <GlitchText>{isLogin ? t("landing.no_account") : t("landing.already_account")}</GlitchText>
               <button
                 onClick={toggleMode}
                 className="auth-card__link"
                 style={{ background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: 4 }}
               >
-                {isLogin ? t("landing.register_here") : t("landing.login")}
+                <GlitchText>{isLogin ? t("landing.register_here") : t("landing.login")}</GlitchText>
               </button>
             </p>
+
           </div>
         </div>
       </main>
