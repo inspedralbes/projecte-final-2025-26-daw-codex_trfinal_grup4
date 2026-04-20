@@ -25,6 +25,11 @@ function SymbolSea({ errorTrigger = 0, isLightMode = false }) {
     }
   }, [errorTrigger]);
 
+  const isLightModeRef = useRef(isLightMode);
+  useEffect(() => {
+    isLightModeRef.current = isLightMode;
+  }, [isLightMode]);
+
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -74,8 +79,6 @@ function SymbolSea({ errorTrigger = 0, isLightMode = false }) {
     };
     
     window.addEventListener("mousemove", handleMouse);
-
-
 
     // Render loop
     let time = 0;
@@ -167,20 +170,18 @@ function SymbolSea({ errorTrigger = 0, isLightMode = false }) {
         }
 
         // Handle Light/Dark base color interpolation with error shift
-        const baseColor = isLightMode ? 0 : 255;
+        const isLight = isLightModeRef.current;
+        const baseColor = isLight ? 0 : 255;
         const r = Math.floor(baseColor + (255 - baseColor) * err);
         const g = Math.floor(baseColor * Math.pow(1 - err, 2.5));
         const b = Math.floor(baseColor * Math.pow(1 - err, 2.5));
 
         // Increase base opacity slightly in light mode for better contrast
-        const themeOpacityMult = isLightMode ? 1.4 : 1.0;
+        const themeOpacityMult = isLight ? 1.4 : 1.0;
         const finalOpacity = Math.min(1, opacity * themeOpacityMult);
 
         ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${finalOpacity.toFixed(3)})`;
         ctx.fillText(p.char, screenX, screenY);
-
-
-
       }
 
       frameRef.current = requestAnimationFrame(animate);
@@ -194,6 +195,7 @@ function SymbolSea({ errorTrigger = 0, isLightMode = false }) {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
   }, []);
+
 
   return (
     <div className="landing__symbol-sea">
