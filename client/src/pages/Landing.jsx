@@ -172,8 +172,13 @@ function SymbolSea({ errorTrigger = 0, isLightMode = false }) {
         const g = Math.floor(baseColor * Math.pow(1 - err, 2.5));
         const b = Math.floor(baseColor * Math.pow(1 - err, 2.5));
 
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity.toFixed(3)})`;
+        // Increase base opacity slightly in light mode for better contrast
+        const themeOpacityMult = isLightMode ? 1.4 : 1.0;
+        const finalOpacity = Math.min(1, opacity * themeOpacityMult);
+
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${finalOpacity.toFixed(3)})`;
         ctx.fillText(p.char, screenX, screenY);
+
 
 
       }
