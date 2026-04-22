@@ -4,8 +4,7 @@
 
 .app-layout {
   display: grid;
-  grid-template-columns: var(--sidebar-width) minmax(min-content, var(--max-content-width)) 1fr;
-  justify-content: center;
+  grid-template-columns: var(--sidebar-width) 1fr var(--widget-width);
   min-height: 100vh;
   background-color: var(--color-background);
 }
@@ -22,8 +21,8 @@
 /* ── Main Content Area ────────────────────────────────────── */
 .main-content {
   min-height: 100vh;
-  border-left: 1px solid var(--border-default);
-  border-right: 1px solid var(--border-default);
+  border-left: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
 }
 
 .main-content__container {
@@ -68,15 +67,15 @@
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--glass-border);
   }
 
   .mobile-header__avatar {
     width: 32px;
     height: 32px;
-    border-radius: var(--radius-full);
+    border-radius: 50%;
     overflow: hidden;
-    background: var(--gray-800);
+    background: var(--depth-3);
     cursor: pointer;
     flex-shrink: 0;
   }
