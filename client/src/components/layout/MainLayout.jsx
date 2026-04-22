@@ -8,7 +8,7 @@ import CenterPromptModal from "@/components/center/CenterPromptModal";
 import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal";
 import socketService from "@/services/socketService";
 import api from "@/services/api";
-import "./MainLayout.css";
+import SymbolSea from "@/components/ui/SymbolSea";
 
 export default function MainLayout() {
   const { user, centerCheck, dismissCenterPrompt, refreshUser } = useAuth();
@@ -18,6 +18,16 @@ export default function MainLayout() {
   const [showCenterPrompt, setShowCenterPrompt] = useState(false);
   const [showTeacherModal, setShowTeacherModal] = useState(false);
   const [teacherModalLoading, setTeacherModalLoading] = useState(false);
+
+  // Global theme state for all pages
+  const [isLightMode, setIsLightMode] = useState(() => {
+    return localStorage.getItem("app-theme") === "light";
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("light-mode", isLightMode);
+    localStorage.setItem("app-theme", isLightMode ? "light" : "dark");
+  }, [isLightMode]);
 
   // Show center prompt modal after login if needed
   useEffect(() => {
@@ -95,7 +105,10 @@ export default function MainLayout() {
   }, [user]);
 
   return (
-    <div className={`app-layout ${user?.role === "admin" ? "app-layout--admin" : ""}`}>
+    <div className={`app-layout ${user?.role === "admin" ? "app-layout--admin" : ""} ${isLightMode ? "app-layout--light" : ""}`}>
+      {/* Symbol Sea Background */}
+      <SymbolSea isLightMode={isLightMode} />
+
       {/* Mobile Header - only visible on small screens */}
       <header className="mobile-header">
         <div className="mobile-header__avatar" onClick={() => navigate("/profile")}>

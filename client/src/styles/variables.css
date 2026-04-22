@@ -1,150 +1,136 @@
 /* ============================================================
    Codex Design System
-   Theme: "Academic Dark Mode" - Deep Slate, Teal & Violet
-   A SaaS-inspired interface for code-focused academics
+   Theme: "Modern Twitter" - Sleek, Fluid, High Visibility
+   Inspired by X (Twitter) and modern social platform aesthetics
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
   /* ── Typography ─────────────────────────────────────────── */
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
   
   --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
   --text-xl: 1.25rem;
   --text-2xl: 1.5rem;
   --text-3xl: 2rem;
   --text-4xl: 2.5rem;
   --text-5xl: 3.5rem;
 
-  /* ── Brand Colors ───────────────────────────────────────── */
-  --codex-teal: #14b8a6;
-  --codex-teal-light: #2dd4bf;
-  --codex-teal-dark: #0d9488;
-  --codex-violet: #8b5cf6;
-  --codex-violet-light: #a78bfa;
-  --codex-violet-dark: #7c3aed;
-  --codex-cyan: #06b6d4;
-  --codex-emerald: #10b981;
-  --codex-amber: #f59e0b;
-  --codex-rose: #f43f5e;
+  /* ── Twitter Palette (Dark Theme - Lights Out) ──────────── */
+  --pure-black: #000000;
+  --pure-white: #ffffff;
+  
+  --twitter-blue: #1d9bf0;
+  --twitter-blue-hover: #1a8cd8;
+  --twitter-blue-active: #177cc0;
+  --twitter-blue-light: rgba(29, 155, 240, 0.1);
+
+  --gray-50: #f7f9f9;
+  --gray-100: #eff3f4;
+  --gray-200: #e7e9ea;
+  --gray-300: #cfd9de;
+  --gray-400: #71767b;
+  --gray-500: #536471;
+  --gray-600: #333639;
+  --gray-700: #202327;
+  --gray-800: #16181c;
+  --gray-900: #0b0d10;
 
   /* ── Primary Actions ────────────────────────────────────── */
-  --color-primary: var(--codex-teal);
-  --color-primary-hover: var(--codex-teal-light);
-  --color-primary-active: var(--codex-teal-dark);
-  --color-accent: var(--codex-violet);
-  --color-accent-hover: var(--codex-violet-light);
+  --color-primary: var(--twitter-blue);
+  --color-primary-hover: var(--twitter-blue-hover);
+  --color-primary-active: var(--twitter-blue-active);
+  --color-accent: var(--twitter-blue);
 
-  /* ── Surface Elevation Stack (Dark) ─────────────────────── */
-  --void: #05080f;
-  --depth-0: #0a0e17;
-  --depth-1: #0f1520;
-  --depth-2: #151c2a;
-  --depth-3: #1c2535;
-  --depth-4: #232d40;
-  --depth-5: #2a364a;
+  /* ── Surface Elevation Stack ─────────────────────────────── */
+  --void: #000000;
+  --depth-0: #000000;
+  --depth-1: #000000;
+  --depth-2: #16181c;
+  --depth-3: #202327;
+  --depth-4: #2f3336;
+  --depth-5: #3e4144;
 
   /* ── Semantic Surfaces ──────────────────────────────────── */
   --color-background: var(--depth-0);
   --color-surface: var(--depth-1);
   --color-surface-raised: var(--depth-2);
   --color-surface-overlay: var(--depth-3);
-  --color-surface-hover: var(--depth-4);
-  --color-surface-active: var(--depth-5);
+  --color-surface-hover: rgba(255, 255, 255, 0.03);
+  --color-surface-active: rgba(255, 255, 255, 0.07);
 
   /* ── Typography Colors ──────────────────────────────────── */
-  --ink-primary: #f4f4f5;
-  --ink-secondary: #a1a1aa;
-  --ink-tertiary: #71717a;
-  --ink-quaternary: #52525b;
-  --ink-inverse: #09090b;
+  --ink-primary: #e7e9ea;
+  --ink-secondary: #71767b;
+  --ink-tertiary: #536471;
+  --ink-quaternary: #333639;
+  --ink-inverse: #000000;
 
   --color-text: var(--ink-primary);
   --color-text-secondary: var(--ink-secondary);
   --color-text-tertiary: var(--ink-tertiary);
 
   /* ── Borders & Dividers ─────────────────────────────────── */
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --border-focus: var(--codex-teal);
+  --border-subtle: #2f3336;
+  --border-default: #2f3336;
+  --border-strong: #333639;
+  --border-focus: var(--twitter-blue);
 
   /* ── Semantic States ────────────────────────────────────── */
-  --state-success: #22c55e;
-  --state-success-bg: rgba(34, 197, 94, 0.12);
-  --state-warning: #eab308;
-  --state-warning-bg: rgba(234, 179, 8, 0.12);
-  --state-error: #ef4444;
-  --state-error-bg: rgba(239, 68, 68, 0.12);
-  --state-info: #3b82f6;
-  --state-info-bg: rgba(59, 130, 246, 0.12);
+  --state-success: #00ba7c;
+  --state-success-bg: rgba(0, 186, 124, 0.1);
+  --state-warning: #ffd400;
+  --state-warning-bg: rgba(255, 212, 0, 0.1);
+  --state-error: #f4212e;
+  --state-error-bg: rgba(244, 33, 46, 0.1);
+  --state-info: #1d9bf0;
+  --state-info-bg: rgba(29, 155, 240, 0.1);
 
-  /* ── Code Syntax (VSCode-inspired) ──────────────────────── */
-  --syntax-bg: var(--depth-1);
-  --syntax-keyword: #c678dd;
-  --syntax-string: #98c379;
-  --syntax-number: #d19a66;
-  --syntax-function: #61afef;
-  --syntax-variable: #e5c07b;
-  --syntax-comment: #5c6370;
-  --syntax-operator: #56b6c2;
+  /* ── Code Syntax ────────────────────────────────────────── */
+  --syntax-bg: #16181c;
+  --syntax-keyword: #ff7b72;
+  --syntax-string: #a5d6ff;
+  --syntax-number: #d2a8ff;
+  --syntax-function: #d2a8ff;
+  --syntax-variable: #ffa657;
+  --syntax-comment: #8b949e;
+  --syntax-operator: #ff7b72;
 
-  /* ── Spacing (4px base) ─────────────────────────────────── */
+  /* ── Spacing ────────────────────────────────────────────── */
   --space-0: 0;
   --space-px: 1px;
   --space-0-5: 2px;
   --space-1: 4px;
-  --space-1-5: 6px;
   --space-2: 8px;
-  --space-2-5: 10px;
   --space-3: 12px;
-  --space-3-5: 14px;
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
-  --space-7: 28px;
   --space-8: 32px;
-  --space-9: 36px;
   --space-10: 40px;
   --space-12: 48px;
-  --space-14: 56px;
   --space-16: 64px;
-  --space-20: 80px;
-  --space-24: 96px;
 
-  /* ── Layout ─────────────────────────────────────────────── */
-  --layout-max-width: 1400px;
-  --sidebar-width: 260px;
-  --sidebar-collapsed: 72px;
-  --feed-width: 680px;
-  --widget-width: 340px;
-  --header-height: 56px;
-
-  /* ── Border Radius ──────────────────────────────────────── */
+  /* ── Radius (Twitter Rounding) ─────────────────────────── */
   --radius-none: 0;
   --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
-  --radius-3xl: 24px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
   --radius-full: 9999px;
 
-  /* ── Shadows (Dark Mode Glow) ───────────────────────────── */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
-  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.7);
-  --shadow-glow-teal: 0 0 20px rgba(20, 184, 166, 0.3);
-  --shadow-glow-violet: 0 0 20px rgba(139, 92, 246, 0.3);
-  --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  /* ── Shadows ────────────────────────────────────────────── */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  --shadow-md: rgba(255, 255, 255, 0.2) 0px 0px 15px, rgba(255, 255, 255, 0.15) 0px 0px 3px 1px;
+  --shadow-lg: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  --shadow-glow: 0 0 10px var(--twitter-blue-light);
 
   /* ── Z-Index Scale ──────────────────────────────────────── */
   --z-base: 0;
@@ -172,9 +158,15 @@
   --transition-slow: var(--duration-slow) var(--ease-out);
 
   /* ── Glassmorphism ──────────────────────────────────────── */
-  --glass-bg: rgba(15, 21, 32, 0.8);
+  --glass-bg: rgba(0, 0, 0, 0.65);
   --glass-blur: 12px;
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.1);
+
+  /* ── Layout ─────────────────────────────────────────────── */
+  --sidebar-width: 275px;
+  --sidebar-collapsed: 88px;
+  --widget-width: 350px;
+  --max-content-width: 600px;
 
   /* ── Mobile / Safe Areas ────────────────────────────────── */
   --safe-top: env(safe-area-inset-top, 0px);
@@ -182,5 +174,50 @@
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --mobile-nav-height: 56px;
-  --mobile-header-height: 52px;
+  --mobile-header-height: 53px;
+
+  /* ── Brutalist Design System ────────────────────────────── */
+  /* Inspired by Landing page: Monospace, Raw, Command-line aesthetic */
+  --brutalist-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  --brutalist-border-width: 1px;
+  --brutalist-border-style: solid;
+  
+  /* Light Mode Brutalist Palette */
+  --brutalist-light-bg: #ffffff;
+  --brutalist-light-fg: #000000;
+  --brutalist-light-border: #000000;
+  --brutalist-light-accent: #000000;
+  
+  /* Dark Mode Brutalist Palette */
+  --brutalist-dark-bg: #000000;
+  --brutalist-dark-fg: #ffffff;
+  --brutalist-dark-border: rgba(255, 255, 255, 0.25);
+  --brutalist-dark-accent: #ffffff;
+  
+  /* Codex Teal (Accent) */
+  --codex-teal: #00d9ff;
+  --codex-teal-hover: #00b8cc;
+}
+
+/* Light Mode Overrides */
+.light-mode {
+  --depth-0: #ffffff;
+  --depth-1: #ffffff;
+  --depth-2: #f7f9f9;
+  --depth-3: #eff3f4;
+  --depth-4: #e7e9ea;
+  --depth-5: #cfd9de;
+
+  --ink-primary: #0f1419;
+  --ink-secondary: #536471;
+  --ink-tertiary: #8b949e;
+  
+  --border-default: #eff3f4;
+  --border-subtle: #eff3f4;
+  
+  --color-surface-hover: rgba(15, 20, 25, 0.03);
+  --color-surface-active: rgba(15, 20, 25, 0.07);
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --shadow-md: rgba(0, 0, 0, 0.08) 0px 8px 28px;
 }

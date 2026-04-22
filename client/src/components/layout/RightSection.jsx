@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTags } from "@/hooks/useTags";
 import profileService from "@/services/profileService";
 import postsService from "@/services/postsService";
+import GlitchText from "@/components/ui/GlitchText";
 import "./RightSection.css";
 
 const SearchIcon = () => (
@@ -49,7 +50,9 @@ const TrendingTags = () => {
 
   return (
     <div className="widget">
-      <h3 className="widget__title">{t("widgets.trending")}</h3>
+      <h3 className="widget__title">
+        <GlitchText>{t("widgets.trending")}</GlitchText>
+      </h3>
       <div className="widget__list">
         {loading ? (
           <LoadingSpinner />
@@ -103,7 +106,9 @@ const TopContributors = () => {
 
   return (
     <div className="widget">
-      <h3 className="widget__title">{t("widgets.top_contributors")}</h3>
+      <h3 className="widget__title">
+        <GlitchText>{t("widgets.top_contributors")}</GlitchText>
+      </h3>
       <div className="widget__list">
         {loading ? (
           <LoadingSpinner />
@@ -167,7 +172,9 @@ const RecentQuestions = () => {
 
   return (
     <div className="widget">
-      <h3 className="widget__title">{t("widgets.recent_questions")}</h3>
+      <h3 className="widget__title">
+        <GlitchText>{t("widgets.recent_questions")}</GlitchText>
+      </h3>
       <div className="widget__list">
         {loading ? (
           <LoadingSpinner />

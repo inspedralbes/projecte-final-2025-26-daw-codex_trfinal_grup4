@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
+import GlitchText from "@/components/ui/GlitchText";
 import "./Sidebar.css";
 
 // Navigation icons
@@ -294,7 +295,9 @@ export default function Sidebar() {
                   <span className="sidebar__nav-icon">
                     <Icon active={false} />
                   </span>
-                  <span className="sidebar__nav-label">{t(label)}</span>
+                  <span className="sidebar__nav-label">
+                    {t(label)}
+                  </span>
                   <span className="sidebar__nav-lock">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -325,8 +328,10 @@ export default function Sidebar() {
                     </span>
                   )}
                 </span>
-                <span className="sidebar__nav-label">{t(label)}</span>
-              </NavLink>
+                  <span className="sidebar__nav-label">
+                    {t(label)}
+                  </span>
+                </NavLink>
             );
           })}
         </nav>

@@ -4,15 +4,17 @@
 
 .app-layout {
   display: grid;
-  grid-template-columns: var(--sidebar-width) 1fr var(--widget-width);
+  grid-template-columns: var(--sidebar-width) minmax(min-content, var(--max-content-width)) 1fr;
+  justify-content: center;
   min-height: 100vh;
+  background-color: var(--color-background);
 }
 
 .app-layout--admin {
   grid-template-columns: var(--sidebar-width) 1fr;
 }
 
-/* ── Mobile Header (hidden on desktop) ────────────────────── */
+/* ── Mobile Header ────────────────────────────────────────── */
 .mobile-header {
   display: none;
 }
@@ -20,8 +22,8 @@
 /* ── Main Content Area ────────────────────────────────────── */
 .main-content {
   min-height: 100vh;
-  border-left: 1px solid var(--border-subtle);
-  border-right: 1px solid var(--border-subtle);
+  border-left: 1px solid var(--border-default);
+  border-right: 1px solid var(--border-default);
 }
 
 .main-content__container {
@@ -66,15 +68,15 @@
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
     -webkit-backdrop-filter: blur(var(--glass-blur));
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--border-subtle);
   }
 
   .mobile-header__avatar {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     overflow: hidden;
-    background: var(--depth-3);
+    background: var(--gray-800);
     cursor: pointer;
     flex-shrink: 0;
   }
@@ -98,15 +100,14 @@
     justify-content: center;
     width: 30px;
     height: 30px;
-    border-radius: var(--radius-md);
-    color: white;
+    color: var(--color-primary);
   }
 
   .mobile-header__logo-text {
     font-size: var(--text-lg);
-    font-weight: 700;
+    font-weight: 800;
     color: var(--ink-primary);
-    letter-spacing: -0.02em;
+    display: none;
   }
 
   .mobile-header__actions {
@@ -123,35 +124,34 @@
     width: 36px;
     height: 36px;
     border-radius: var(--radius-full);
-    background: none;
+    background: transparent;
     border: none;
-    color: var(--ink-secondary);
+    color: var(--ink-primary);
     cursor: pointer;
     transition: all var(--transition-fast);
   }
 
-  .mobile-header__action:hover,
-  .mobile-header__action:active {
-    background: var(--depth-2);
-    color: var(--ink-primary);
+  .mobile-header__action:hover {
+    background: var(--color-surface-hover);
   }
 
   .mobile-header__badge {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: -2px;
+    right: -2px;
     min-width: 16px;
     height: 16px;
     padding: 0 4px;
-    background: var(--status-error);
+    background: var(--state-error);
     color: white;
     font-size: 10px;
-    font-weight: 600;
+    font-weight: 700;
     border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
+    border: 1px solid var(--color-background);
   }
 
   .main-content {
@@ -168,31 +168,35 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  background: var(--depth-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
+  background: transparent;
+  border: 1px solid var(--border-default);
   color: var(--ink-primary);
   z-index: var(--z-fixed);
-  box-shadow: var(--shadow-xl);
   animation: toastSlideUp 0.3s var(--ease-out);
   max-width: 400px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  font-size: var(--text-xs);
+  letter-spacing: 0.05em;
 }
 
 .ar-toast--success {
-  border-left: 4px solid var(--state-success);
+  border-color: var(--state-success);
+  color: var(--state-success);
 }
 
 .ar-toast--info {
-  border-left: 4px solid var(--codex-teal);
+  border-color: var(--codex-teal);
+  color: var(--codex-teal);
 }
 
 @keyframes toastSlideUp {
   from {
-    transform: translateY(100%) scale(0.9);
+    transform: translateX(100%);
     opacity: 0;
   }
   to {
-    transform: translateY(0) scale(1);
+    transform: translateX(0);
     opacity: 1;
   }
 }
