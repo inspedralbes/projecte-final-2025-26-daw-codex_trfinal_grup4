@@ -130,12 +130,13 @@ function BanModal({ user, onConfirm, onCancel }) {
 /* ================================================================
    AdminUsers – main component
    ================================================================ */
-export default function AdminUsers() {
+export default function AdminUsers({ initialBanStatus = "all", title = "Gestión de Usuarios" }) {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState(null);
+    const [banStatusFilter, setBanStatusFilter] = useState(initialBanStatus);
     const [auditingUser, setAuditingUser] = useState(null);
     const [expandedUserId, setExpandedUserId] = useState(null);
     const [banTargetUser, setBanTargetUser] = useState(null); // user to ban/timeout
@@ -143,7 +144,15 @@ export default function AdminUsers() {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const response = await api.get(`/admin/users?search=${search}&page=${page}`);
+            const query = new URLSearchParams();
+            query.set("search", search);
+            query.set("page", String(page));
+
+            if (banStatusFilter !== "all") {
+                query.set("ban_status", banStatusFilter);
+            }
+
+            const response = await api.get(`/admin/users?${query.toString()}`);
             const data = response.data || response;
             setUsers(data.data || []);
             setPagination({
@@ -161,7 +170,7 @@ export default function AdminUsers() {
     useEffect(() => {
         const timer = setTimeout(() => { fetchUsers(); }, 500);
         return () => clearTimeout(timer);
-    }, [search, page]);
+    }, [search, page, banStatusFilter]);
 
     // Apply ban or timeout via the dedicated endpoint
     const handleBanConfirm = async ({ type, ban_reason, ban_expires_at }) => {
@@ -207,6 +216,22 @@ export default function AdminUsers() {
         }
     };
 
+    const handlePermanentBan = async (user) => {
+        const defaultReason = user.ban_reason || "Escalado de timeout a baneo permanente por reincidencia.";
+        const reason = window.prompt(`Motivo del baneo permanente para ${user.name}:`, defaultReason);
+        if (!reason || !reason.trim()) return;
+
+        try {
+            await api.post(`/admin/users/${user.id}/ban`, {
+                type: "ban",
+                ban_reason: reason.trim(),
+            });
+            fetchUsers();
+        } catch (error) {
+            alert("Error al aplicar el baneo permanente.");
+        }
+    };
+
     const getBanBadge = (user) => {
         if (user.ban_status === "banned") return <span className="status-badge status-banned">BANEADO</span>;
         if (user.ban_status === "timeout") return <span className="status-badge status-timeout">Timeout</span>;
@@ -222,12 +247,26 @@ export default function AdminUsers() {
         });
     };
 
+    const timeoutsCount = users.filter((u) => u.ban_status === "timeout").length;
+    const bannedCount = users.filter((u) => u.ban_status === "banned").length;
+    const flaggedCount = users.filter((u) => u.ban_status === "flagged").length;
+
     if (auditingUser) {
         return <AdminUserPosts user={auditingUser} onBack={() => setAuditingUser(null)} />;
     }
 
     return (
         <div className="admin-users">
+            <header className="admin-page-header">
+                <h2 className="admin-page-title">{title}</h2>
+                <p className="admin-page-subtitle">Gestiona baneos, timeouts y reportes desde un solo panel.</p>
+                <div className="admin-status-summary">
+                    <span className="status-badge status-timeout">Timeout: {timeoutsCount}</span>
+                    <span className="status-badge status-banned">Baneados: {bannedCount}</span>
+                    <span className="status-badge status-blocked">Reportados: {flaggedCount}</span>
+                </div>
+            </header>
+
             {banTargetUser && (
                 <BanModal
                     user={banTargetUser}
@@ -244,6 +283,21 @@ export default function AdminUsers() {
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                     className="admin-search"
                 />
+
+                <select
+                    className="admin-filter"
+                    value={banStatusFilter}
+                    onChange={(e) => {
+                        setBanStatusFilter(e.target.value);
+                        setPage(1);
+                    }}
+                >
+                    <option value="all">Todos los estados</option>
+                    <option value="timeout">Solo timeout</option>
+                    <option value="banned">Solo baneados</option>
+                    <option value="flagged">Solo reportados</option>
+                    <option value="active">Solo activos</option>
+                </select>
             </div>
 
             <div className="admin-table-container">
@@ -283,10 +337,12 @@ export default function AdminUsers() {
                                     </div>
                                     <div className="mobile-actions" onClick={(e) => e.stopPropagation()}>
                                         <button onClick={() => setAuditingUser(user)} className="btn-icon" title="Ver Actividad"><Eye size={14} /></button>
-                                        {user.is_blocked ? (
+                                        <button onClick={() => setBanTargetUser(user)} className="btn-icon btn-block" title="Aplicar o renovar timeout"><Clock size={14} /></button>
+                                        {user.ban_status === "timeout" && (
+                                            <button onClick={() => handlePermanentBan(user)} className="btn-icon btn-delete" title="Banear permanentemente"><ShieldOff size={14} /></button>
+                                        )}
+                                        {user.is_blocked && (
                                             <button onClick={() => handleUnban(user)} className="btn-icon btn-unblock" title="Levantar sanción"><Unlock size={14} /></button>
-                                        ) : (
-                                            <button onClick={() => setBanTargetUser(user)} className="btn-icon btn-block" title="Sancionar"><Clock size={14} /></button>
                                         )}
                                     </div>
                                 </td>
@@ -314,6 +370,9 @@ export default function AdminUsers() {
                                             ⏰ Hasta: {formatExpiry(user.ban_expires_at)}
                                         </div>
                                     )}
+                                    {typeof user.ai_moderation_strikes === "number" && (
+                                        <div className="ban-expiry-cell">⚠️ Strikes IA: {user.ai_moderation_strikes}</div>
+                                    )}
                                 </td>
 
                                 <td className="td-actions" onClick={(e) => e.stopPropagation()}>
@@ -321,15 +380,23 @@ export default function AdminUsers() {
                                         <button onClick={() => setAuditingUser(user)} className="btn-icon btn-audit" title="Ver Actividad">
                                             <Eye size={15} />
                                         </button>
-                                        {user.is_blocked ? (
+
+                                        <button onClick={() => setBanTargetUser(user)} className="btn-icon btn-block" title="Aplicar o renovar timeout">
+                                            <Clock size={15} /> Timeout
+                                        </button>
+
+                                        {user.ban_status === "timeout" && (
+                                            <button onClick={() => handlePermanentBan(user)} className="btn-icon btn-delete" title="Escalar a baneo permanente">
+                                                <ShieldOff size={15} /> Ban permanente
+                                            </button>
+                                        )}
+
+                                        {user.is_blocked && (
                                             <button onClick={() => handleUnban(user)} className="btn-icon btn-unblock" title="Levantar sanción">
                                                 <Unlock size={15} /> Levantar
                                             </button>
-                                        ) : (
-                                            <button onClick={() => setBanTargetUser(user)} className="btn-icon btn-block" title="Sancionar">
-                                                <Clock size={15} /> Sancionar
-                                            </button>
                                         )}
+
                                         <button onClick={() => handleDeleteUser(user.id)} className="btn-icon btn-delete" title="Eliminar usuario">
                                             <Ban size={15} />
                                         </button>

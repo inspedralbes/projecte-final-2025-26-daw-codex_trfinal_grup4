@@ -39,6 +39,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'ban_status',
         'ban_reason',
         'ban_expires_at',
+        'ai_moderation_strikes',
         'google_id',
         'auth_provider',
         'email_verified_at',
@@ -75,6 +76,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_blocked' => 'boolean',
             'center_blocked' => 'boolean',
             'ban_status' => 'string',
+            'ai_moderation_strikes' => 'integer',
             'center_prompt_dismissed' => 'boolean',
         ];
     }

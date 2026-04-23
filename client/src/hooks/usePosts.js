@@ -28,7 +28,7 @@ export function usePosts({
   centerId = null,
   enabled = true,
 } = {}) {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, refreshUser } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -172,9 +172,34 @@ export function usePosts({
       return { success: true, post: newPost };
     } catch (err) {
       console.error("Error creating post:", err);
-      return { success: false, error: err.message };
+
+      const errorData = err?.data || {};
+      const enforcement = errorData?.errors?.enforcement || null;
+      const message =
+        errorData?.message ||
+        err?.message ||
+        "No se ha podido publicar el post.";
+
+      const isSanctioned =
+        err?.status === 403 ||
+        enforcement?.ban_status === "timeout" ||
+        enforcement?.ban_status === "banned";
+
+      if (isSanctioned) {
+        await refreshUser();
+      }
+
+      return {
+        success: false,
+        error: message,
+        status: err?.status,
+        sanctioned: isSanctioned,
+        enforcement,
+        ban_expires_at: errorData?.ban_expires_at || null,
+        ban_reason: errorData?.ban_reason || enforcement?.reason || null,
+      };
     }
-  }, []);
+  }, [refreshUser]);
 
   // Delete a post
   const deletePost = useCallback(

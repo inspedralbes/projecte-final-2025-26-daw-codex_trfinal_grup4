@@ -80,8 +80,11 @@ const api = {
       ...options,
     }).then(async (response) => {
       if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw error;
+        const errorBody = await response.json().catch(() => ({}));
+        const err = new Error(errorBody.message || `HTTP ${response.status}`);
+        err.status = response.status;
+        err.data = errorBody;
+        throw err;
       }
       return response.json();
     });

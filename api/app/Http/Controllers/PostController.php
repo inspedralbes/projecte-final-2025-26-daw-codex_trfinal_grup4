@@ -8,6 +8,8 @@ use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Services\AiModerationService;
+use App\Services\ModerationEnforcementService;
 use App\Services\NotificationService;
 use App\Services\SanitizationService;
 use App\Traits\ApiResponse;
@@ -21,7 +23,9 @@ class PostController extends Controller
 
     public function __construct(
         private readonly SanitizationService $sanitizer,
-        private readonly NotificationService $notificationService
+        private readonly NotificationService $notificationService,
+        private readonly AiModerationService $aiModerationService,
+        private readonly ModerationEnforcementService $moderationEnforcementService
     ) {}
 
     /**
@@ -159,6 +163,41 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request): JsonResponse
     {
+        $sanitizedContent = $request->input('content')
+            ? $this->sanitizer->sanitizeHtml($request->input('content'))
+            : null;
+
+        $sanitizedCodeSnippet = $request->input('code_snippet')
+            ? $this->sanitizer->sanitizeCode($request->input('code_snippet'))
+            : null;
+
+        $moderationDecision = $this->aiModerationService->moderatePost(
+            $sanitizedContent,
+            $sanitizedCodeSnippet,
+            $request->hasFile('image')
+        );
+
+        if (!($moderationDecision['allowed'] ?? true)) {
+            $enforcement = $this->moderationEnforcementService->enforceForRejectedPost(
+                $request->user(),
+                $moderationDecision
+            );
+
+            return $this->error(
+                'Post rejected by automatic moderation policy.',
+                422,
+                [
+                    'moderation' => [
+                        'severity' => $moderationDecision['severity'] ?? 'unknown',
+                        'score' => $moderationDecision['score'] ?? 0,
+                        'reason' => $moderationDecision['reason'] ?? 'Policy violation detected.',
+                        'categories' => $moderationDecision['categories'] ?? [],
+                    ],
+                    'enforcement' => $enforcement,
+                ]
+            );
+        }
+
         // Determine center_id based on visibility choice
         $user = $request->user();
         $visibility = $request->input('visibility', 'global');
@@ -178,9 +217,9 @@ class PostController extends Controller
             'user_id'       => $user->id,
             'center_id'     => $centerId,
             'type'          => $request->input('type', 'news'),
-            'content'       => $request->input('content') ? $this->sanitizer->sanitizeHtml($request->input('content')) : null,
+            'content'       => $sanitizedContent,
             'image_url'     => $imageUrl,
-            'code_snippet'  => $request->input('code_snippet') ? $this->sanitizer->sanitizeCode($request->input('code_snippet')) : null,
+            'code_snippet'  => $sanitizedCodeSnippet,
             'code_language' => $request->input('code_language') ? $this->sanitizer->sanitizePlain($request->input('code_language')) : null,
         ]);
 

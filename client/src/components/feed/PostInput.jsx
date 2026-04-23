@@ -134,6 +134,7 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
   const [linkUrl, setLinkUrl] = useState("");
   const [visibility, setVisibility] = useState("global");
   const [showVisibilityDropdown, setShowVisibilityDropdown] = useState(false);
+  const [serverSanction, setServerSanction] = useState(null);
   const imageInputRef = React.useRef(null);
   const textareaRef = React.useRef(null);
   const visibilityRef = React.useRef(null);
@@ -141,8 +142,11 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
   const hasCenterAccess = !!user?.center_id;
 
   // ── Ban / Timeout check ───────────────────────────────────────
-  const isBanned = user?.ban_status === "banned";
-  const isTimeout = user?.ban_status === "timeout";
+  const effectiveBanStatus = serverSanction?.ban_status || user?.ban_status;
+  const effectiveBanReason = serverSanction?.ban_reason || user?.ban_reason;
+  const effectiveBanExpiresAt = serverSanction?.ban_expires_at || user?.ban_expires_at;
+  const isBanned = effectiveBanStatus === "banned";
+  const isTimeout = effectiveBanStatus === "timeout";
   const isSanctioned = isBanned || isTimeout || user?.is_blocked;
 
   const formatBanExpiry = (dateStr) => {
@@ -234,7 +238,15 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
             setShowLinkInput(false);
             setLinkUrl("");
             setVisibility("global");
+            setServerSanction(null);
           } else {
+            if (result.sanctioned) {
+              setServerSanction({
+                ban_status: result?.enforcement?.ban_status || "timeout",
+                ban_reason: result?.ban_reason || result?.error || "Contenido bloqueado por moderacion.",
+                ban_expires_at: result?.ban_expires_at || null,
+              });
+            }
             setError(result.error || t("auth.register_error_fallback"));
           }
         }
@@ -269,18 +281,18 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
                 ? "Tu cuenta ha sido baneada"
                 : "Tu cuenta está en timeout"}
             </strong>
-            {user?.ban_reason && (
+            {effectiveBanReason && (
               <p className="post-input__ban-reason">
-                Motivo: {user.ban_reason}
+                Motivo: {effectiveBanReason}
               </p>
             )}
-            {user?.ban_expires_at && (
+            {effectiveBanExpiresAt && (
               <p className="post-input__ban-expiry">
                 Tu timeout acabará el{" "}
-                <strong>{formatBanExpiry(user.ban_expires_at)}</strong>
+                <strong>{formatBanExpiry(effectiveBanExpiresAt)}</strong>
               </p>
             )}
-            {isBanned && !user?.ban_expires_at && (
+            {isBanned && !effectiveBanExpiresAt && (
               <p className="post-input__ban-expiry">Este baneo es permanente.</p>
             )}
           </div>

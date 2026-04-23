@@ -51,11 +51,46 @@ services:
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
+      - AI_MODERATION_ENABLED=${AI_MODERATION_ENABLED:-true}
+      - AI_MODERATION_URL=http://ai-moderation:8088
+      - AI_MODERATION_TIMEOUT_SECONDS=${AI_MODERATION_TIMEOUT_SECONDS:-4}
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
+      ai-moderation:
+        condition: service_started
+    networks:
+      - tfg_network
+
+  # -----------------------------------------------------------
+  #  AI Moderation – Node.js + Transformers
+  # -----------------------------------------------------------
+  ai-moderation:
+    build:
+      context: ./ai-moderation
+      dockerfile: Dockerfile
+    container_name: tfg_ai_moderation_prod
+    restart: always
+    env_file: .env
+    environment:
+      - PORT=8088
+      - AI_MODEL_ENABLED=${AI_MODEL_ENABLED:-true}
+      - AI_MODEL_ID=${AI_MODEL_ID:-Xenova/toxic-bert}
+      - AI_ZERO_SHOT_ENABLED=${AI_ZERO_SHOT_ENABLED:-true}
+      - AI_ZERO_SHOT_MODEL_ID=${AI_ZERO_SHOT_MODEL_ID:-MoritzLaurer/mDeBERTa-v3-base-mnli-xnli}
+      - AI_ZERO_SHOT_BLOCK_THRESHOLD=${AI_ZERO_SHOT_BLOCK_THRESHOLD:-0.52}
+      - AI_LLM_ENABLED=${AI_LLM_ENABLED:-false}
+      - AI_LLM_BASE_URL=${AI_LLM_BASE_URL:-https://api.openai.com/v1}
+      - AI_LLM_API_KEY=${AI_LLM_API_KEY:-}
+      - AI_LLM_MODEL=${AI_LLM_MODEL:-gpt-4o-mini}
+      - AI_BLOCK_THRESHOLD=${AI_BLOCK_THRESHOLD:-0.72}
+      - AI_MEDIUM_THRESHOLD=${AI_MEDIUM_THRESHOLD:-0.45}
+      - AI_HIGH_THRESHOLD=${AI_HIGH_THRESHOLD:-0.65}
+      - AI_CRITICAL_THRESHOLD=${AI_CRITICAL_THRESHOLD:-0.85}
+      - AI_MAX_TEXT_LENGTH=${AI_MAX_TEXT_LENGTH:-6000}
+      - AI_MODERATION_API_KEY=${AI_MODERATION_API_KEY:-}
     networks:
       - tfg_network
 
