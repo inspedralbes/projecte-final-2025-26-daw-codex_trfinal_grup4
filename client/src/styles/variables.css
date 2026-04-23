@@ -65,10 +65,10 @@
   --color-surface-active: rgba(255, 255, 255, 0.07);
 
   /* ── Typography Colors ──────────────────────────────────── */
-  --ink-primary: #e7e9ea;
-  --ink-secondary: #71767b;
-  --ink-tertiary: #536471;
-  --ink-quaternary: #333639;
+  --ink-primary: #ffffff;
+  --ink-secondary: #e7e9ea;
+  --ink-tertiary: #a7b1b8;
+  --ink-quaternary: #71767b;
   --ink-inverse: #000000;
 
   --color-text: var(--ink-primary);

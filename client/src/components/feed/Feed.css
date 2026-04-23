@@ -18,8 +18,6 @@
   z-index: var(--z-sticky);
   background: var(--color-background);
   border-bottom: 1px solid var(--border-default);
-  border-left: 1px solid var(--border-default);
-  border-right: 1px solid var(--border-default);
 }
 
 .feed__title {
@@ -35,7 +33,6 @@
 
 .feed__tabs {
   display: flex;
-  border-top: 1px solid var(--border-default);
 }
 
 .feed__tab {
@@ -85,8 +82,6 @@
 .feed__posts {
   display: flex;
   flex-direction: column;
-  border-left: 1px solid var(--border-default);
-  border-right: 1px solid var(--border-default);
 }
 
 /* ── Loading State ────────────────────────────────────────── */
