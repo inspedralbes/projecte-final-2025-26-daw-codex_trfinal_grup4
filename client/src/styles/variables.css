@@ -1,14 +1,14 @@
 /* ============================================================
    Codex Design System
-   Theme: "Modern Twitter" - Sleek, Fluid, High Visibility
-   Inspired by X (Twitter) and modern social platform aesthetics
+   Theme: "Brutalist Digital" - Raw, Technical, High Contrast
+   Inspired by terminal interfaces and brutalist web design
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 
 :root {
   /* ── Typography ─────────────────────────────────────────── */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: 'JetBrains Mono', monospace;
   --font-mono: 'JetBrains Mono', monospace;
   
   --text-xs: 0.75rem;
@@ -21,90 +21,67 @@
   --text-4xl: 2.5rem;
   --text-5xl: 3.5rem;
 
-  /* ── Twitter Palette (Dark Theme - Lights Out) ──────────── */
+  /* ── Brutalist Palette ─────────────────────────────────── */
   --pure-black: #000000;
   --pure-white: #ffffff;
+  --codex-teal: #00d9ff;
+  --codex-teal-hover: #00b8cc;
   
-  --twitter-blue: #1d9bf0;
-  --twitter-blue-hover: #1a8cd8;
-  --twitter-blue-active: #177cc0;
-  --twitter-blue-light: rgba(29, 155, 240, 0.1);
-
-  --gray-50: #f7f9f9;
-  --gray-100: #eff3f4;
-  --gray-200: #e7e9ea;
-  --gray-300: #cfd9de;
-  --gray-400: #71767b;
-  --gray-500: #536471;
-  --gray-600: #333639;
-  --gray-700: #202327;
-  --gray-800: #16181c;
   --gray-900: #0b0d10;
-
-  /* ── Primary Actions ────────────────────────────────────── */
-  --color-primary: var(--twitter-blue);
-  --color-primary-hover: var(--twitter-blue-hover);
-  --color-primary-active: var(--twitter-blue-active);
-  --color-accent: var(--twitter-blue);
-
-  /* ── Surface Elevation Stack ─────────────────────────────── */
-  --void: #000000;
-  --depth-0: #000000;
-  --depth-1: #000000;
-  --depth-2: #16181c;
-  --depth-3: #202327;
-  --depth-4: #2f3336;
-  --depth-5: #3e4144;
+  --gray-800: #16181c;
+  --gray-700: #202327;
+  --gray-600: #333639;
+  --gray-400: #71767b;
 
   /* ── Semantic Surfaces ──────────────────────────────────── */
-  --color-background: var(--depth-0);
-  --color-surface: var(--depth-1);
-  --color-surface-raised: var(--depth-2);
-  --color-surface-overlay: var(--depth-3);
-  --color-surface-hover: rgba(255, 255, 255, 0.03);
-  --color-surface-active: rgba(255, 255, 255, 0.07);
+  --color-background: var(--pure-black);
+  --color-surface: var(--pure-black);
+  --color-surface-raised: #0a0a0a;
+  --color-surface-overlay: #111111;
+  --color-surface-hover: #111111;
+  --color-surface-active: rgba(255, 255, 255, 0.1);
 
   /* ── Typography Colors ──────────────────────────────────── */
-  --ink-primary: #ffffff;
-  --ink-secondary: #e7e9ea;
-  --ink-tertiary: #a7b1b8;
-  --ink-quaternary: #71767b;
-  --ink-inverse: #000000;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'JetBrains Mono', monospace;
 
-  --color-text: var(--ink-primary);
-  --color-text-secondary: var(--ink-secondary);
-  --color-text-tertiary: var(--ink-tertiary);
+  /* Stark Palette */
+  --pure-black: #000000;
+  --pure-white: #ffffff;
+  --codex-teal: #00d9ff;
+  --codex-teal-dim: rgba(0, 217, 255, 0.15);
 
-  /* ── Borders & Dividers ─────────────────────────────────── */
-  --border-subtle: #2f3336;
-  --border-default: #2f3336;
-  --border-strong: #333639;
-  --border-focus: var(--twitter-blue);
+  /* Semantic Colors - Forced Contrast */
+  --color-background: var(--pure-black);
+  --color-surface: var(--pure-black);
+  --color-surface-hover: #111111;
+  --color-text: var(--pure-white);
+  --ink-primary: var(--pure-white);
+  --ink-secondary: #cccccc;
+  --ink-tertiary: #999999;
+  
+  /* Brutalist Borders - High Visibility */
+  --brutalist-border-width: 1px;
+  --brutalist-border-style: solid;
+  --brutalist-border-color: #333333;
+  --border-default: #333333;
+  --border-subtle: #222222;
 
-  /* ── Semantic States ────────────────────────────────────── */
-  --state-success: #00ba7c;
-  --state-success-bg: rgba(0, 186, 124, 0.1);
-  --state-warning: #ffd400;
-  --state-warning-bg: rgba(255, 212, 0, 0.1);
-  --state-error: #f4212e;
-  --state-error-bg: rgba(244, 33, 46, 0.1);
-  --state-info: #1d9bf0;
-  --state-info-bg: rgba(29, 155, 240, 0.1);
+  /* Layout Constants */
+  --sidebar-width: 275px;
+  --sidebar-collapsed: 80px;
+  --widget-width: 350px;
+  --max-content-width: 700px;
+  --mobile-header-height: 0px; /* Removed */
 
-  /* ── Code Syntax ────────────────────────────────────────── */
-  --syntax-bg: #16181c;
-  --syntax-keyword: #ff7b72;
-  --syntax-string: #a5d6ff;
-  --syntax-number: #d2a8ff;
-  --syntax-function: #d2a8ff;
-  --syntax-variable: #ffa657;
-  --syntax-comment: #8b949e;
-  --syntax-operator: #ff7b72;
-
+  /* ── Layout ─────────────────────────────────────────────── */
+  --sidebar-width: 275px;
+  --sidebar-collapsed: 88px;
+  --widget-width: 350px;
+  --max-content-width: 600px;
+  
   /* ── Spacing ────────────────────────────────────────────── */
   --space-0: 0;
-  --space-px: 1px;
-  --space-0-5: 2px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -113,111 +90,42 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 40px;
-  --space-12: 48px;
-  --space-16: 64px;
 
-  /* ── Radius (Twitter Rounding) ─────────────────────────── */
+  /* ── Radius (STRICLY NONE FOR BRUTALIST) ───────────────── */
   --radius-none: 0;
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-full: 9999px;
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-full: 0;
 
-  /* ── Shadows ────────────────────────────────────────────── */
+  /* ── Transitions & Effects ─────────────────────────────── */
+  --transition-fast: 100ms ease;
+  --transition-normal: 200ms ease;
+  
   --shadow-none: none;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  --shadow-md: rgba(255, 255, 255, 0.2) 0px 0px 15px, rgba(255, 255, 255, 0.15) 0px 0px 3px 1px;
-  --shadow-lg: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-  --shadow-glow: 0 0 10px var(--twitter-blue-light);
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
 
-  /* ── Z-Index Scale ──────────────────────────────────────── */
+  /* ── Z-Index ────────────────────────────────────────────── */
   --z-base: 0;
-  --z-dropdown: 100;
   --z-sticky: 200;
   --z-fixed: 300;
-  --z-modal-backdrop: 400;
   --z-modal: 500;
-  --z-popover: 600;
-  --z-tooltip: 700;
-
-  /* ── Transitions ────────────────────────────────────────── */
-  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  
-  --duration-instant: 50ms;
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 400ms;
-  --duration-slower: 600ms;
-
-  --transition-fast: var(--duration-fast) var(--ease-out);
-  --transition-normal: var(--duration-normal) var(--ease-out);
-  --transition-slow: var(--duration-slow) var(--ease-out);
-
-  /* ── Glassmorphism ──────────────────────────────────────── */
-  --glass-bg: rgba(0, 0, 0, 0.65);
-  --glass-blur: 12px;
-  --glass-border: rgba(255, 255, 255, 0.1);
-
-  /* ── Layout ─────────────────────────────────────────────── */
-  --sidebar-width: 275px;
-  --sidebar-collapsed: 88px;
-  --widget-width: 350px;
-  --max-content-width: 600px;
-
-  /* ── Mobile / Safe Areas ────────────────────────────────── */
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-  --mobile-nav-height: 56px;
-  --mobile-header-height: 53px;
-
-  /* ── Brutalist Design System ────────────────────────────── */
-  /* Inspired by Landing page: Monospace, Raw, Command-line aesthetic */
-  --brutalist-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
-  --brutalist-border-width: 1px;
-  --brutalist-border-style: solid;
-  
-  /* Light Mode Brutalist Palette */
-  --brutalist-light-bg: #ffffff;
-  --brutalist-light-fg: #000000;
-  --brutalist-light-border: #000000;
-  --brutalist-light-accent: #000000;
-  
-  /* Dark Mode Brutalist Palette */
-  --brutalist-dark-bg: #000000;
-  --brutalist-dark-fg: #ffffff;
-  --brutalist-dark-border: rgba(255, 255, 255, 0.25);
-  --brutalist-dark-accent: #ffffff;
-  
-  /* Codex Teal (Accent) */
-  --codex-teal: #00d9ff;
-  --codex-teal-hover: #00b8cc;
 }
 
-/* Light Mode Overrides */
+/* Light Mode (Brutalist Inverted) */
 .light-mode {
-  --depth-0: #ffffff;
-  --depth-1: #ffffff;
-  --depth-2: #f7f9f9;
-  --depth-3: #eff3f4;
-  --depth-4: #e7e9ea;
-  --depth-5: #cfd9de;
-
-  --ink-primary: #0f1419;
-  --ink-secondary: #536471;
-  --ink-tertiary: #8b949e;
+  --color-background: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f5f5f5;
   
-  --border-default: #eff3f4;
-  --border-subtle: #eff3f4;
+  --ink-primary: #000000;
+  --ink-secondary: rgba(0, 0, 0, 0.8);
+  --ink-tertiary: rgba(0, 0, 0, 0.6);
   
-  --color-surface-hover: rgba(15, 20, 25, 0.03);
-  --color-surface-active: rgba(15, 20, 25, 0.07);
-
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --shadow-md: rgba(0, 0, 0, 0.08) 0px 8px 28px;
+  --brutalist-border-color: #000000;
+  --border-default: #000000;
 }

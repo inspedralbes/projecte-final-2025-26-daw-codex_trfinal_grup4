@@ -4,35 +4,38 @@
    ============================================================ */
 
 .feed {
-  min-height: 100vh;
-  max-width: var(--feed-width);
+  max-width: var(--max-content-width);
   margin: 0 auto;
-  width: 100%;
-  background: var(--color-background);
+  border-right: 1px solid var(--border-default);
+  border-left: 1px solid var(--border-default);
+  background-color: var(--color-background);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ── Header ───────────────────────────────────────────────── */
 .feed__header {
   position: sticky;
   top: 0;
-  z-index: var(--z-sticky);
-  background: var(--color-background);
+  z-index: 1000;
+  background-color: #000000;
   border-bottom: 1px solid var(--border-default);
+  width: 100%;
 }
 
-.feed__title {
-  padding: var(--space-4) var(--space-4) var(--space-2);
-  font-size: var(--text-lg);
+.feed__header h2 {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
   font-weight: 700;
   color: var(--ink-primary);
-  margin: 0;
-  font-family: var(--font-mono);
-  letter-spacing: 0.05em;
   text-transform: uppercase;
+  letter-spacing: -0.02em;
 }
 
 .feed__tabs {
   display: flex;
+  width: 100%;
+  border-bottom: 1px solid var(--border-default);
 }
 
 .feed__tab {
@@ -40,41 +43,24 @@
   padding: var(--space-4);
   background: none;
   border: none;
-  border-right: 1px solid var(--border-default);
-  color: var(--ink-tertiary);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  cursor: pointer;
-  position: relative;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  color: var(--ink-secondary);
   font-family: var(--font-mono);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.feed__tab:last-child {
-  border-right: none;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
 }
 
 .feed__tab:hover {
-  color: var(--ink-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--pure-white);
 }
 
 .feed__tab--active {
   color: var(--codex-teal);
-  font-weight: 600;
-  background: rgba(0, 217, 255, 0.05);
-}
-
-.feed__tab--active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--codex-teal);
+  border-bottom: 2px solid var(--codex-teal);
 }
 
 

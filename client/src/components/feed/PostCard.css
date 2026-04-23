@@ -48,31 +48,26 @@
   margin-bottom: var(--space-2);
 }
 
-.post-card__author {
+.post-card__author-info {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  flex-wrap: wrap;
-  min-width: 0;
-}
-
-.post-card__name {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-weight: 600;
-  color: var(--ink-primary);
-  white-space: nowrap;
+  margin-bottom: var(--space-1);
   font-family: var(--font-mono);
-  letter-spacing: 0.02em;
 }
 
-.post-card__handle {
+.post-card__display-name {
+  font-weight: 700;
+  color: var(--pure-white);
+  font-size: var(--text-base);
+  font-family: var(--font-mono);
+}
+
+.post-card__username,
+.post-card__time {
   color: var(--ink-tertiary);
-  font-size: var(--text-xs);
-  white-space: nowrap;
+  font-size: var(--text-sm);
   font-family: var(--font-mono);
-  letter-spacing: 0.01em;
 }
 
 .post-card__badge {
