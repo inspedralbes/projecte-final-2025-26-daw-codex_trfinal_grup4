@@ -7,6 +7,7 @@ use App\Events\NewMessageEvent;
 use App\Http\Requests\StoreMessageRequest;
 use App\Models\ChatMessage;
 use App\Models\User;
+use App\Models\Group;
 use App\Services\ChatService;
 use App\Services\NotificationService;
 use App\Services\SanitizationService;
@@ -81,6 +82,55 @@ class ChatController extends Controller
     }
 
     /**
+     * GET /api/chat/groups/{groupId}
+     * Get messages for a specific group.
+     */
+    public function groupMessages(Request $request, int $groupId): JsonResponse
+    {
+        $user = $request->user();
+        $group = Group::find($groupId);
+
+        if (!$group) {
+            return $this->error('Grupo no encontrado.', 404);
+        }
+
+        $beforeId = $request->query('before_id');
+        $limit = min((int) $request->query('limit', 50), 100);
+
+        try {
+            $messages = $this->chatService->getGroupMessages(
+                $user,
+                $groupId,
+                $limit,
+                $beforeId ? (int) $beforeId : null
+            );
+
+            // Mark group as read
+            $this->chatService->markGroupAsRead($user, $group->id);
+
+            return $this->success([
+                'messages' => $messages,
+                'group' => [
+                    'id' => $group->id,
+                    'name' => $group->name,
+                    'image_url' => $group->image_url,
+                    'members' => $group->members->map(function ($m) {
+                        return [
+                            'id' => $m->id,
+                            'name' => $m->name,
+                            'username' => $m->username,
+                            'avatar' => $m->avatar,
+                            'is_admin' => (bool)$m->pivot->is_admin,
+                        ];
+                    }),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 403);
+        }
+    }
+
+    /**
      * POST /api/chat/messages
      * Send a new message.
      */
@@ -88,8 +138,55 @@ class ChatController extends Controller
     {
         $sender = $request->user();
         $receiverId = $request->input('receiver_id');
+        $groupId = $request->input('group_id');
         $content = $request->input('content');
 
+        // Case 1: Group Message
+        if ($groupId) {
+            $group = Group::find($groupId);
+            if (!$group) {
+                return $this->error('Grupo no encontrado.', 404);
+            }
+
+            // Verify membership
+            if (!$sender->groups()->where('groups.id', $groupId)->exists()) {
+                return $this->error('No perteneces a este grupo.', 403);
+            }
+
+            $sanitizedContent = $this->sanitization->sanitizeHtml($content);
+
+            $message = ChatMessage::create([
+                'sender_id' => $sender->id,
+                'group_id' => $group->id,
+                'content' => $sanitizedContent,
+            ]);
+
+            // Broadcast the event (skip if called from Socket P2P to avoid duplicate)
+            if (!$request->hasHeader('X-Socket-P2P')) {
+                event(new \App\Events\NewGroupMessageEvent($message));
+            }
+
+            $memberIds = $group->members()->pluck('users.id')->toArray();
+
+            return $this->success([
+                'message' => [
+                    'id' => $message->id,
+                    'content' => $message->content,
+                    'sender_id' => $message->sender_id,
+                    'group_id' => $message->group_id,
+                    'is_own' => true,
+                    'created_at' => $message->created_at->toISOString(),
+                    'sender' => [
+                        'id' => $sender->id,
+                        'name' => $sender->name,
+                        'avatar' => $sender->avatar,
+                    ]
+                ],
+                'member_ids' => $memberIds
+            ], 'Mensaje enviado al grupo.', 201);
+        }
+
+        // Case 2: Private Message
         $receiver = User::find($receiverId);
         if (!$receiver) {
             return $this->error('Usuario destinatario no encontrado.', 404);

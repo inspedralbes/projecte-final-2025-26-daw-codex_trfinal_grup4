@@ -128,8 +128,10 @@ class ChatService
      */
     public function getConversations(User $user): array
     {
-        // Get all users this user has exchanged messages with
+        // 1. Get 1:1 conversations
         $conversationPartners = ChatMessage::query()
+            ->whereNull('group_id')
+            ->whereNull('center_id')
             ->where(function ($q) use ($user) {
                 $q->where('sender_id', $user->id)
                   ->orWhere('receiver_id', $user->id);
@@ -149,8 +151,9 @@ class ChatService
             $partner = User::find($partnerId);
             if (!$partner) continue;
 
-            // Get last message
             $lastMessage = ChatMessage::query()
+                ->whereNull('group_id')
+                ->whereNull('center_id')
                 ->where(function ($q) use ($user, $partnerId) {
                     $q->where(function ($q2) use ($user, $partnerId) {
                         $q2->where('sender_id', $user->id)
@@ -163,7 +166,6 @@ class ChatService
                 ->orderBy('created_at', 'desc')
                 ->first();
 
-            // Get unread count
             $unreadCount = ChatMessage::query()
                 ->where('sender_id', $partnerId)
                 ->where('receiver_id', $user->id)
@@ -173,6 +175,7 @@ class ChatService
             $status = $this->getConversationStatus($user, $partner);
 
             $conversations[] = [
+                'type' => 'private',
                 'partner' => [
                     'id' => $partner->id,
                     'name' => $partner->name,
@@ -190,6 +193,40 @@ class ChatService
                 'unread_count' => $unreadCount,
                 'is_mutual' => $status['is_mutual'],
                 'can_send' => $status['can_send'],
+            ];
+        }
+
+        // 2. Get Group conversations
+        $userGroups = $user->groups()->withCount('members')->get();
+        foreach ($userGroups as $group) {
+            $lastMessage = ChatMessage::query()
+                ->where('group_id', $group->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            $lastReadMessageId = $group->pivot->last_read_message_id ?? 0;
+            
+            $unreadCount = ChatMessage::query()
+                ->where('group_id', $group->id)
+                ->where('id', '>', $lastReadMessageId)
+                ->count();
+
+            $conversations[] = [
+                'type' => 'group',
+                'group' => [
+                    'id' => $group->id,
+                    'name' => $group->name,
+                    'image_url' => $group->image_url,
+                    'members_count' => $group->members_count,
+                    'is_admin' => (bool)$group->pivot->is_admin,
+                ],
+                'last_message' => $lastMessage ? [
+                    'id' => $lastMessage->id,
+                    'content' => $lastMessage->content,
+                    'sender_id' => $lastMessage->sender_id,
+                    'created_at' => $lastMessage->created_at->toISOString(),
+                ] : null,
+                'unread_count' => $unreadCount,
             ];
         }
 
@@ -244,6 +281,44 @@ class ChatService
     }
 
     /**
+     * Get messages for a specific group.
+     */
+    public function getGroupMessages(User $user, int $groupId, int $limit = 50, ?int $beforeId = null): array
+    {
+        // Verify user belongs to group
+        if (!$user->groups()->where('groups.id', $groupId)->exists()) {
+            throw new \Exception('No perteneces a este grupo.', 403);
+        }
+
+        $query = ChatMessage::query()
+            ->where('group_id', $groupId);
+
+        if ($beforeId) {
+            $query->where('id', '<', $beforeId);
+        }
+
+        $messages = $query
+            ->with('sender:id,name,username,avatar')
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get()
+            ->reverse()
+            ->values();
+
+        return $messages->map(function ($msg) use ($user) {
+            return [
+                'id' => $msg->id,
+                'content' => $msg->content,
+                'sender_id' => $msg->sender_id,
+                'sender' => $msg->sender,
+                'group_id' => $msg->group_id,
+                'is_own' => $msg->sender_id === $user->id,
+                'created_at' => $msg->created_at->toISOString(),
+            ];
+        })->toArray();
+    }
+
+    /**
      * Mark messages as read.
      */
     public function markAsRead(User $currentUser, User $sender): int
@@ -256,13 +331,42 @@ class ChatService
     }
 
     /**
+     * Mark group messages as read for a user.
+     */
+    public function markGroupAsRead(User $user, int $groupId): void
+    {
+        $lastMessage = ChatMessage::query()
+            ->where('group_id', $groupId)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if ($lastMessage) {
+            $user->groups()->updateExistingPivot($groupId, [
+                'last_read_message_id' => $lastMessage->id
+            ]);
+        }
+    }
+
+    /**
      * Get total unread messages count for a user.
      */
     public function getUnreadCount(User $user): int
     {
-        return ChatMessage::query()
+        $privateUnread = ChatMessage::query()
             ->where('receiver_id', $user->id)
             ->where('is_read', false)
             ->count();
+            
+        $groupUnread = 0;
+        $userGroups = $user->groups()->get();
+        foreach ($userGroups as $group) {
+            $lastReadMessageId = $group->pivot->last_read_message_id ?? 0;
+            $groupUnread += ChatMessage::query()
+                ->where('group_id', $group->id)
+                ->where('id', '>', $lastReadMessageId)
+                ->count();
+        }
+        
+        return $privateUnread + $groupUnread;
     }
 }

@@ -219,6 +219,30 @@ const socketService = {
   },
 
   /**
+   * Join a group room for live messages
+   * @param {number} groupId - Group ID
+   */
+  joinGroupRoom: (groupId) => {
+    if (socket) {
+      socket.emit("join-group", { groupId });
+      rooms.add(`group.${groupId}`);
+      console.log("[Socket.io] Joined room: group." + groupId);
+    }
+  },
+
+  /**
+   * Leave a group room
+   * @param {number} groupId - Group ID
+   */
+  leaveGroupRoom: (groupId) => {
+    if (socket) {
+      socket.emit("leave-group", { groupId });
+      rooms.delete(`group.${groupId}`);
+      console.log("[Socket.io] Left room: group." + groupId);
+    }
+  },
+
+  /**
    * Send typing indicator
    * @param {number} userId - Current user ID
    * @param {number} partnerId - Chat partner ID
@@ -232,12 +256,13 @@ const socketService = {
 
   /**
    * Send a P2P message via socket
-   * @param {number} receiverId - Receiver user ID
+   * @param {number|null} receiverId - Receiver user ID (for 1:1)
    * @param {string} content - Message content
    * @param {string} tempId - Temporary ID for optimistic update
+   * @param {number|null} groupId - Group ID (for group chats)
    * @returns {Promise<{success: boolean, message?: object, error?: string}>}
    */
-  sendMessage: (receiverId, content, tempId) => {
+  sendMessage: (receiverId, content, tempId, groupId = null) => {
     return new Promise((resolve) => {
       if (!socket || !socket.connected) {
         console.error("[Socket.io] sendMessage: Not connected");
@@ -253,6 +278,7 @@ const socketService = {
 
       console.log("[Socket.io] Sending message:", {
         receiverId,
+        groupId,
         contentLength: content?.length,
         tempId,
         hasToken: !!authToken,
@@ -264,7 +290,7 @@ const socketService = {
         resolve({ success: false, error: "Server timeout" });
       }, 10000);
 
-      socket.emit("send-message", { receiverId, content, tempId, token: authToken }, (response) => {
+      socket.emit("send-message", { receiverId, groupId, content, tempId, token: authToken }, (response) => {
         clearTimeout(timeout);
         console.log("[Socket.io] sendMessage response:", response);
         resolve(response || { success: false, error: "No response" });
@@ -324,6 +350,7 @@ const socketService = {
         if (type === "post") socket.emit("join-post", { postId: id });
         if (type === "profile") socket.emit("join-profile", { userId: id });
         if (room === "admin") socket.emit("join-admin");
+        if (type === "group") socket.emit("join-group", { groupId: parseInt(id) });
         if (type === "chat") {
           const [userId, partnerId] = id.split("-");
           socket.emit("join-chat", { userId: parseInt(userId), partnerId: parseInt(partnerId) });
@@ -350,6 +377,26 @@ const socketService = {
   onAdminEvent: (callback) => {
     if (socket) {
       socket.on("admin.new_request", callback);
+    }
+  },
+
+  /**
+   * Listen for group updates (name, image)
+   * @param {Function} callback - Handler function
+   */
+  onGroupUpdate: (callback) => {
+    if (socket) {
+      socket.on("group.updated", callback);
+    }
+  },
+
+  /**
+   * Listen for group membership changes (add, remove, leave)
+   * @param {Function} callback - Handler function
+   */
+  onGroupMemberChange: (callback) => {
+    if (socket) {
+      socket.on("group.member_changed", callback);
     }
   },
 

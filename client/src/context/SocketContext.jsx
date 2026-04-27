@@ -37,6 +37,17 @@ export const SocketProvider = ({ children }) => {
         setIsConnected(true);
         // Join user's personal room for notifications
         socketService.joinUserRoom(user.id);
+
+        // Auto-join all group rooms so we receive group messages globally
+        chatService.getGroups()
+          .then((response) => {
+            const groups = response.groups || [];
+            groups.forEach((g) => {
+              socketService.joinGroupRoom(g.id);
+            });
+            console.log(`[Socket] Auto-joined ${groups.length} group rooms`);
+          })
+          .catch((err) => console.error("Error auto-joining group rooms:", err));
       };
 
       const handleDisconnect = () => {
@@ -104,10 +115,21 @@ export const SocketProvider = ({ children }) => {
       console.log("[Socket] New message (global):", message);
       
       const senderId = parseInt(message.sender_id, 10);
+      const msgGroupId = message.group_id ? parseInt(message.group_id, 10) : null;
       const activeChat = activeConversationRef.current;
       
+      // Determine if the message belongs to the active conversation
+      let isForActiveChat = false;
+      if (activeChat) {
+        if (msgGroupId && activeChat.type === "group" && activeChat.id === msgGroupId) {
+          isForActiveChat = true;
+        } else if (!msgGroupId && activeChat.type === "user" && activeChat.id === senderId) {
+          isForActiveChat = true;
+        }
+      }
+      
       // Only increment counter for messages from others AND not in the active conversation
-      if (senderId !== user.id && senderId !== activeChat) {
+      if (senderId !== user.id && !isForActiveChat) {
         setUnreadMessagesCount((prev) => prev + 1);
       }
       
@@ -117,10 +139,39 @@ export const SocketProvider = ({ children }) => {
       );
     };
 
+    const handleGroupUpdate = (data) => {
+      console.log("[Socket] Group updated:", data);
+      window.dispatchEvent(
+        new CustomEvent("codex:group_updated", { detail: data })
+      );
+    };
+
+    const handleGroupMemberChange = (data) => {
+      console.log("[Socket] Group member changed:", data);
+      const groupId = parseInt(data.group_id, 10);
+      const action = data.action;
+      const changedUser = data.user;
+      const currentUserId = parseInt(user?.id, 10);
+
+      // If CURRENT user was added to a group, join the room immediately
+      if (changedUser.id === currentUserId && action === 'added') {
+        console.log(`[Socket] We were added to group ${groupId}, joining room...`);
+        socketService.joinGroupRoom(groupId);
+      }
+
+      window.dispatchEvent(
+        new CustomEvent("codex:group_member_changed", { detail: data })
+      );
+    };
+
     socketService.onMessage(handleNewMessage);
+    socketService.onGroupUpdate(handleGroupUpdate);
+    socketService.onGroupMemberChange(handleGroupMemberChange);
 
     return () => {
       socketService.off("new.message", handleNewMessage);
+      socketService.off("group.updated", handleGroupUpdate);
+      socketService.off("group.member_changed", handleGroupMemberChange);
     };
   }, [user]);
 
@@ -169,6 +220,20 @@ export const SocketProvider = ({ children }) => {
     return () => window.removeEventListener("codex:message", handleMsg);
   }, []);
 
+  // Subscribe to group updates globally
+  const onGroupUpdate = useCallback((callback) => {
+    const handleUpdate = (event) => callback(event.detail);
+    window.addEventListener("codex:group_updated", handleUpdate);
+    return () => window.removeEventListener("codex:group_updated", handleUpdate);
+  }, []);
+
+  // Subscribe to group member changes globally
+  const onGroupMemberChange = useCallback((callback) => {
+    const handleChange = (event) => callback(event.detail);
+    window.addEventListener("codex:group_member_changed", handleChange);
+    return () => window.removeEventListener("codex:group_member_changed", handleChange);
+  }, []);
+
   // Set unread messages count (for when fetched from API or updater function)
   const setMessagesCount = useCallback((countOrUpdater) => {
     setUnreadMessagesCount(countOrUpdater);
@@ -180,8 +245,16 @@ export const SocketProvider = ({ children }) => {
   }, []);
 
   // Set active conversation (to prevent incrementing unread for messages in this chat)
-  const setActiveChat = useCallback((userId) => {
-    activeConversationRef.current = userId ? parseInt(userId, 10) : null;
+  // Accepts: null, { type: 'user', id: number } or { type: 'group', id: number }
+  const setActiveChat = useCallback((chatInfo) => {
+    if (!chatInfo) {
+      activeConversationRef.current = null;
+    } else if (typeof chatInfo === "object" && chatInfo.type) {
+      activeConversationRef.current = { type: chatInfo.type, id: parseInt(chatInfo.id, 10) };
+    } else {
+      // Legacy fallback: treat as user ID
+      activeConversationRef.current = { type: "user", id: parseInt(chatInfo, 10) };
+    }
   }, []);
 
   // Reset unread messages count
@@ -205,6 +278,8 @@ export const SocketProvider = ({ children }) => {
     onNewComment,
     onNewNotification,
     onNewMessage,
+    onGroupUpdate,
+    onGroupMemberChange,
   };
 
   return (
