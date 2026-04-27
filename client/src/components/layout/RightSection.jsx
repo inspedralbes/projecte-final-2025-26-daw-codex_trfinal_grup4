@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTags } from "@/hooks/useTags";
 import profileService from "@/services/profileService";
 import postsService from "@/services/postsService";
+import GlitchHover from "@/components/ui/GlitchHover";
 import "./RightSection.css";
 
 const SearchIcon = () => (
@@ -64,7 +65,7 @@ const TrendingTags = () => {
             >
               <span className="trend-item__rank">{index + 1}</span>
               <div className="trend-item__content">
-                <span className="trend-item__tag">#{tag.name}</span>
+                <span className="trend-item__tag">#<GlitchHover>{tag.name}</GlitchHover></span>
                 <span className="trend-item__posts">
                   {tag.posts_count || 0} {t("feed.posts_count")}
                 </span>
@@ -127,9 +128,11 @@ const TopContributors = () => {
               </div>
               <div className="user-item__info">
                 <span className="user-item__name">
-                  {user.name} {user.badge}
+                  <GlitchHover>{user.name}</GlitchHover> {user.badge}
                 </span>
-                <span className="user-item__handle">@{user.username}</span>
+                <span className="user-item__handle">
+                  <GlitchHover>@{user.username}</GlitchHover>
+                </span>
               </div>
               <span className="user-item__points">{user.score} pts</span>
             </button>
@@ -183,10 +186,10 @@ const RecentQuestions = () => {
               </span>
               <div className="question-item__content">
                 <span className="question-item__title">
-                  {q.content?.slice(0, 50) || t("feed.no_title")}...
+                  <GlitchHover>{q.content?.slice(0, 30) || t("feed.no_title")}...</GlitchHover>
                 </span>
                 <span className="question-item__author">
-                  @{q.user?.username || t("common.anonymous")}
+                  <GlitchHover>@{q.user?.username || t("common.anonymous")}</GlitchHover>
                 </span>
               </div>
             </button>

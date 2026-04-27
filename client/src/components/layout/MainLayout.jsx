@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
 import Sidebar from "./Sidebar";
 import RightSection from "./RightSection";
+import SymbolSea from "@/components/ui/SymbolSea";
 import CenterPromptModal from "@/components/center/CenterPromptModal";
 import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal";
 import socketService from "@/services/socketService";
@@ -96,6 +97,9 @@ export default function MainLayout() {
 
   return (
     <div className={`app-layout ${user?.role === "admin" ? "app-layout--admin" : ""}`}>
+      {/* ── Symbol Sea Background ── */}
+      <SymbolSea />
+      
       {/* Mobile Header - only visible on small screens */}
       <header className="mobile-header">
         <div className="mobile-header__avatar" onClick={() => navigate("/profile")}>
@@ -164,8 +168,9 @@ export default function MainLayout() {
         </div>
       </main>
       {user?.role !== "admin" && <RightSection />}
-
-      {/* Admin Real-time Toast */}
+      
+      {/* ── Brutalist Decorative Elements ── */}
+      <div className="bg-watermark">CODEX_CORE_v2.0.46</div>
       {adminNotification && (
         <div
           className={`ar-toast ar-toast--${adminNotification.type}`}

@@ -36,27 +36,27 @@
 }
 
 .notif__badge {
-  background: var(--codex-teal);
-  color: var(--codex-deep-slate);
+  background: var(--codex-coral);
+  color: var(--codex-black);
   font-size: var(--text-xs);
-  font-weight: 700;
+  font-weight: 800;
   padding: 2px 8px;
-  border-radius: var(--radius-full);
+  border-radius: 0;
   min-width: 20px;
   text-align: center;
 }
 
 .notif__mark-read {
   background: none;
-  border: none;
-  color: var(--codex-teal);
-  font-family: var(--font-sans);
-  font-size: var(--text-sm);
-  font-weight: 500;
+  border: 1px solid var(--codex-white);
+  color: var(--codex-white);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
   cursor: pointer;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  transition: background var(--duration-fast) ease;
+  padding: var(--space-1) var(--space-3);
+  border-radius: 0;
+  text-transform: uppercase;
 }
 
 .notif__mark-read:hover {
@@ -91,8 +91,8 @@
 }
 
 .notif__filter--active {
-  background: var(--codex-teal-muted);
-  color: var(--codex-teal);
+  background: rgba(255, 95, 86, 0.15);
+  color: var(--codex-coral);
 }
 
 /* Notification List */
@@ -116,8 +116,8 @@
 }
 
 .notif__item--unread {
-  background: color-mix(in srgb, var(--codex-teal) 8%, var(--surface-depth-1));
-  border-left: 3px solid var(--codex-teal);
+  background: rgba(255, 95, 86, 0.03);
+  border-left: 3px solid var(--codex-coral);
   position: relative;
 }
 
@@ -128,8 +128,8 @@
   left: -1px;
   width: 6px;
   height: 6px;
-  background: var(--codex-teal);
-  border-radius: 50%;
+  background: var(--codex-coral);
+  border-radius: 0;
   transform: translateY(-50%);
 }
 
@@ -154,8 +154,8 @@
 }
 
 .notif__icon--follow {
-  background: color-mix(in srgb, var(--codex-teal) 20%, transparent);
-  color: var(--codex-teal);
+  background: rgba(255, 95, 86, 0.15);
+  color: var(--codex-coral);
 }
 
 .notif__icon--mention {
@@ -169,8 +169,8 @@
 }
 
 .notif__icon--success {
-  background: color-mix(in srgb, var(--codex-emerald) 20%, transparent);
-  color: var(--codex-emerald);
+  background: rgba(255, 95, 86, 0.15);
+  color: var(--codex-coral);
 }
 
 .notif__icon--code {
@@ -254,11 +254,12 @@
   display: inline-block;
   margin-top: var(--space-2);
   padding: 2px var(--space-2);
-  background: var(--codex-emerald-muted);
-  color: var(--codex-emerald);
+  background: rgba(255, 95, 86, 0.1);
+  color: var(--codex-coral);
   font-size: var(--text-xs);
-  font-weight: 600;
-  border-radius: var(--radius-sm);
+  font-weight: 700;
+  border-radius: 0;
+  border: 1px solid var(--codex-coral);
   font-family: var(--font-mono);
 }
 
@@ -391,7 +392,7 @@
 }
 
 .notif__spinner svg {
-  color: var(--codex-teal);
+  color: var(--codex-coral);
 }
 
 .notif__error {

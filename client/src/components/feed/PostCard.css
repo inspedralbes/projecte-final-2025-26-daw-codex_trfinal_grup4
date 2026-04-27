@@ -5,21 +5,25 @@
 .post-card {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border-bottom: 1px solid var(--border-subtle);
-  transition: background var(--transition-fast);
+  gap: var(--space-4);
+  padding: var(--space-5);
+  margin-bottom: var(--space-2);
+  border: 1px solid var(--border-default);
+  transition: all var(--transition-fast);
   cursor: pointer;
+  background: var(--depth-1);
 }
 
 .post-card:hover {
-  background: var(--depth-1);
+  background: var(--depth-2);
+  border-color: var(--codex-coral);
+  transform: translateY(-1px);
 }
 
 .post-card__avatar {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
+  border: 1px solid var(--border-default);
   overflow: hidden;
   background: var(--depth-3);
   flex-shrink: 0;
@@ -79,14 +83,15 @@
 
 /* Center post badge */
 .post-card__center-badge {
-  padding: 3px 8px;
-  background: rgba(20, 184, 166, 0.08);
-  color: var(--codex-teal);
-  border: 1px solid rgba(20, 184, 166, 0.12);
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  padding: 2px 8px;
+  background: var(--depth-3);
+  color: var(--codex-white);
+  border: 1px solid var(--border-default);
+  font-size: 0.65rem;
   font-weight: 700;
   margin-left: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .post-card__dot {
@@ -137,9 +142,9 @@
 }
 
 .post-card__question-badge--open {
-  background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(245, 158, 11, 0.1));
-  border: 1px solid rgba(234, 179, 8, 0.4);
-  color: var(--state-warning);
+  background: var(--codex-coral);
+  border: 1px solid var(--codex-coral);
+  color: var(--codex-black);
 }
 
 .post-card__question-badge-icon {
@@ -228,23 +233,23 @@
 
 .post-card__code-dots {
   display: flex;
-  gap: var(--space-1-5);
+  gap: var(--space-1);
 }
 
 .post-card__code-dots span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--border-default);
 }
 
 .post-card__code-dots span:first-child {
-  background: #ff5f56;
+  background: var(--state-error);
 }
 .post-card__code-dots span:nth-child(2) {
-  background: #ffbd2e;
+  background: var(--state-warning);
 }
 .post-card__code-dots span:last-child {
-  background: #27ca40;
+  background: var(--state-success);
 }
 
 .post-card__code-lang {
@@ -397,47 +402,47 @@
   transition: color 0.15s ease;
 }
 
-/* Comment - Blue */
+/* Comment - White */
 .post-card__action--comment:hover .post-card__action-icon {
-  color: rgb(29, 155, 240);
-  background: rgba(29, 155, 240, 0.1);
+  color: var(--codex-white);
+  background: rgba(255, 255, 255, 0.1);
 }
 .post-card__action--comment:hover .post-card__action-count {
-  color: rgb(29, 155, 240);
+  color: var(--codex-white);
 }
 
-/* Repost - Green */
+/* Repost - White */
 .post-card__action--repost:hover:not(:disabled) .post-card__action-icon {
-  color: rgb(0, 186, 124);
-  background: rgba(0, 186, 124, 0.1);
+  color: var(--codex-white);
+  background: rgba(255, 255, 255, 0.1);
 }
 .post-card__action--repost:hover:not(:disabled) .post-card__action-count {
-  color: rgb(0, 186, 124);
+  color: var(--codex-white);
 }
 .post-card__action--active-repost .post-card__action-icon {
-  color: rgb(0, 186, 124);
+  color: var(--codex-white);
 }
 .post-card__action--active-repost .post-card__action-count {
-  color: rgb(0, 186, 124);
+  color: var(--codex-white);
 }
 .post-card__action--repost:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
 
-/* Like - Pink/Red */
+/* Like - Red */
 .post-card__action--like:hover .post-card__action-icon {
-  color: rgb(249, 24, 128);
-  background: rgba(249, 24, 128, 0.1);
+  color: var(--state-error);
+  background: rgba(255, 51, 51, 0.1);
 }
 .post-card__action--like:hover .post-card__action-count {
-  color: rgb(249, 24, 128);
+  color: var(--state-error);
 }
 .post-card__action--like.post-card__action--active .post-card__action-icon {
-  color: rgb(249, 24, 128);
+  color: var(--state-error);
 }
 .post-card__action--like.post-card__action--active .post-card__action-count {
-  color: rgb(249, 24, 128);
+  color: var(--state-error);
 }
 
 /* Bookmark - Blue */
@@ -449,10 +454,10 @@
   color: rgb(29, 155, 240);
 }
 
-/* Share - Teal */
+/* Share - White/Coral */
 .post-card__action--share:hover .post-card__action-icon {
-  color: var(--codex-teal);
-  background: rgba(20, 184, 166, 0.1);
+  color: var(--codex-coral);
+  background: rgba(255, 95, 86, 0.1);
 }
 .post-card__action--share.post-card__action--copied .post-card__action-icon {
   color: var(--state-success);
@@ -806,7 +811,7 @@
   flex-basis: 100%;
   margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) 0;
   padding: var(--space-2) var(--space-4);
-  background: rgba(0, 186, 124, 0.05);
+  background: rgba(255, 95, 86, 0.05);
   border-bottom: 1px solid var(--border-subtle);
   color: var(--ink-tertiary);
   font-size: var(--text-xs);
@@ -815,13 +820,13 @@
 .post-card__repost-indicator svg {
   width: 14px;
   height: 14px;
-  color: var(--codex-emerald);
+  color: var(--codex-coral);
   flex-shrink: 0;
 }
 
 /* ── Reply Indicator ──────────────────────────────────────── */
 .post-card--reply {
-  border-left: 3px solid var(--codex-teal);
+  border-left: 3px solid var(--codex-coral);
 }
 
 .post-card__reply-indicator {
@@ -831,7 +836,7 @@
   flex-basis: 100%;
   margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-4)) 0;
   padding: var(--space-2) var(--space-4);
-  background: rgba(20, 184, 166, 0.05);
+  background: rgba(255, 95, 86, 0.05);
   border-bottom: 1px solid var(--border-subtle);
   color: var(--ink-tertiary);
   font-size: var(--text-xs);
@@ -840,12 +845,12 @@
 .post-card__reply-indicator svg {
   width: 14px;
   height: 14px;
-  color: var(--codex-teal);
+  color: var(--codex-coral);
   flex-shrink: 0;
 }
 
 .post-card__reply-link {
-  color: var(--codex-teal);
+  color: var(--codex-coral);
   text-decoration: none;
   font-weight: 500;
 }

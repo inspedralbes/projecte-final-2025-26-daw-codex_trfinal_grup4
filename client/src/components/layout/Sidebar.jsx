@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
+import GlitchHover from "@/components/ui/GlitchHover";
 import "./Sidebar.css";
 
 // Navigation icons
@@ -294,7 +295,9 @@ export default function Sidebar() {
                   <span className="sidebar__nav-icon">
                     <Icon active={false} />
                   </span>
-                  <span className="sidebar__nav-label">{t(label)}</span>
+                  <span className="sidebar__nav-label">
+                    <GlitchHover>{t(label)}</GlitchHover>
+                  </span>
                   <span className="sidebar__nav-lock">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -325,7 +328,9 @@ export default function Sidebar() {
                     </span>
                   )}
                 </span>
-                <span className="sidebar__nav-label">{t(label)}</span>
+                <span className="sidebar__nav-label">
+                  <GlitchHover>{t(label)}</GlitchHover>
+                </span>
               </NavLink>
             );
           })}
@@ -343,9 +348,11 @@ export default function Sidebar() {
             />
           </div>
           <div className="sidebar__user-info">
-            <span className="sidebar__user-name">{user?.name || t("common.user")}</span>
+            <span className="sidebar__user-name">
+              <GlitchHover>{user?.name || t("common.user")}</GlitchHover>
+            </span>
             <span className="sidebar__user-handle">
-              @{user?.username || t("common.user").toLowerCase()}
+              <GlitchHover>@{user?.username || t("common.user").toLowerCase()}</GlitchHover>
             </span>
           </div>
           <button className="sidebar__user-menu" onClick={handleLogout} title={t("common.logout")}>

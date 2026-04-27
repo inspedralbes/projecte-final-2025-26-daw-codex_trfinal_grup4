@@ -7,6 +7,7 @@ import "highlight.js/styles/github-dark.css";
 import { useInteractions } from "@/hooks/useInteractions";
 import postsService from "@/services/postsService";
 import { useAuth } from "@/hooks/useAuth";
+import GlitchHover from "@/components/ui/GlitchHover";
 import "./PostCard.css";
 
 // Icons - Twitter-style minimal
@@ -95,7 +96,7 @@ const ReplyToIcon = () => (
 );
 
 const VerifiedIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--codex-teal)">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--codex-coral)">
     <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
   </svg>
 );
@@ -420,10 +421,12 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
         <header className="post-card__header">
           <div className="post-card__author">
             <span className="post-card__name">
-              {targetAuthor.name || "Usuario"}
+              <GlitchHover>{targetAuthor.name || "Usuario"}</GlitchHover>
               {isTargetVerified && <VerifiedIcon />}
             </span>
-            <span className="post-card__handle">@{targetAuthor.username || "user"}</span>
+            <span className="post-card__handle">
+              <GlitchHover>@{targetAuthor.username || "user"}</GlitchHover>
+            </span>
             {targetBadge && <span className="post-card__badge">{targetBadge}</span>}
             {/* Center post badge (visible when API marks it or center relation exists) */}
             { (targetPost.is_center_post || targetPost.center) && (
@@ -517,7 +520,7 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
               const tagName = typeof tag === "string" ? tag : tag.name || tag.slug;
               return (
                 <a key={tagName} href="#" className="post-card__tag">
-                  #{tagName}
+                  #<GlitchHover>{tagName}</GlitchHover>
                 </a>
               );
             })}

@@ -16,7 +16,7 @@
   --landing-border: rgba(255, 255, 255, 0.25);
   --landing-card-bg: rgba(0, 0, 0, 0.85);
   --landing-error: #ff3333;
-  --landing-success: #00ff88;
+  --landing-success: #ff5f56;
   --landing-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
   min-height: 100vh;
@@ -386,7 +386,7 @@ body:has(.landing--light) {
 }
 
 .auth-card__input--valid {
-  border-color: rgba(0, 255, 136, 0.5) !important;
+  border-color: rgba(255, 95, 86, 0.5) !important;
 }
 
 .auth-card__input--valid:focus {
@@ -602,7 +602,7 @@ body:has(.landing--light) {
 .auth-card__message--success {
   color: var(--landing-success);
   border-color: var(--landing-success);
-  background: rgba(0, 255, 136, 0.05);
+  background: rgba(255, 95, 86, 0.05);
 }
 
 .auth-card__message--error {

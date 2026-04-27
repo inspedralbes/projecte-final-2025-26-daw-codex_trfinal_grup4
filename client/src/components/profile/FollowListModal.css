@@ -14,7 +14,7 @@
 .follow-modal {
   background: var(--depth-1);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
+  border-radius: 0;
   width: 100%;
   max-width: 400px;
   max-height: 80vh;
@@ -113,7 +113,7 @@
   padding: var(--space-4);
   background: none;
   border: none;
-  color: var(--codex-teal);
+  color: var(--codex-coral);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
