@@ -51,7 +51,6 @@ class GroupMemberChangedEvent implements ShouldBroadcastNow
                 'username' => $this->user->username,
                 'avatar' => $this->user->avatar,
             ],
-            'is_admin' => $this->group->members()->where('user_id', $this->user->id)->first()?->pivot?->is_admin ?? false,
             'members_count' => $this->group->members()->count(),
         ];
     }

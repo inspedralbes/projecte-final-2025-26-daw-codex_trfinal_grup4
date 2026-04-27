@@ -59,7 +59,6 @@ Route::post('/password/reset', [PasswordController::class, 'reset']);
 /* ------------------------------------------------------------------ */
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{post}', [PostController::class, 'show']);
-Route::get('/sitemap', [\App\Http\Controllers\SitemapController::class, 'index']);
 Route::get('/posts/{postId}/comments', [CommentController::class, 'index']);
 Route::get('/posts/{postId}/interactions', [InteractionController::class, 'postStatus']);
 Route::get('/tags', [TagController::class, 'index']);
@@ -75,9 +74,6 @@ Route::get('/users/{user}/following', [FollowController::class, 'following']);
 
 // Search (public)
 Route::get('/search', [SearchController::class, 'index']);
-
-// Trending posts (public)
-Route::get('/trending', [PostController::class, 'trending']);
 
 // Leaderboard (public)
 Route::get('/leaderboard', [ProfileController::class, 'leaderboard']);
@@ -158,15 +154,11 @@ Route::middleware(['auth:sanctum', 'verified', 'not-blocked'])->group(function (
     // Follow – toggle + status (auth required)
     Route::post('/users/{user}/follow', [FollowController::class, 'toggle']);
     Route::get('/users/{user}/follow-status', [FollowController::class, 'status']);
-    Route::get('/follow-requests', [FollowController::class, 'pendingRequests']);
-    Route::post('/follow-requests/{follower}/accept', [FollowController::class, 'acceptRequest']);
-    Route::post('/follow-requests/{follower}/reject', [FollowController::class, 'rejectRequest']);
 
     // Center Hub (US#5) – "Walled Garden"
-    Route::get("/center/posts", [PostController::class, "centerPosts"]);
-    Route::get("/center/tags", [TagController::class, "centerTags"]);
-    Route::get("/center/search", [SearchController::class, "centerSearch"]);
-    Route::post("/center/group", [GroupChatController::class, "createOrGetCenterGroup"]);
+    Route::get('/center/posts', [PostController::class, 'centerPosts']);
+    Route::get('/center/tags', [TagController::class, 'centerTags']);
+    Route::get('/center/search', [SearchController::class, 'centerSearch']);
 
     // Tags – follow/unfollow + notifications
     Route::post('/tags/{tag}/follow', [TagController::class, 'toggleFollow']);
@@ -185,11 +177,9 @@ Route::middleware(['auth:sanctum', 'verified', 'not-blocked'])->group(function (
     Route::get('/groups', [GroupChatController::class, 'index']);
     Route::put('/groups/{groupId}', [GroupChatController::class, 'update']);
     Route::delete('/groups/{groupId}/members/{userId}', [GroupChatController::class, 'removeMember']);
-    Route::post('/groups/{groupId}/members/{userId}/toggle-admin', [GroupChatController::class, 'toggleAdmin']);
     Route::post('/groups/{groupId}/members', [GroupChatController::class, 'addMember']);
     Route::post('/groups/{groupId}/leave', [GroupChatController::class, 'leave']);
     Route::post('/groups/{groupId}/read', [GroupChatController::class, 'markAsRead']);
-    Route::post('/groups/{groupId}/image', [GroupChatController::class, 'uploadImage']);
 
     // Profile update (US#7)
     Route::put('/profile', [ProfileController::class, 'update']);

@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
 import chatService from "@/services/chatService";
 import socketService from "@/services/socketService";
-import GlitchText from "@/components/ui/GlitchText";
 import NewGroupModal from "@/components/chat/NewGroupModal";
 import GroupSettingsModal from "@/components/chat/GroupSettingsModal";
-import VideoCall from "@/components/chat/VideoCall";
 import "./Messages.css";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -18,94 +16,40 @@ const MAX_MESSAGE_LENGTH = 1000;
 // ─── Icons ───────────────────────────────────────────────────────────────────
 
 const SearchIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8" />
     <line x1="21" y1="21" x2="16.65" y2="16.65" />
   </svg>
 );
 
 const SendIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="22" y1="2" x2="11" y2="13" />
     <polygon points="22 2 15 22 11 13 2 9 22 2" />
   </svg>
 );
 
 const MessageCircleIcon = () => (
-  <svg
-    width="48"
-    height="48"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
   </svg>
 );
 
 const ChevronLeftIcon = () => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="15 18 9 12 15 6" />
   </svg>
 );
 
 const LockIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
   </svg>
 );
 
 const UsersIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
     <circle cx="9" cy="7" r="4" />
     <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -114,63 +58,27 @@ const UsersIcon = () => (
 );
 
 const CheckIcon = () => (
-  <svg
-    width="12"
-    height="12"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="3"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12" />
   </svg>
 );
 
 const DoubleCheckIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="18 6 9 17 4 12" />
     <polyline points="22 6 13 17" />
   </svg>
 );
 
 const PlusIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="12" y1="5" x2="12" y2="19" />
     <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
 
 const InfoIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10"></circle>
     <line x1="12" y1="16" x2="12" y2="12"></line>
     <line x1="12" y1="8" x2="12.01" y2="8"></line>
@@ -191,13 +99,12 @@ const LoadingSpinner = ({ size = 24 }) => (
 // ─── Avatar Component ────────────────────────────────────────────────────────
 
 const Avatar = ({ src, name, size = 48, online }) => {
-  const initials =
-    name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) || "?";
+  const initials = name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "?";
 
   return (
     <div className="msg__avatar" style={{ width: size, height: size }}>
@@ -206,7 +113,9 @@ const Avatar = ({ src, name, size = 48, online }) => {
       ) : (
         <span className="msg__avatar-initials">{initials}</span>
       )}
-      {online !== undefined && <span className={`msg__avatar-status ${online ? "online" : ""}`} />}
+      {online !== undefined && (
+        <span className={`msg__avatar-status ${online ? "online" : ""}`} />
+      )}
     </div>
   );
 };
@@ -217,17 +126,17 @@ const formatMessageTime = (dateString, t) => {
   const date = new Date(dateString);
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
-
+  
   if (isToday) {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   }
-
+  
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
   if (date.toDateString() === yesterday.toDateString()) {
     return t("messages.yesterday");
   }
-
+  
   return date.toLocaleDateString([], { day: "numeric", month: "short" });
 };
 
@@ -251,33 +160,20 @@ const formatConversationTime = (dateString, t) => {
 
 const ConversationItem = ({ conversation, isActive, onClick, t }) => {
   const { last_message, unread_count } = conversation;
-  const isGroup = conversation.type === "group";
+  const isGroup = conversation.type === 'group';
   const name = isGroup ? conversation.group?.name : conversation.partner?.name;
   const avatarSrc = isGroup ? conversation.group?.image_url : conversation.partner?.avatar;
   const is_mutual = !isGroup && conversation.is_mutual;
-
+  
   return (
     <div
       className={`msg__conv-item ${isActive ? "active" : ""} ${unread_count > 0 ? "unread" : ""}`}
       onClick={onClick}
     >
       {isGroup ? (
-        <div
-          className="msg__avatar msg__avatar--group"
-          style={{
-            width: 48,
-            height: 48,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <div className="msg__avatar msg__avatar--group" style={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {avatarSrc ? (
-            <img
-              src={avatarSrc}
-              alt={name}
-              style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
-            />
+            <img src={avatarSrc} alt={name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
           ) : (
             <UsersIcon />
           )}
@@ -308,7 +204,9 @@ const ConversationItem = ({ conversation, isActive, onClick, t }) => {
                 {last_message.content?.slice(0, 40)}
                 {last_message.content?.length > 40 ? "..." : ""}
               </span>
-              {unread_count > 0 && <span className="msg__conv-badge">{unread_count}</span>}
+              {unread_count > 0 && (
+                <span className="msg__conv-badge">{unread_count}</span>
+              )}
             </>
           ) : (
             <span className="msg__conv-empty">{t("messages.no_messages")}</span>
@@ -322,41 +220,19 @@ const ConversationItem = ({ conversation, isActive, onClick, t }) => {
 // ─── Message Bubble ──────────────────────────────────────────────────────────
 
 const MessageBubble = ({ message, showAvatar, partnerAvatar, partnerName, isGroup }) => {
-  const { content, is_own, is_read, created_at, sender, type } = message;
+  const { content, is_own, is_read, created_at, sender } = message;
   const displayAvatar = isGroup ? sender?.avatar : partnerAvatar;
   const displayName = isGroup ? sender?.name : partnerName;
-
-  if (type === 'system') {
-    // Basic markdown support for bold names in system messages
-    const formattedContent = content.split('**').map((part, i) => 
-      i % 2 === 1 ? <strong key={i}>{part}</strong> : part
-    );
-
-    return (
-      <div className="msg__bubble-system">
-        <span className="msg__bubble-system-text">
-          {formattedContent}
-        </span>
-      </div>
-    );
-  }
-
+  
   return (
     <div className={`msg__bubble-wrapper ${is_own ? "own" : "other"}`}>
-      {!is_own && showAvatar && <Avatar src={displayAvatar} name={displayName} size={32} />}
+      {!is_own && showAvatar && (
+        <Avatar src={displayAvatar} name={displayName} size={32} />
+      )}
       {!is_own && !showAvatar && <div className="msg__bubble-spacer" />}
       <div className={`msg__bubble ${is_own ? "own" : "other"}`}>
         {isGroup && !is_own && showAvatar && (
-          <span
-            className="msg__bubble-sender"
-            style={{
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              color: "var(--accent-primary, #7c5cfc)",
-              marginBottom: "2px",
-              display: "block",
-            }}
-          >
+          <span className="msg__bubble-sender" style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-primary, #7c5cfc)', marginBottom: '2px', display: 'block' }}>
             {displayName}
           </span>
         )}
@@ -380,25 +256,23 @@ const MessageBubble = ({ message, showAvatar, partnerAvatar, partnerName, isGrou
 
 const RestrictionBanner = ({ isMutual, canSend, restrictionReason, t }) => {
   if (isMutual) return null;
-
+  
   return (
     <div className="msg__restriction">
       {!isMutual && (
         <div className="msg__restriction-badge">
           <LockIcon />
-          <span>
-            <GlitchText>{t("messages.restriction.title")}</GlitchText>
-          </span>
+          <span>{t("messages.restriction.title")}</span>
         </div>
       )}
       {!canSend && restrictionReason === "message_limit_reached" && (
         <p className="msg__restriction-text">
-          <GlitchText>{t("messages.restriction.message_sent")}</GlitchText>
+          {t("messages.restriction.message_sent")}
         </p>
       )}
       {canSend && !isMutual && (
         <p className="msg__restriction-text">
-          <GlitchText>{t("messages.restriction.not_following")}</GlitchText>
+          {t("messages.restriction.not_following")}
         </p>
       )}
     </div>
@@ -446,12 +320,8 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser, t }) => {
     <div className="msg__modal-overlay" onClick={onClose}>
       <div className="msg__modal" onClick={(e) => e.stopPropagation()}>
         <div className="msg__modal-header">
-          <h3>
-            <GlitchText>{t("messages.new_conversation")}</GlitchText>
-          </h3>
-          <button className="msg__modal-close" onClick={onClose}>
-            ×
-          </button>
+          <h3>{t("messages.new_conversation")}</h3>
+          <button className="msg__modal-close" onClick={onClose}>×</button>
         </div>
         <div className="msg__modal-search">
           <SearchIcon />
@@ -470,9 +340,7 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser, t }) => {
             </div>
           )}
           {!loading && results.length === 0 && query.length >= 2 && (
-            <p className="msg__modal-empty">
-              <GlitchText>{t("messages.no_results")}</GlitchText>
-            </p>
+            <p className="msg__modal-empty">{t("messages.no_results")}</p>
           )}
           {results.map((user) => (
             <div
@@ -486,7 +354,7 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser, t }) => {
               <Avatar src={user.avatar} name={user.name} size={40} />
               <div className="msg__modal-user-info">
                 <span className="msg__modal-user-name">{user.name}</span>
-                <span className="msg__modal-user-username">{user.username}</span>
+                <span className="msg__modal-user-username">@{user.username}</span>
               </div>
               {user.is_mutual && (
                 <span className="msg__modal-mutual" title={t("messages.mutual_followers")}>
@@ -508,15 +376,11 @@ const EmptyConversations = ({ onNewConversation, t }) => (
     <div className="msg__empty-icon">
       <MessageCircleIcon />
     </div>
-    <h3>
-      <GlitchText>{t("messages.no_conversations")}</GlitchText>
-    </h3>
-    <p>
-      <GlitchText>{t("messages.no_conversations_subtitle")}</GlitchText>
-    </p>
+    <h3>{t("messages.no_conversations")}</h3>
+    <p>{t("messages.no_conversations_subtitle")}</p>
     <button className="msg__empty-btn" onClick={onNewConversation}>
       <PlusIcon />
-      <GlitchText>{t("messages.new_conversation")}</GlitchText>
+      {t("messages.new_conversation")}
     </button>
   </div>
 );
@@ -526,12 +390,8 @@ const EmptyChat = ({ t }) => (
     <div className="msg__empty-icon">
       <MessageCircleIcon />
     </div>
-    <h3>
-      <GlitchText>{t("messages.select_conversation")}</GlitchText>
-    </h3>
-    <p>
-      <GlitchText>{t("messages.select_conversation_subtitle")}</GlitchText>
-    </p>
+    <h3>{t("messages.select_conversation")}</h3>
+    <p>{t("messages.select_conversation_subtitle")}</p>
   </div>
 );
 
@@ -540,18 +400,17 @@ const EmptyChat = ({ t }) => (
 export default function Messages() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const {
-    resetMessagesUnread,
-    setMessagesCount,
-    setActiveChat,
-    onNewMessage,
-    onGroupUpdate,
-    onGroupMemberChange,
+  const { 
+    resetMessagesUnread, 
+    setMessagesCount, 
+    setActiveChat, 
+    onNewMessage, 
+    onGroupUpdate, 
+    onGroupMemberChange 
   } = useSocket();
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-
+  
   // State
   const [conversations, setConversations] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
@@ -569,52 +428,15 @@ export default function Messages() {
   const [typing, setTyping] = useState(false);
   const [mobileView, setMobileView] = useState("list"); // 'list' | 'chat'
   
-  // Call state
-  const [activeCall, setActiveCall] = useState(false);
-  const [isVideoCall, setIsVideoCall] = useState(true);
-  const [incomingCall, setIncomingCall] = useState(null);
-
-  const autoAnsweredRef = useRef(false);
-  // Handle incoming call from navigation state
-  useEffect(() => {
-    if (location.state?.incomingCallData && !autoAnsweredRef.current) {
-      const data = location.state.incomingCallData;
-      console.log("[Messages] Auto-answering global incoming call:", data);
-      autoAnsweredRef.current = true;
-      setIncomingCall(data);
-      setIsVideoCall(data.isVideo);
-      setActiveCall(true);
-      
-      // Clear location state so it doesn't trigger again on refresh
-      navigate(location.pathname + location.search, { replace: true, state: {} });
-    }
-  }, [location.state, navigate, location.pathname, location.search]);
-
-  const handleStartAudioCall = () => {
-    console.log("[Messages] Manually starting audio call");
-    setIsVideoCall(false);
-    setActiveCall(true);
-  };
-
-  const handleStartVideoCall = () => {
-    console.log("[Messages] Manually starting video call");
-    setIsVideoCall(true);
-    setActiveCall(true);
-  };
-
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const activeConversationRef = useRef(null);
-  const lastPartnerRef = useRef(null);
 
   // Keep ref in sync with state
   useEffect(() => {
     activeConversationRef.current = activeConversation;
-    if (partner) {
-      lastPartnerRef.current = partner;
-    }
-  }, [activeConversation, partner]);
+  }, [activeConversation]);
 
   // Get active conversation from URL
   const activeUserId = searchParams.get("user");
@@ -631,7 +453,7 @@ export default function Messages() {
         // Sync unread count with context
         const totalUnread = (data.conversations || []).reduce(
           (sum, c) => sum + (c.unread_count || 0),
-          0,
+          0
         );
         setMessagesCount(totalUnread);
       } catch (err) {
@@ -671,30 +493,26 @@ export default function Messages() {
           setConversationStatus({ is_mutual: true, can_send: true });
           setActiveConversation(`group_${activeGroupId}`);
           socketService.joinGroupRoom(parseInt(activeGroupId));
-          setActiveChat({ type: "group", id: parseInt(activeGroupId) });
+          setActiveChat({ type: 'group', id: parseInt(activeGroupId) });
         } else {
           data = await chatService.getMessages(parseInt(activeUserId));
           setPartner(data.partner);
           setConversationStatus(data.conversation_status);
           setActiveConversation(parseInt(activeUserId));
           socketService.joinChatRoom(user.id, parseInt(activeUserId));
-          setActiveChat({ type: "user", id: parseInt(activeUserId) });
+          setActiveChat({ type: 'user', id: parseInt(activeUserId) });
         }
-
+        
         setMessages(data.messages || []);
         setMobileView("chat");
-
+        
         // Reset unread for both private and group conversations
         setConversations((prev) => {
           let idx;
           if (isGroupActive) {
-            idx = prev.findIndex(
-              (c) => c.type === "group" && c.group?.id === parseInt(activeGroupId),
-            );
+            idx = prev.findIndex((c) => c.type === 'group' && c.group?.id === parseInt(activeGroupId));
           } else {
-            idx = prev.findIndex(
-              (c) => c.type === "private" && c.partner?.id === parseInt(activeUserId),
-            );
+            idx = prev.findIndex((c) => c.type === 'private' && c.partner?.id === parseInt(activeUserId));
           }
           if (idx !== -1 && prev[idx].unread_count > 0) {
             const unreadToRemove = prev[idx].unread_count;
@@ -727,15 +545,7 @@ export default function Messages() {
       }
       setActiveChat(null);
     };
-  }, [
-    activeUserId,
-    activeGroupId,
-    user?.id,
-    setMessagesCount,
-    setActiveChat,
-    isGroupActive,
-    currentActiveId,
-  ]);
+  }, [activeUserId, activeGroupId, user?.id, setMessagesCount, setActiveChat, isGroupActive, currentActiveId]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -761,13 +571,12 @@ export default function Messages() {
         isForCurrentChat = true;
       } else if (!msgGroupId && !activeGroupId && msgReceiverId) {
         const activePartnerId = parseInt(activeUserId, 10);
-        isForCurrentChat =
-          (parseInt(msgSenderId) === activePartnerId && parseInt(msgReceiverId) === userId) ||
-          (parseInt(msgSenderId) === userId && parseInt(msgReceiverId) === activePartnerId);
+        isForCurrentChat = (parseInt(msgSenderId) === activePartnerId && parseInt(msgReceiverId) === userId) ||
+                           (parseInt(msgSenderId) === userId && parseInt(msgReceiverId) === activePartnerId);
       }
-
+      
       console.log("[Messages] isForCurrentChat:", isForCurrentChat);
-
+      
       if (isForCurrentChat) {
         setMessages((prev) => {
           // If this message has a tempId, replace the optimistic message
@@ -789,24 +598,21 @@ export default function Messages() {
               return updated;
             }
           }
-
+          
           // Avoid duplicates by ID
           if (data.id && prev.some((m) => m.id === data.id)) return prev;
-
-          return [
-            ...prev,
-            {
-              id: data.id,
-              content: data.content,
-              sender_id: msgSenderId,
-              receiver_id: msgReceiverId,
-              group_id: msgGroupId,
-              is_own: msgSenderId === userId,
-              is_read: data.is_read,
-              created_at: data.created_at,
-              sender: data.sender,
-            },
-          ];
+          
+          return [...prev, {
+            id: data.id,
+            content: data.content,
+            sender_id: msgSenderId,
+            receiver_id: msgReceiverId,
+            group_id: msgGroupId,
+            is_own: msgSenderId === userId,
+            is_read: data.is_read,
+            created_at: data.created_at,
+            sender: data.sender,
+          }];
         });
 
         // Mark as read if we're viewing this P2P conversation
@@ -824,10 +630,10 @@ export default function Messages() {
       // Always update conversation list for ANY message to show last message and unread count
       setConversations((prev) => {
         const targetPartnerId = msgSenderId === userId ? msgReceiverId : msgSenderId;
-        const idx = prev.findIndex((c) =>
-          msgGroupId
-            ? c.type === "group" && c.group?.id === msgGroupId
-            : c.type === "private" && c.partner?.id === targetPartnerId,
+        const idx = prev.findIndex((c) => 
+          msgGroupId 
+            ? (c.type === "group" && c.group?.id === msgGroupId)
+            : (c.type === "private" && c.partner?.id === targetPartnerId)
         );
 
         if (idx === -1) {
@@ -837,7 +643,7 @@ export default function Messages() {
 
         const updated = [...prev];
         const conv = { ...updated[idx] };
-
+        
         conv.last_message = {
           id: data.id,
           content: data.content,
@@ -870,7 +676,9 @@ export default function Messages() {
       const userId = parseInt(user?.id, 10);
       if (readerId === activeId) {
         setMessages((prev) =>
-          prev.map((m) => (m.sender_id === userId ? { ...m, is_read: true } : m)),
+          prev.map((m) =>
+            m.sender_id === userId ? { ...m, is_read: true } : m
+          )
         );
       }
     };
@@ -879,82 +687,65 @@ export default function Messages() {
       if (!data) return;
       const groupId = parseInt(data.id, 10);
       const activeId = activeConversationRef.current;
-      setConversations((prev) => {
+      setConversations(prev => {
         const updated = [...prev];
-        const idx = updated.findIndex((c) => c.type === "group" && c.group?.id === groupId);
+        const idx = updated.findIndex(c => c.type === 'group' && c.group?.id === groupId);
         if (idx !== -1) {
           updated[idx] = { ...updated[idx], group: { ...updated[idx].group, ...data } };
         }
         return updated;
       });
       if (activeId === `group_${groupId}`) {
-        setGroupDetails((prev) => ({ ...prev, ...data }));
+        setGroupDetails(prev => ({ ...prev, ...data }));
       }
     };
 
     const handleGroupMemberChange = (data) => {
-      console.log("[Messages] handleGroupMemberChange received:", data);
       if (!data) return;
       const groupId = parseInt(data.group_id, 10);
       const action = data.action;
       const changedUser = data.user;
-      const currentUserId = String(user?.id);
+      const currentUserId = parseInt(user?.id, 10);
       const activeId = activeConversationRef.current;
 
-      console.log(`[Messages] Processing action: ${action} for user: ${changedUser.id} (me: ${currentUserId})`);
-
-      if (String(changedUser.id) === currentUserId) {
+      if (changedUser.id === currentUserId) {
         if (action === 'removed' || action === 'left') {
-          console.log("[Messages] We were removed/left, filtering conversations...");
-          setConversations(prev => prev.filter(c => !(c.type === 'group' && String(c.group?.id) === String(groupId))));
+          setConversations(prev => prev.filter(c => !(c.type === 'group' && c.group?.id === groupId)));
           if (activeId === `group_${groupId}`) {
-            console.log("[Messages] Current group is the one we left, navigating away...");
             navigate('/messages');
             setMobileView("list");
             setActiveConversation(null);
           }
-        } else if (action === "added") {
+        } else if (action === 'added') {
           console.log("[Messages] We were added to a group, refreshing list...");
-          chatService.getConversations().then((res) => {
+          chatService.getConversations().then(res => {
             setConversations(res.conversations || []);
             socketService.joinGroupRoom(groupId);
           });
         }
       } else {
         if (activeId === `group_${groupId}`) {
-          console.log("[Messages] Updating members for active group...");
           setGroupDetails(prev => {
-            if (!prev || String(prev.id) !== String(groupId)) return prev;
+            if (!prev || prev.id !== groupId) return prev;
             let updatedMembers = [...(prev.members || [])];
-            
             if (action === 'added') {
-              if (!updatedMembers.some(m => String(m.id) === String(changedUser.id))) {
+              if (!updatedMembers.some(m => m.id === changedUser.id)) {
                 updatedMembers.push({ ...changedUser, is_admin: false });
               }
-            } else if (action === 'role_changed') {
-              console.log(`[Messages] Member ${changedUser.id} role changed to admin: ${data.is_admin}`);
-              updatedMembers = updatedMembers.map(m => 
-                String(m.id) === String(changedUser.id) ? { ...m, is_admin: !!data.is_admin } : m
-              );
             } else {
-              console.log(`[Messages] Member ${changedUser.id} was removed/left, filtering list...`);
-              updatedMembers = updatedMembers.filter(m => String(m.id) !== String(changedUser.id));
+              updatedMembers = updatedMembers.filter(m => m.id !== changedUser.id);
             }
-            return { ...prev, members: updatedMembers, members_count: data.members_count || updatedMembers.length };
+            return { ...prev, members: updatedMembers, members_count: data.members_count };
           });
         }
-        chatService.getConversations().then(res => {
-          console.log("[Messages] Refreshing conversations list after member change...");
-          setConversations(res.conversations || []);
-        });
+        chatService.getConversations().then(res => setConversations(res.conversations || []));
       }
     };
-
 
     const unsubscribeMsg = onNewMessage(handleNewMessage);
     const unsubscribeUpdate = onGroupUpdate(handleGroupUpdate);
     const unsubscribeMember = onGroupMemberChange(handleGroupMemberChange);
-
+    
     socketService.onTyping(handleTyping);
     socketService.onMessagesRead(handleMessagesRead);
 
@@ -965,15 +756,7 @@ export default function Messages() {
       socketService.off("user.typing", handleTyping);
       socketService.off("messages.read", handleMessagesRead);
     };
-  }, [
-    user?.id,
-    onNewMessage,
-    onGroupUpdate,
-    onGroupMemberChange,
-    navigate,
-    activeUserId,
-    activeGroupId,
-  ]);
+  }, [user?.id, onNewMessage, onGroupUpdate, onGroupMemberChange, navigate, activeUserId, activeGroupId]);
 
   // Send message (P2P via socket)
   const handleSend = async () => {
@@ -981,7 +764,7 @@ export default function Messages() {
 
     const content = newMessage.trim();
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
+    
     // Optimistically add message to UI
     const optimisticMessage = {
       tempId,
@@ -994,7 +777,7 @@ export default function Messages() {
       created_at: new Date().toISOString(),
       sender: { id: user?.id, name: user?.name, avatar: user?.avatar },
     };
-
+    
     setMessages((prev) => [...prev, optimisticMessage]);
     setNewMessage("");
     setSending(true);
@@ -1004,9 +787,9 @@ export default function Messages() {
         isGroupActive ? null : parseInt(activeUserId),
         content,
         tempId,
-        isGroupActive ? parseInt(activeGroupId) : null,
+        isGroupActive ? parseInt(activeGroupId) : null
       );
-
+      
       if (!result.success) {
         setMessages((prev) => prev.filter((m) => m.tempId !== tempId));
         console.error("Error sending message:", result.error);
@@ -1020,10 +803,8 @@ export default function Messages() {
         }
 
         setConversations((prev) => {
-          const idx = prev.findIndex((c) =>
-            isGroupActive
-              ? c.type === "group" && c.group?.id === parseInt(activeGroupId)
-              : c.type === "private" && c.partner?.id === parseInt(activeUserId),
+          const idx = prev.findIndex((c) => 
+            isGroupActive ? (c.type === 'group' && c.group?.id === parseInt(activeGroupId)) : (c.type === 'private' && c.partner?.id === parseInt(activeUserId))
           );
           if (idx === -1) return prev;
           const updated = [...prev];
@@ -1051,17 +832,17 @@ export default function Messages() {
   // Handle input change with typing indicator and character limit
   const handleInputChange = (e) => {
     const value = e.target.value;
-
+    
     // Enforce character limit
     if (value.length > MAX_MESSAGE_LENGTH) {
       return;
     }
-
+    
     setNewMessage(value);
-
+    
     if (user?.id && activeConversation) {
       socketService.sendTypingIndicator(user.id, activeConversation, true);
-
+      
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(() => {
         socketService.sendTypingIndicator(user.id, activeConversation, false);
@@ -1088,9 +869,7 @@ export default function Messages() {
 
   // Handle new user selection
   const handleNewUserSelect = async (selectedUser) => {
-    const existing = conversations.find(
-      (c) => c.type === "private" && c.partner?.id === selectedUser.id,
-    );
+    const existing = conversations.find((c) => c.type === 'private' && c.partner?.id === selectedUser.id);
     if (existing) {
       selectConversation(selectedUser.id);
       return;
@@ -1098,7 +877,7 @@ export default function Messages() {
 
     setConversations((prev) => [
       {
-        type: "private",
+        type: 'private',
         partner: selectedUser,
         last_message: null,
         unread_count: 0,
@@ -1114,13 +893,8 @@ export default function Messages() {
   const handleGroupCreated = (group) => {
     setConversations((prev) => [
       {
-        type: "group",
-        group: {
-          id: group.id,
-          name: group.name,
-          image_url: group.image_url,
-          members_count: group.members_count,
-        },
+        type: 'group',
+        group: { id: group.id, name: group.name, image_url: group.image_url, members_count: group.members_count },
         last_message: null,
         unread_count: 0,
       },
@@ -1144,10 +918,8 @@ export default function Messages() {
       {/* Conversation List */}
       <aside className={`msg__sidebar ${mobileView === "chat" ? "hidden-mobile" : ""}`}>
         <div className="msg__sidebar-header">
-          <h1 className="msg__title">
-            <GlitchText>{t("messages.title")}</GlitchText>
-          </h1>
-          <div style={{ display: "flex", gap: "8px" }}>
+          <h1 className="msg__title">{t("messages.title")}</h1>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button
               className="msg__new-btn"
               onClick={() => setShowGroupModal(true)}
@@ -1164,7 +936,7 @@ export default function Messages() {
             </button>
           </div>
         </div>
-
+        
         <div className="msg__search">
           <SearchIcon />
           <input type="text" placeholder={t("messages.search_conversation")} />
@@ -1180,19 +952,10 @@ export default function Messages() {
           ) : (
             conversations.map((conv) => (
               <ConversationItem
-                key={conv.type === "group" ? `g_${conv.group.id}` : `p_${conv.partner.id}`}
+                key={conv.type === 'group' ? `g_${conv.group.id}` : `p_${conv.partner.id}`}
                 conversation={conv}
-                isActive={
-                  conv.type === "group"
-                    ? activeGroupId === String(conv.group.id)
-                    : activeUserId === String(conv.partner?.id)
-                }
-                onClick={() =>
-                  selectConversation(
-                    conv.type === "group" ? conv.group.id : conv.partner.id,
-                    conv.type === "group",
-                  )
-                }
+                isActive={conv.type === 'group' ? (activeGroupId === String(conv.group.id)) : (activeUserId === String(conv.partner?.id))}
+                onClick={() => selectConversation(conv.type === 'group' ? conv.group.id : conv.partner.id, conv.type === 'group')}
                 t={t}
               />
             ))
@@ -1218,21 +981,12 @@ export default function Messages() {
               <div
                 className="msg__chat-user-link"
                 onClick={() => !isGroupActive && navigate(`/profile/${partner?.username}`)}
-                style={{ cursor: isGroupActive ? "default" : "pointer" }}
+                style={{ cursor: isGroupActive ? 'default' : 'pointer' }}
               >
                 {isGroupActive ? (
                   <div className="msg__avatar msg__avatar--group" style={{ width: 40, height: 40 }}>
                     {groupDetails?.image_url ? (
-                      <img
-                        src={groupDetails.image_url}
-                        alt={groupDetails.name}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                        }}
-                      />
+                      <img src={groupDetails.image_url} alt={groupDetails.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                     ) : (
                       <UsersIcon />
                     )}
@@ -1241,62 +995,26 @@ export default function Messages() {
                   <Avatar src={partner?.avatar} name={partner?.name} size={40} />
                 )}
                 <div className="msg__chat-info">
-                  <h2 className="msg__chat-name">
-                    {isGroupActive ? groupDetails?.name || "Grupo" : partner?.name}
-                  </h2>
+                  <h2 className="msg__chat-name">{isGroupActive ? (groupDetails?.name || 'Grupo') : partner?.name}</h2>
                   <span className="msg__chat-username">
-                    {isGroupActive
-                      ? t("messages.group_chat", "Chat de grupo")
-                      : `${partner?.username}`}
-                    {typing && !isGroupActive && (
-                      <span className="msg__typing-indicator">{t("messages.typing")}</span>
-                    )}
+                    {isGroupActive ? t("messages.group_chat", "Chat de grupo") : `@${partner?.username}`}
+                    {typing && !isGroupActive && <span className="msg__typing-indicator">{t("messages.typing")}</span>}
                   </span>
                 </div>
               </div>
-              <div
-                className="msg__header-actions"
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
+              <div className="msg__header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {conversationStatus?.is_mutual && !isGroupActive && (
                   <span className="msg__mutual-badge" title={t("messages.mutual_followers")}>
                     <UsersIcon />
                     {t("messages.mutual")}
                   </span>
                 )}
-                {!isGroupActive && partner && (
-                  <>
-                    <button
-                      className="msg__header-btn"
-                      onClick={handleStartAudioCall}
-                      title={t("messages.call.audio_call", "Llamada de voz")}
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width: 20, height: 20}}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                    </button>
-                    <button
-                      className="msg__header-btn"
-                      onClick={handleStartVideoCall}
-                      title={t("messages.call.video_call", "Videollamada")}
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width: 20, height: 20}}><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-                    </button>
-                  </>
-                )}
                 {isGroupActive && (
-                  <button
-                    className="msg__header-btn"
+                  <button 
+                    className="msg__header-btn" 
                     onClick={() => setShowGroupSettingsModal(true)}
                     title={t("messages.group_info", "Info")}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#888",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "8px",
-                      borderRadius: "50%",
-                    }}
+                    style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '8px', borderRadius: '50%' }}
                   >
                     <InfoIcon />
                   </button>
@@ -1316,10 +1034,8 @@ export default function Messages() {
             <div className="msg__messages">
               {messages.map((msg, idx) => {
                 const prevMsg = messages[idx - 1];
-                const showAvatar =
-                  !msg.is_own &&
-                  (!prevMsg || prevMsg.is_own || prevMsg.sender_id !== msg.sender_id);
-
+                const showAvatar = !msg.is_own && (!prevMsg || prevMsg.is_own || prevMsg.sender_id !== msg.sender_id);
+                
                 return (
                   <MessageBubble
                     key={msg.id || msg.tempId}
@@ -1354,9 +1070,7 @@ export default function Messages() {
                       maxLength={MAX_MESSAGE_LENGTH}
                     />
                     {newMessage.length > MAX_MESSAGE_LENGTH * 0.7 && (
-                      <span
-                        className={`msg__char-counter ${newMessage.length >= MAX_MESSAGE_LENGTH ? "msg__char-counter--limit" : newMessage.length > MAX_MESSAGE_LENGTH * 0.9 ? "msg__char-counter--warning" : ""}`}
-                      >
+                      <span className={`msg__char-counter ${newMessage.length >= MAX_MESSAGE_LENGTH ? "msg__char-counter--limit" : newMessage.length > MAX_MESSAGE_LENGTH * 0.9 ? "msg__char-counter--warning" : ""}`}>
                         {newMessage.length}/{MAX_MESSAGE_LENGTH}
                       </span>
                     )}
@@ -1364,9 +1078,7 @@ export default function Messages() {
                   <button
                     className="msg__send-btn"
                     onClick={handleSend}
-                    disabled={
-                      !newMessage.trim() || sending || newMessage.length > MAX_MESSAGE_LENGTH
-                    }
+                    disabled={!newMessage.trim() || sending || newMessage.length > MAX_MESSAGE_LENGTH}
                   >
                     {sending ? <LoadingSpinner size={20} /> : <SendIcon />}
                   </button>
@@ -1404,38 +1116,16 @@ export default function Messages() {
           onClose={() => setShowGroupSettingsModal(false)}
           onGroupUpdated={(updatedGroup) => {
             setGroupDetails((prev) => ({ ...prev, ...updatedGroup }));
-            setConversations((prev) => {
+            setConversations(prev => {
               const updated = [...prev];
-              const idx = updated.findIndex(
-                (c) => c.type === "group" && c.group?.id === updatedGroup.id,
-              );
+              const idx = updated.findIndex(c => c.type === 'group' && c.group?.id === updatedGroup.id);
               if (idx !== -1) {
-                updated[idx] = {
-                  ...updated[idx],
-                  group: { ...updated[idx].group, ...updatedGroup },
-                };
+                updated[idx] = { ...updated[idx], group: { ...updated[idx].group, ...updatedGroup } };
               }
               return updated;
             });
           }}
         />
-      )}
-      {activeCall && (partner || lastPartnerRef.current) ? (
-        <VideoCall
-          partnerId={partner?.id || lastPartnerRef.current?.id}
-          isIncoming={!!incomingCall}
-          incomingSignal={incomingCall?.signal}
-          callerInfo={incomingCall ? incomingCall.callerInfo : (partner || lastPartnerRef.current)}
-          isVideoCall={incomingCall ? incomingCall.isVideo : isVideoCall}
-          autoAnswer={incomingCall ? incomingCall.autoAnswer : false}
-          onEnd={() => {
-            console.log("[Messages] Call ended callback triggered");
-            setActiveCall(false);
-            setIncomingCall(null);
-          }}
-        />
-      ) : (
-        activeCall && console.log("[Messages] Call active but partner is missing!", { partner, lastPartner: lastPartnerRef.current })
       )}
     </div>
   );
