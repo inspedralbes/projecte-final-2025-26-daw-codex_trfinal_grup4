@@ -25,7 +25,7 @@ export function useProfile(username) {
   const isOwnProfile =
     currentUser &&
     profile &&
-    (currentUser.username === profile.username || currentUser.id === profile.id);
+    (currentUser.username === profile.username || String(currentUser.id) === String(profile.id));
 
   const fetchProfile = useCallback(async () => {
     if (!username) {
@@ -59,7 +59,7 @@ export function useProfile(username) {
     } finally {
       setLoading(false);
     }
-  }, [username]);
+  }, [username, currentUser?.id]);
 
   // Initial fetch
   useEffect(() => {

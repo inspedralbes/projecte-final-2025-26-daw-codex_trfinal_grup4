@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
 import chatService from "@/services/chatService";
 import socketService from "@/services/socketService";
+import NewGroupModal from "@/components/chat/NewGroupModal";
+import GroupSettingsModal from "@/components/chat/GroupSettingsModal";
 import "./Messages.css";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -72,6 +74,14 @@ const PlusIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="12" y1="5" x2="12" y2="19" />
     <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
+const InfoIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"></circle>
+    <line x1="12" y1="16" x2="12" y2="12"></line>
+    <line x1="12" y1="8" x2="12.01" y2="8"></line>
   </svg>
 );
 
@@ -149,19 +159,33 @@ const formatConversationTime = (dateString, t) => {
 // ─── Conversation List Item ─────────────────────────────────────────────────
 
 const ConversationItem = ({ conversation, isActive, onClick, t }) => {
-  const { partner, last_message, unread_count, is_mutual } = conversation;
+  const { last_message, unread_count } = conversation;
+  const isGroup = conversation.type === 'group';
+  const name = isGroup ? conversation.group?.name : conversation.partner?.name;
+  const avatarSrc = isGroup ? conversation.group?.image_url : conversation.partner?.avatar;
+  const is_mutual = !isGroup && conversation.is_mutual;
   
   return (
     <div
       className={`msg__conv-item ${isActive ? "active" : ""} ${unread_count > 0 ? "unread" : ""}`}
       onClick={onClick}
     >
-      <Avatar src={partner.avatar} name={partner.name} size={48} />
+      {isGroup ? (
+        <div className="msg__avatar msg__avatar--group" style={{ width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {avatarSrc ? (
+            <img src={avatarSrc} alt={name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+          ) : (
+            <UsersIcon />
+          )}
+        </div>
+      ) : (
+        <Avatar src={avatarSrc} name={name} size={48} />
+      )}
       <div className="msg__conv-content">
         <div className="msg__conv-header">
           <span className="msg__conv-name">
-            {partner.name}
-            {!is_mutual && (
+            {name}
+            {!isGroup && !is_mutual && (
               <span className="msg__conv-restricted" title={t("messages.restriction.title")}>
                 <LockIcon />
               </span>
@@ -177,9 +201,8 @@ const ConversationItem = ({ conversation, isActive, onClick, t }) => {
           {last_message ? (
             <>
               <span className="msg__conv-text">
-                {last_message.sender_id === partner.id ? "" : `${t("messages.you")}: `}
-                {last_message.content.slice(0, 40)}
-                {last_message.content.length > 40 ? "..." : ""}
+                {last_message.content?.slice(0, 40)}
+                {last_message.content?.length > 40 ? "..." : ""}
               </span>
               {unread_count > 0 && (
                 <span className="msg__conv-badge">{unread_count}</span>
@@ -196,22 +219,29 @@ const ConversationItem = ({ conversation, isActive, onClick, t }) => {
 
 // ─── Message Bubble ──────────────────────────────────────────────────────────
 
-const MessageBubble = ({ message, showAvatar, partnerAvatar, partnerName }) => {
-  const { content, is_own, is_read, created_at } = message;
+const MessageBubble = ({ message, showAvatar, partnerAvatar, partnerName, isGroup }) => {
+  const { content, is_own, is_read, created_at, sender } = message;
+  const displayAvatar = isGroup ? sender?.avatar : partnerAvatar;
+  const displayName = isGroup ? sender?.name : partnerName;
   
   return (
     <div className={`msg__bubble-wrapper ${is_own ? "own" : "other"}`}>
       {!is_own && showAvatar && (
-        <Avatar src={partnerAvatar} name={partnerName} size={32} />
+        <Avatar src={displayAvatar} name={displayName} size={32} />
       )}
       {!is_own && !showAvatar && <div className="msg__bubble-spacer" />}
       <div className={`msg__bubble ${is_own ? "own" : "other"}`}>
+        {isGroup && !is_own && showAvatar && (
+          <span className="msg__bubble-sender" style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-primary, #7c5cfc)', marginBottom: '2px', display: 'block' }}>
+            {displayName}
+          </span>
+        )}
         <p className="msg__bubble-text">{content}</p>
         <div className="msg__bubble-meta">
           <span className="msg__bubble-time">
             {new Date(created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </span>
-          {is_own && (
+          {is_own && !isGroup && (
             <span className={`msg__bubble-status ${is_read ? "read" : ""}`}>
               {is_read ? <DoubleCheckIcon /> : <CheckIcon />}
             </span>
@@ -370,7 +400,14 @@ const EmptyChat = ({ t }) => (
 export default function Messages() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { resetMessagesUnread, setMessagesCount, setActiveChat, onNewMessage } = useSocket();
+  const { 
+    resetMessagesUnread, 
+    setMessagesCount, 
+    setActiveChat, 
+    onNewMessage, 
+    onGroupUpdate, 
+    onGroupMemberChange 
+  } = useSocket();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -385,6 +422,9 @@ export default function Messages() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [showGroupSettingsModal, setShowGroupSettingsModal] = useState(false);
+  const [groupDetails, setGroupDetails] = useState({ members: [] });
   const [typing, setTyping] = useState(false);
   const [mobileView, setMobileView] = useState("list"); // 'list' | 'chat'
   
@@ -400,6 +440,9 @@ export default function Messages() {
 
   // Get active conversation from URL
   const activeUserId = searchParams.get("user");
+  const activeGroupId = searchParams.get("group");
+  const isGroupActive = !!activeGroupId;
+  const currentActiveId = activeGroupId || activeUserId;
 
   // Load conversations
   useEffect(() => {
@@ -429,7 +472,7 @@ export default function Messages() {
 
   // Load messages when active conversation changes
   useEffect(() => {
-    if (!activeUserId) {
+    if (!currentActiveId) {
       setActiveConversation(null);
       setMessages([]);
       setPartner(null);
@@ -442,28 +485,37 @@ export default function Messages() {
     const loadMessages = async () => {
       setLoadingMessages(true);
       try {
-        const data = await chatService.getMessages(parseInt(activeUserId));
+        let data;
+        if (isGroupActive) {
+          data = await chatService.getGroupMessages(parseInt(activeGroupId));
+          setPartner(null);
+          setGroupDetails(data.group);
+          setConversationStatus({ is_mutual: true, can_send: true });
+          setActiveConversation(`group_${activeGroupId}`);
+          socketService.joinGroupRoom(parseInt(activeGroupId));
+          setActiveChat({ type: 'group', id: parseInt(activeGroupId) });
+        } else {
+          data = await chatService.getMessages(parseInt(activeUserId));
+          setPartner(data.partner);
+          setConversationStatus(data.conversation_status);
+          setActiveConversation(parseInt(activeUserId));
+          socketService.joinChatRoom(user.id, parseInt(activeUserId));
+          setActiveChat({ type: 'user', id: parseInt(activeUserId) });
+        }
+        
         setMessages(data.messages || []);
-        setPartner(data.partner);
-        setConversationStatus(data.conversation_status);
-        setActiveConversation(parseInt(activeUserId));
         setMobileView("chat");
         
-        // Tell context which conversation is active (to prevent incrementing unread)
-        setActiveChat(activeUserId);
-        
-        // Join chat room for real-time updates
-        if (user?.id) {
-          socketService.joinChatRoom(user.id, parseInt(activeUserId));
-        }
-
-        // Reset unread count for this conversation and update global counter
-        // Use functional update to get current conversations without adding to deps
+        // Reset unread for both private and group conversations
         setConversations((prev) => {
-          const idx = prev.findIndex((c) => c.partner?.id === parseInt(activeUserId));
+          let idx;
+          if (isGroupActive) {
+            idx = prev.findIndex((c) => c.type === 'group' && c.group?.id === parseInt(activeGroupId));
+          } else {
+            idx = prev.findIndex((c) => c.type === 'private' && c.partner?.id === parseInt(activeUserId));
+          }
           if (idx !== -1 && prev[idx].unread_count > 0) {
             const unreadToRemove = prev[idx].unread_count;
-            // Defer the context update to avoid render-time setState
             setTimeout(() => {
               setMessagesCount((current) => Math.max(0, current - unreadToRemove));
             }, 0);
@@ -473,6 +525,10 @@ export default function Messages() {
           }
           return prev;
         });
+
+        if (isGroupActive) {
+          chatService.markGroupAsRead(parseInt(activeGroupId)).catch(() => {});
+        }
       } catch (err) {
         console.error("Error loading messages:", err);
       } finally {
@@ -482,14 +538,14 @@ export default function Messages() {
 
     loadMessages();
 
-    // Cleanup: leave chat room and clear active chat
+    // Cleanup: leave P2P chat rooms (group rooms stay joined via SocketContext)
     return () => {
-      if (user?.id && activeUserId) {
+      if (user?.id && !isGroupActive && activeUserId) {
         socketService.leaveChatRoom(user.id, parseInt(activeUserId));
       }
       setActiveChat(null);
     };
-  }, [activeUserId, user?.id, setMessagesCount, setActiveChat]);
+  }, [activeUserId, activeGroupId, user?.id, setMessagesCount, setActiveChat, isGroupActive, currentActiveId]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -499,23 +555,27 @@ export default function Messages() {
   // Real-time message handling
   useEffect(() => {
     const handleNewMessage = (data) => {
-      // Use ref to get the CURRENT value of activeConversation
-      const currentActiveConversation = activeConversationRef.current;
-      
-      console.log("[Messages] Received message:", data, "activeConversation:", currentActiveConversation, "user.id:", user?.id);
-      
-      // Convert IDs to numbers for comparison
-      const senderId = parseInt(data.sender_id, 10);
-      const receiverId = parseInt(data.receiver_id, 10);
-      const activeId = parseInt(currentActiveConversation, 10);
+      if (!data) return;
+      const activeId = activeGroupId ? `group_${activeGroupId}` : activeUserId;
       const userId = parseInt(user?.id, 10);
+      const msgSenderId = parseInt(data.sender_id, 10);
+      const msgReceiverId = data.receiver_id ? parseInt(data.receiver_id, 10) : null;
+      const msgGroupId = data.group_id ? parseInt(data.group_id, 10) : null;
+
+      console.log("[Messages] handleNewMessage received:", data);
+      console.log("[Messages] Current active chat:", { activeGroupId, activeUserId });
+
+      // Determine if this message is for the active conversation
+      let isForCurrentChat = false;
+      if (msgGroupId && activeGroupId && parseInt(activeGroupId) === parseInt(msgGroupId)) {
+        isForCurrentChat = true;
+      } else if (!msgGroupId && !activeGroupId && msgReceiverId) {
+        const activePartnerId = parseInt(activeUserId, 10);
+        isForCurrentChat = (parseInt(msgSenderId) === activePartnerId && parseInt(msgReceiverId) === userId) ||
+                           (parseInt(msgSenderId) === userId && parseInt(msgReceiverId) === activePartnerId);
+      }
       
-      // Add message if it's for the current conversation
-      const isForCurrentChat = 
-        (senderId === activeId && receiverId === userId) ||
-        (senderId === userId && receiverId === activeId);
-        
-      console.log("[Messages] isForCurrentChat:", isForCurrentChat, { senderId, receiverId, activeId, userId });
+      console.log("[Messages] isForCurrentChat:", isForCurrentChat);
       
       if (isForCurrentChat) {
         setMessages((prev) => {
@@ -523,16 +583,17 @@ export default function Messages() {
           if (data.tempId) {
             const tempIndex = prev.findIndex((m) => m.tempId === data.tempId);
             if (tempIndex !== -1) {
-              // Replace optimistic message with real one
               const updated = [...prev];
               updated[tempIndex] = {
                 id: data.id,
                 content: data.content,
-                sender_id: senderId,
-                receiver_id: receiverId,
-                is_own: senderId === userId,
+                sender_id: msgSenderId,
+                receiver_id: msgReceiverId,
+                group_id: msgGroupId,
+                is_own: msgSenderId === userId,
                 is_read: data.is_read,
                 created_at: data.created_at,
+                sender: data.sender,
               };
               return updated;
             }
@@ -544,60 +605,63 @@ export default function Messages() {
           return [...prev, {
             id: data.id,
             content: data.content,
-            sender_id: senderId,
-            receiver_id: receiverId,
-            is_own: senderId === userId,
+            sender_id: msgSenderId,
+            receiver_id: msgReceiverId,
+            group_id: msgGroupId,
+            is_own: msgSenderId === userId,
             is_read: data.is_read,
             created_at: data.created_at,
+            sender: data.sender,
           }];
         });
 
-        // Mark as read if we're viewing this conversation (using P2P)
-        if (senderId === activeId && userId) {
-          socketService.markMessagesRead(userId, activeId);
-          
-          // When we receive a message from the other user, we can now reply
-          // (they responded, so we're no longer at the 1-message limit)
+        // Mark as read if we're viewing this P2P conversation
+        if (!msgGroupId && msgSenderId === parseInt(activeUserId, 10) && userId) {
+          socketService.markMessagesRead(userId, parseInt(activeUserId, 10));
           setConversationStatus((prev) => {
             if (prev && !prev.can_send) {
-              return { ...prev, can_send: true, reason: 'partner_replied' };
+              return { ...prev, can_send: true, reason: "partner_replied" };
             }
             return prev;
           });
         }
       }
 
-      // Update conversation list
+      // Always update conversation list for ANY message to show last message and unread count
       setConversations((prev) => {
-        const partnerId = senderId === userId ? receiverId : senderId;
-        const existingIndex = prev.findIndex((c) => c.partner.id === partnerId);
-        
-        if (existingIndex === -1) {
-          // Reload conversations to get new one
-          chatService.getConversations().then((result) => {
-            setConversations(result.conversations || []);
-          });
+        const targetPartnerId = msgSenderId === userId ? msgReceiverId : msgSenderId;
+        const idx = prev.findIndex((c) => 
+          msgGroupId 
+            ? (c.type === "group" && c.group?.id === msgGroupId)
+            : (c.type === "private" && c.partner?.id === targetPartnerId)
+        );
+
+        if (idx === -1) {
+          chatService.getConversations().then((res) => setConversations(res.conversations || []));
           return prev;
         }
 
         const updated = [...prev];
-        const conv = { ...updated[existingIndex] };
+        const conv = { ...updated[idx] };
+        
         conv.last_message = {
           id: data.id,
           content: data.content,
-          sender_id: senderId,
+          sender_id: msgSenderId,
           created_at: data.created_at,
         };
-        if (senderId !== userId && partnerId !== activeId) {
+
+        if (!isForCurrentChat && msgSenderId !== userId) {
           conv.unread_count = (conv.unread_count || 0) + 1;
         }
-        updated.splice(existingIndex, 1);
-        updated.unshift(conv);
-        return updated;
+
+        updated.splice(idx, 1);
+        return [conv, ...updated];
       });
     };
 
     const handleTyping = (data) => {
+      if (!data) return;
       const typingUserId = parseInt(data.userId, 10);
       const activeId = parseInt(activeConversationRef.current, 10);
       if (typingUserId === activeId) {
@@ -606,6 +670,7 @@ export default function Messages() {
     };
 
     const handleMessagesRead = (data) => {
+      if (!data) return;
       const readerId = parseInt(data.reader_id, 10);
       const activeId = parseInt(activeConversationRef.current, 10);
       const userId = parseInt(user?.id, 10);
@@ -618,19 +683,80 @@ export default function Messages() {
       }
     };
 
-    // Listen ONLY via context's CustomEvent (SocketContext already listens to socket)
-    const unsubscribeContext = onNewMessage(handleNewMessage);
+    const handleGroupUpdate = (data) => {
+      if (!data) return;
+      const groupId = parseInt(data.id, 10);
+      const activeId = activeConversationRef.current;
+      setConversations(prev => {
+        const updated = [...prev];
+        const idx = updated.findIndex(c => c.type === 'group' && c.group?.id === groupId);
+        if (idx !== -1) {
+          updated[idx] = { ...updated[idx], group: { ...updated[idx].group, ...data } };
+        }
+        return updated;
+      });
+      if (activeId === `group_${groupId}`) {
+        setGroupDetails(prev => ({ ...prev, ...data }));
+      }
+    };
 
-    // Typing and read events still need direct socket listeners
+    const handleGroupMemberChange = (data) => {
+      if (!data) return;
+      const groupId = parseInt(data.group_id, 10);
+      const action = data.action;
+      const changedUser = data.user;
+      const currentUserId = parseInt(user?.id, 10);
+      const activeId = activeConversationRef.current;
+
+      if (changedUser.id === currentUserId) {
+        if (action === 'removed' || action === 'left') {
+          setConversations(prev => prev.filter(c => !(c.type === 'group' && c.group?.id === groupId)));
+          if (activeId === `group_${groupId}`) {
+            navigate('/messages');
+            setMobileView("list");
+            setActiveConversation(null);
+          }
+        } else if (action === 'added') {
+          console.log("[Messages] We were added to a group, refreshing list...");
+          chatService.getConversations().then(res => {
+            setConversations(res.conversations || []);
+            socketService.joinGroupRoom(groupId);
+          });
+        }
+      } else {
+        if (activeId === `group_${groupId}`) {
+          setGroupDetails(prev => {
+            if (!prev || prev.id !== groupId) return prev;
+            let updatedMembers = [...(prev.members || [])];
+            if (action === 'added') {
+              if (!updatedMembers.some(m => m.id === changedUser.id)) {
+                updatedMembers.push({ ...changedUser, is_admin: false });
+              }
+            } else {
+              updatedMembers = updatedMembers.filter(m => m.id !== changedUser.id);
+            }
+            return { ...prev, members: updatedMembers, members_count: data.members_count };
+          });
+        }
+        chatService.getConversations().then(res => setConversations(res.conversations || []));
+      }
+    };
+
+    const unsubscribeMsg = onNewMessage(handleNewMessage);
+    const unsubscribeUpdate = onGroupUpdate(handleGroupUpdate);
+    const unsubscribeMember = onGroupMemberChange(handleGroupMemberChange);
+    
     socketService.onTyping(handleTyping);
     socketService.onMessagesRead(handleMessagesRead);
 
     return () => {
-      unsubscribeContext();
+      unsubscribeMsg();
+      unsubscribeUpdate();
+      unsubscribeMember();
       socketService.off("user.typing", handleTyping);
       socketService.off("messages.read", handleMessagesRead);
     };
-  }, [user?.id, onNewMessage]); // Removed activeConversation - using ref instead
+  }, [user?.id, onNewMessage, onGroupUpdate, onGroupMemberChange, navigate, activeUserId, activeGroupId]);
 
   // Send message (P2P via socket)
   const handleSend = async () => {
@@ -644,10 +770,12 @@ export default function Messages() {
       tempId,
       content,
       sender_id: user?.id,
-      receiver_id: activeConversation,
+      receiver_id: isGroupActive ? null : parseInt(activeUserId),
+      group_id: isGroupActive ? parseInt(activeGroupId) : null,
       is_own: true,
       is_read: false,
       created_at: new Date().toISOString(),
+      sender: { id: user?.id, name: user?.name, avatar: user?.avatar },
     };
     
     setMessages((prev) => [...prev, optimisticMessage]);
@@ -655,16 +783,18 @@ export default function Messages() {
     setSending(true);
 
     try {
-      // Send via socket P2P
-      const result = await socketService.sendMessage(activeConversation, content, tempId);
+      const result = await socketService.sendMessage(
+        isGroupActive ? null : parseInt(activeUserId),
+        content,
+        tempId,
+        isGroupActive ? parseInt(activeGroupId) : null
+      );
       
       if (!result.success) {
-        // Remove optimistic message on failure
         setMessages((prev) => prev.filter((m) => m.tempId !== tempId));
         console.error("Error sending message:", result.error);
       } else {
-        // Update conversation status if it changed (non-mutual restrictions)
-        if (conversationStatus && !conversationStatus.is_mutual) {
+        if (!isGroupActive && conversationStatus && !conversationStatus.is_mutual) {
           setConversationStatus((prev) => ({
             ...prev,
             can_send: false,
@@ -672,9 +802,10 @@ export default function Messages() {
           }));
         }
 
-        // Update conversation in list
         setConversations((prev) => {
-          const idx = prev.findIndex((c) => c.partner.id === activeConversation);
+          const idx = prev.findIndex((c) => 
+            isGroupActive ? (c.type === 'group' && c.group?.id === parseInt(activeGroupId)) : (c.type === 'private' && c.partner?.id === parseInt(activeUserId))
+          );
           if (idx === -1) return prev;
           const updated = [...prev];
           updated[idx] = {
@@ -686,14 +817,11 @@ export default function Messages() {
               created_at: new Date().toISOString(),
             },
           };
-          // Move to top
           const conv = updated.splice(idx, 1)[0];
-          updated.unshift(conv);
-          return updated;
+          return [conv, ...updated];
         });
       }
     } catch (err) {
-      // Remove optimistic message on error
       setMessages((prev) => prev.filter((m) => m.tempId !== tempId));
       console.error("Error sending message:", err);
     } finally {
@@ -731,22 +859,25 @@ export default function Messages() {
   };
 
   // Select user from modal or conversation
-  const selectConversation = (userId) => {
-    setSearchParams({ user: userId });
+  const selectConversation = (id, isGroup = false) => {
+    if (isGroup) {
+      setSearchParams({ group: id });
+    } else {
+      setSearchParams({ user: id });
+    }
   };
 
   // Handle new user selection
   const handleNewUserSelect = async (selectedUser) => {
-    // Check if conversation already exists
-    const existing = conversations.find((c) => c.partner.id === selectedUser.id);
+    const existing = conversations.find((c) => c.type === 'private' && c.partner?.id === selectedUser.id);
     if (existing) {
       selectConversation(selectedUser.id);
       return;
     }
 
-    // Create new conversation entry and open it
     setConversations((prev) => [
       {
+        type: 'private',
         partner: selectedUser,
         last_message: null,
         unread_count: 0,
@@ -756,6 +887,21 @@ export default function Messages() {
       ...prev,
     ]);
     selectConversation(selectedUser.id);
+  };
+
+  // Handle new group created
+  const handleGroupCreated = (group) => {
+    setConversations((prev) => [
+      {
+        type: 'group',
+        group: { id: group.id, name: group.name, image_url: group.image_url, members_count: group.members_count },
+        last_message: null,
+        unread_count: 0,
+      },
+      ...prev,
+    ]);
+    socketService.joinGroupRoom(group.id);
+    selectConversation(group.id, true);
   };
 
   // Back to list (mobile)
@@ -773,13 +919,22 @@ export default function Messages() {
       <aside className={`msg__sidebar ${mobileView === "chat" ? "hidden-mobile" : ""}`}>
         <div className="msg__sidebar-header">
           <h1 className="msg__title">{t("messages.title")}</h1>
-          <button
-            className="msg__new-btn"
-            onClick={() => setShowNewModal(true)}
-            title={t("messages.new_conversation")}
-          >
-            <PlusIcon />
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              className="msg__new-btn"
+              onClick={() => setShowGroupModal(true)}
+              title={t("messages.new_group", "Nuevo Grupo")}
+            >
+              <UsersIcon />
+            </button>
+            <button
+              className="msg__new-btn"
+              onClick={() => setShowNewModal(true)}
+              title={t("messages.new_conversation")}
+            >
+              <PlusIcon />
+            </button>
+          </div>
         </div>
         
         <div className="msg__search">
@@ -797,10 +952,10 @@ export default function Messages() {
           ) : (
             conversations.map((conv) => (
               <ConversationItem
-                key={conv.partner.id}
+                key={conv.type === 'group' ? `g_${conv.group.id}` : `p_${conv.partner.id}`}
                 conversation={conv}
-                isActive={conv.partner.id === activeConversation}
-                onClick={() => selectConversation(conv.partner.id)}
+                isActive={conv.type === 'group' ? (activeGroupId === String(conv.group.id)) : (activeUserId === String(conv.partner?.id))}
+                onClick={() => selectConversation(conv.type === 'group' ? conv.group.id : conv.partner.id, conv.type === 'group')}
                 t={t}
               />
             ))
@@ -825,24 +980,46 @@ export default function Messages() {
               </button>
               <div
                 className="msg__chat-user-link"
-                onClick={() => navigate(`/profile/${partner?.username}`)}
-                style={{ cursor: 'pointer' }}
+                onClick={() => !isGroupActive && navigate(`/profile/${partner?.username}`)}
+                style={{ cursor: isGroupActive ? 'default' : 'pointer' }}
               >
-                <Avatar src={partner?.avatar} name={partner?.name} size={40} />
+                {isGroupActive ? (
+                  <div className="msg__avatar msg__avatar--group" style={{ width: 40, height: 40 }}>
+                    {groupDetails?.image_url ? (
+                      <img src={groupDetails.image_url} alt={groupDetails.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <UsersIcon />
+                    )}
+                  </div>
+                ) : (
+                  <Avatar src={partner?.avatar} name={partner?.name} size={40} />
+                )}
                 <div className="msg__chat-info">
-                  <h2 className="msg__chat-name">{partner?.name}</h2>
+                  <h2 className="msg__chat-name">{isGroupActive ? (groupDetails?.name || 'Grupo') : partner?.name}</h2>
                   <span className="msg__chat-username">
-                    @{partner?.username}
-                    {typing && <span className="msg__typing-indicator">{t("messages.typing")}</span>}
+                    {isGroupActive ? t("messages.group_chat", "Chat de grupo") : `@${partner?.username}`}
+                    {typing && !isGroupActive && <span className="msg__typing-indicator">{t("messages.typing")}</span>}
                   </span>
                 </div>
               </div>
-              {conversationStatus?.is_mutual && (
-                <span className="msg__mutual-badge" title={t("messages.mutual_followers")}>
-                  <UsersIcon />
-                  {t("messages.mutual")}
-                </span>
-              )}
+              <div className="msg__header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {conversationStatus?.is_mutual && !isGroupActive && (
+                  <span className="msg__mutual-badge" title={t("messages.mutual_followers")}>
+                    <UsersIcon />
+                    {t("messages.mutual")}
+                  </span>
+                )}
+                {isGroupActive && (
+                  <button 
+                    className="msg__header-btn" 
+                    onClick={() => setShowGroupSettingsModal(true)}
+                    title={t("messages.group_info", "Info")}
+                    style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '8px', borderRadius: '50%' }}
+                  >
+                    <InfoIcon />
+                  </button>
+                )}
+              </div>
             </header>
 
             {/* Restriction Banner */}
@@ -866,6 +1043,7 @@ export default function Messages() {
                     showAvatar={showAvatar}
                     partnerAvatar={partner?.avatar}
                     partnerName={partner?.name}
+                    isGroup={isGroupActive}
                   />
                 );
               })}
@@ -916,13 +1094,39 @@ export default function Messages() {
         )}
       </main>
 
-      {/* New Conversation Modal */}
       <NewConversationModal
         isOpen={showNewModal}
         onClose={() => setShowNewModal(false)}
         onSelectUser={handleNewUserSelect}
         t={t}
       />
+
+      <NewGroupModal
+        isOpen={showGroupModal}
+        onClose={() => setShowGroupModal(false)}
+        onGroupCreated={handleGroupCreated}
+        t={t}
+      />
+
+      {showGroupSettingsModal && isGroupActive && groupDetails && (
+        <GroupSettingsModal
+          group={groupDetails}
+          members={groupDetails.members || []}
+          currentUser={user}
+          onClose={() => setShowGroupSettingsModal(false)}
+          onGroupUpdated={(updatedGroup) => {
+            setGroupDetails((prev) => ({ ...prev, ...updatedGroup }));
+            setConversations(prev => {
+              const updated = [...prev];
+              const idx = updated.findIndex(c => c.type === 'group' && c.group?.id === updatedGroup.id);
+              if (idx !== -1) {
+                updated[idx] = { ...updated[idx], group: { ...updated[idx].group, ...updatedGroup } };
+              }
+              return updated;
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

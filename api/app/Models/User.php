@@ -181,4 +181,22 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(CenterRequest::class);
     }
+
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'group_members')
+            ->withPivot(['joined_at', 'is_admin', 'last_read_message_id']);
+    }
+
+    /**
+     * Get mutual followers (users who follow each other).
+     */
+    public function mutualFollowers()
+    {
+        return $this->following()->whereIn('users.id', function($query) {
+            $query->select('follower_id')
+                ->from('follows')
+                ->where('followed_id', $this->id);
+        });
+    }
 }
