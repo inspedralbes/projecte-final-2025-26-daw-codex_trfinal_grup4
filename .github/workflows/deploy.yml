@@ -157,8 +157,8 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
 
-            # ── 2. Build & restart ──
-            $COMPOSE down --remove-orphans
+            # ── 2. Build & restart (preserve SSL certificates) ──
+            $COMPOSE stop
             $COMPOSE build
             $COMPOSE up -d
 
