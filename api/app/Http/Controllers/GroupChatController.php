@@ -93,13 +93,7 @@ class GroupChatController extends Controller
                 }
 
                 return $this->success([
-                    'group' => [
-                        'id' => $group->id,
-                        'name' => $group->name,
-                        'image_url' => $group->image_url,
-                        'creator_id' => $group->creator_id,
-                        'members_count' => count($allMemberIds),
-                    ]
+                    'group' => $this->formatGroup($group)
                 ], 'Grupo creado correctamente.', 201);
             });
         } catch (Throwable $e) {
@@ -151,20 +145,27 @@ class GroupChatController extends Controller
             return $this->error('No tienes permisos de administrador para este grupo.', 403);
         }
 
+        $oldName = $group->name;
+        $newName = $this->sanitization->sanitizeHtml($request->input('name'));
+        $newImage = $this->sanitization->sanitizeHtml($request->input('image_url'));
+
         $group->update([
-            'name' => $this->sanitization->sanitizeHtml($request->input('name')),
-            'image_url' => $this->sanitization->sanitizeHtml($request->input('image_url')),
+            'name' => $newName,
+            'image_url' => $newImage,
         ]);
+
+        // Send system message if name changed
+        if ($oldName !== $newName) {
+            $this->createSystemMessage($group->id, "ha cambiado el nombre del grupo a \"$newName\"", $user->name);
+        } else {
+            $this->createSystemMessage($group->id, "ha actualizado la información del grupo", $user->name);
+        }
 
         // Broadcast update
         event(new GroupUpdatedEvent($group));
 
         return $this->success([
-            'group' => [
-                'id' => $group->id,
-                'name' => $group->name,
-                'image_url' => $group->image_url,
-            ]
+            'group' => $this->formatGroup($group)
         ], 'Grupo actualizado correctamente.');
     }
 
@@ -201,13 +202,19 @@ class GroupChatController extends Controller
         // Remove the member
         $group->members()->detach($userId);
 
-        // Broadcast removal
+        // Send system message
         $targetUser = User::find($userId);
         if ($targetUser) {
+            $this->createSystemMessage($group->id, "ha sido expulsado del grupo", $targetUser->name);
             event(new GroupMemberChangedEvent($group, $targetUser, 'removed'));
         }
 
-        return $this->success(null, 'Miembro expulsado correctamente.');
+        // Refresh group to get updated members list
+        $group->load('members');
+
+        return $this->success([
+            'group' => $this->formatGroup($group)
+        ], 'Miembro expulsado correctamente.');
     }
 
     /**
@@ -248,6 +255,9 @@ class GroupChatController extends Controller
             event(new GroupMemberChangedEvent($group, $targetUser, 'added'));
         }
 
+        // Refresh group to get updated members list
+        $group->load('members');
+
         return $this->success([
             'user' => [
                 'id' => $targetUser->id,
@@ -255,7 +265,8 @@ class GroupChatController extends Controller
                 'username' => $targetUser->username,
                 'avatar' => $targetUser->avatar,
                 'is_admin' => false
-            ]
+            ],
+            'group' => $this->formatGroup($group)
         ], 'Miembro añadido correctamente.');
     }
 
@@ -280,10 +291,79 @@ class GroupChatController extends Controller
         // Remove the member
         $group->members()->detach($user->id);
 
+        // Send system message
+        $this->createSystemMessage($group->id, "ha abandonado el grupo", $user->name);
+
         // Broadcast leave
         event(new GroupMemberChangedEvent($group, $user, 'left'));
 
         return $this->success(null, 'Has abandonado el grupo correctamente.');
+    }
+
+    /**
+     * POST /api/groups/{groupId}/members/{userId}/toggle-admin
+     * Toggle admin status for a member. Admin only.
+     */
+    public function toggleAdmin(Request $request, int $groupId, int $userId): JsonResponse
+    {
+        $currentUser = $request->user();
+        $group = Group::find($groupId);
+
+        if (!$group) {
+            return $this->error('Grupo no encontrado.', 404);
+        }
+
+        // Verify current user is admin
+        $adminMember = $group->members()->where('user_id', $currentUser->id)->first();
+        if (!$adminMember || !$adminMember->pivot->is_admin) {
+            return $this->error('No tienes permisos de administrador para este grupo.', 403);
+        }
+
+        // Cannot demote the creator (or yourself if you are the only admin)
+        if ($currentUser->id === $userId && $group->creator_id === $userId) {
+            return $this->error('El creador siempre debe ser administrador.', 400);
+        }
+
+        // Verify target user is in the group
+        $targetMember = $group->members()->where('user_id', $userId)->first();
+        if (!$targetMember) {
+            return $this->error('El usuario no pertenece a este grupo.', 404);
+        }
+
+        $newStatus = !$targetMember->pivot->is_admin;
+        $group->members()->updateExistingPivot($userId, ['is_admin' => $newStatus]);
+
+        // Send system message
+        $statusText = $newStatus ? "ahora es administrador" : "ya no es administrador";
+        $this->createSystemMessage($group->id, "$statusText", $targetMember->name);
+
+        // Broadcast member changed (to update UI roles)
+        event(new GroupMemberChangedEvent($group, $targetMember, 'role_changed'));
+
+        // Refresh group to get updated pivot data
+        $group->load('members');
+
+        return $this->success([
+            'is_admin' => $newStatus,
+            'group' => $this->formatGroup($group)
+        ], 'Estado de administrador actualizado.');
+    }
+
+    /**
+     * Helper to create system messages
+     */
+    private function createSystemMessage(int $groupId, string $content, ?string $userName = null): void
+    {
+        $text = $userName ? "**$userName** $content" : $content;
+
+        $message = \App\Models\ChatMessage::create([
+            'group_id' => $groupId,
+            'content' => $text,
+            'type' => 'system',
+            'sender_id' => null
+        ]);
+
+        event(new \App\Events\NewGroupMessageEvent($message));
     }
 
     /**
@@ -307,5 +387,72 @@ class GroupChatController extends Controller
         $this->chatService->markGroupAsRead($user, $group->id);
 
         return $this->success(null, 'Grupo marcado como leído.');
+    }
+    /**
+     * POST /api/groups/{groupId}/image
+     * Upload and update group image.
+     */
+    public function uploadImage(Request $request, int $groupId): JsonResponse
+    {
+        $request->validate([
+            'image' => 'required|image|max:5120',
+        ]);
+
+        $group = Group::find($groupId);
+        if (!$group) {
+            return $this->error('Grupo no encontrado.', 404);
+        }
+
+        // Verify current user is admin
+        $adminMember = $group->members()->where('user_id', $request->user()->id)->first();
+        if (!$adminMember || !$adminMember->pivot->is_admin) {
+            return $this->error('No tienes permisos de administrador.', 403);
+        }
+
+        if ($request->hasFile('image')) {
+            // Delete old image if it was local
+            if ($group->image_url && str_contains($group->image_url, '/storage/groups/')) {
+                $oldPath = str_replace('/storage/', '', parse_url($group->image_url, PHP_URL_PATH));
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+
+            $path = $request->file('image')->store('groups', 'public');
+            $group->image_url = url('storage/' . $path);
+            $group->save();
+
+            // Broadcast update
+            event(new \App\Events\GroupUpdatedEvent($group));
+
+            return $this->success([
+                'image_url' => $group->image_url,
+                'group' => $this->formatGroup($group)
+            ], 'Imagen del grupo actualizada.');
+        }
+
+        return $this->error('No se ha subido ninguna imagen.', 400);
+    }
+
+    /**
+     * Format group for consistent API response.
+     */
+    private function formatGroup(Group $group): array
+    {
+        return [
+            'id' => $group->id,
+            'name' => $group->name,
+            'image_url' => $group->image_url,
+            'creator_id' => $group->creator_id,
+            'members' => $group->members->map(function ($m) {
+                return [
+                    'id' => $m->id,
+                    'name' => $m->name,
+                    'username' => $m->username,
+                    'avatar' => $m->avatar,
+                    'is_admin' => (bool)$m->pivot->is_admin,
+                ];
+            }),
+            'members_count' => $group->members()->count(),
+            'created_at' => $group->created_at,
+        ];
     }
 }
