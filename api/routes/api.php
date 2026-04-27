@@ -181,9 +181,11 @@ Route::middleware(['auth:sanctum', 'verified', 'not-blocked'])->group(function (
     Route::get('/groups', [GroupChatController::class, 'index']);
     Route::put('/groups/{groupId}', [GroupChatController::class, 'update']);
     Route::delete('/groups/{groupId}/members/{userId}', [GroupChatController::class, 'removeMember']);
+    Route::post('/groups/{groupId}/members/{userId}/toggle-admin', [GroupChatController::class, 'toggleAdmin']);
     Route::post('/groups/{groupId}/members', [GroupChatController::class, 'addMember']);
     Route::post('/groups/{groupId}/leave', [GroupChatController::class, 'leave']);
     Route::post('/groups/{groupId}/read', [GroupChatController::class, 'markAsRead']);
+    Route::post('/groups/{groupId}/image', [GroupChatController::class, 'uploadImage']);
 
     // Profile update (US#7)
     Route::put('/profile', [ProfileController::class, 'update']);

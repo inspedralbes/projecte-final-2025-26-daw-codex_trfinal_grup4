@@ -321,9 +321,24 @@ const ConversationItem = ({ conversation, isActive, onClick, t }) => {
 // ─── Message Bubble ──────────────────────────────────────────────────────────
 
 const MessageBubble = ({ message, showAvatar, partnerAvatar, partnerName, isGroup }) => {
-  const { content, is_own, is_read, created_at, sender } = message;
+  const { content, is_own, is_read, created_at, sender, type } = message;
   const displayAvatar = isGroup ? sender?.avatar : partnerAvatar;
   const displayName = isGroup ? sender?.name : partnerName;
+
+  if (type === 'system') {
+    // Basic markdown support for bold names in system messages
+    const formattedContent = content.split('**').map((part, i) => 
+      i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+    );
+
+    return (
+      <div className="msg__bubble-system">
+        <span className="msg__bubble-system-text">
+          {formattedContent}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className={`msg__bubble-wrapper ${is_own ? "own" : "other"}`}>
@@ -839,20 +854,23 @@ export default function Messages() {
     };
 
     const handleGroupMemberChange = (data) => {
+      console.log("[Messages] handleGroupMemberChange received:", data);
       if (!data) return;
       const groupId = parseInt(data.group_id, 10);
       const action = data.action;
       const changedUser = data.user;
-      const currentUserId = parseInt(user?.id, 10);
+      const currentUserId = String(user?.id);
       const activeId = activeConversationRef.current;
 
-      if (changedUser.id === currentUserId) {
-        if (action === "removed" || action === "left") {
-          setConversations((prev) =>
-            prev.filter((c) => !(c.type === "group" && c.group?.id === groupId)),
-          );
+      console.log(`[Messages] Processing action: ${action} for user: ${changedUser.id} (me: ${currentUserId})`);
+
+      if (String(changedUser.id) === currentUserId) {
+        if (action === 'removed' || action === 'left') {
+          console.log("[Messages] We were removed/left, filtering conversations...");
+          setConversations(prev => prev.filter(c => !(c.type === 'group' && String(c.group?.id) === String(groupId))));
           if (activeId === `group_${groupId}`) {
-            navigate("/messages");
+            console.log("[Messages] Current group is the one we left, navigating away...");
+            navigate('/messages');
             setMobileView("list");
             setActiveConversation(null);
           }
@@ -865,22 +883,34 @@ export default function Messages() {
         }
       } else {
         if (activeId === `group_${groupId}`) {
-          setGroupDetails((prev) => {
-            if (!prev || prev.id !== groupId) return prev;
+          console.log("[Messages] Updating members for active group...");
+          setGroupDetails(prev => {
+            if (!prev || String(prev.id) !== String(groupId)) return prev;
             let updatedMembers = [...(prev.members || [])];
-            if (action === "added") {
-              if (!updatedMembers.some((m) => m.id === changedUser.id)) {
+            
+            if (action === 'added') {
+              if (!updatedMembers.some(m => String(m.id) === String(changedUser.id))) {
                 updatedMembers.push({ ...changedUser, is_admin: false });
               }
+            } else if (action === 'role_changed') {
+              console.log(`[Messages] Member ${changedUser.id} role changed to admin: ${data.is_admin}`);
+              updatedMembers = updatedMembers.map(m => 
+                String(m.id) === String(changedUser.id) ? { ...m, is_admin: !!data.is_admin } : m
+              );
             } else {
-              updatedMembers = updatedMembers.filter((m) => m.id !== changedUser.id);
+              console.log(`[Messages] Member ${changedUser.id} was removed/left, filtering list...`);
+              updatedMembers = updatedMembers.filter(m => String(m.id) !== String(changedUser.id));
             }
-            return { ...prev, members: updatedMembers, members_count: data.members_count };
+            return { ...prev, members: updatedMembers, members_count: data.members_count || updatedMembers.length };
           });
         }
-        chatService.getConversations().then((res) => setConversations(res.conversations || []));
+        chatService.getConversations().then(res => {
+          console.log("[Messages] Refreshing conversations list after member change...");
+          setConversations(res.conversations || []);
+        });
       }
     };
+
 
     const unsubscribeMsg = onNewMessage(handleNewMessage);
     const unsubscribeUpdate = onGroupUpdate(handleGroupUpdate);

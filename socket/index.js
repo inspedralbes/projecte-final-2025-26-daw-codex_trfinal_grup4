@@ -406,7 +406,7 @@ redisSubscriber.psubscribe(pattern, (err) => {
 
 redisSubscriber.on("pmessage", (_pattern, channel, rawMessage) => {
   // Enhanced prefix stripping to handle various Laravel naming conventions
-  // (hyphens, underscores, or colons)
+  console.log(`[Socket.io] DEBUG: Redis raw message on channel: ${channel}`);
   let laravelChannel = channel;
 
   if (channel.startsWith(REDIS_PREFIX)) {
@@ -430,11 +430,10 @@ redisSubscriber.on("pmessage", (_pattern, channel, rawMessage) => {
 
     console.log(
       `[Socket.io] Redis ← channel=${laravelChannel} event=${eventName}`,
+      JSON.stringify(eventData)
     );
 
     // Emit to the matching Socket.io room
-    // Laravel channel "user.3"  → Socket.io room "user.3"
-    // Laravel channel "post.1"  → Socket.io room "post.1"
     io.to(laravelChannel).emit(eventName, eventData);
     console.log(`[Socket.io] Emitted ${eventName} to room ${laravelChannel}`);
   } catch (err) {
