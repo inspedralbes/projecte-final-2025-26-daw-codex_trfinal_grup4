@@ -13,6 +13,7 @@ class ChatMessage extends Model
         'center_id',
         'group_id',
         'content',
+        'type',
         'is_read',
     ];
 

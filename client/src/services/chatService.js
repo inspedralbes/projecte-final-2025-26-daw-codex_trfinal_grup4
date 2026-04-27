@@ -137,17 +137,27 @@ const chatService = {
   },
 
   /**
-   * Update group information.
+   * Update group name and image.
    * @param {number} groupId 
    * @param {string} name 
    * @param {string|null} imageUrl 
-   * @returns {Promise<{group: Object}>}
    */
   updateGroup: async (groupId, name, imageUrl = null) => {
+    console.log(`[chatService] Updating group ${groupId}:`, { name, imageUrl });
     const response = await api.put(`/groups/${groupId}`, {
       name,
       image_url: imageUrl
     });
+    return response.data;
+  },
+
+  /**
+   * Toggle admin status for a group member.
+   * @param {number} groupId 
+   * @param {number} userId 
+   */
+  toggleGroupAdmin: async (groupId, userId) => {
+    const response = await api.post(`/groups/${groupId}/members/${userId}/toggle-admin`);
     return response.data;
   },
 
@@ -157,6 +167,7 @@ const chatService = {
    * @param {number} userId 
    */
   removeGroupMember: async (groupId, userId) => {
+    console.log(`[chatService] Removing member ${userId} from group ${groupId}`);
     const response = await api.delete(`/groups/${groupId}/members/${userId}`);
     return response.data;
   },
@@ -178,8 +189,21 @@ const chatService = {
    * @param {number} groupId 
    */
   leaveGroup: async (groupId) => {
+    console.log(`[chatService] Leaving group ${groupId}`);
     const response = await api.post(`/groups/${groupId}/leave`);
     return response.data;
+  },
+
+  /**
+   * Upload group image.
+   * @param {number} groupId 
+   * @param {File} file 
+   */
+  uploadGroupImage: async (groupId, file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    // MUST use api.upload because api.post stringifies the body to JSON
+    return api.upload(`/groups/${groupId}/image`, formData);
   },
 
   /**

@@ -992,9 +992,39 @@
     font-size: var(--text-lg);
   }
 
-  .msg__empty-title {
+  .msg__sidebar-header h3 {
     font-size: var(--text-lg);
   }
+}
+
+/* ─── System Messages ─────────────────────────────────────────────────────── */
+
+.msg__bubble-system {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: var(--space-4) 0;
+  padding: 0 var(--space-4);
+}
+
+.msg__bubble-system-text {
+  background: rgba(var(--codex-teal-rgb), 0.1);
+  color: var(--color-text-secondary);
+  padding: var(--space-1-5) var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-family: var(--font-sans);
+  font-style: italic;
+  text-align: center;
+  border: 1px solid rgba(var(--codex-teal-rgb), 0.15);
+  max-width: 80%;
+  line-height: 1.4;
+}
+
+.msg__bubble-system-text strong {
+  color: var(--color-text);
+  font-weight: 600;
+  font-style: normal;
 }
 
 /* Small mobile */

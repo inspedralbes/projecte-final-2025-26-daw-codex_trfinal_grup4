@@ -48,13 +48,14 @@ class NewGroupMessageEvent implements ShouldBroadcastNow
             'content' => $this->message->content,
             'sender_id' => $this->message->sender_id,
             'group_id' => $this->message->group_id,
+            'type' => $this->message->type ?? 'text',
             'created_at' => $this->message->created_at->toISOString(),
-            'sender' => [
+            'sender' => $sender ? [
                 'id' => $sender->id,
                 'name' => $sender->name,
                 'username' => $sender->username,
                 'avatar' => $sender->avatar,
-            ],
+            ] : null,
         ];
     }
 }

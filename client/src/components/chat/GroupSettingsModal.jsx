@@ -51,6 +51,12 @@ const LogOutIcon = () => (
   </svg>
 );
 
+const ShieldIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+  </svg>
+);
+
 const GroupSettingsModal = ({ group, members, currentUser, onClose, onGroupUpdated }) => {
   const { t } = useTranslation();
   const fileInputRef = useRef(null);
@@ -64,8 +70,14 @@ const GroupSettingsModal = ({ group, members, currentUser, onClose, onGroupUpdat
   const [mutualFollowers, setMutualFollowers] = useState([]);
   const [showAddMembers, setShowAddMembers] = useState(false);
   const [addingMemberId, setAddingMemberId] = useState(null);
+  const [kickingMemberId, setKickingMemberId] = useState(null);
 
-  const isAdmin = members.some(m => m.id === currentUser.id && m.is_admin);
+  // Use loose equality and check both property locations for robustness
+  const isAdmin = (members || []).some(m => {
+    const isMe = String(m.id) === String(currentUser?.id);
+    const hasAdminProp = m.is_admin === true || m.is_admin === 1;
+    return isMe && hasAdminProp;
+  });
 
   // Fetch mutual followers to allow adding new members
   useEffect(() => {
@@ -99,24 +111,16 @@ const GroupSettingsModal = ({ group, members, currentUser, onClose, onGroupUpdat
     setError('');
 
     try {
-      const formData = new FormData();
-      formData.append('avatar', file);
-
-      // Using the existing profile avatar upload endpoint, 
-      // but ideally this should be a generic upload endpoint or group specific.
-      // Assuming api/profile/avatar returns { user: { avatar: url } }
-      const response = await api.post('/profile/avatar', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const result = await chatService.uploadGroupImage(group.id, file);
       
-      const newImageUrl = response.data.user?.avatar;
-      if (newImageUrl) {
-        setImageUrl(newImageUrl);
-        // Automatically save group when image is uploaded
-        handleSave(name, newImageUrl);
+      if (result.success && result.data?.image_url) {
+        setImageUrl(result.data.image_url);
+        if (result.data.group) {
+          onGroupUpdated(result.data.group);
+        }
       }
     } catch (err) {
-      setError(err.response?.data?.message || t("messages.upload_error", "Error uploading image."));
+      setError(err.response?.data?.message || t("messages.upload_error", "Error subiendo la imagen."));
     } finally {
       setUploadingImage(false);
     }
@@ -141,16 +145,39 @@ const GroupSettingsModal = ({ group, members, currentUser, onClose, onGroupUpdat
     }
   };
 
-  const handleKickMember = async (userId) => {
-    if (!window.confirm(t("messages.confirm_kick", "¿Estás seguro de que deseas expulsar a este miembro?"))) return;
 
+
+  const handleKickMember = async (userId) => {
+    console.log(`[GroupSettingsModal] Kicking user ${userId} from group ${group?.id}`);
+    
+    setKickingMemberId(userId);
     setError('');
     try {
-      await chatService.removeGroupMember(group.id, userId);
-      // Parent should re-fetch or we should update local state if we want instant feedback
-      onGroupUpdated(group); 
+      if (!group?.id) throw new Error("Group ID is missing");
+      
+      const result = await chatService.removeGroupMember(group.id, userId);
+      console.log(`[GroupSettingsModal] Kick successful:`, result);
+      
+      if (result.success && result.data?.group) {
+        onGroupUpdated(result.data.group);
+      }
     } catch (err) {
-      setError(err.response?.data?.message || t("messages.kick_error", "Error kicking member."));
+      console.error("[GroupSettingsModal] Kick failed:", err);
+      setError(err.response?.data?.message || err.message || t("messages.kick_error", "Error expulsando al miembro."));
+    } finally {
+      setKickingMemberId(null);
+    }
+  };
+
+  const handleToggleAdmin = async (userId) => {
+    setError('');
+    try {
+      const result = await chatService.toggleGroupAdmin(group.id, userId);
+      if (result.success && result.data?.group) {
+        onGroupUpdated(result.data.group);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || t("messages.admin_error", "Error updating admin status."));
     }
   };
 
@@ -158,9 +185,11 @@ const GroupSettingsModal = ({ group, members, currentUser, onClose, onGroupUpdat
     setAddingMemberId(userId);
     setError('');
     try {
-      await chatService.addGroupMember(group.id, userId);
-      onGroupUpdated(group);
-      setMutualFollowers(prev => prev.filter(u => u.id !== userId));
+      const result = await chatService.addGroupMember(group.id, userId);
+      if (result.success && result.data?.group) {
+        onGroupUpdated(result.data.group);
+        setMutualFollowers(prev => prev.filter(u => u.id !== userId));
+      }
     } catch (err) {
       setError(err.response?.data?.message || t("messages.add_error", "Error adding member."));
     } finally {
@@ -326,17 +355,34 @@ const GroupSettingsModal = ({ group, members, currentUser, onClose, onGroupUpdat
 
                   <div className="gs-modal__member-actions">
                     {member.is_admin && (
-                      <span className="gs-modal__admin-badge">{t("messages.admin", "Admin")}</span>
+                      <span className="gs-modal__admin-badge">
+                        <ShieldIcon />
+                        {t("messages.admin", "Admin")}
+                      </span>
                     )}
                     
                     {isAdmin && member.id !== currentUser.id && (
-                      <button 
-                        className="gs-modal__kick-btn"
-                        onClick={() => handleKickMember(member.id)}
-                        title={t("messages.kick_member", "Expulsar")}
-                      >
-                        <UserMinusIcon />
-                      </button>
+                      <div className="gs-modal__admin-actions">
+                        <button 
+                          className={`gs-modal__admin-btn ${member.is_admin ? 'active' : ''}`}
+                          onClick={() => handleToggleAdmin(member.id)}
+                          title={member.is_admin ? t("messages.demote_admin", "Quitar Admin") : t("messages.promote_admin", "Hacer Admin")}
+                        >
+                          <ShieldIcon />
+                        </button>
+                        <button 
+                          className={`gs-modal__kick-btn ${kickingMemberId === member.id ? 'loading' : ''}`}
+                          onClick={() => handleKickMember(member.id)}
+                          disabled={kickingMemberId !== null}
+                          title={t("messages.kick_member", "Expulsar")}
+                        >
+                          {kickingMemberId === member.id ? (
+                            <div className="gs-modal__spinner-small"></div>
+                          ) : (
+                            <UserMinusIcon />
+                          )}
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
