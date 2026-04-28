@@ -7,6 +7,7 @@ use App\Models\Center;
 use App\Models\CenterRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class AuthService
@@ -109,7 +110,7 @@ class AuthService
 
             // Only set avatar if the user doesn't already have one
             if (!$user->avatar && $googleUser->getAvatar()) {
-                $updateData['avatar'] = $googleUser->getAvatar();
+                $updateData['avatar'] = $this->downloadAndStoreGoogleAvatar($googleUser->getAvatar(), $googleUser->getId());
             }
 
             // Auto-verify email if not yet verified (Google already verified it)
@@ -142,7 +143,7 @@ class AuthService
             'password_set_at'   => null, // User needs to set their own password
             'google_id'         => $googleUser->getId(),
             'auth_provider'     => 'google',
-            'avatar'            => $googleUser->getAvatar(),
+            'avatar'            => $this->downloadAndStoreGoogleAvatar($googleUser->getAvatar(), $googleUser->getId()),
             'email_verified_at' => now(), // Google-verified email
             'role'              => $role,
             'center_id'         => $centerId,
@@ -273,4 +274,42 @@ class AuthService
             'detected_center'     => $centerDetection['has_center'] ? $centerDetection['center_name'] : null,
         ];
     }
+
+    /**
+     * Download Google avatar and store it locally to avoid expiration issues.
+     * Returns the local avatar path relative to storage.
+     */
+    private function downloadAndStoreGoogleAvatar(?string $googleAvatarUrl, string $googleId): ?string
+    {
+        if (!$googleAvatarUrl) {
+            return null;
+        }
+
+        try {
+            // Download the image from Google
+            $imageContent = file_get_contents($googleAvatarUrl);
+
+            if (!$imageContent) {
+                return null;
+            }
+
+            // Create a filename based on Google ID
+            $filename = 'avatars/' . $googleId . '.jpg';
+            $path = storage_path('app/public/' . $filename);
+
+            // Ensure directory exists
+            @mkdir(dirname($path), 0755, true);
+
+            // Store the image
+            file_put_contents($path, $imageContent);
+
+            // Return the relative path that can be served by the API
+            return '/storage/' . $filename;
+        } catch (\Exception $e) {
+            // If download fails, return null (user will get a fallback avatar)
+            \Log::warning('Failed to download Google avatar: ' . $e->getMessage());
+            return null;
+        }
+    }
 }
+
