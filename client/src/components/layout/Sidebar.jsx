@@ -331,27 +331,39 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* User Profile */}
-        <div className="sidebar__user">
-          <div className="sidebar__user-avatar">
-            <img
-              src={
-                user?.avatar ||
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || "developer"}`
-              }
-              alt="Avatar"
-            />
+        {/* User Profile or Login Button */}
+        {user ? (
+          <div className="sidebar__user">
+            <div className="sidebar__user-avatar">
+              <img
+                src={
+                  user.avatar ||
+                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username || "developer"}`
+                }
+                alt="Avatar"
+              />
+            </div>
+            <div className="sidebar__user-info">
+              <span className="sidebar__user-name">{user.name}</span>
+              <span className="sidebar__user-handle">
+                @{user.username}
+              </span>
+            </div>
+            <button className="sidebar__user-menu" onClick={handleLogout} title={t("common.logout")}>
+              <LogoutIcon />
+            </button>
           </div>
-          <div className="sidebar__user-info">
-            <span className="sidebar__user-name">{user?.name || t("common.user")}</span>
-            <span className="sidebar__user-handle">
-              @{user?.username || t("common.user").toLowerCase()}
-            </span>
+        ) : (
+          <div className="sidebar__user" style={{ justifyContent: "center", padding: "1rem" }}>
+            <button 
+              onClick={() => navigate("/welcome")} 
+              className="sidebar__user-name" 
+              style={{ background: "var(--codex-primary)", color: "white", padding: "10px 20px", borderRadius: "20px", border: "none", cursor: "pointer", width: "100%", fontWeight: "bold", textAlign: "center" }}
+            >
+              {t("auth.login", "Iniciar Sesión")}
+            </button>
           </div>
-          <button className="sidebar__user-menu" onClick={handleLogout} title={t("common.logout")}>
-            <LogoutIcon />
-          </button>
-        </div>
+        )}
       </div>
     </aside>
   );
