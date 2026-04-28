@@ -519,7 +519,7 @@ export default function Profile({ username }) {
               >
                 {t("profile.edit.cta")}
               </button>
-            ) : (
+            ) : currentUser ? (
               <>
                 <button
                   className="profile-guay__btn profile-guay__btn--message"
@@ -544,7 +544,7 @@ export default function Profile({ username }) {
                   {isFollowing ? t("profile.unfollow") : t("profile.follow")}
                 </button>
               </>
-            )}
+            ) : null}
           </div>
         </div>
       </header>

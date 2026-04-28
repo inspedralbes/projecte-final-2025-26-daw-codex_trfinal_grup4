@@ -58,6 +58,7 @@ Route::post('/password/reset', [PasswordController::class, 'reset']);
 /* ------------------------------------------------------------------ */
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{post}', [PostController::class, 'show']);
+Route::get('/sitemap', [\App\Http\Controllers\SitemapController::class, 'index']);
 Route::get('/posts/{postId}/comments', [CommentController::class, 'index']);
 Route::get('/posts/{postId}/interactions', [InteractionController::class, 'postStatus']);
 Route::get('/tags', [TagController::class, 'index']);
