@@ -144,7 +144,6 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           timeout: 30m
           command_timeout: 30m
-          script_stop: true
           script: |
             set -e
             APP_DIR="/opt/codex"
