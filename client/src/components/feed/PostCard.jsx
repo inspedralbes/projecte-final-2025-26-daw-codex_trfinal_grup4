@@ -304,6 +304,7 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
   const userReposted = targetPost.user_reposted || false;
 
   const handleLike = useCallback(async () => {
+    if (!currentUser) return navigate("/welcome");
     await toggleLike();
     if (onInteractionUpdate) {
       onInteractionUpdate(targetPost.id, {
@@ -311,13 +312,15 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
         user_liked: !liked,
       });
     }
-  }, [toggleLike, onInteractionUpdate, targetPost.id, liked, likesCount]);
+  }, [currentUser, navigate, toggleLike, onInteractionUpdate, targetPost.id, liked, likesCount]);
 
   const handleBookmark = useCallback(async () => {
+    if (!currentUser) return navigate("/welcome");
     await toggleBookmark();
-  }, [toggleBookmark]);
+  }, [currentUser, navigate, toggleBookmark]);
 
   const handleRepost = useCallback(async () => {
+    if (!currentUser) return navigate("/welcome");
     if (reposting) return;
     setReposting(true);
     try {
@@ -334,7 +337,7 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
     } finally {
       setReposting(false);
     }
-  }, [targetPost.id, reposting, repostsCount, onInteractionUpdate]);
+  }, [currentUser, navigate, targetPost.id, reposting, repostsCount, onInteractionUpdate]);
 
   const handleDelete = useCallback(async () => {
     if (onDelete && window.confirm(t("feed.delete_confirm"))) {
