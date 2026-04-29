@@ -213,6 +213,10 @@ jobs:
               sleep 3
             done
             echo "❌ Health check failed"
+            echo "================ WEBSERVER LOGS ================"
+            $COMPOSE logs --tail=50 webserver || true
+            echo "================ API LOGS ================"
+            $COMPOSE logs --tail=50 api || true
             exit 1
 
   # ─────────────────────────────────────────────────────────
