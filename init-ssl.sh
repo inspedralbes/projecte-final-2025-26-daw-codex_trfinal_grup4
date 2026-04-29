@@ -76,7 +76,7 @@ sleep 3
 echo -e "${YELLOW}🔑 Paso 3: Solicitando certificado SSL a Let's Encrypt...${NC}"
 
 docker run --rm \
-    -v tfg_certbot_conf:/etc/letsencrypt \
+    -v /etc/letsencrypt:/etc/letsencrypt \
     -v tfg_certbot_www:/var/www/certbot \
     certbot/certbot certonly \
     --webroot \

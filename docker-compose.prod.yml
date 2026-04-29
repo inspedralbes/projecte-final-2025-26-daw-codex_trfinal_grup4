@@ -195,7 +195,7 @@ services:
     container_name: tfg_certbot_prod
     restart: "no"
     volumes:
-      - certbot_conf:/etc/letsencrypt
+      - /etc/letsencrypt:/etc/letsencrypt
       - certbot_www:/var/www/certbot
     networks:
       - tfg_network
@@ -205,7 +205,6 @@ volumes:
   redis_data:
   api_storage:
   client_build:
-  certbot_conf:
   certbot_www:
 
 networks:
