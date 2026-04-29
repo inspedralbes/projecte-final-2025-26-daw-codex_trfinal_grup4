@@ -159,6 +159,7 @@ jobs:
             # ── 2. Build & restart (preserve SSL certificates) ──
             $COMPOSE stop
             $COMPOSE build
+            docker rm -f tfg_nginx_temp 2>/dev/null || true
             $COMPOSE up -d
 
             # ── 3. Wait for MySQL ──
