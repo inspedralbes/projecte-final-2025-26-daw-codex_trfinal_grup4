@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -120,6 +121,25 @@ class User extends Authenticatable implements MustVerifyEmail
     public function needsPassword(): bool
     {
         return $this->password_set_at === null;
+    }
+
+    public function getAvatarAttribute($value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        if (Str::startsWith($value, ['http://', 'https://'])) {
+            return $value;
+        }
+
+        $baseUrl = rtrim(config('app.url'), '/');
+
+        if (Str::startsWith($value, '/')) {
+            return $baseUrl . $value;
+        }
+
+        return $baseUrl . '/' . $value;
     }
 
     /**
