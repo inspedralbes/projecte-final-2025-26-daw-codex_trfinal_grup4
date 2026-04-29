@@ -107,13 +107,15 @@ function Comment({ comment, postAuthorId, onReply, onToggleSolution, level = 0 }
           <p className="comment__text">{comment.content}</p>
           
           <div className="comment__actions">
-            <button 
-              className="comment__action"
-              onClick={() => setShowReplyInput(!showReplyInput)}
-            >
-              <ReplyIcon />
-              <span>{t("post.reply")}</span>
-            </button>
+            {user && (
+              <button 
+                className="comment__action"
+                onClick={() => setShowReplyInput(!showReplyInput)}
+              >
+                <ReplyIcon />
+                <span>{t("post.reply")}</span>
+              </button>
+            )}
             
             {isPostAuthor && !isCommentAuthor && (
               <button 
@@ -166,6 +168,8 @@ function Comment({ comment, postAuthorId, onReply, onToggleSolution, level = 0 }
     </div>
   );
 }
+
+import { Helmet } from "react-helmet-async";
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -317,9 +321,35 @@ export default function PostDetail() {
   }
 
   const postAuthorId = post.user?.id || post.author?.id;
+  const postAuthorName = post.user?.name || post.author?.name || "Usuario";
+  const postTitle = post.title || "Post en Codex";
+  const postDescription = post.content ? post.content.substring(0, 150) + "..." : "Mira este proyecto en Codex.";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": postTitle,
+    "author": {
+      "@type": "Person",
+      "name": postAuthorName
+    },
+    "datePublished": post.created_at || new Date().toISOString(),
+    "description": postDescription
+  };
 
   return (
     <div className="post-detail">
+      <Helmet>
+        <title>{postTitle} | Codex</title>
+        <meta name="description" content={postDescription} />
+        <meta property="og:title" content={postTitle} />
+        <meta property="og:description" content={postDescription} />
+        <meta property="og:type" content="article" />
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd)}
+        </script>
+      </Helmet>
+
       <header className="post-detail__header">
         <button className="post-detail__back" onClick={() => navigate(-1)}>
           <BackIcon />
@@ -331,27 +361,34 @@ export default function PostDetail() {
       <PostCard post={post} />
 
       {/* Comment Input */}
-      <form className="post-detail__comment-form" onSubmit={handleSubmitComment}>
-        <img 
-          src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username}`}
-          alt={user?.name}
-          className="post-detail__comment-avatar"
-        />
-        <input
-          type="text"
-          className="post-detail__comment-input"
-          placeholder={t("post.write_comment")}
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-        />
-        <button 
-          type="submit" 
-          className="post-detail__comment-submit"
-          disabled={!newComment.trim() || submitting}
-        >
-          {submitting ? "..." : t("post.comment_btn")}
-        </button>
-      </form>
+      {user ? (
+        <form className="post-detail__comment-form" onSubmit={handleSubmitComment}>
+          <img 
+            src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+            alt={user.name}
+            className="post-detail__comment-avatar"
+          />
+          <input
+            type="text"
+            className="post-detail__comment-input"
+            placeholder={t("post.write_comment")}
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+          />
+          <button 
+            type="submit" 
+            className="post-detail__comment-submit"
+            disabled={!newComment.trim() || submitting}
+          >
+            {submitting ? "..." : t("post.comment_btn")}
+          </button>
+        </form>
+      ) : (
+        <div className="post-detail__login-prompt" style={{ padding: "1.5rem", textAlign: "center", background: "rgba(255,255,255,0.03)", borderRadius: "12px", margin: "1rem 0", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <p style={{ marginBottom: "1rem", color: "var(--text-secondary)" }}>{t("post.login_to_comment", "Inicia sesión para participar en la conversación")}</p>
+          <button onClick={() => navigate("/welcome")} className="post-detail__comment-submit" style={{ cursor: "pointer", opacity: 1 }}>{t("auth.login", "Iniciar Sesión")}</button>
+        </div>
+      )}
 
       {/* Comments Section */}
       <div className="post-detail__comments">

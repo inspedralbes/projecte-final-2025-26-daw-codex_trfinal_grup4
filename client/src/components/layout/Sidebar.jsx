@@ -299,7 +299,16 @@ export default function Sidebar() {
                     <GlitchHover>{t(label)}</GlitchHover>
                   </span>
                   <span className="sidebar__nav-lock">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
@@ -336,29 +345,51 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* User Profile */}
-        <div className="sidebar__user">
-          <div className="sidebar__user-avatar">
-            <img
-              src={
-                user?.avatar ||
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || "developer"}`
-              }
-              alt="Avatar"
-            />
+        {/* User Profile or Login Button */}
+        {user ? (
+          <div className="sidebar__user">
+            <div className="sidebar__user-avatar">
+              <img
+                src={
+                  user.avatar ||
+                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username || "developer"}`
+                }
+                alt="Avatar"
+              />
+            </div>
+            <div className="sidebar__user-info">
+              <span className="sidebar__user-name">{user.name}</span>
+              <span className="sidebar__user-handle">@{user.username}</span>
+            </div>
+            <button
+              className="sidebar__user-menu"
+              onClick={handleLogout}
+              title={t("common.logout")}
+            >
+              <LogoutIcon />
+            </button>
           </div>
-          <div className="sidebar__user-info">
-            <span className="sidebar__user-name">
-              <GlitchHover>{user?.name || t("common.user")}</GlitchHover>
-            </span>
-            <span className="sidebar__user-handle">
-              <GlitchHover>@{user?.username || t("common.user").toLowerCase()}</GlitchHover>
-            </span>
+        ) : (
+          <div className="sidebar__user" style={{ justifyContent: "center", padding: "1rem" }}>
+            <button
+              onClick={() => navigate("/welcome")}
+              className="sidebar__user-name"
+              style={{
+                background: "var(--codex-primary)",
+                color: "white",
+                padding: "10px 20px",
+                borderRadius: "20px",
+                border: "none",
+                cursor: "pointer",
+                width: "100%",
+                fontWeight: "bold",
+                textAlign: "center",
+              }}
+            >
+              {t("auth.login", "Iniciar Sesión")}
+            </button>
           </div>
-          <button className="sidebar__user-menu" onClick={handleLogout} title={t("common.logout")}>
-            <LogoutIcon />
-          </button>
-        </div>
+        )}
       </div>
     </aside>
   );

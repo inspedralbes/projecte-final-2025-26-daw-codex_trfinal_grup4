@@ -576,53 +576,55 @@ export default function Explore() {
             </section>
 
             {/* Suggested Users - NEW */}
-            <section className="explore__widget explore__widget--suggested">
-              <div className="explore__widget-header">
-                <UserPlusIcon />
-                <h2 className="explore__widget-title">{t("explore.who_to_follow")}</h2>
-              </div>
-              <div className="explore__widget-content">
-                {loadingSuggested ? (
-                  <div className="explore__widget-loading">
-                    <LoadingSpinner />
-                  </div>
-                ) : suggestedUsers.length === 0 ? (
-                  <p className="explore__widget-empty">{t("explore.no_suggestions")}</p>
-                ) : (
-                  suggestedUsers.map((u) => (
-                    <div key={u.id} className="explore__suggested-user">
-                      <button
-                        className="explore__suggested-user-main"
-                        onClick={() => handleUserClick(u.username)}
-                      >
-                        <div className="explore__suggested-user-avatar">
-                          <img
-                            src={
-                              u.avatar ||
-                              `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`
-                            }
-                            alt={u.name}
-                          />
-                        </div>
-                        <div className="explore__suggested-user-info">
-                          <span className="explore__suggested-user-name">{u.name}</span>
-                          <span className="explore__suggested-user-handle">@{u.username}</span>
-                        </div>
-                      </button>
-                      <button
-                        className={`explore__follow-btn ${followingMap[u.id] ? "explore__follow-btn--following" : ""}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleFollowToggle(u.id);
-                        }}
-                      >
-                        {followingMap[u.id] ? t("explore.following") : t("explore.follow")}
-                      </button>
+            {user && (
+              <section className="explore__widget explore__widget--suggested">
+                <div className="explore__widget-header">
+                  <UserPlusIcon />
+                  <h2 className="explore__widget-title">{t("explore.who_to_follow")}</h2>
+                </div>
+                <div className="explore__widget-content">
+                  {loadingSuggested ? (
+                    <div className="explore__widget-loading">
+                      <LoadingSpinner />
                     </div>
-                  ))
-                )}
-              </div>
-            </section>
+                  ) : suggestedUsers.length === 0 ? (
+                    <p className="explore__widget-empty">{t("explore.no_suggestions")}</p>
+                  ) : (
+                    suggestedUsers.map((u) => (
+                      <div key={u.id} className="explore__suggested-user">
+                        <button
+                          className="explore__suggested-user-main"
+                          onClick={() => handleUserClick(u.username)}
+                        >
+                          <div className="explore__suggested-user-avatar">
+                            <img
+                              src={
+                                u.avatar ||
+                                `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`
+                              }
+                              alt={u.name}
+                            />
+                          </div>
+                          <div className="explore__suggested-user-info">
+                            <span className="explore__suggested-user-name">{u.name}</span>
+                            <span className="explore__suggested-user-handle">@{u.username}</span>
+                          </div>
+                        </button>
+                        <button
+                          className={`explore__follow-btn ${followingMap[u.id] ? "explore__follow-btn--following" : ""}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFollowToggle(u.id);
+                          }}
+                        >
+                          {followingMap[u.id] ? t("explore.following") : t("explore.follow")}
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </section>
+            )}
 
             {/* Top Contributors */}
             <section className="explore__widget explore__widget--contributors">
