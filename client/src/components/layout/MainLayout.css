@@ -7,6 +7,8 @@
   grid-template-columns: var(--sidebar-width) 1fr var(--widget-width);
   min-height: 100vh;
   position: relative;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 
@@ -54,10 +56,14 @@
   backdrop-filter: blur(2px);
   position: relative;
   z-index: 1;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 .main-content__container {
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* ── Responsive ───────────────────────────────────────────── */
@@ -186,6 +192,11 @@
 
   .main-content {
     border: none;
+    overflow-x: hidden;
+  }
+
+  .bg-watermark {
+    display: none;
   }
 }
 
@@ -224,5 +235,16 @@
   to {
     transform: translateY(0) scale(1);
     opacity: 1;
+  }
+}
+
+/* ── Toast Mobile ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  .ar-toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: calc(var(--mobile-nav-height) + var(--safe-bottom) + 1rem);
+    max-width: none;
+    width: auto;
   }
 }

@@ -519,7 +519,9 @@
     gap: var(--space-2);
     padding: var(--space-3);
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
+    overflow: hidden;
   }
 
   .post-card__avatar {
@@ -679,6 +681,13 @@
     width: 28px;
     height: 28px;
   }
+
+  /* Fix repost/reply indicator margins for mobile padding */
+  .post-card__repost-indicator,
+  .post-card__reply-indicator {
+    margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-3)) 0;
+    padding: var(--space-1) var(--space-3);
+  }
 }
 
 /* ── Responsive: Very Small Phones ────────────────────────── */
@@ -686,6 +695,7 @@
   .post-card {
     padding: var(--space-2);
     gap: var(--space-1-5);
+    overflow: hidden;
   }
 
   .post-card__avatar {
@@ -755,6 +765,13 @@
   .post-card__center-badge {
     font-size: 0.6rem;
     padding: 1px 4px;
+  }
+
+  /* Fix repost/reply indicator margins for very small phones */
+  .post-card__repost-indicator,
+  .post-card__reply-indicator {
+    margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0;
+    padding: var(--space-1) var(--space-2);
   }
 }
 
