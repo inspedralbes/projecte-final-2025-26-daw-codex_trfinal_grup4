@@ -439,20 +439,6 @@
   background: rgba(239, 68, 68, 0.9);
 }
 
-/* ── Link Input ───────────────────────────────────────────── */
-.sidebar__nav-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  color: var(--ink-secondary);
-  text-decoration: none;
-  border-radius: 0;
-  font-size: var(--text-lg);
-  font-weight: 400;
-  transition: all var(--transition-fast);
-}
-
 .post-input__link-input {
   display: flex;
   align-items: center;
@@ -573,6 +559,16 @@
   .post-input__code-textarea {
     font-size: var(--text-xs);
     padding: var(--space-3);
+  }
+
+  /* Visibility dropdown position fix for mobile */
+  .post-input__visibility-dropdown {
+    min-width: 200px;
+    right: -8px;
+  }
+
+  .post-input__link-input {
+    flex-wrap: wrap;
   }
 }
 

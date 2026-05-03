@@ -9,6 +9,8 @@
     justify-content: center;
     background: var(--depth-1, #0f1419);
     padding: 1.5rem;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .blocked-screen__card {
@@ -115,4 +117,23 @@
     background: rgba(239, 68, 68, 0.25);
     border-color: rgba(239, 68, 68, 0.5);
     transform: translateY(-1px);
+}
+
+@media (max-width: 480px) {
+    .blocked-screen__card {
+        padding: 2rem 1.5rem;
+    }
+
+    .blocked-screen__icon {
+        width: 72px;
+        height: 72px;
+    }
+
+    .blocked-screen__title {
+        font-size: 1.3rem;
+    }
+
+    .blocked-screen__subtitle {
+        font-size: 0.9rem;
+    }
 }

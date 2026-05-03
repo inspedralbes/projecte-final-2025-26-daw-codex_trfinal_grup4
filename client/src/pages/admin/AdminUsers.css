@@ -607,3 +607,35 @@
         flex-wrap: wrap;
     }
 }
+
+/* ── Small Mobile ────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .ban-modal {
+        padding: 1.25rem;
+        width: 95%;
+    }
+
+    .ban-modal__type-row {
+        flex-direction: column;
+    }
+
+    .ban-modal__actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .ban-modal__btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .admin-table td.td-summary {
+        padding: 0.75rem;
+    }
+
+    .admin-table tr.row-expanded td.td-detail {
+        grid-template-columns: 80px 1fr;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+}

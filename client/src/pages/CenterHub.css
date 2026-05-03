@@ -908,8 +908,22 @@
    ============================================================ */
 
 @media (max-width: 640px) {
+  .center-hub {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  .center-hub__members-section {
+    padding: var(--space-3);
+  }
+
   .center-hub__members-toolbar {
     flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .center-hub__members-search {
+    min-width: 0;
   }
 
   .center-hub__members-filters {
@@ -919,11 +933,13 @@
   .center-hub__filter-btn {
     flex: 1;
     text-align: center;
+    font-size: var(--text-xs);
   }
 
   .center-hub__member-card {
     flex-direction: column;
     gap: var(--space-3);
+    padding: var(--space-3);
   }
 
   .center-hub__member-avatar {
@@ -938,11 +954,97 @@
 
   .center-hub__stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .center-hub__stat-card {
+    padding: var(--space-3);
+  }
+
+  .center-hub__stat-value {
+    font-size: var(--text-xl);
   }
 
   .center-hub__privacy-indicator {
     font-size: 10px;
     padding: var(--space-0-5) var(--space-2);
+  }
+
+  /* Admin section responsive */
+  .center-hub__admin-section {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  .center-hub__admin-card {
+    padding: var(--space-3);
+  }
+
+  .center-hub__admin-title {
+    font-size: var(--text-base);
+    gap: var(--space-1);
+  }
+
+  .center-hub__form-actions {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .center-hub__form-actions .center-hub__btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .center-hub__form-group input,
+  .center-hub__form-group textarea {
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+
+  /* Modal responsive */
+  .center-hub__modal {
+    padding: var(--space-4);
+    width: calc(100% - var(--space-8));
+    max-width: none;
+  }
+
+  .center-hub__modal-actions {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  /* Blocked view responsive */
+  .center-hub__blocked-view {
+    padding: var(--space-8) var(--space-4);
+  }
+
+  .center-hub__blocked-icon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .center-hub__blocked-title {
+    font-size: var(--text-xl);
+  }
+
+  .center-hub__blocked-desc,
+  .center-hub__blocked-contact {
+    font-size: var(--text-sm);
+  }
+
+  /* Channels responsive */
+  .center-hub__channels {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .center-hub__channels::-webkit-scrollbar {
+    display: none;
+  }
+
+  .center-hub__channel {
+    flex-shrink: 0;
   }
 }
 
