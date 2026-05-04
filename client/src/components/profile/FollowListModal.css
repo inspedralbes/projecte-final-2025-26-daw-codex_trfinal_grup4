@@ -108,6 +108,39 @@
   color: var(--ink-tertiary);
 }
 
+.follow-modal__btn {
+  margin-left: auto;
+  padding: 4px 12px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 0;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.follow-modal__btn--primary {
+  background: var(--codex-coral);
+  color: var(--codex-black);
+}
+
+.follow-modal__btn--primary:hover {
+  background: var(--codex-white);
+}
+
+.follow-modal__btn--following {
+  background: transparent;
+  border-color: var(--border-subtle);
+  color: var(--ink-primary);
+}
+
+.follow-modal__btn--following:hover {
+  border-color: var(--status-error);
+  color: var(--status-error);
+}
+
 .follow-modal__load-more {
   width: 100%;
   padding: var(--space-4);

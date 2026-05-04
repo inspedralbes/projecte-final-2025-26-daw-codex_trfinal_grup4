@@ -117,14 +117,14 @@ const ChevronDownIcon = () => (
   </svg>
 );
 
-export default function PostInput({ onSubmit, forceQuestion = false }) {
+export default function PostInput({ onSubmit, forceQuestion = false, initialMode = "text" }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [content, setContent] = useState("");
-  const [showCodeEditor, setShowCodeEditor] = useState(false);
+  const [showCodeEditor, setShowCodeEditor] = useState(initialMode === "code");
   const [code, setCode] = useState("");
   const [codeLanguage, setCodeLanguage] = useState("javascript");
-  const [isQuestion, setIsQuestion] = useState(forceQuestion);
+  const [isQuestion, setIsQuestion] = useState(forceQuestion || initialMode === "question");
   const [tags, setTags] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -160,8 +160,15 @@ export default function PostInput({ onSubmit, forceQuestion = false }) {
 
   // Sync isQuestion with forceQuestion prop when tab changes
   useEffect(() => {
-    setIsQuestion(forceQuestion);
-  }, [forceQuestion]);
+    setIsQuestion(forceQuestion || initialMode === "question");
+  }, [forceQuestion, initialMode]);
+
+  // Auto-open image dialog if mode is image
+  useEffect(() => {
+    if (initialMode === "image" && imageInputRef.current) {
+      setTimeout(() => imageInputRef.current?.click(), 100);
+    }
+  }, [initialMode]);
 
   // Close visibility dropdown on outside click
   useEffect(() => {

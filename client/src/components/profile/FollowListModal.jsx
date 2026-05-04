@@ -51,6 +51,49 @@ export default function FollowListModal({ userId, type, onClose }) {
     navigate(`/profile/${username}`);
   };
 
+  const handleToggleFollow = async (e, targetUser) => {
+    e.stopPropagation();
+    const isCurrentlyFollowing = !!targetUser.is_following;
+    const isCurrentlyPending = !!targetUser.is_pending;
+
+    // Optimistic UI update
+    setUsers(prev => prev.map(u => {
+      if (u.id === targetUser.id) {
+        return {
+          ...u,
+          is_following: !isCurrentlyFollowing && !isCurrentlyPending && !u.is_private,
+          is_pending: !isCurrentlyFollowing && !isCurrentlyPending && !!u.is_private,
+        };
+      }
+      return u;
+    }));
+
+    try {
+      const response = await followService.toggleFollowUser(targetUser.id);
+      const data = response.data?.data || response.data || response;
+      
+      setUsers(prev => prev.map(u => {
+        if (u.id === targetUser.id) {
+          return {
+            ...u,
+            is_following: data.status === 'accepted' || data.following === true,
+            is_pending: data.status === 'pending',
+          };
+        }
+        return u;
+      }));
+    } catch (err) {
+      console.error("Error toggling follow in modal:", err);
+      // Revert on error
+      setUsers(prev => prev.map(u => {
+        if (u.id === targetUser.id) {
+          return { ...u, is_following: isCurrentlyFollowing, is_pending: isCurrentlyPending };
+        }
+        return u;
+      }));
+    }
+  };
+
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
@@ -107,6 +150,14 @@ export default function FollowListModal({ userId, type, onClose }) {
                     <span className="follow-modal__name">{user.name}</span>
                     <span className="follow-modal__username">@{user.username}</span>
                   </div>
+                  {!user.is_self && (
+                    <button 
+                      className={`follow-modal__btn ${user.is_following ? 'follow-modal__btn--following' : 'follow-modal__btn--primary'}`}
+                      onClick={(e) => handleToggleFollow(e, user)}
+                    >
+                      {user.is_following ? t("profile.unfollow") : user.is_pending ? t("profile.pending", "Solicitado") : t("profile.follow")}
+                    </button>
+                  )}
                 </div>
               ))}
 

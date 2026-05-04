@@ -340,7 +340,7 @@
   height: 16px;
   margin: -8px 0 0 -8px;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border-top-color: var(--codex-white);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -426,7 +426,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.7);
-  color: white;
+  color: var(--codex-white);
   border: none;
   border-radius: 50%;
   font-size: var(--text-lg);

@@ -153,6 +153,9 @@ Route::middleware(['auth:sanctum', 'verified', 'not-blocked'])->group(function (
     // Follow – toggle + status (auth required)
     Route::post('/users/{user}/follow', [FollowController::class, 'toggle']);
     Route::get('/users/{user}/follow-status', [FollowController::class, 'status']);
+    Route::get('/follow-requests', [FollowController::class, 'pendingRequests']);
+    Route::post('/follow-requests/{follower}/accept', [FollowController::class, 'acceptRequest']);
+    Route::post('/follow-requests/{follower}/reject', [FollowController::class, 'rejectRequest']);
 
     // Center Hub (US#5) – "Walled Garden"
     Route::get('/center/posts', [PostController::class, 'centerPosts']);

@@ -289,7 +289,7 @@
 
 .explore__contributor-rank--3 {
   background: linear-gradient(135deg, #f97316, #ea580c);
-  color: white;
+  color: var(--codex-white);
 }
 
 .explore__contributor-avatar {

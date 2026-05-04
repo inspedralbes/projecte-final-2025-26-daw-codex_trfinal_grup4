@@ -48,6 +48,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'portfolio_url',
         'external_url',
         'center_prompt_dismissed',
+        'is_private',
     ];
 
     /**
@@ -79,6 +80,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'ban_status' => 'string',
             'ai_moderation_strikes' => 'integer',
             'center_prompt_dismissed' => 'boolean',
+            'is_private' => 'boolean',
         ];
     }
 
@@ -171,12 +173,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function followers(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id');
+        return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id')->withPivot('status')->withTimestamps();
     }
 
     public function following(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'followed_id');
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'followed_id')->withPivot('status')->withTimestamps();
     }
 
     public function likedPosts(): BelongsToMany

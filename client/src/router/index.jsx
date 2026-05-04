@@ -15,7 +15,7 @@ const PostDetail = React.lazy(() => import("@/pages/PostDetail"));
 const Explore = React.lazy(() => import("@/pages/Explore"));
 const Notifications = React.lazy(() => import("@/pages/Notifications"));
 const Messages = React.lazy(() => import("@/pages/Messages"));
-const More = React.lazy(() => import("@/pages/More"));
+const Settings = React.lazy(() => import("@/pages/Settings"));
 const Landing = React.lazy(() => import("@/pages/Landing"));
 const GoogleCallback = React.lazy(() => import("@/pages/GoogleCallback"));
 const CenterHub = React.lazy(() => import("@/pages/CenterHub"));
@@ -113,7 +113,7 @@ export default function AppRouter() {
               <Route path="/messages" element={<Messages />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/center" element={<CenterHub />} />
-              <Route path="/more" element={<More />} />
+              <Route path="/settings" element={<Settings />} />
 
               {/* Admin Section */}
               <Route path="/admin" element={<AdminRoute />}>

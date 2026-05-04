@@ -309,17 +309,6 @@
   color: var(--codex-coral);
 }
 
-.profile-guay__nav-btn.active::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: var(--space-6);
-  right: var(--space-6);
-  height: 4px;
-  background: var(--codex-coral);
-  border-radius: 0;
-}
-
 /* Content section wrapper for nav + feed */
 .profile-guay__content {
   width: 100%;
@@ -339,7 +328,8 @@
 
 .profile-guay__loading-feed,
 .profile-guay__empty-feed {
-  padding: var(--space-20);
+  padding: var(--space-20) var(--space-4);
+  margin-top: var(--space-8);
   text-align: center;
   color: var(--ink-tertiary);
 }
@@ -535,7 +525,7 @@
   opacity: 0;
   transition: all 0.2s ease;
   cursor: pointer;
-  color: white;
+  color: var(--codex-white);
 }
 
 .edit-modal__banner:hover .edit-modal__banner-overlay {
@@ -585,7 +575,7 @@
   justify-content: center;
   opacity: 0;
   transition: opacity 0.2s ease;
-  color: white;
+  color: var(--codex-white);
 }
 
 .edit-modal__avatar:hover .edit-modal__avatar-overlay {
@@ -910,12 +900,6 @@
     justify-content: center;
   }
 
-  .profile-guay__nav-btn.active::after {
-    left: var(--space-3);
-    right: var(--space-3);
-    height: 3px;
-  }
-
   /* Feed responsive for likes/saved/posts/questions sections */
   .profile-guay__feed {
     padding: var(--space-2);
@@ -988,7 +972,8 @@
 
   .profile-guay__loading-feed,
   .profile-guay__empty-feed {
-    padding: var(--space-10);
+    padding: var(--space-16) var(--space-4);
+    margin-top: var(--space-8);
     font-size: 0.875rem;
   }
 
@@ -1148,7 +1133,8 @@
 
   .profile-guay__loading-feed,
   .profile-guay__empty-feed {
-    padding: var(--space-8);
+    padding: var(--space-12) var(--space-2);
+    margin-top: var(--space-6);
     font-size: 0.8125rem;
   }
 
@@ -1195,4 +1181,45 @@
     width: 64px;
     height: 64px;
   }
+}
+
+.profile-guay__private-account {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-20) var(--space-6);
+  text-align: center;
+  gap: var(--space-4);
+  background: var(--depth-1);
+  border: 1px solid var(--border-subtle);
+  margin-top: var(--space-8);
+}
+
+.profile-guay__private-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--depth-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--ink-primary);
+  margin-bottom: var(--space-4);
+  color: var(--ink-primary);
+}
+
+.profile-guay__private-account h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink-primary);
+}
+
+.profile-guay__private-account p {
+  font-size: 1rem;
+  color: var(--ink-tertiary);
+  max-width: 300px;
+  margin: 0;
 }
