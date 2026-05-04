@@ -285,7 +285,7 @@
 
 .tvm-btn--primary {
   background: linear-gradient(135deg, var(--codex-teal), var(--codex-teal-dark));
-  color: white;
+  color: var(--codex-white);
 }
 
 .tvm-btn--primary:hover:not(:disabled) {

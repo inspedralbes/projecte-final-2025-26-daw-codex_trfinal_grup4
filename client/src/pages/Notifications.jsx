@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useSocket } from "@/context/SocketContext";
+import followService from "@/services/followService";
 import "./Notifications.css";
 
 // Notification Icons
@@ -261,6 +262,9 @@ export default function Notifications() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
+  const [followRequests, setFollowRequests] = useState([]);
+  const [requestsLoading, setRequestsLoading] = useState(false);
+  
   const {
     notifications,
     unreadCount,
@@ -281,9 +285,46 @@ export default function Notifications() {
     return unsubscribe;
   }, [onNewNotification, addNotification]);
 
+  const fetchFollowRequests = useCallback(async () => {
+    setRequestsLoading(true);
+    try {
+      const response = await followService.getFollowRequests();
+      setFollowRequests(response.data || response || []);
+    } catch (err) {
+      console.error("Error fetching follow requests:", err);
+    } finally {
+      setRequestsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (filter === "requests") {
+      fetchFollowRequests();
+    }
+  }, [filter, fetchFollowRequests]);
+
+  const handleAcceptRequest = async (followerId) => {
+    try {
+      await followService.acceptFollowRequest(followerId);
+      setFollowRequests(prev => prev.filter(r => r.id !== followerId));
+    } catch (err) {
+      console.error("Error accepting request:", err);
+    }
+  };
+
+  const handleRejectRequest = async (followerId) => {
+    try {
+      await followService.rejectFollowRequest(followerId);
+      setFollowRequests(prev => prev.filter(r => r.id !== followerId));
+    } catch (err) {
+      console.error("Error rejecting request:", err);
+    }
+  };
+
   const filters = [
     { id: "all", label: t("notifications.filters.all") },
     { id: "social", label: t("notifications.filters.social") },
+    { id: "requests", label: t("notifications.requests", "Solicitudes") },
     { id: "school", label: t("sidebar.center") },
     { id: "code", label: t("notifications.filters.code") },
   ];
@@ -386,7 +427,42 @@ export default function Notifications() {
 
       {/* Notifications List */}
       <div className="notif__list">
-        {filteredNotifications.map((notif) => {
+        {filter === "requests" ? (
+          requestsLoading ? (
+            <div className="notif__loading-inner">
+              <LoadingSpinner />
+            </div>
+          ) : followRequests.length === 0 ? (
+            <div className="notif__empty-inner">
+              <p>{t("notifications.no_requests", "No tienes solicitudes pendientes")}</p>
+            </div>
+          ) : (
+            followRequests.map(user => (
+              <div key={user.id} className="notif__request-item">
+                <div className="notif__request-user">
+                  <img 
+                    src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} 
+                    alt={user.name} 
+                    className="notif__avatar"
+                    onClick={() => navigate(`/profile/${user.username}`)}
+                  />
+                  <div className="notif__request-info" onClick={() => navigate(`/profile/${user.username}`)}>
+                    <strong>{user.name}</strong>
+                    <span>@{user.username}</span>
+                  </div>
+                </div>
+                <div className="notif__request-actions">
+                  <button className="notif__btn-accept" onClick={() => handleAcceptRequest(user.id)}>
+                    {t("common.accept", "Aceptar")}
+                  </button>
+                  <button className="notif__btn-reject" onClick={() => handleRejectRequest(user.id)}>
+                    {t("common.reject", "Rechazar")}
+                  </button>
+                </div>
+              </div>
+            ))
+          )
+        ) : filteredNotifications.map((notif) => {
           const mappedType = mapNotificationType(notif.type);
           const isRead = !!notif.read_at;
 

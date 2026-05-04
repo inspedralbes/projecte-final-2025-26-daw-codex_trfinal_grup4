@@ -309,6 +309,7 @@ export default function Profile({ username }) {
     loading: profileLoading,
     error: profileError,
     isFollowing,
+    isPending,
     toggleFollow,
     isOwnProfile,
     updateProfile,
@@ -541,7 +542,7 @@ export default function Profile({ username }) {
                   className={`profile-guay__btn ${isFollowing ? "profile-guay__btn--following" : "profile-guay__btn--primary"}`}
                   onClick={toggleFollow}
                 >
-                  {isFollowing ? t("profile.unfollow") : t("profile.follow")}
+                  {isFollowing ? t("profile.unfollow") : isPending ? t("profile.pending", "Solicitado") : t("profile.follow")}
                 </button>
               </>
             ) : null}
@@ -861,7 +862,18 @@ export default function Profile({ username }) {
         </nav>
 
         <div className="profile-guay__feed">
-          {isLoadingPosts ? (
+          {(!isOwnProfile && profile.is_private && !isFollowing) ? (
+            <div className="profile-guay__private-account">
+              <div className="profile-guay__private-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </div>
+              <h3>{t("profile.private_title", "Esta cuenta es privada")}</h3>
+              <p>{t("profile.private_desc", "Sigue a este usuario para ver sus publicaciones.")}</p>
+            </div>
+          ) : isLoadingPosts ? (
             <div className="profile-guay__loading-feed">
               <LoadingSpinner />
             </div>

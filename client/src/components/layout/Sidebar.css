@@ -352,32 +352,19 @@
     position: relative;
   }
 
-  /* Show only first 3 items in mobile (Home, Explore, Center) - Notifications and Profile are in header */
-  .sidebar__nav-item:nth-child(n+4) {
+  /* Show only 4 items in mobile footer (Home, Center, Messages, Settings) */
+  .sidebar__nav-item:nth-child(n+5) {
     display: none;
   }
 
   .sidebar__nav-item--active {
     color: var(--codex-coral);
-  }
-
-  .sidebar__nav-item--active::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 32px;
-    height: 2px;
-    background: var(--codex-coral);
-    border-radius: 0;
+    border-left: none;
+    background: transparent;
   }
 
   .sidebar__nav-label {
-    display: block;
-    font-size: 10px;
-    font-weight: 500;
-    line-height: 1;
+    display: none; /* Hide labels for a cleaner brutalist look on mobile footer */
   }
 
   .sidebar__nav-icon {

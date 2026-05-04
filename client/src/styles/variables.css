@@ -151,10 +151,60 @@
   /* ── Mobile / Safe Areas ────────────────────────────────── */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --mobile-nav-height: 56px;
+  --mobile-nav-height: 64px;
+
+
   --mobile-header-height: 52px;
+
+  /* ── Z-Index Layers ─────────────────────────────────────── */
+  --z-base: 1;
+  --z-sticky: 100;
+  --z-fixed: 110;
+  --z-modal: 1000;
 
   /* ── Brutalist Background FX ────────────────────────────── */
   --bg-grid-color: rgba(255, 255, 255, 0.08); /* Increased from 0.03 */
   --bg-scanline-color: rgba(255, 255, 255, 0.04);
+}
+
+/* ============================================================
+   Light Theme Override (Settings Toggle)
+   ============================================================ */
+body[data-theme="light"] {
+  --codex-black: #ffffff;
+  --codex-white: #000000;
+  
+  --void: #ffffff;
+  --depth-0: #ffffff;
+  --depth-1: #ffffff;
+  --depth-2: #ffffff;
+  --depth-3: #ffffff;
+  --depth-4: #ffffff;
+  --depth-5: #ffffff;
+  
+  --color-background: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-overlay: #ffffff;
+  --ink-primary: #000000;
+  --ink-secondary: #374151;
+  --ink-tertiary: #6b7280;
+  --ink-quaternary: #9ca3af;
+  --ink-subtle: #9ca3af;
+  
+  --color-text: var(--ink-primary);
+  --color-text-secondary: var(--ink-secondary);
+  --color-text-tertiary: var(--ink-tertiary);
+  
+  --glass-bg: #ffffff;
+  --glass-border: #e5e7eb;
+  
+  --border-subtle: #e5e7eb;
+  --border-default: #d1d5db;
+  --border-strong: #9ca3af;
+  
+  --codex-teal: #000000;
+  --codex-coral: #ef4444;
+  --bg-grid-color: rgba(0, 0, 0, 0.08);
+  --bg-scanline-color: rgba(0, 0, 0, 0.04);
 }

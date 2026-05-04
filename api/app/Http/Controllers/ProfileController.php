@@ -59,8 +59,10 @@ class ProfileController extends Controller
             'linkedin_url'     => $user->linkedin_url,
             'portfolio_url'    => $user->portfolio_url,
             'external_url'     => $user->external_url,
+            'is_private'       => $user->is_private,
             'center'           => $user->center,
-            'is_following'     => $isFollowing,
+            'is_following'     => $authUser ? $authUser->following()->where('followed_id', $user->id)->where('status', 'accepted')->exists() : false,
+            'is_pending'       => $authUser ? $authUser->following()->where('followed_id', $user->id)->where('status', 'pending')->exists() : false,
             'created_at'       => $user->created_at,
             'stats'            => [
                 'posts_count'          => $user->posts_count,
@@ -203,6 +205,7 @@ class ProfileController extends Controller
             'linkedin_url'  => 'sometimes|nullable|url|max:500',
             'portfolio_url' => 'sometimes|nullable|url|max:500',
             'external_url'  => 'sometimes|nullable|url|max:500',
+            'is_private'    => 'sometimes|boolean',
         ]);
 
         // Handle avatar file upload
@@ -257,6 +260,7 @@ class ProfileController extends Controller
             'linkedin_url'  => $user->linkedin_url,
             'portfolio_url' => $user->portfolio_url,
             'external_url'  => $user->external_url,
+            'is_private'    => $user->is_private,
         ], 'Profile updated successfully');
     }
 

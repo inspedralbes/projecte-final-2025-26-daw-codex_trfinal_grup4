@@ -102,20 +102,19 @@ const ProfileIcon = ({ active }) => (
   </svg>
 );
 
-const MoreIcon = () => (
+const SettingsIcon = ({ active }) => (
   <svg
     width="24"
     height="24"
     viewBox="0 0 24 24"
-    fill="none"
+    fill={active ? "currentColor" : "none"}
     stroke="currentColor"
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <circle cx="12" cy="12" r="1" />
-    <circle cx="19" cy="12" r="1" />
-    <circle cx="5" cy="12" r="1" />
+    <path d="M12.22 2h-.44a2 2 0 0 0-2 2a2 2 0 0 1-2 2a2 2 0 0 0-2 2a2 2 0 0 1-2 2a2 2 0 0 0-2 2v.44a2 2 0 0 0 2 2a2 2 0 0 1 2 2a2 2 0 0 0 2 2a2 2 0 0 1 2 2a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2a2 2 0 0 1 2-2a2 2 0 0 0 2-2a2 2 0 0 1 2-2a2 2 0 0 0 2-2v-.44a2 2 0 0 0-2-2a2 2 0 0 1-2-2a2 2 0 0 0-2-2a2 2 0 0 1-2-2a2 2 0 0 0-2-2z" />
+    <circle cx="12" cy="12" r="3" />
   </svg>
 );
 
@@ -222,11 +221,12 @@ const RequestsIcon = ({ active }) => (
 
 const navItems = [
   { path: "/", label: "sidebar.home", Icon: HomeIcon },
-  { path: "/explore", label: "sidebar.explore", Icon: ExploreIcon },
   { path: "/center", label: "sidebar.center", Icon: CenterIcon, centerItem: true },
-  { path: "/notifications", label: "sidebar.notifications", Icon: NotificationsIcon },
-  { path: "/profile", label: "sidebar.profile", Icon: ProfileIcon },
   { path: "/messages", label: "sidebar.messages", Icon: MessagesIcon },
+  { path: "/settings", label: "sidebar.settings", Icon: SettingsIcon },
+  { path: "/notifications", label: "sidebar.notifications", Icon: NotificationsIcon },
+  { path: "/explore", label: "sidebar.explore", Icon: ExploreIcon },
+  { path: "/profile", label: "sidebar.profile", Icon: ProfileIcon },
   { path: "/admin", label: "sidebar.admin_summary", Icon: StatsIcon, adminOnly: true, end: true },
   { path: "/admin/users", label: "sidebar.admin_users", Icon: UsersIcon, adminOnly: true },
   {
@@ -237,7 +237,6 @@ const navItems = [
   },
   { path: "/admin/centers", label: "sidebar.admin_centers", Icon: CenterIcon, adminOnly: true },
   { path: "/admin/requests", label: "sidebar.admin_requests", Icon: RequestsIcon, adminOnly: true },
-  { path: "/more", label: "sidebar.more", Icon: MoreIcon },
 ];
 
 export default function Sidebar() {

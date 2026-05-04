@@ -68,6 +68,29 @@ const followService = {
   getFollowedTags: async () => {
     return api.get("/tags/followed");
   },
+  /**
+   * Get pending follow requests for the authenticated user
+   * @returns {Promise<Array>} List of pending requests
+   */
+  getFollowRequests: async () => {
+    return api.get("/follow-requests");
+  },
+
+  /**
+   * Accept a follow request
+   * @param {number} followerId - ID of the user who sent the request
+   */
+  acceptFollowRequest: async (followerId) => {
+    return api.post(`/follow-requests/${followerId}/accept`);
+  },
+
+  /**
+   * Reject a follow request
+   * @param {number} followerId - ID of the user who sent the request
+   */
+  rejectFollowRequest: async (followerId) => {
+    return api.post(`/follow-requests/${followerId}/reject`);
+  },
 };
 
 export default followService;

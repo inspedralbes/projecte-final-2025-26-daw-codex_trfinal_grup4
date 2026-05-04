@@ -19,6 +19,7 @@ export function useProfile(username) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const profileIdRef = useRef(null);
 
   // Determine if viewing own profile
@@ -52,6 +53,7 @@ export function useProfile(username) {
 
       setProfile(flatProfile);
       setIsFollowing(data.is_following || false);
+      setIsPending(data.is_pending || false);
       profileIdRef.current = data.id;
     } catch (err) {
       console.error("Error fetching profile:", err);
@@ -128,13 +130,22 @@ export function useProfile(username) {
 
     // Optimistic update to UI for immediate feedback
     const wasFollowing = isFollowing;
+    const wasPending = isPending;
     const prevFollowersCount = profile.followers_count;
 
-    setIsFollowing(!wasFollowing);
-    setProfile((prev) => ({
-      ...prev,
-      followers_count: wasFollowing ? prev.followers_count - 1 : prev.followers_count + 1,
-    }));
+    // Optimistic: toggle following if public, or set pending if private
+    if (wasFollowing || wasPending) {
+        setIsFollowing(false);
+        setIsPending(false);
+        setProfile(prev => ({ ...prev, followers_count: wasFollowing ? prev.followers_count - 1 : prev.followers_count }));
+    } else {
+        if (profile.is_private) {
+            setIsPending(true);
+        } else {
+            setIsFollowing(true);
+            setProfile(prev => ({ ...prev, followers_count: prev.followers_count + 1 }));
+        }
+    }
 
     try {
       const response = await followService.toggleFollowUser(profile.id);
@@ -150,6 +161,16 @@ export function useProfile(username) {
       if (data.following !== undefined) {
         setIsFollowing(data.following);
       }
+      if (data.status === 'pending') {
+        setIsPending(true);
+        setIsFollowing(false);
+      } else if (data.status === 'accepted') {
+        setIsFollowing(true);
+        setIsPending(false);
+      } else if (data.status === null) {
+        setIsFollowing(false);
+        setIsPending(false);
+      }
 
       // Also refresh current user to sync their "following" count if needed
       if (currentUser) refreshUser();
@@ -157,6 +178,7 @@ export function useProfile(username) {
       // Revert on error
       console.error("Error toggling follow:", err);
       setIsFollowing(wasFollowing);
+      setIsPending(wasPending);
       setProfile((prev) => ({
         ...prev,
         followers_count: prevFollowersCount,
@@ -222,6 +244,7 @@ export function useProfile(username) {
     loading,
     error,
     isFollowing,
+    isPending,
     isOwnProfile,
     toggleFollow,
     updateProfile,
