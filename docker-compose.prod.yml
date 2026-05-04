@@ -65,6 +65,26 @@ services:
       - tfg_network
 
   # -----------------------------------------------------------
+  #  Queue Worker – Background tasks (Emails, AI logs, etc.)
+  # -----------------------------------------------------------
+  queue:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: production
+    container_name: tfg_queue_prod
+    restart: always
+    env_file: .env
+    command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=90"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - tfg_network
+
+  # -----------------------------------------------------------
   #  AI Moderation – Node.js + Transformers
   # -----------------------------------------------------------
   ai-moderation:
