@@ -350,7 +350,7 @@
     "description": "Configuració i altres opcions."
   },
   "settings": {
-    "title": "Ajustos",
+    "title": "Configuració",
     "description": "Personalitza la teva experiència.",
     "language": "Idioma",
     "theme": "Aparença",
