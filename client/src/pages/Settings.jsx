@@ -154,14 +154,14 @@ export default function Settings() {
             disabled={(!hasChanges && !saveStatus) || isLoading}
           >
             <GlitchText>
-            {isLoading 
-              ? t("settings.saving", "Guardando...") 
-              : saveStatus === 'success' 
-                ? t("settings.saved", "¡Datos guardados!") 
-                : !hasChanges 
-                  ? t("settings.no_changes", "Sin cambios")
-                  : t("settings.save", "Guardar cambios")
-            }
+              {isLoading 
+                ? t("settings.saving", "Guardando...") 
+                : saveStatus === 'success' 
+                  ? t("settings.saved", "¡Datos guardados!") 
+                  : !hasChanges 
+                    ? t("settings.no_changes", "Sin cambios")
+                    : t("settings.save", "Guardar cambios")
+              }
             </GlitchText>
           </button>
         </div>
