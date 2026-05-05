@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import profileService from "@/services/profileService";
+import GlitchText from "@/components/ui/GlitchText";
 import "./Settings.css";
 
 export default function Settings() {
@@ -56,14 +57,14 @@ export default function Settings() {
   return (
     <div className="settings-page">
       <header className="settings-page__header">
-        <h1 className="settings-page__title">{t("settings.title", "Ajustes")}</h1>
-        <p className="settings-page__subtitle">{t("settings.description", "Personaliza tu experiencia.")}</p>
+        <h1 className="settings-page__title"><GlitchText>{t("settings.title", "Ajustes")}</GlitchText></h1>
+        <p className="settings-page__subtitle"><GlitchText>{t("settings.description", "Personaliza tu experiencia.")}</GlitchText></p>
       </header>
 
       <div className="settings-page__content">
         {/* Language Settings */}
         <section className="settings-section">
-          <h2 className="settings-section__title">{t("settings.language", "Idioma")}</h2>
+          <h2 className="settings-section__title"><GlitchText>{t("settings.language", "Idioma")}</GlitchText></h2>
           <div className="settings-group">
             <button 
               className={`settings-btn ${i18n.language === 'es' ? 'settings-btn--active' : ''}`}
@@ -88,31 +89,31 @@ export default function Settings() {
 
         {/* Theme Settings */}
         <section className="settings-section">
-          <h2 className="settings-section__title">{t("settings.theme", "Apariencia")}</h2>
+          <h2 className="settings-section__title"><GlitchText>{t("settings.theme", "Apariencia")}</GlitchText></h2>
           <div className="settings-group">
             <button 
               className={`settings-btn ${theme === 'dark' ? 'settings-btn--active' : ''}`}
               onClick={() => setTheme('dark')}
             >
-              {t("settings.dark_mode", "Modo Oscuro")}
+              <GlitchText>{t("settings.dark_mode", "Modo Oscuro")}</GlitchText>
             </button>
             <button 
               className={`settings-btn ${theme === 'light' ? 'settings-btn--active' : ''}`}
               onClick={() => setTheme('light')}
             >
-              {t("settings.light_mode", "Modo Claro")}
+              <GlitchText>{t("settings.light_mode", "Modo Claro")}</GlitchText>
             </button>
           </div>
         </section>
 
         {/* Privacy Settings */}
         <section className="settings-section">
-          <h2 className="settings-section__title">{t("settings.privacy", "Privacidad")}</h2>
+          <h2 className="settings-section__title"><GlitchText>{t("settings.privacy", "Privacidad")}</GlitchText></h2>
           <div className="settings-toggle-group">
             <div className="settings-toggle-item">
               <div className="settings-toggle-info">
-                <strong>{t("settings.private_profile", "Perfil privado")}</strong>
-                <span>{t("settings.private_profile_desc", "Solo tus seguidores pueden ver tu actividad")}</span>
+                <strong><GlitchText>{t("settings.private_profile", "Perfil privado")}</GlitchText></strong>
+                <span><GlitchText>{t("settings.private_profile_desc", "Solo tus seguidores pueden ver tu actividad")}</GlitchText></span>
               </div>
               <label className="toggle-switch">
                 <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} />
@@ -124,11 +125,11 @@ export default function Settings() {
 
         {/* Account Settings */}
         <section className="settings-section settings-section--danger">
-          <h2 className="settings-section__title">{t("settings.account", "Cuenta")}</h2>
+          <h2 className="settings-section__title"><GlitchText>{t("settings.account", "Cuenta")}</GlitchText></h2>
           
           <div className="settings-toggle-item">
             <div className="settings-toggle-info">
-              <strong>{t("settings.email_notifications", "Notificaciones por email")}</strong>
+              <strong><GlitchText>{t("settings.email_notifications", "Notificaciones por email")}</GlitchText></strong>
             </div>
             <label className="toggle-switch">
               <input type="checkbox" checked={emailNotifs} onChange={(e) => setEmailNotifs(e.target.checked)} />
@@ -138,10 +139,10 @@ export default function Settings() {
 
           <div className="settings-action-item">
             <div className="settings-toggle-info">
-              <strong>{t("settings.delete_account", "Eliminar cuenta")}</strong>
-              <span>{t("settings.delete_account_desc", "Esta acción es irreversible.")}</span>
+              <strong><GlitchText>{t("settings.delete_account", "Eliminar cuenta")}</GlitchText></strong>
+              <span><GlitchText>{t("settings.delete_account_desc", "Esta acción es irreversible.")}</GlitchText></span>
             </div>
-            <button className="settings-btn settings-btn--danger">{t("settings.delete_account", "Eliminar cuenta")}</button>
+            <button className="settings-btn settings-btn--danger"><GlitchText>{t("settings.delete_account", "Eliminar cuenta")}</GlitchText></button>
           </div>
         </section>
         
@@ -152,6 +153,7 @@ export default function Settings() {
             onClick={handleSave}
             disabled={(!hasChanges && !saveStatus) || isLoading}
           >
+            <GlitchText>
             {isLoading 
               ? t("settings.saving", "Guardando...") 
               : saveStatus === 'success' 
@@ -160,6 +162,7 @@ export default function Settings() {
                   ? t("settings.no_changes", "Sin cambios")
                   : t("settings.save", "Guardar cambios")
             }
+            </GlitchText>
           </button>
         </div>
       </div>

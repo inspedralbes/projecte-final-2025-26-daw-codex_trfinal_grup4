@@ -362,7 +362,10 @@
     "private_profile_desc": "Solo tus seguidores pueden ver tu actividad",
     "email_notifications": "Notificaciones por email",
     "delete_account": "Eliminar cuenta",
-    "delete_account_desc": "Esta acción es irreversible."
+    "delete_account_desc": "Esta acción es irreversible.",
+    "saving": "Guardando...",
+    "saved": "¡Datos guardados!",
+    "no_changes": "Sin cambios"
   },
   "email_verification": {
     "title": "Verifica tu correo",

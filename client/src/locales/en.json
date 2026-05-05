@@ -117,7 +117,7 @@
     "messages": "Messages",
     "profile": "Profile",
     "center": "Center",
-    "more": "More",
+    "settings": "Settings",
     "teacher": "Teacher",
     "admin": "Admin",
     "student": "Student",
@@ -348,6 +348,27 @@
   },
   "more": {
     "description": "Settings and other options."
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Customize your experience.",
+    "language": "Language",
+    "theme": "Appearance",
+    "light_mode": "Light Mode",
+    "dark_mode": "Dark Mode",
+    "privacy": "Privacy",
+    "account": "Account",
+    "save": "Save changes",
+    "public_profile": "Public profile",
+    "public_profile_desc": "Anyone can see your profile and posts",
+    "private_profile": "Private profile",
+    "private_profile_desc": "Only your followers can see your activity",
+    "email_notifications": "Email notifications",
+    "delete_account": "Delete account",
+    "delete_account_desc": "This action is irreversible.",
+    "saving": "Saving...",
+    "saved": "Data saved!",
+    "no_changes": "No changes"
   },
   "email_verification": {
     "title": "Verify your email",
