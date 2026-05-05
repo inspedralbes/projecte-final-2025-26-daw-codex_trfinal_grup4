@@ -7,47 +7,11 @@ import api from "@/services/api";
 import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import SymbolSea from "@/components/ui/SymbolSea";
+import GlitchText from "@/components/ui/GlitchText";
 import "./Landing.css";
 
 // ── Symbol Sea: Canvas-based animated ASCII background ────────
 const SYMBOLS = "{}[]<>=>/*+-|\\;:!?#@&$%^~_.01";
-
-/**
- * Brutalist scrambling text effect for i18n changes
- */
-function GlitchText({ children }) {
-  const [displayText, setDisplayText] = useState(children);
-  const targetText = String(children);
-
-  useEffect(() => {
-    let iteration = 0;
-    const interval = setInterval(() => {
-      setDisplayText(prev => {
-        return targetText
-          .split("")
-          .map((char, index) => {
-            if (index < iteration) return targetText[index];
-            if (char === " ") return " ";
-            return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-          })
-          .join("");
-      });
-      
-      iteration += 1;
-      if (iteration > targetText.length) {
-        clearInterval(interval);
-        setDisplayText(targetText);
-      }
-    }, 40);
-
-    return () => clearInterval(interval);
-  }, [children]);
-
-  return <>{displayText}</>;
-}
-
-
-
 
 // ── Icons ─────────────────────────────────────────────────────
 const CheckIcon = () => (

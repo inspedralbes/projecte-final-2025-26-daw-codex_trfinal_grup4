@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
 import chatService from "@/services/chatService";
 import socketService from "@/services/socketService";
+import GlitchText from "@/components/ui/GlitchText";
 import "./Messages.css";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -232,17 +233,17 @@ const RestrictionBanner = ({ isMutual, canSend, restrictionReason, t }) => {
       {!isMutual && (
         <div className="msg__restriction-badge">
           <LockIcon />
-          <span>{t("messages.restriction.title")}</span>
+          <span><GlitchText>{t("messages.restriction.title")}</GlitchText></span>
         </div>
       )}
       {!canSend && restrictionReason === "message_limit_reached" && (
         <p className="msg__restriction-text">
-          {t("messages.restriction.message_sent")}
+          <GlitchText>{t("messages.restriction.message_sent")}</GlitchText>
         </p>
       )}
       {canSend && !isMutual && (
         <p className="msg__restriction-text">
-          {t("messages.restriction.not_following")}
+          <GlitchText>{t("messages.restriction.not_following")}</GlitchText>
         </p>
       )}
     </div>
@@ -290,7 +291,7 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser, t }) => {
     <div className="msg__modal-overlay" onClick={onClose}>
       <div className="msg__modal" onClick={(e) => e.stopPropagation()}>
         <div className="msg__modal-header">
-          <h3>{t("messages.new_conversation")}</h3>
+          <h3><GlitchText>{t("messages.new_conversation")}</GlitchText></h3>
           <button className="msg__modal-close" onClick={onClose}>×</button>
         </div>
         <div className="msg__modal-search">
@@ -310,7 +311,7 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser, t }) => {
             </div>
           )}
           {!loading && results.length === 0 && query.length >= 2 && (
-            <p className="msg__modal-empty">{t("messages.no_results")}</p>
+            <p className="msg__modal-empty"><GlitchText>{t("messages.no_results")}</GlitchText></p>
           )}
           {results.map((user) => (
             <div
@@ -346,11 +347,11 @@ const EmptyConversations = ({ onNewConversation, t }) => (
     <div className="msg__empty-icon">
       <MessageCircleIcon />
     </div>
-    <h3>{t("messages.no_conversations")}</h3>
-    <p>{t("messages.no_conversations_subtitle")}</p>
+    <h3><GlitchText>{t("messages.no_conversations")}</GlitchText></h3>
+    <p><GlitchText>{t("messages.no_conversations_subtitle")}</GlitchText></p>
     <button className="msg__empty-btn" onClick={onNewConversation}>
       <PlusIcon />
-      {t("messages.new_conversation")}
+      <GlitchText>{t("messages.new_conversation")}</GlitchText>
     </button>
   </div>
 );
@@ -360,8 +361,8 @@ const EmptyChat = ({ t }) => (
     <div className="msg__empty-icon">
       <MessageCircleIcon />
     </div>
-    <h3>{t("messages.select_conversation")}</h3>
-    <p>{t("messages.select_conversation_subtitle")}</p>
+    <h3><GlitchText>{t("messages.select_conversation")}</GlitchText></h3>
+    <p><GlitchText>{t("messages.select_conversation_subtitle")}</GlitchText></p>
   </div>
 );
 
@@ -772,7 +773,7 @@ export default function Messages() {
       {/* Conversation List */}
       <aside className={`msg__sidebar ${mobileView === "chat" ? "hidden-mobile" : ""}`}>
         <div className="msg__sidebar-header">
-          <h1 className="msg__title">{t("messages.title")}</h1>
+          <h1 className="msg__title"><GlitchText>{t("messages.title")}</GlitchText></h1>
           <button
             className="msg__new-btn"
             onClick={() => setShowNewModal(true)}

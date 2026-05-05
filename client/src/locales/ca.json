@@ -117,7 +117,7 @@
     "messages": "Missatges",
     "profile": "Perfil",
     "center": "Centre",
-    "more": "Més",
+    "settings": "Configuració",
     "teacher": "Professor",
     "admin": "Admin",
     "student": "Estudiant",
@@ -348,6 +348,27 @@
   },
   "more": {
     "description": "Configuració i altres opcions."
+  },
+  "settings": {
+    "title": "Ajustos",
+    "description": "Personalitza la teva experiència.",
+    "language": "Idioma",
+    "theme": "Aparença",
+    "light_mode": "Mode Clar",
+    "dark_mode": "Mode Fosc",
+    "privacy": "Privadesa",
+    "account": "Compte",
+    "save": "Guardar canvis",
+    "public_profile": "Perfil públic",
+    "public_profile_desc": "Tothom pot veure el teu perfil i publicacions",
+    "private_profile": "Perfil privat",
+    "private_profile_desc": "Només els teus seguidors poden veure la teva activitat",
+    "email_notifications": "Notificacions per email",
+    "delete_account": "Eliminar compte",
+    "delete_account_desc": "Aquesta acció és irreversible.",
+    "saving": "Guardant...",
+    "saved": "Dades guardades!",
+    "no_changes": "Sense canvis"
   },
   "email_verification": {
     "title": "Verifica el teu correu",

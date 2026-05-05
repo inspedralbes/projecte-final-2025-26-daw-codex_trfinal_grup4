@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import PostInput from "./PostInput";
 import PostCard from "./PostCard";
 import { usePosts } from "@/hooks/usePosts";
+import GlitchText from "@/components/ui/GlitchText";
 import "./Feed.css";
 
 // Skeleton loader component
@@ -34,26 +35,26 @@ const WelcomeCard = ({ t }) => (
     <div className="feed__welcome-icon">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
     </div>
-    <h2 className="feed__welcome-title">{t("feed.welcome_title")}</h2>
-    <p className="feed__welcome-text">{t("feed.welcome_text")}</p>
+    <h2 className="feed__welcome-title"><GlitchText>{t("feed.welcome_title")}</GlitchText></h2>
+    <p className="feed__welcome-text"><GlitchText>{t("feed.welcome_text")}</GlitchText></p>
     <div className="feed__welcome-tips">
       <div className="feed__welcome-tip">
         <span className="feed__welcome-tip-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
         </span>
-        <span>{t("feed.welcome_tip_code")}</span>
+        <span><GlitchText>{t("feed.welcome_tip_code")}</GlitchText></span>
       </div>
       <div className="feed__welcome-tip">
         <span className="feed__welcome-tip-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </span>
-        <span>{t("feed.welcome_tip_question")}</span>
+        <span><GlitchText>{t("feed.welcome_tip_question")}</GlitchText></span>
       </div>
       <div className="feed__welcome-tip">
         <span className="feed__welcome-tip-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </span>
-        <span>{t("feed.welcome_tip_follow")}</span>
+        <span><GlitchText>{t("feed.welcome_tip_follow")}</GlitchText></span>
       </div>
     </div>
   </div>
@@ -140,21 +141,21 @@ export default function Feed({ feedType = "global", centerMode = false }) {
             className={`feed__tab ${activeTab === "all" ? "feed__tab--active" : ""}`}
             onClick={() => setActiveTab("all")}
           >
-            {t("feed.tabs.for_you")}
+            <GlitchText>{t("feed.tabs.for_you")}</GlitchText>
           </button>
           {!centerMode && (
             <button
               className={`feed__tab ${activeTab === "following" ? "feed__tab--active" : ""}`}
               onClick={() => setActiveTab("following")}
             >
-              {t("feed.tabs.following")}
+              <GlitchText>{t("feed.tabs.following")}</GlitchText>
             </button>
           )}
           <button
             className={`feed__tab ${activeTab === "questions" ? "feed__tab--active" : ""}`}
             onClick={() => setActiveTab("questions")}
           >
-            {t("widgets.recent_questions")}
+            <GlitchText>{t("widgets.recent_questions")}</GlitchText>
           </button>
         </nav>
       </header>
@@ -208,7 +209,7 @@ export default function Feed({ feedType = "global", centerMode = false }) {
         <div className="post-modal__backdrop" onClick={() => setIsPostModalOpen(false)}>
           <div className="post-modal" onClick={(e) => e.stopPropagation()}>
             <div className="post-modal__header">
-              <h2 className="post-modal__title">{t("feed.publish", "Crear Publicación")}</h2>
+              <h2 className="post-modal__title"><GlitchText>{t("feed.publish", "Crear Publicación")}</GlitchText></h2>
               <button className="post-modal__close" onClick={() => setIsPostModalOpen(false)}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -243,8 +244,8 @@ export default function Feed({ feedType = "global", centerMode = false }) {
           <WelcomeCard t={t} />
         ) : posts.length === 0 ? (
           <div className="feed__empty">
-            <p>{t("feed.no_posts")}</p>
-            <span>{t("feed.be_first")}</span>
+            <p><GlitchText>{t("feed.no_posts")}</GlitchText></p>
+            <span><GlitchText>{t("feed.be_first")}</GlitchText></span>
           </div>
         ) : (
           <>

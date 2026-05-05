@@ -9,6 +9,7 @@ import { useTags } from "@/hooks/useTags";
 import { useAuth } from "@/hooks/useAuth";
 import centerService from "@/services/centerService";
 import api from "@/services/api";
+import GlitchText from "@/components/ui/GlitchText";
 import "./CenterHub.css";
 
 // Icons
@@ -481,13 +482,12 @@ export default function CenterHub() {
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
-          <h2 className="center-hub__blocked-title">Acceso restringido al centro</h2>
+          <h2 className="center-hub__blocked-title"><GlitchText>Acceso restringido al centro</GlitchText></h2>
           <p className="center-hub__blocked-desc">
-            Un profesor o administrador te ha bloqueado en este centro.
-            No puedes acceder al hub del centro ni interactuar con su contenido.
+            <GlitchText>Un profesor o administrador te ha bloqueado en este centro. No puedes acceder al hub del centro ni interactuar con su contenido.</GlitchText>
           </p>
           <p className="center-hub__blocked-contact">
-            Si crees que es un error, contacta con tu tutor o administrador del centro.
+            <GlitchText>Si crees que es un error, contacta con tu tutor o administrador del centro.</GlitchText>
           </p>
         </div>
       </div>
@@ -500,7 +500,7 @@ export default function CenterHub() {
       <div className="center-hub">
         <div className="center-hub__loading">
           <LoadingSpinner />
-          <p>{t("center.loading")}</p>
+          <p><GlitchText>{t("center.loading")}</GlitchText></p>
         </div>
       </div>
     );
@@ -758,19 +758,19 @@ export default function CenterHub() {
           </div>
           <div className="center-hub__school-info">
             <div className="center-hub__school-header">
-              <h1 className="center-hub__school-name">{centerName}</h1>
+              <h1 className="center-hub__school-name"><GlitchText>{centerName}</GlitchText></h1>
               <span className={`center-hub__privacy-indicator ${isPrivate ? "center-hub__privacy-indicator--private" : "center-hub__privacy-indicator--public"}`}>
                 {isPrivate ? <LockIcon /> : <GlobeIcon />}
-                {isPrivate ? t("center.private") : t("center.public")}
+                <GlitchText>{isPrivate ? t("center.private") : t("center.public")}</GlitchText>
               </span>
             </div>
-            {centerLocation && <p className="center-hub__school-location">{centerLocation}</p>}
+            {centerLocation && <p className="center-hub__school-location"><GlitchText>{centerLocation}</GlitchText></p>}
             <div className="center-hub__school-stats">
               <span>
-                <UsersIcon /> {memberCount} {t("center.members")}
+                <UsersIcon /> {memberCount} <GlitchText>{t("center.members")}</GlitchText>
               </span>
               <span>
-                <CalendarIcon /> {t("center.since")} {createdYear}
+                <CalendarIcon /> <GlitchText>{t("center.since")} {createdYear}</GlitchText>
               </span>
             </div>
           </div>
