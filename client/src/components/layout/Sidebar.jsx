@@ -219,6 +219,39 @@ const RequestsIcon = ({ active }) => (
   </svg>
 );
 
+const SYMBOLS = "{}[]<>=>/*+-|\\;:!?#@&$%^~_.01";
+
+function GlitchText({ children }) {
+  const [displayText, setDisplayText] = React.useState(children);
+  const targetText = String(children);
+
+  React.useEffect(() => {
+    let iteration = 0;
+    const interval = setInterval(() => {
+      setDisplayText(prev => {
+        return targetText
+          .split("")
+          .map((char, index) => {
+            if (index < iteration) return targetText[index];
+            if (char === " ") return " ";
+            return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+          })
+          .join("");
+      });
+      
+      iteration += 1;
+      if (iteration > targetText.length) {
+        clearInterval(interval);
+        setDisplayText(targetText);
+      }
+    }, 20);
+
+    return () => clearInterval(interval);
+  }, [children]);
+
+  return <span>{displayText}</span>;
+}
+
 const navItems = [
   { path: "/", label: "sidebar.home", Icon: HomeIcon },
   { path: "/center", label: "sidebar.center", Icon: CenterIcon, centerItem: true },
@@ -240,11 +273,19 @@ const navItems = [
 ];
 
 export default function Sidebar() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, centerCheck } = useAuth();
   const { unreadCount, unreadMessagesCount } = useSocket();
+
+  const [pageGlitch, setPageGlitch] = React.useState(false);
+
+  React.useEffect(() => {
+    setPageGlitch(true);
+    const timer = setTimeout(() => setPageGlitch(false), 600);
+    return () => clearTimeout(timer);
+  }, [i18n.language]);
 
   const isGenericEmail = centerCheck?.is_generic_email ?? false;
 
@@ -261,7 +302,10 @@ export default function Sidebar() {
   });
 
   return (
-    <aside className="sidebar">
+    <aside 
+      key={i18n.language}
+      className={`sidebar ${pageGlitch ? 'sidebar--glitch' : ''}`}
+    >
       <div className="sidebar__container">
         {/* Logo */}
         <NavLink to={user?.role === "admin" ? "/admin" : "/"} className="sidebar__logo">
@@ -273,7 +317,9 @@ export default function Sidebar() {
               style={{ width: "32px", height: "32px", objectFit: "contain" }}
             />
           </span>
-          <span className="sidebar__logo-text">Codex</span>
+          <span className="sidebar__logo-text">
+            <GlitchText>Codex</GlitchText>
+          </span>
         </NavLink>
 
         {/* Navigation */}
@@ -295,7 +341,7 @@ export default function Sidebar() {
                     <Icon active={false} />
                   </span>
                   <span className="sidebar__nav-label">
-                    <GlitchHover>{t(label)}</GlitchHover>
+                    <GlitchText>{t(label)}</GlitchText>
                   </span>
                   <span className="sidebar__nav-lock">
                     <svg
@@ -337,7 +383,7 @@ export default function Sidebar() {
                   )}
                 </span>
                 <span className="sidebar__nav-label">
-                  <GlitchHover>{t(label)}</GlitchHover>
+                  <GlitchText>{t(label)}</GlitchText>
                 </span>
               </NavLink>
             );

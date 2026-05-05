@@ -17,9 +17,29 @@ export default function SymbolSea({ errorTrigger = 0, isLightMode = false, class
   }, [errorTrigger]);
 
   const isLightModeRef = useRef(isLightMode);
+  
   useEffect(() => {
-    isLightModeRef.current = isLightMode;
-  }, [isLightMode]);
+    // Check initial theme
+    const checkTheme = () => {
+      const isLight = document.body.getAttribute("data-theme") === "light";
+      isLightModeRef.current = isLight;
+    };
+    
+    checkTheme();
+
+    // Observe theme changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "data-theme") {
+          checkTheme();
+        }
+      });
+    });
+
+    observer.observe(document.body, { attributes: true });
+    
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -137,12 +157,13 @@ export default function SymbolSea({ errorTrigger = 0, isLightMode = false, class
         }
 
         const isLight = isLightModeRef.current;
-        const baseColor = isLight ? 0 : 255;
+        // In light mode, base color is dark grey, in dark mode it's white
+        const baseColor = isLight ? 40 : 255;
         const r = Math.floor(baseColor + (255 - baseColor) * err);
-        const g = Math.floor(baseColor * Math.pow(1 - err, 2.5));
-        const b = Math.floor(baseColor * Math.pow(1 - err, 2.5));
+        const g = Math.floor(isLight ? baseColor * (1-err) : baseColor * Math.pow(1 - err, 2.5));
+        const b = Math.floor(isLight ? baseColor * (1-err) : baseColor * Math.pow(1 - err, 2.5));
 
-        const themeOpacityMult = isLight ? 1.4 : 1.0;
+        const themeOpacityMult = isLight ? 1.0 : 1.0;
         const finalOpacity = Math.min(1, opacity * themeOpacityMult);
 
         ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${finalOpacity.toFixed(3)})`;

@@ -108,7 +108,7 @@ export default function Landing() {
 
   // Theme logic
   const [isLightMode, setIsLightMode] = useState(() => {
-    const saved = localStorage.getItem("landing-theme");
+    const saved = localStorage.getItem("codex-theme");
     if (saved) return saved === "light";
     return !window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
@@ -116,7 +116,7 @@ export default function Landing() {
   const toggleTheme = () => {
     const newVal = !isLightMode;
     setIsLightMode(newVal);
-    localStorage.setItem("landing-theme", newVal ? "light" : "dark");
+    localStorage.setItem("codex-theme", newVal ? "light" : "dark");
   };
 
 

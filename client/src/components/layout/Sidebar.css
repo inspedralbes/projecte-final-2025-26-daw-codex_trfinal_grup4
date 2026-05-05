@@ -396,3 +396,18 @@
     display: none;
   }
 }
+
+/* Sidebar Rewrite Animation */
+.sidebar--glitch {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar--glitch .sidebar__container {
+  animation: sidebar-rewrite-fade 0.5s ease-in-out forwards;
+}
+
+@keyframes sidebar-rewrite-fade {
+  0% { opacity: 0.3; filter: brightness(1.5); }
+  100% { opacity: 1; filter: brightness(1); }
+}
