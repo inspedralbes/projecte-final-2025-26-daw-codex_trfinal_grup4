@@ -122,7 +122,7 @@ jobs:
           REDIS_PORT=6379
           EOF
           php artisan key:generate --force
-          php artisan test --parallel
+          php artisan test
 
   # ─────────────────────────────────────────────────────────
   #  3. Deploy – SSH into server, pull & restart
