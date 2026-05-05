@@ -1,0 +1,101 @@
+/* ── Global Rewrite Animation ─────────────────────────────────── */
+.global-rewrite {
+  position: relative;
+  overflow: hidden;
+}
+
+.system-scan-laser::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--codex-coral) 50%,
+    transparent 100%
+  );
+  box-shadow: 0 0 15px var(--codex-coral);
+  z-index: 10000;
+  pointer-events: none;
+  animation: global-rewrite-scan 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+@keyframes global-rewrite-scan {
+  0% { top: 0; opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.global-rewrite-content {
+  animation: rewrite-glitch-flicker 0.6s linear forwards;
+}
+
+/* ── Local Page Rewrite (Navegación entre páginas) ──────────── */
+.page-rewrite-transition {
+  position: relative;
+  animation: page-rewrite-main 0.7s steps(20, end) forwards;
+  will-change: clip-path, opacity, filter;
+}
+
+/* El efecto de "reescritura" visual por franjas */
+@keyframes page-rewrite-main {
+  0% { 
+    opacity: 0;
+    filter: brightness(3) contrast(2) hue-rotate(90deg);
+    clip-path: inset(0 100% 0 0); 
+  }
+  20% {
+    opacity: 0.5;
+    filter: brightness(2) contrast(1.5) hue-rotate(45deg);
+    clip-path: inset(0 60% 0 0);
+  }
+  40% {
+    opacity: 0.8;
+    filter: brightness(1.5) contrast(1.2) hue-rotate(0deg);
+    clip-path: inset(0 30% 0 0);
+    transform: translateX(-2px);
+  }
+  60% {
+    opacity: 0.9;
+    clip-path: inset(0 0 0 0);
+    transform: translateX(2px);
+  }
+  100% { 
+    opacity: 1; 
+    filter: brightness(1) contrast(1);
+    clip-path: inset(0 0 0 0);
+    transform: translateX(0);
+  }
+}
+
+/* Overlay de ruido técnico durante la transición */
+.page-rewrite-transition::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(transparent 50%, rgba(0, 0, 0, 0.2) 50%),
+    repeating-linear-gradient(0deg, transparent 0px, transparent 1px, rgba(255,255,255,0.05) 1px, rgba(255,255,255,0.05) 2px);
+  background-size: 100% 4px, 100% 2px;
+  pointer-events: none;
+  z-index: 1000;
+  animation: technical-flicker 0.7s steps(5) forwards;
+}
+
+@keyframes technical-flicker {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes rewrite-glitch-flicker {
+  0% { opacity: 0; filter: hue-rotate(90deg) brightness(2); }
+  10% { opacity: 0.5; transform: translateX(-2px); }
+  20% { opacity: 0.2; transform: translateX(2px); }
+  30% { opacity: 0.8; filter: hue-rotate(0deg); }
+  100% { opacity: 1; filter: brightness(1); }
+}

@@ -326,3 +326,18 @@
     display: none;
   }
 }
+
+/* RightSection Rewrite Animation */
+.right-section--glitch {
+  position: relative;
+  overflow: hidden;
+}
+
+.right-section--glitch .right-section__container {
+  animation: rs-rewrite-fade 0.5s ease-in-out forwards;
+}
+
+@keyframes rs-rewrite-fade {
+  0% { opacity: 0.3; filter: brightness(1.5); }
+  100% { opacity: 1; filter: brightness(1); }
+}
