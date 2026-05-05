@@ -10,6 +10,7 @@ import interactionsService from "@/services/interactionsService";
 import profileService from "@/services/profileService";
 import PostCard from "@/components/feed/PostCard";
 import FollowListModal from "./FollowListModal";
+import { Helmet } from "react-helmet-async";
 import "./Profile.css";
 
 // Loading spinner
@@ -491,6 +492,13 @@ export default function Profile({ username }) {
 
   return (
     <div className="profile-guay">
+      <Helmet>
+        <title>{user.name} (@{user.username}) | Codex</title>
+        <meta name="description" content={user.bio || `Perfil de ${user.name} en Codex.`} />
+        <meta property="og:title" content={`${user.name} (@${user.username}) | Codex`} />
+        <meta property="og:description" content={user.bio || `Perfil de ${user.name} en Codex.`} />
+      </Helmet>
+
       {/* 1. Header Visual */}
       <header className="profile-guay__header">
         <div className="profile-guay__cover">
