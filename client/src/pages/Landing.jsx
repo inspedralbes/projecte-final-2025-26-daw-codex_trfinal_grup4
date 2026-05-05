@@ -8,6 +8,7 @@ import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import SymbolSea from "@/components/ui/SymbolSea";
 import GlitchText from "@/components/ui/GlitchText";
+import { Helmet } from "react-helmet-async";
 import "./Landing.css";
 
 // ── Symbol Sea: Canvas-based animated ASCII background ────────
@@ -273,6 +274,12 @@ export default function Landing() {
 
   return (
     <div className={`landing ${isLightMode ? "landing--light" : ""} ${hasError ? "landing--error" : ""}`}>
+      <Helmet>
+        <title>Codex | {t("landing.welcome")}</title>
+        <meta name="description" content={t("landing.hero_subtitle")} />
+        <meta property="og:title" content={`Codex | ${t("landing.welcome")}`} />
+        <meta property="og:description" content={t("landing.hero_subtitle")} />
+      </Helmet>
       {/* Symbol Sea Background */}
       <SymbolSea errorTrigger={errorCount} isLightMode={isLightMode} className="landing__symbol-sea" />
 
