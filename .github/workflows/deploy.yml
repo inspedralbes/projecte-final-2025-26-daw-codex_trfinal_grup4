@@ -103,24 +103,7 @@ jobs:
           REDIS_PORT: 6379
         run: |
           composer install --no-interaction --prefer-dist --no-scripts
-          cat > .env << 'EOF'
-          APP_NAME=Laravel
-          APP_ENV=testing
-          APP_KEY=
-          APP_DEBUG=true
-          DB_CONNECTION=mysql
-          DB_HOST=127.0.0.1
-          DB_PORT=3306
-          DB_DATABASE=tfg_test
-          DB_USERNAME=root
-          DB_PASSWORD=root
-          CACHE_STORE=array
-          SESSION_DRIVER=array
-          QUEUE_CONNECTION=sync
-          MAIL_MAILER=log
-          REDIS_HOST=127.0.0.1
-          REDIS_PORT=6379
-          EOF
+          cp .env.example .env
           php artisan key:generate --force
           php artisan test
 
