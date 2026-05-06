@@ -1106,7 +1106,7 @@ export default function Messages() {
       <aside className={`msg__sidebar ${mobileView === "chat" ? "hidden-mobile" : ""}`}>
         <div className="msg__sidebar-header">
           <h1 className="msg__title">
-            <GlichText>{t("messages.title")}</GlichText>
+            <GlitchText>{t("messages.title")}</GlitchText>
           </h1>
           <div style={{ display: "flex", gap: "8px" }}>
             <button
