@@ -11,7 +11,9 @@ class ChatMessage extends Model
         'sender_id',
         'receiver_id',
         'center_id',
+        'group_id',
         'content',
+        'type',
         'is_read',
     ];
 
@@ -39,5 +41,10 @@ class ChatMessage extends Model
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
     }
 }

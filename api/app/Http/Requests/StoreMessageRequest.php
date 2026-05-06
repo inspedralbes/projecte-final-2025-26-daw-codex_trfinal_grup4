@@ -14,7 +14,8 @@ class StoreMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'receiver_id' => ['required', 'integer', 'exists:users,id'],
+            'receiver_id' => ['required_without:group_id', 'nullable', 'integer', 'exists:users,id'],
+            'group_id' => ['required_without:receiver_id', 'nullable', 'integer', 'exists:groups,id'],
             'content' => ['required', 'string', 'max:1000', 'min:1'],
         ];
     }

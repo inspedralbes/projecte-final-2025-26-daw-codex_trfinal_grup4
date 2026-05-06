@@ -7,6 +7,7 @@ use App\Http\Controllers\CenterRequestController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\GroupChatController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\InteractionController;
 use App\Http\Controllers\NotificationController;
@@ -119,6 +120,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Chat – read-only (banned users can see past conversations)
     Route::get('/chat/conversations', [ChatController::class, 'conversations']);
     Route::get('/chat/conversations/{userId}', [ChatController::class, 'messages']);
+    Route::get('/chat/groups/{groupId}', [ChatController::class, 'groupMessages']);
     Route::get('/chat/unread', [ChatController::class, 'unreadCount']);
 
     // Center request status (read-only)
@@ -172,6 +174,18 @@ Route::middleware(['auth:sanctum', 'verified', 'not-blocked'])->group(function (
     Route::post('/chat/conversations/{userId}/read', [ChatController::class, 'markAsRead']);
     Route::get('/chat/can-message/{userId}', [ChatController::class, 'canMessage']);
     Route::get('/chat/search-users', [ChatController::class, 'searchUsers']);
+
+    // Groups (Mutual Follows)
+    Route::get('/users/mutual-followers', [GroupChatController::class, 'mutualFollowers']);
+    Route::post('/groups', [GroupChatController::class, 'store']);
+    Route::get('/groups', [GroupChatController::class, 'index']);
+    Route::put('/groups/{groupId}', [GroupChatController::class, 'update']);
+    Route::delete('/groups/{groupId}/members/{userId}', [GroupChatController::class, 'removeMember']);
+    Route::post('/groups/{groupId}/members/{userId}/toggle-admin', [GroupChatController::class, 'toggleAdmin']);
+    Route::post('/groups/{groupId}/members', [GroupChatController::class, 'addMember']);
+    Route::post('/groups/{groupId}/leave', [GroupChatController::class, 'leave']);
+    Route::post('/groups/{groupId}/read', [GroupChatController::class, 'markAsRead']);
+    Route::post('/groups/{groupId}/image', [GroupChatController::class, 'uploadImage']);
 
     // Profile update (US#7)
     Route::put('/profile', [ProfileController::class, 'update']);

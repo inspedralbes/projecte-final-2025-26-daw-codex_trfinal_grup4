@@ -133,17 +133,50 @@ io.on("connection", (socket) => {
   });
 
   /**
+   * Clients join a group room to receive live messages.
+   *   socket.emit('join-group', { groupId: 5 })
+   */
+  socket.on("join-group", (data) => {
+    if (data && data.groupId) {
+      const room = `group.${data.groupId}`;
+      socket.join(room);
+      console.log(`[Socket.io] ${socket.id} joined room ${room}`);
+    }
+  });
+
+  /**
+   * Leave a group room.
+   */
+  socket.on("leave-group", (data) => {
+    if (data && data.groupId) {
+      const room = `group.${data.groupId}`;
+      socket.leave(room);
+      console.log(`[Socket.io] ${socket.id} left room ${room}`);
+    }
+  });
+
+  /**
    * Typing indicator for chat.
    *   socket.emit('typing', { partnerId: 5, userId: 3 })
    */
   socket.on("typing", (data) => {
-    if (data && data.partnerId && data.userId) {
-      const ids = [data.userId, data.partnerId].sort((a, b) => a - b);
-      const room = `chat.${ids[0]}-${ids[1]}`;
-      socket.to(room).emit("user.typing", {
-        userId: data.userId,
-        isTyping: data.isTyping !== false,
-      });
+    if (data && data.userId) {
+      if (typeof data.partnerId === "string" && data.partnerId.startsWith("group_")) {
+        const groupId = data.partnerId.replace("group_", "");
+        const room = `group.${groupId}`;
+        socket.to(room).emit("user.typing", {
+          userId: data.userId,
+          isTyping: data.isTyping !== false,
+          groupId: parseInt(groupId),
+        });
+      } else if (data.partnerId) {
+        const ids = [data.userId, data.partnerId].sort((a, b) => a - b);
+        const room = `chat.${ids[0]}-${ids[1]}`;
+        socket.to(room).emit("user.typing", {
+          userId: data.userId,
+          isTyping: data.isTyping !== false,
+        });
+      }
     }
   });
 
@@ -156,15 +189,16 @@ io.on("connection", (socket) => {
   socket.on("send-message", async (data, callback) => {
     console.log("[Socket.io] Received send-message event:", {
       receiverId: data?.receiverId,
+      groupId: data?.groupId,
       hasContent: !!data?.content,
       hasToken: !!data?.token,
       hasTempId: !!data?.tempId,
       hasCallback: typeof callback === "function",
     });
 
-    const { receiverId, content, tempId, token } = data || {};
+    const { receiverId, groupId, content, tempId, token } = data || {};
 
-    if (!receiverId || !content || !token) {
+    if ((!receiverId && !groupId) || !content || !token) {
       console.log("[Socket.io] Missing required fields");
       if (callback)
         callback({ success: false, error: "Missing required fields" });
@@ -193,7 +227,8 @@ io.on("connection", (socket) => {
           "X-Socket-P2P": "true", // Skip Laravel broadcast, socket handles it
         },
         body: JSON.stringify({
-          receiver_id: parseInt(receiverId, 10),
+          receiver_id: receiverId ? parseInt(receiverId, 10) : null,
+          group_id: groupId ? parseInt(groupId, 10) : null,
           content: content.trim(),
         }),
       });
@@ -213,25 +248,70 @@ io.on("connection", (socket) => {
       // The API wraps in { success, message, data }
       const messageData = result.data?.message || result.message;
       
-      // Broadcast to the chat room (both sender and receiver)
-      const senderId = messageData.sender_id;
-      const ids = [senderId, receiverId].sort((a, b) => a - b);
-      const chatRoom = `chat.${ids[0]}-${ids[1]}`;
+      if (groupId) {
+        // Broadcast to the group room (for active participants)
+        const groupRoom = `group.${groupId}`;
+        io.to(groupRoom).emit("new.message", {
+          ...messageData,
+          tempId: tempId,
+        });
 
-      // Emit with tempId so sender can match and update local state
-      io.to(chatRoom).emit("new.message", {
-        ...messageData,
-        tempId: tempId,
-      });
+        // Also emit to each group member's personal room so they get sidebar
+        // updates even when they are NOT viewing the group chat.
+        // The API returns member_ids so we can iterate them.
+        const memberIds = result.data?.member_ids || [];
+        const senderId = messageData.sender_id;
 
-      // Also emit to receiver's personal room so they receive
-      // the message even if they don't have the chat open
-      io.to(`user.${receiverId}`).emit("new.message", {
-        ...messageData,
-        tempId: tempId,
-      });
+        // Collect socket IDs already in the group room to avoid double-emit
+        const socketsInGroupRoom = await io.in(groupRoom).fetchSockets();
+        const socketIdsInRoom = new Set(socketsInGroupRoom.map((s) => s.id));
 
-      console.log(`[Socket.io] P2P message sent in room ${chatRoom} and user.${receiverId}`);
+        console.log(`[Socket.io] Group message broadcast to ${groupRoom}. Member IDs:`, memberIds);
+        
+        for (const memberId of memberIds) {
+          // Skip sender (they already got the callback + group room emit)
+          if (parseInt(memberId) === parseInt(senderId)) continue;
+
+          const userRoom = `user.${memberId}`;
+          const socketsInUserRoom = await io.in(userRoom).fetchSockets();
+          
+          console.log(`[Socket.io] Checking user room ${userRoom}. Sockets found: ${socketsInUserRoom.length}`);
+
+          // Only emit to user room if none of their sockets are in the group room
+          const alreadyInGroupRoom = socketsInUserRoom.some((s) =>
+            socketIdsInRoom.has(s.id),
+          );
+          
+          if (!alreadyInGroupRoom) {
+            console.log(`[Socket.io] User ${memberId} NOT in group room, emitting to ${userRoom}`);
+            io.to(userRoom).emit("new.message", {
+              ...messageData,
+              tempId: null,
+            });
+          } else {
+            console.log(`[Socket.io] User ${memberId} IS ALREADY in group room, skipping user room emit`);
+          }
+        }
+      } else {
+        // Broadcast to the private chat room (both sender and receiver)
+        const senderId = messageData.sender_id;
+        const ids = [senderId, receiverId].sort((a, b) => a - b);
+        const chatRoom = `chat.${ids[0]}-${ids[1]}`;
+
+        // Emit with tempId so sender can match and update local state
+        io.to(chatRoom).emit("new.message", {
+          ...messageData,
+          tempId: tempId,
+        });
+
+        // Also emit to receiver's personal room
+        io.to(`user.${receiverId}`).emit("new.message", {
+          ...messageData,
+          tempId: tempId,
+        });
+
+        console.log(`[Socket.io] P2P message sent in room ${chatRoom} and user.${receiverId}`);
+      }
 
       // Confirm to sender
       if (callback) callback({ success: true, message: messageData });
@@ -326,7 +406,7 @@ redisSubscriber.psubscribe(pattern, (err) => {
 
 redisSubscriber.on("pmessage", (_pattern, channel, rawMessage) => {
   // Enhanced prefix stripping to handle various Laravel naming conventions
-  // (hyphens, underscores, or colons)
+  console.log(`[Socket.io] DEBUG: Redis raw message on channel: ${channel}`);
   let laravelChannel = channel;
 
   if (channel.startsWith(REDIS_PREFIX)) {
@@ -350,11 +430,10 @@ redisSubscriber.on("pmessage", (_pattern, channel, rawMessage) => {
 
     console.log(
       `[Socket.io] Redis ← channel=${laravelChannel} event=${eventName}`,
+      JSON.stringify(eventData)
     );
 
     // Emit to the matching Socket.io room
-    // Laravel channel "user.3"  → Socket.io room "user.3"
-    // Laravel channel "post.1"  → Socket.io room "post.1"
     io.to(laravelChannel).emit(eventName, eventData);
     console.log(`[Socket.io] Emitted ${eventName} to room ${laravelChannel}`);
   } catch (err) {
