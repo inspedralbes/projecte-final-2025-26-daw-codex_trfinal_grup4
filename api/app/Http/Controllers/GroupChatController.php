@@ -433,6 +433,76 @@ class GroupChatController extends Controller
     }
 
     /**
+     * POST /api/center/group
+     * Create or get the center group chat for the authenticated user.
+     */
+    public function createOrGetCenterGroup(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $centerId = $user->center_id;
+
+        if (!$centerId) {
+            return $this->error('No perteneces a ningún centro.', 403);
+        }
+
+        try {
+            return DB::transaction(function () use ($user, $centerId) {
+                // Find existing center group
+                $group = Group::where('center_id', $centerId)->first();
+
+                if (!$group) {
+                    // Only teachers/admins can create the center group
+                    if ($user->role->value !== 'teacher' && $user->role->value !== 'admin') {
+                        return $this->error('Solo los profesores pueden crear el chat del centro por primera vez.', 403);
+                    }
+
+                    $centerName = $user->center->name ?? 'Centro Oficial';
+
+                    $group = Group::create([
+                        'name' => "Chat Oficial - " . $centerName,
+                        'creator_id' => $user->id,
+                        'center_id' => $centerId,
+                        'image_url' => null,
+                    ]);
+
+                    // Get all members of the center and add them
+                    $centerMembers = User::where('center_id', $centerId)->get();
+                    foreach ($centerMembers as $member) {
+                        $isAdmin = ($member->role->value === 'teacher' || $member->role->value === 'admin');
+                        $group->members()->attach($member->id, ['is_admin' => $isAdmin]);
+                        
+                        // Send system message
+                        $this->createSystemMessage($group->id, "se ha unido al chat del centro", $member->name);
+                    }
+                } else {
+                    // Ensure the current user is a member of the group (for new students)
+                    if (!$group->members()->where('user_id', $user->id)->exists()) {
+                        $isAdmin = ($user->role->value === 'teacher' || $user->role->value === 'admin');
+                        $group->members()->attach($user->id, ['is_admin' => $isAdmin]);
+
+                        // Send system message
+                        $this->createSystemMessage($group->id, "se ha unido al chat del centro", $user->name);
+                        event(new GroupMemberChangedEvent($group, clone $user, 'added'));
+                    }
+                }
+
+                $group->load('members');
+
+                return $this->success([
+                    'group' => $this->formatGroup($group)
+                ], 'Chat del centro listo.');
+            });
+        } catch (Throwable $e) {
+            Log::error('Error al acceder al chat del centro: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'center_id' => $centerId,
+                'trace' => $e->getTraceAsString()
+            ]);
+            return $this->error('Error al acceder al chat del centro: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
      * Format group for consistent API response.
      */
     private function formatGroup(Group $group): array
@@ -442,6 +512,7 @@ class GroupChatController extends Controller
             'name' => $group->name,
             'image_url' => $group->image_url,
             'creator_id' => $group->creator_id,
+            'center_id' => $group->center_id,
             'members' => $group->members->map(function ($m) {
                 return [
                     'id' => $m->id,

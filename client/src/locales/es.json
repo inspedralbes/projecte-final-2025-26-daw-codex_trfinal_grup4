@@ -404,6 +404,15 @@
       "message_sent": "Ya has enviado tu mensaje. Espera a que te siga para continuar la conversación.",
       "follow_to_unlock": "Seguir para desbloquear",
       "waiting_response": "Esperando respuesta"
+    },
+    "call": {
+      "calling": "Llamando...",
+      "ongoing": "Llamada en curso...",
+      "is_calling": "te está llamando",
+      "video_call": "Videollamada",
+      "audio_call": "Llamada de voz",
+      "accept": "Aceptar",
+      "reject": "Rechazar"
     }
   }
 }

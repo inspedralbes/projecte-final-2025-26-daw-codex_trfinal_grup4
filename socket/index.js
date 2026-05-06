@@ -361,6 +361,63 @@ io.on("connection", (socket) => {
     }
   });
 
+  /**
+   * WebRTC Signaling
+   */
+  socket.on("call-user", (data) => {
+    if (data && data.userToCall && data.signalData && data.from) {
+      io.to(`user.${data.userToCall}`).emit("call-made", {
+        signal: data.signalData,
+        from: data.from,
+        callerInfo: data.callerInfo,
+        isVideo: data.isVideo
+      });
+      console.log(`[Socket.io] Call from ${data.from} to ${data.userToCall}`);
+    }
+  });
+
+  socket.on("make-answer", (data) => {
+    if (data && data.to && data.signal) {
+      io.to(`user.${data.to}`).emit("call-answered", {
+        signal: data.signal,
+        from: data.from
+      });
+      console.log(`[Socket.io] Call answered from ${data.from} to ${data.to}`);
+    }
+  });
+
+  socket.on("ice-candidate", (data) => {
+    if (data && data.to && data.candidate) {
+      io.to(`user.${data.to}`).emit("ice-candidate-received", {
+        candidate: data.candidate,
+        from: data.from
+      });
+    }
+  });
+
+  socket.on("end-call", (data) => {
+    if (data && data.to) {
+      io.to(`user.${data.to}`).emit("call-ended", { from: data.from });
+      console.log(`[Socket.io] Call ended by ${data.from}`);
+    }
+  });
+
+  socket.on("reject-call", (data) => {
+    if (data && data.to) {
+      io.to(`user.${data.to}`).emit("call-rejected", { from: data.from });
+      console.log(`[Socket.io] Call rejected by ${data.from}`);
+    }
+  });
+
+  socket.on("video-toggle", (data) => {
+    if (data && data.to) {
+      io.to(`user.${data.to}`).emit("peer-video-toggle", {
+        isVideoOff: data.isVideoOff,
+        from: data.from
+      });
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log(`[Socket.io] Client disconnected: ${socket.id}`);
   });

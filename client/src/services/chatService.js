@@ -228,6 +228,15 @@ const chatService = {
     const response = await api.get(endpoint);
     return response.data;
   },
+
+  /**
+   * Create or get center group.
+   * @returns {Promise<{group: Object}>}
+   */
+  createOrGetCenterGroup: async () => {
+    const response = await api.post('/center/group');
+    return response.data;
+  },
 };
 
 export default chatService;

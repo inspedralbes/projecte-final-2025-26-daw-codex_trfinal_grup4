@@ -404,6 +404,15 @@
       "message_sent": "Ja has enviat el teu missatge. Espera que et segueixi per continuar la conversa.",
       "follow_to_unlock": "Seguir per desbloquejar",
       "waiting_response": "Esperant resposta"
+    },
+    "call": {
+      "calling": "Trucant...",
+      "ongoing": "Trucada en curs...",
+      "is_calling": "t'està trucant",
+      "video_call": "Videotrucada",
+      "audio_call": "Trucada de veu",
+      "accept": "Acceptar",
+      "reject": "Rebutjar"
     }
   }
 }

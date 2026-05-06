@@ -16,6 +16,7 @@ class Group extends Model
         'name',
         'image_url',
         'creator_id',
+        'center_id',
     ];
 
     /**
@@ -33,6 +34,14 @@ class Group extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    /**
+     * Get the center this group belongs to.
+     */
+    public function center(): BelongsTo
+    {
+        return $this->belongsTo(Center::class);
     }
 
     /**

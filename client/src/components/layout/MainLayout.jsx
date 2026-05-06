@@ -8,6 +8,7 @@ import CenterPromptModal from "@/components/center/CenterPromptModal";
 import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal";
 import socketService from "@/services/socketService";
 import api from "@/services/api";
+import GlobalCallHandler from "../chat/GlobalCallHandler";
 import "./MainLayout.css";
 
 export default function MainLayout() {
@@ -18,6 +19,7 @@ export default function MainLayout() {
   const [showCenterPrompt, setShowCenterPrompt] = useState(false);
   const [showTeacherModal, setShowTeacherModal] = useState(false);
   const [teacherModalLoading, setTeacherModalLoading] = useState(false);
+  const [globalToast, setGlobalToast] = useState(null);
 
   // Show center prompt modal after login if needed
   useEffect(() => {
@@ -94,6 +96,65 @@ export default function MainLayout() {
     }
   }, [user]);
 
+  // Global document title for unread badges
+  useEffect(() => {
+    const totalUnread = (unreadCount || 0) + (unreadMessagesCount || 0);
+    if (totalUnread > 0) {
+      document.title = `(${totalUnread}) Codex`;
+    } else {
+      document.title = 'Codex';
+    }
+  }, [unreadCount, unreadMessagesCount]);
+
+  // Global Real-time Toasts (Messages & Notifications)
+  useEffect(() => {
+    if (!user) return;
+
+    const handleNewMessage = (e) => {
+      const msg = e.detail;
+      // Show toast only if NOT the sender and NOT in the active chat
+      // The logic for 'should I show' is handled by the event dispatcher in SocketContext
+      // but we add a check here to be safe and to only show for others' messages
+      if (msg.sender_id !== user.id) {
+        // Find if it's already incremented unread count (SocketContext does this)
+        setGlobalToast({
+          id: Date.now(),
+          title: msg.sender?.name || "Nuevo mensaje",
+          message: msg.content.substring(0, 50) + (msg.content.length > 50 ? "..." : ""),
+          type: "message",
+          link: "/messages?user=" + msg.sender_id
+        });
+      }
+    };
+
+    const handleNotification = (e) => {
+      const notif = e.detail;
+      setGlobalToast({
+        id: Date.now(),
+        title: "Nueva notificación",
+        message: notif.message,
+        type: "notification",
+        link: "/notifications"
+      });
+    };
+
+    window.addEventListener("codex:message", handleNewMessage);
+    window.addEventListener("codex:notification", handleNotification);
+
+    return () => {
+      window.removeEventListener("codex:message", handleNewMessage);
+      window.removeEventListener("codex:notification", handleNotification);
+    };
+  }, [user]);
+
+  // Auto-hide global toast
+  useEffect(() => {
+    if (globalToast) {
+      const timer = setTimeout(() => setGlobalToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [globalToast]);
+
   return (
     <div className={`app-layout ${user?.role === "admin" ? "app-layout--admin" : ""}`}>
       {/* Mobile Header - only visible on small screens */}
@@ -165,6 +226,25 @@ export default function MainLayout() {
       </main>
       {user?.role !== "admin" && <RightSection />}
 
+      {/* Global Toast Notification */}
+      {globalToast && (
+        <div 
+          className={`global-toast global-toast--${globalToast.type}`}
+          onClick={() => {
+            setGlobalToast(null);
+            navigate(globalToast.link);
+          }}
+        >
+          <div className="global-toast__icon">
+            {globalToast.type === 'message' ? '💬' : '🔔'}
+          </div>
+          <div className="global-toast__content">
+            <div className="global-toast__title">{globalToast.title}</div>
+            <div className="global-toast__message">{globalToast.message}</div>
+          </div>
+        </div>
+      )}
+
       {/* Admin Real-time Toast */}
       {adminNotification && (
         <div
@@ -201,6 +281,9 @@ export default function MainLayout() {
           onCancel={() => setShowTeacherModal(false)}
         />
       )}
+
+      {/* Global Call UI */}
+      <GlobalCallHandler />
     </div>
   );
 }

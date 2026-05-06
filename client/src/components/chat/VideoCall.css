@@ -1,0 +1,349 @@
+.vc-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vc-container {
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  background: var(--bg-secondary, #1e1e24);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.vc-incoming {
+  padding: 40px;
+  text-align: center;
+  color: white;
+}
+
+.vc-avatar {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--accent-primary, #7c5cfc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.vc-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vc-incoming h3 {
+  margin: 0 0 10px;
+  font-size: 24px;
+}
+
+.vc-incoming p {
+  color: #a0a0a0;
+  margin-bottom: 30px;
+}
+
+.vc-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.vc-btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.vc-btn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.vc-btn.accept {
+  background: #22c55e;
+  color: white;
+}
+
+.vc-btn.reject {
+  background: #ef4444;
+  color: white;
+}
+
+.vc-active {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.vc-video-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vc-remote-video {
+  width: 100%;
+  height: 100%;
+}
+
+.vc-remote-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vc-waiting {
+  color: white;
+  font-size: 20px;
+  animation: pulse 1.5s infinite;
+}
+
+.vc-local-video {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 150px;
+  aspect-ratio: 16 / 9;
+  background: #333;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vc-video-off-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-secondary, #1e1e24);
+  color: #a0a0a0;
+  font-size: 18px;
+}
+
+.vc-video-off-placeholder svg {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  stroke: #666;
+}
+
+.vc-video-off-placeholder.small svg {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0;
+}
+
+
+.vc-local-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vc-controls {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.vc-control-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.vc-control-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.vc-control-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.vc-control-btn.hangup {
+  background: #ef4444;
+}
+
+.vc-control-btn.hangup:hover {
+  background: #dc2626;
+}
+
+.vc-control-btn.muted, .vc-control-btn.video-off {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* Audio Only Styles */
+.vc-active.vc-audio-only {
+  background: var(--bg-secondary, #1e1e24);
+  justify-content: center;
+  align-items: center;
+}
+
+.vc-audio-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  padding-bottom: 80px;
+}
+
+.vc-audio-avatar-wrapper {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.vc-audio-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: var(--accent-primary, #7c5cfc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  color: white;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 10px 30px rgba(124, 92, 252, 0.4);
+}
+
+.vc-audio-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vc-audio-avatar.calling::before,
+.vc-audio-avatar.calling::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--accent-primary, #7c5cfc);
+  z-index: -1;
+  animation: pulse-ring 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.vc-audio-avatar.calling::after {
+  animation-delay: 1s;
+}
+
+@keyframes pulse-ring {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+}
+
+.vc-audio-container h3 {
+  color: white;
+  font-size: 28px;
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+.vc-call-status {
+  color: #a0a0a0;
+  font-size: 16px;
+  margin: 0;
+  animation: pulse 2s infinite;
+}
+
+@media (max-width: 768px) {
+  .vc-overlay {
+    background-color: var(--bg-primary, #121212);
+  }
+
+  .vc-container {
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    max-width: 100vw;
+  }
+  
+  .vc-video-container {
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  .vc-controls {
+    padding: 30px 20px;
+  }
+
+  .vc-control-btn {
+    width: 60px;
+    height: 60px;
+  }
+
+  .vc-control-btn svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .vc-audio-avatar {
+    width: 180px;
+    height: 180px;
+  }
+}

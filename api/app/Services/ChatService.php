@@ -56,25 +56,15 @@ class ChatService
             ];
         }
 
-        // Check if the receiver has already sent a message to the sender
-        // (conversation is established - both can continue chatting)
-        $receiverHasReplied = ChatMessage::query()
-            ->where('sender_id', $receiver->id)
-            ->where('receiver_id', $sender->id)
-            ->exists();
-
-        if ($receiverHasReplied) {
-            return [
-                'can_send' => true,
-                'reason' => 'conversation_established',
-                'is_mutual' => false,
-            ];
-        }
+        // Note: We removed the 'receiverHasReplied' exception to strictly enforce 
+        // the 1-message limit until mutual follow is established.
 
         // Check if user has already sent a message to this receiver
         $existingMessage = ChatMessage::query()
             ->where('sender_id', $sender->id)
             ->where('receiver_id', $receiver->id)
+            ->whereNull('group_id')
+            ->whereNull('center_id')
             ->exists();
 
         if ($existingMessage) {

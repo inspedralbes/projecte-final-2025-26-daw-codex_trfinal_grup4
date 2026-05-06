@@ -404,6 +404,15 @@
       "message_sent": "You've already sent your message. Wait for them to follow you to continue the conversation.",
       "follow_to_unlock": "Follow to unlock",
       "waiting_response": "Waiting for response"
+    },
+    "call": {
+      "calling": "Calling...",
+      "ongoing": "Call ongoing...",
+      "is_calling": "is calling you",
+      "video_call": "Video Call",
+      "audio_call": "Voice Call",
+      "accept": "Accept",
+      "reject": "Decline"
     }
   }
 }
