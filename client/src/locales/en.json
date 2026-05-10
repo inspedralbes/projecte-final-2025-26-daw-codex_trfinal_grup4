@@ -425,6 +425,20 @@
       "message_sent": "You've already sent your message. Wait for them to follow you to continue the conversation.",
       "follow_to_unlock": "Follow to unlock",
       "waiting_response": "Waiting for response"
+    },
+    "call": {
+      "video_call": "Video Call",
+      "audio_call": "Audio Call",
+      "incoming_video": "Incoming Video Call",
+      "incoming_audio": "Incoming Audio Call",
+      "accept": "Accept",
+      "reject": "Reject",
+      "calling": "Calling",
+      "is_calling": "is calling you",
+      "ongoing": "Call in progress...",
+      "ended": "Call ended",
+      "camera_off_peer": "has turned off their camera",
+      "mic_off_peer": "has muted their mic"
     }
   }
 }

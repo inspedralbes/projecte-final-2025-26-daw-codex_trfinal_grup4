@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
 import Sidebar from "./Sidebar";
 import RightSection from "./RightSection";
+import GlobalCallHandler from "@/components/chat/GlobalCallHandler";
 import SymbolSea from "@/components/ui/SymbolSea";
 import CenterPromptModal from "@/components/center/CenterPromptModal";
 import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal";
@@ -16,6 +17,7 @@ export default function MainLayout() {
   const { unreadCount, unreadMessagesCount } = useSocket();
   const navigate = useNavigate();
   const [adminNotification, setAdminNotification] = useState(null);
+  const [globalToast, setGlobalToast] = useState(null);
   const [showCenterPrompt, setShowCenterPrompt] = useState(false);
   const [showTeacherModal, setShowTeacherModal] = useState(false);
   const [teacherModalLoading, setTeacherModalLoading] = useState(false);
@@ -95,11 +97,67 @@ export default function MainLayout() {
     }
   }, [user]);
 
+  // Global document title for unread badges
+  useEffect(() => {
+    const totalUnread = (unreadCount || 0) + (unreadMessagesCount || 0);
+    if (totalUnread > 0) {
+      document.title = `(${totalUnread}) Codex`;
+    } else {
+      document.title = "Codex";
+    }
+  }, [unreadCount, unreadMessagesCount]);
+
+  // Global Real-time Toasts (Messages & Notifications)
+  useEffect(() => {
+    if (!user) return;
+
+    const handleNewMessage = (e) => {
+      const msg = e.detail;
+      // Show toast only if NOT the sender
+      if (msg.sender_id !== user.id) {
+        setGlobalToast({
+          id: Date.now(),
+          title: msg.sender?.name || "Nuevo mensaje",
+          message: msg.content.substring(0, 50) + (msg.content.length > 50 ? "..." : ""),
+          type: "message",
+          link: "/messages?user=" + msg.sender_id,
+        });
+      }
+    };
+
+    const handleNotification = (e) => {
+      const notif = e.detail;
+      setGlobalToast({
+        id: Date.now(),
+        title: "Nueva notificación",
+        message: notif.message,
+        type: "notification",
+        link: "/notifications",
+      });
+    };
+
+    window.addEventListener("codex:message", handleNewMessage);
+    window.addEventListener("codex:notification", handleNotification);
+
+    return () => {
+      window.removeEventListener("codex:message", handleNewMessage);
+      window.removeEventListener("codex:notification", handleNotification);
+    };
+  }, [user]);
+
+  // Auto-hide global toast
+  useEffect(() => {
+    if (globalToast) {
+      const timer = setTimeout(() => setGlobalToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [globalToast]);
+
   return (
     <div className={`app-layout ${user?.role === "admin" ? "app-layout--admin" : ""}`}>
       {/* ── Symbol Sea Background ── */}
       <SymbolSea />
-      
+
       {/* Mobile Header - only visible on small screens */}
       <header className="mobile-header">
         <div className="mobile-header__avatar" onClick={() => navigate("/profile")}>
@@ -149,9 +207,27 @@ export default function MainLayout() {
         </div>
       </main>
       {user?.role !== "admin" && <RightSection />}
-      
+
       {/* ── Brutalist Decorative Elements ── */}
       <div className="bg-watermark">CODEX_CORE_v2.0.46</div>
+
+      {/* Global Toast Notification */}
+      {globalToast && (
+        <div
+          className={`global-toast global-toast--${globalToast.type}`}
+          onClick={() => {
+            setGlobalToast(null);
+            navigate(globalToast.link);
+          }}
+        >
+          <div className="global-toast__icon">{globalToast.type === "message" ? "💬" : "🔔"}</div>
+          <div className="global-toast__content">
+            <div className="global-toast__title">{globalToast.title}</div>
+            <div className="global-toast__message">{globalToast.message}</div>
+          </div>
+        </div>
+      )}
+
       {adminNotification && (
         <div
           className={`ar-toast ar-toast--${adminNotification.type}`}
@@ -187,6 +263,9 @@ export default function MainLayout() {
           onCancel={() => setShowTeacherModal(false)}
         />
       )}
+
+      {/* Global Call UI */}
+      <GlobalCallHandler />
     </div>
   );
 }

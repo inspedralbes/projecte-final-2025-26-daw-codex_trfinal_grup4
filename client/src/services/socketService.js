@@ -421,6 +421,76 @@ const socketService = {
       socket.off(event, callback);
     }
   },
+
+  // ─── WebRTC Signaling ────────────────────────────────────────────────────────
+  
+  callUser: (data) => {
+    if (socket) socket.emit("call-user", data);
+  },
+  answerCall: (data) => {
+    if (socket) socket.emit("make-answer", data);
+  },
+  sendIceCandidate: (data) => {
+    if (socket) socket.emit("ice-candidate", data);
+  },
+  endCall: (data) => {
+    if (socket) socket.emit("end-call", data);
+  },
+  rejectCall: (data) => {
+    if (socket) socket.emit("reject-call", data);
+  },
+
+  onIncomingCall: (callback) => {
+    if (socket) socket.on("call-made", callback);
+  },
+  onCallAnswered: (callback) => {
+    if (socket) socket.on("call-answered", callback);
+  },
+  onIceCandidate: (callback) => {
+    if (socket) socket.on("ice-candidate-received", callback);
+  },
+  onCallEnded: (callback) => {
+    if (socket) socket.on("call-ended", callback);
+  },
+  onCallRejected: (callback) => {
+    if (socket) socket.on("call-rejected", callback);
+  },
+  
+  offIncomingCall: (callback) => {
+    if (socket) socket.off("call-made", callback);
+  },
+  offCallAnswered: (callback) => {
+    if (socket) socket.off("call-answered", callback);
+  },
+  offIceCandidate: (callback) => {
+    if (socket) socket.off("ice-candidate-received", callback);
+  },
+  offCallEnded: (callback) => {
+    if (socket) socket.off("call-ended", callback);
+  },
+  offCallRejected: (callback) => {
+    if (socket) socket.off("call-rejected", callback);
+  },
+
+  sendVideoToggle: (data) => {
+    if (socket) socket.emit("video-toggle", data);
+  },
+  onPeerVideoToggle: (callback) => {
+    if (socket) socket.on("peer-video-toggle", callback);
+  },
+  offPeerVideoToggle: (callback) => {
+    if (socket) socket.off("peer-video-toggle", callback);
+  },
+  
+  sendAudioToggle: (data) => {
+    if (socket) socket.emit("audio-toggle", data);
+  },
+  onPeerAudioToggle: (callback) => {
+    if (socket) socket.on("peer-audio-toggle", callback);
+  },
+  offPeerAudioToggle: (callback) => {
+    if (socket) socket.off("peer-audio-toggle", callback);
+  }
 };
 
 export default socketService;

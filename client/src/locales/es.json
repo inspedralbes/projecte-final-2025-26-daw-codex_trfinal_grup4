@@ -422,6 +422,20 @@
       "message_sent": "Ya has enviado tu mensaje. Espera a que te siga para continuar la conversación.",
       "follow_to_unlock": "Seguir para desbloquear",
       "waiting_response": "Esperando respuesta"
+    },
+    "call": {
+      "video_call": "Videollamada",
+      "audio_call": "Llamada de voz",
+      "incoming_video": "Videollamada entrante",
+      "incoming_audio": "Llamada entrante",
+      "accept": "Aceptar",
+      "reject": "Rechazar",
+      "calling": "Llamando a",
+      "is_calling": "te está llamando",
+      "ongoing": "Llamada en curso...",
+      "ended": "Llamada finalizada",
+      "camera_off_peer": "ha apagado la cámara",
+      "mic_off_peer": "ha silenciado su micro"
     }
   }
 }
