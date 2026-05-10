@@ -26,11 +26,10 @@ export function useNotifications() {
       setError(null);
 
       const response = await notificationsService.getNotifications({ page: pageNum });
-      const data = response.data || response;
-      const newNotifications = data.data || data;
+      const newNotifications = response.data || [];
+      const meta = response.meta || {};
       
       // Meta contains unread_count - sync with global context
-      const meta = data.meta || {};
       setNotificationCount(meta.unread_count || 0);
       
       const lastPage = meta.last_page || 1;

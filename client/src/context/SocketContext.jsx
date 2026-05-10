@@ -65,8 +65,9 @@ export const SocketProvider = ({ children }) => {
       // Fetch initial unread count from API
       notificationsService.getNotifications({ page: 1 })
         .then((response) => {
-          const data = response.data || response;
-          const meta = data.meta || {};
+          // The API response has { success, message, data, meta }
+          // meta contains unread_count
+          const meta = response.meta || {};
           setUnreadCount(meta.unread_count || 0);
         })
         .catch((err) => console.error("Error fetching notification count:", err));
