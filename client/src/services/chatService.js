@@ -216,16 +216,11 @@ const chatService = {
   },
 
   /**
-   * Get messages for a group.
-   * @param {number} groupId
-   * @returns {Promise<{messages: Array, group: Object}>}
+   * Create or get the official center group.
+   * @returns {Promise<{group: Object}>}
    */
-  getGroupMessages: async (groupId, beforeId = null, limit = 50) => {
-    let endpoint = `/chat/groups/${groupId}?limit=${limit}`;
-    if (beforeId) {
-      endpoint += `&before_id=${beforeId}`;
-    }
-    const response = await api.get(endpoint);
+  createOrGetCenterGroup: async () => {
+    const response = await api.post('/center/group');
     return response.data;
   },
 };

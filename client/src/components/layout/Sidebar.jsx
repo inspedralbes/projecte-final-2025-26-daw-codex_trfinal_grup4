@@ -278,6 +278,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const { user, logout, centerCheck } = useAuth();
   const { unreadCount, unreadMessagesCount } = useSocket();
+  console.log(`[Sidebar] Unread: notifs=${unreadCount}, msgs=${unreadMessagesCount}`);
 
   const [pageGlitch, setPageGlitch] = React.useState(false);
 
@@ -372,12 +373,12 @@ export default function Sidebar() {
                 <span className="sidebar__nav-icon">
                   <Icon active={isActive} />
                   {path === "/notifications" && unreadCount > 0 && (
-                    <span className="sidebar__nav-badge">
+                    <span key={`notif-${unreadCount}`} className="sidebar__nav-badge">
                       {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                   )}
                   {path === "/messages" && unreadMessagesCount > 0 && (
-                    <span className="sidebar__nav-badge">
+                    <span key={`msg-${unreadMessagesCount}`} className="sidebar__nav-badge">
                       {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
                     </span>
                   )}

@@ -1182,3 +1182,60 @@
   line-height: 1.6;
   margin: 0;
 }
+/* Center Group Chat Button */
+.center-hub__btn--chat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--codex-primary);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+  border: none;
+  box-shadow: 4px 4px 0px black;
+  cursor: pointer;
+}
+
+.center-hub__btn--chat:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px black;
+  filter: brightness(1.1);
+}
+
+.center-hub__btn--chat:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px black;
+}
+
+.center-hub__btn--chat:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: 2px 2px 0px black;
+}
+
+.center-hub__btn-chat-icon {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .center-hub__banner-actions {
+    width: 100%;
+    margin-top: 1rem;
+    justify-content: flex-start;
+  }
+  
+  .center-hub__btn--chat {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

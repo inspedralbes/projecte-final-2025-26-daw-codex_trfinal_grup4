@@ -425,6 +425,20 @@
       "message_sent": "Ja has enviat el teu missatge. Espera que et segueixi per continuar la conversa.",
       "follow_to_unlock": "Seguir per desbloquejar",
       "waiting_response": "Esperant resposta"
+    },
+    "call": {
+      "video_call": "Videollamada",
+      "audio_call": "Trucada de veu",
+      "incoming_video": "Videollamada entrant",
+      "incoming_audio": "Trucada entrant",
+      "accept": "Acceptar",
+      "reject": "Rebutjar",
+      "calling": "Trucant a",
+      "is_calling": "et trucant",
+      "ongoing": "Trucada en curs...",
+      "ended": "Trucada finalitzada",
+      "camera_off_peer": "ha apagat la càmera",
+      "mic_off_peer": "ha silenciat el seu micro"
     }
   }
 }
