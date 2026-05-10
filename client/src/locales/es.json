@@ -131,7 +131,8 @@
   "footer": {
     "terms": "Términos",
     "privacy": "Privacidad",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "help": "Ayuda"
   },
   "auth": {
     "login_success": "¡Inicio de sesión exitoso! Bienvenido de vuelta.",
@@ -434,19 +435,7 @@
       "ongoing": "Llamada en curso...",
       "ended": "Llamada finalizada",
       "camera_off_peer": "ha apagado la cámara",
-      "mic_off_peer": "ha silenciado su micro",
-      "permission_denied": "Acceso denegado a la cámara/micrófono. Por favor, actívalos en tu navegador para realizar llamadas.",
-      "secure_context_required": "La videollamada requiere una conexión segura (HTTPS). Verifica que tu URL comience por https://."
+      "mic_off_peer": "ha silenciado su micro"
     }
-  },
-  "legal": {
-    "title": "Legal y Privacidad",
-    "terms": "Términos de Servicio",
-    "privacy": "Política de Privacidad",
-    "cookies": "Política de Cookies",
-    "terms_content": "Bienvenido a Codex. Al utilizar nuestros servicios, aceptas estos términos y condiciones en su totalidad. Codex es una plataforma educativa para conectar a estudiantes y profesores. No nos hacemos responsables del contenido generado por los usuarios. Nos reservamos el derecho de suspender cuentas que infrinjan las normas de la comunidad.",
-    "privacy_content": "En Codex nos tomamos muy en serio tu privacidad. Recopilamos información básica para el funcionamiento del servicio, como tu nombre, correo electrónico y centro educativo. No vendemos tus datos a terceros. Puedes solicitar la eliminación de tu cuenta en cualquier momento poniéndote en contacto con nosotros.",
-    "cookies_content": "Utilizamos cookies esenciales para el funcionamiento de la plataforma, como mantener tu sesión activa y guardar tus preferencias de tema (claro/oscuro). No utilizamos cookies de rastreo publicitario de terceros.",
-    "back_to_settings": "< VOLVER A CONFIGURACIÓN"
   }
 }

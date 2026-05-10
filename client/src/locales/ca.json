@@ -131,7 +131,8 @@
   "footer": {
     "terms": "Termes",
     "privacy": "Privadesa",
-    "cookies": "Cookies"
+    "cookies": "Cookies",
+    "help": "Ajuda"
   },
   "auth": {
     "login_success": "Sessió iniciada correctament! Benvingut de nou.",
@@ -437,19 +438,7 @@
       "ongoing": "Trucada en curs...",
       "ended": "Trucada finalitzada",
       "camera_off_peer": "ha apagat la càmera",
-      "mic_off_peer": "ha silenciat el seu micro",
-      "permission_denied": "Accés denegat a la càmera/micròfon. Per favor, activa'ls al teu navegador per realitzar trucades.",
-      "secure_context_required": "La videollamada requereix una connexió segura (HTTPS). Verifica que la teva URL comenci per https://."
+      "mic_off_peer": "ha silenciat el seu micro"
     }
-  },
-  "legal": {
-    "title": "Avís Legal i Privacitat",
-    "terms": "Termes de Servei",
-    "privacy": "Política de Privacitat",
-    "cookies": "Política de Galetes",
-    "terms_content": "Benvingut a Codex. En utilitzar els nostres serveis, acceptes aquests termes i condicions en la seva totalitat. Codex és una plataforma educativa per connectar estudiants i professors. No ens fem responsables del contingut generat pels usuaris. Ens reservem el dret de suspendre comptes que infringeixin les normes de la comunitat.",
-    "privacy_content": "A Codex ens prenem molt seriosament la teva privacitat. Recopilem informació bàsica per al funcionament del servei, com el teu nom, correu electrònic i centre educatiu. No venem les teves dades a tercers. Pots sol·licitar l'eliminació del teu compte en qualsevol moment posant-te en contacte amb nosaltres.",
-    "cookies_content": "Utilitzem galetes essencials per al funcionament de la plataforma, com mantenir la teva sessió activa i desar les teves preferències de tema (clar/fosc). No utilitzem galetes de seguiment publicitari de tercers.",
-    "back_to_settings": "< TORNAR A CONFIGURACIÓ"
   }
 }

@@ -156,9 +156,10 @@ Route::middleware(['auth:sanctum', 'verified', 'not-blocked'])->group(function (
     Route::get('/users/{user}/follow-status', [FollowController::class, 'status']);
 
     // Center Hub (US#5) – "Walled Garden"
-    Route::get('/center/posts', [PostController::class, 'centerPosts']);
-    Route::get('/center/tags', [TagController::class, 'centerTags']);
-    Route::get('/center/search', [SearchController::class, 'centerSearch']);
+    Route::get("/center/posts", [PostController::class, "centerPosts"]);
+    Route::get("/center/tags", [TagController::class, "centerTags"]);
+    Route::get("/center/search", [SearchController::class, "centerSearch"]);
+    Route::post("/center/group", [GroupChatController::class, "createOrGetCenterGroup"]);
 
     // Tags – follow/unfollow + notifications
     Route::post('/tags/{tag}/follow', [TagController::class, 'toggleFollow']);

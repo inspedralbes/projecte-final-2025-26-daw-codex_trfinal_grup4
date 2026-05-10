@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
 import chatService from "@/services/chatService";
 import socketService from "@/services/socketService";
 import NewGroupModal from "@/components/chat/NewGroupModal";
 import GroupSettingsModal from "@/components/chat/GroupSettingsModal";
+import VideoCall from "@/components/chat/VideoCall";
+import GlitchText from "@/components/ui/GlitchText";
 import "./Messages.css";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -82,6 +84,19 @@ const InfoIcon = () => (
     <circle cx="12" cy="12" r="10"></circle>
     <line x1="12" y1="16" x2="12" y2="12"></line>
     <line x1="12" y1="8" x2="12.01" y2="8"></line>
+  </svg>
+);
+
+const PhoneCallIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+  </svg>
+);
+
+const VideoIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="23 7 16 12 23 17 23 7" />
+    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
   </svg>
 );
 
@@ -277,17 +292,17 @@ const RestrictionBanner = ({ isMutual, canSend, restrictionReason, t }) => {
       {!isMutual && (
         <div className="msg__restriction-badge">
           <LockIcon />
-          <span>{t("messages.restriction.title")}</span>
+          <span><GlitchText>{t("messages.restriction.title")}</GlitchText></span>
         </div>
       )}
       {!canSend && restrictionReason === "message_limit_reached" && (
         <p className="msg__restriction-text">
-          {t("messages.restriction.message_sent")}
+          <GlitchText>{t("messages.restriction.message_sent")}</GlitchText>
         </p>
       )}
       {canSend && !isMutual && (
         <p className="msg__restriction-text">
-          {t("messages.restriction.not_following")}
+          <GlitchText>{t("messages.restriction.not_following")}</GlitchText>
         </p>
       )}
     </div>
@@ -335,7 +350,7 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser, t }) => {
     <div className="msg__modal-overlay" onClick={onClose}>
       <div className="msg__modal" onClick={(e) => e.stopPropagation()}>
         <div className="msg__modal-header">
-          <h3>{t("messages.new_conversation")}</h3>
+          <h3><GlitchText>{t("messages.new_conversation")}</GlitchText></h3>
           <button className="msg__modal-close" onClick={onClose}>×</button>
         </div>
         <div className="msg__modal-search">
@@ -355,7 +370,7 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser, t }) => {
             </div>
           )}
           {!loading && results.length === 0 && query.length >= 2 && (
-            <p className="msg__modal-empty">{t("messages.no_results")}</p>
+            <p className="msg__modal-empty"><GlitchText>{t("messages.no_results")}</GlitchText></p>
           )}
           {results.map((user) => (
             <div
@@ -391,11 +406,11 @@ const EmptyConversations = ({ onNewConversation, t }) => (
     <div className="msg__empty-icon">
       <MessageCircleIcon />
     </div>
-    <h3>{t("messages.no_conversations")}</h3>
-    <p>{t("messages.no_conversations_subtitle")}</p>
+    <h3><GlitchText>{t("messages.no_conversations")}</GlitchText></h3>
+    <p><GlitchText>{t("messages.no_conversations_subtitle")}</GlitchText></p>
     <button className="msg__empty-btn" onClick={onNewConversation}>
       <PlusIcon />
-      {t("messages.new_conversation")}
+      <GlitchText>{t("messages.new_conversation")}</GlitchText>
     </button>
   </div>
 );
@@ -405,8 +420,8 @@ const EmptyChat = ({ t }) => (
     <div className="msg__empty-icon">
       <MessageCircleIcon />
     </div>
-    <h3>{t("messages.select_conversation")}</h3>
-    <p>{t("messages.select_conversation_subtitle")}</p>
+    <h3><GlitchText>{t("messages.select_conversation")}</GlitchText></h3>
+    <p><GlitchText>{t("messages.select_conversation_subtitle")}</GlitchText></p>
   </div>
 );
 
@@ -442,7 +457,13 @@ export default function Messages() {
   const [groupDetails, setGroupDetails] = useState({ members: [] });
   const [typing, setTyping] = useState(false);
   const [mobileView, setMobileView] = useState("list"); // 'list' | 'chat'
-  
+
+  // Call State
+  const [incomingCall, setIncomingCall] = useState(null);
+  const [activeCall, setActiveCall] = useState(false);
+  const [isVideoCall, setIsVideoCall] = useState(true);
+  const [callerInfo, setCallerInfo] = useState(null);
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -479,6 +500,22 @@ export default function Messages() {
     };
     loadConversations();
   }, [setMessagesCount]);
+
+  const location = useLocation();
+
+  // Handle auto-answering from GlobalCallHandler
+  useEffect(() => {
+    if (location.state?.incomingCallData) {
+      const data = location.state.incomingCallData;
+      console.log("[Messages] Auto-answering global incoming call:", data);
+      setIncomingCall(data);
+      setIsVideoCall(data.isVideo);
+      setActiveCall(true);
+
+      // Clear the state so it doesn't trigger again on reload
+      navigate(".", { replace: true, state: {} });
+    }
+  }, [location.state, navigate]);
 
   // Clear active chat when component unmounts
   useEffect(() => {
@@ -949,7 +986,7 @@ export default function Messages() {
       {/* Conversation List */}
       <aside className={`msg__sidebar ${mobileView === "chat" ? "hidden-mobile" : ""}`}>
         <div className="msg__sidebar-header">
-          <h1 className="msg__title">{t("messages.title")}</h1>
+          <h1 className="msg__title"><GlitchText>{t("messages.title")}</GlitchText></h1>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
               className="msg__new-btn"
@@ -1033,7 +1070,51 @@ export default function Messages() {
                   </span>
                 </div>
               </div>
-              <div className="msg__header-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="msg__header-actions" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                {!isGroupActive && conversationStatus?.is_mutual && (
+                  <>
+                    <button
+                      className="msg__header-btn"
+                      onClick={() => {
+                        setIsVideoCall(false);
+                        setActiveCall(true);
+                      }}
+                      title={t("messages.call.audio_call", "Llamada de voz")}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "var(--accent-primary, #7c5cfc)",
+                        cursor: "pointer",
+                        padding: "8px",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <PhoneCallIcon />
+                    </button>
+                    <button
+                      className="msg__header-btn"
+                      onClick={() => {
+                        setIsVideoCall(true);
+                        setActiveCall(true);
+                      }}
+                      title={t("messages.call.video_call", "Videollamada")}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "var(--accent-primary, #7c5cfc)",
+                        cursor: "pointer",
+                        padding: "8px",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <VideoIcon />
+                    </button>
+                  </>
+                )}
                 {conversationStatus?.is_mutual && !isGroupActive && (
                   <span className="msg__mutual-badge" title={t("messages.mutual_followers")}>
                     <UsersIcon />
@@ -1041,11 +1122,20 @@ export default function Messages() {
                   </span>
                 )}
                 {isGroupActive && (
-                  <button 
-                    className="msg__header-btn" 
+                  <button
+                    className="msg__header-btn"
                     onClick={() => setShowGroupSettingsModal(true)}
                     title={t("messages.group_info", "Info")}
-                    style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '8px', borderRadius: '50%' }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#888",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "8px",
+                      borderRadius: "50%",
+                    }}
                   >
                     <InfoIcon />
                   </button>
@@ -1155,6 +1245,21 @@ export default function Messages() {
               }
               return updated;
             });
+          }}
+        />
+      )}
+
+      {activeCall && (
+        <VideoCall
+          partnerId={incomingCall ? incomingCall.from : activeUserId}
+          isIncoming={!!incomingCall}
+          incomingSignal={incomingCall ? incomingCall.signal : null}
+          callerInfo={incomingCall ? incomingCall.callerInfo : partner}
+          isVideoCall={incomingCall ? incomingCall.isVideo : isVideoCall}
+          autoAnswer={incomingCall ? incomingCall.autoAnswer : false}
+          onEnd={() => {
+            setActiveCall(false);
+            setIncomingCall(null);
           }}
         />
       )}

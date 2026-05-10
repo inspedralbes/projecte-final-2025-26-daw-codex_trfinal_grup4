@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
 import Sidebar from "./Sidebar";
 import RightSection from "./RightSection";
-import { useTheme } from "@/context/ThemeContext";
 import GlobalCallHandler from "@/components/chat/GlobalCallHandler";
-import GlobalMessageHandler from "@/components/chat/GlobalMessageHandler";
 import SymbolSea from "@/components/ui/SymbolSea";
 import CenterPromptModal from "@/components/center/CenterPromptModal";
 import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal";
@@ -17,27 +15,12 @@ import "./MainLayout.css";
 export default function MainLayout() {
   const { user, centerCheck, dismissCenterPrompt, refreshUser } = useAuth();
   const { unreadCount, unreadMessagesCount } = useSocket();
-  const { theme } = useTheme();
   const navigate = useNavigate();
-  const location = useLocation();
   const [adminNotification, setAdminNotification] = useState(null);
   const [globalToast, setGlobalToast] = useState(null);
   const [showCenterPrompt, setShowCenterPrompt] = useState(false);
   const [showTeacherModal, setShowTeacherModal] = useState(false);
   const [teacherModalLoading, setTeacherModalLoading] = useState(false);
-
-  // Prevent layout flash for unauthenticated users accessing protected routes
-  if (!user) {
-    const isPublicRoute = 
-      location.pathname.startsWith("/post/") || 
-      location.pathname.startsWith("/profile/") || 
-      location.pathname === "/explore";
-      
-    if (!isPublicRoute) {
-      // Just return Outlet so ProtectedRoute can handle the redirect without rendering layout
-      return <Outlet />;
-    }
-  }
 
   // Show center prompt modal after login if needed
   useEffect(() => {
@@ -189,28 +172,13 @@ export default function MainLayout() {
         <div className="mobile-header__logo" onClick={() => navigate("/")}>
           <span className="mobile-header__logo-icon">
             <img
-              src={theme === "dark" ? "/logo-white.png" : "/logo-black.png"}
+              src="/logo-transparent.png"
               alt="XC Logo"
               style={{ width: "24px", height: "24px", objectFit: "contain" }}
             />
           </span>
         </div>
         <div className="mobile-header__actions">
-          <button className="mobile-header__action" onClick={() => navigate("/explore")} title="Buscar">
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-          </button>
           <button className="mobile-header__action" onClick={() => navigate("/notifications")}>
             <svg
               width="22"
@@ -298,7 +266,6 @@ export default function MainLayout() {
 
       {/* Global Call UI */}
       <GlobalCallHandler />
-      <GlobalMessageHandler />
     </div>
   );
 }

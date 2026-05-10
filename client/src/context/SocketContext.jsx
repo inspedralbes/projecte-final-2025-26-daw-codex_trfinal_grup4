@@ -91,8 +91,12 @@ export const SocketProvider = ({ children }) => {
     if (!user) return;
 
     const handleNotification = (notification) => {
-      console.log("[Socket] New notification:", notification);
-      setUnreadCount((prev) => prev + 1);
+      console.log("[Socket] New notification received:", notification);
+      setUnreadCount((prev) => {
+        const newVal = prev + 1;
+        console.log(`[Socket] Notification count: ${prev} -> ${newVal}`);
+        return newVal;
+      });
       
       // Dispatch custom event for components to handle
       window.dispatchEvent(
@@ -100,12 +104,15 @@ export const SocketProvider = ({ children }) => {
       );
     };
 
-    socketService.onNotification(handleNotification);
+    if (isConnected) {
+      console.log("[SocketContext] Registering notification listener...");
+      socketService.onNotification(handleNotification);
+    }
 
     return () => {
       socketService.off("new.notification", handleNotification);
     };
-  }, [user]);
+  }, [user, isConnected]);
 
   // Handle real-time messages (global listener)
   useEffect(() => {
@@ -121,16 +128,26 @@ export const SocketProvider = ({ children }) => {
       // Determine if the message belongs to the active conversation
       let isForActiveChat = false;
       if (activeChat) {
-        if (msgGroupId && activeChat.type === "group" && activeChat.id === msgGroupId) {
+        if (msgGroupId && activeChat.type === "group" && String(activeChat.id) === String(msgGroupId)) {
           isForActiveChat = true;
-        } else if (!msgGroupId && activeChat.type === "user" && activeChat.id === senderId) {
+        } else if (!msgGroupId && activeChat.type === "user" && String(activeChat.id) === String(senderId)) {
           isForActiveChat = true;
         }
       }
       
       // Only increment counter for messages from others AND not in the active conversation
-      if (senderId !== user.id && !isForActiveChat) {
-        setUnreadMessagesCount((prev) => prev + 1);
+      if (String(senderId) !== String(user?.id) && !isForActiveChat) {
+        setUnreadMessagesCount((prev) => {
+          const newVal = prev + 1;
+          console.log(`[Socket] Message count: ${prev} -> ${newVal}`);
+          return newVal;
+        });
+      } else {
+        console.log("[Socket] Message received but not incrementing counter:", { 
+          senderId, 
+          userId: user.id, 
+          isForActiveChat 
+        });
       }
       
       // Dispatch custom event for ALL messages (including own for tempId replacement)
@@ -164,16 +181,19 @@ export const SocketProvider = ({ children }) => {
       );
     };
 
-    socketService.onMessage(handleNewMessage);
-    socketService.onGroupUpdate(handleGroupUpdate);
-    socketService.onGroupMemberChange(handleGroupMemberChange);
+    if (isConnected) {
+      console.log("[SocketContext] Connected! Registering listeners...");
+      socketService.onMessage(handleNewMessage);
+      socketService.onGroupUpdate(handleGroupUpdate);
+      socketService.onGroupMemberChange(handleGroupMemberChange);
+    }
 
     return () => {
       socketService.off("new.message", handleNewMessage);
       socketService.off("group.updated", handleGroupUpdate);
       socketService.off("group.member_changed", handleGroupMemberChange);
     };
-  }, [user]);
+  }, [user, isConnected]);
 
   // Join a post room for live comments
   const joinPost = useCallback((postId) => {

@@ -395,18 +395,10 @@ io.on("connection", (socket) => {
     }
   });
 
-  const lastEndCall = new Map();
   socket.on("end-call", (data) => {
     if (data && data.to) {
-      const now = Date.now();
-      const key = `${socket.id}-${data.to}`;
-      if (lastEndCall.has(key) && now - lastEndCall.get(key) < 1000) {
-        return; // Throttle
-      }
-      lastEndCall.set(key, now);
-      
       io.to(`user.${data.to}`).emit("call-ended", { from: data.from });
-      console.log(`[Socket.io] Call ended by ${data.from} (sent to ${data.to})`);
+      console.log(`[Socket.io] Call ended by ${data.from}`);
     }
   });
 
