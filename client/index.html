@@ -21,6 +21,12 @@
     <link rel="canonical" href="https://c0dex.cat/" />
   </head>
   <body>
+    <script>
+      (function() {
+        var savedTheme = localStorage.getItem('codex-theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

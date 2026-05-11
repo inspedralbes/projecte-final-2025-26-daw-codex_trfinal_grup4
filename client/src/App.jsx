@@ -2,14 +2,17 @@ import React from "react";
 import AppRouter from "@/router";
 import { AuthProvider } from "@/context/AuthContext";
 import { SocketProvider } from "@/context/SocketContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 function App() {
   return (
-    <AuthProvider>
-      <SocketProvider>
-        <AppRouter />
-      </SocketProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <SocketProvider>
+          <AppRouter />
+        </SocketProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

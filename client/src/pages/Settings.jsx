@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/context/ThemeContext";
 import profileService from "@/services/profileService";
 import GlitchText from "@/components/ui/GlitchText";
 import "./Settings.css";
@@ -8,8 +9,8 @@ import "./Settings.css";
 export default function Settings() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
   
-  const [theme, setTheme] = useState(localStorage.getItem("codex-theme") || "dark");
   const [isPrivate, setIsPrivate] = useState(user?.is_private || false);
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,11 +29,7 @@ export default function Settings() {
 
   const hasChanges = isPrivate !== initialPrivate;
 
-  // Sync theme with body
-  useEffect(() => {
-    document.body.setAttribute("data-theme", theme);
-    localStorage.setItem("codex-theme", theme);
-  }, [theme]);
+
 
   const handleLanguageChange = (lang) => {
     i18n.changeLanguage(lang);

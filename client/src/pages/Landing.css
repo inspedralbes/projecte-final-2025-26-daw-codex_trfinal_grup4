@@ -16,7 +16,7 @@
   --landing-border: rgba(255, 255, 255, 0.25);
   --landing-card-bg: rgba(0, 0, 0, 0.85);
   --landing-error: #ff3333;
-  --landing-success: #ff5f56;
+  --landing-success: #00ff9d;
   --landing-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
   min-height: 100vh;

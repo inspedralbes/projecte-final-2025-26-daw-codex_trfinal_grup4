@@ -8,6 +8,7 @@ import TeacherVerificationModal from "@/components/auth/TeacherVerificationModal
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import SymbolSea from "@/components/ui/SymbolSea";
 import GlitchText from "@/components/ui/GlitchText";
+import { useTheme } from "@/context/ThemeContext";
 import { Helmet } from "react-helmet-async";
 import "./Landing.css";
 
@@ -62,6 +63,7 @@ export default function Landing() {
     useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { theme, setTheme } = useTheme();
 
   // State
   const [isLogin, setIsLogin] = useState(true);
@@ -72,16 +74,10 @@ export default function Landing() {
   const [errorCount, setErrorCount] = useState(0);
 
   // Theme logic
-  const [isLightMode, setIsLightMode] = useState(() => {
-    const saved = localStorage.getItem("codex-theme");
-    if (saved) return saved === "light";
-    return !window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
+  const isLightMode = theme === "light";
 
   const toggleTheme = () => {
-    const newVal = !isLightMode;
-    setIsLightMode(newVal);
-    localStorage.setItem("codex-theme", newVal ? "light" : "dark");
+    setTheme(isLightMode ? "dark" : "light");
   };
 
 
