@@ -55,7 +55,7 @@
 
 /* ── Navigation ───────────────────────────────────────────── */
 .sidebar__nav-logout {
-  display: none;
+  display: none !important;
 }
 
 .sidebar__nav {
