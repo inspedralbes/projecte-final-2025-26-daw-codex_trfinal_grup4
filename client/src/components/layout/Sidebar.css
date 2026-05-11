@@ -54,8 +54,14 @@
 }
 
 /* ── Navigation ───────────────────────────────────────────── */
+/* Removed display: none from sidebar__nav-logout to make it visible on desktop too */
 .sidebar__nav-logout {
-  display: none;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
 }
 
 .sidebar__nav {

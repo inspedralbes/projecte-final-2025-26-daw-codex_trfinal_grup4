@@ -423,13 +423,6 @@ export default function Sidebar() {
               <span className="sidebar__user-name">{user.name}</span>
               <span className="sidebar__user-handle">@{user.username}</span>
             </div>
-            <button
-              className="sidebar__user-menu"
-              onClick={handleLogout}
-              title={t("common.logout")}
-            >
-              <LogoutIcon />
-            </button>
           </div>
         ) : (
           <div className="sidebar__user" style={{ justifyContent: "center", padding: "1rem" }}>
