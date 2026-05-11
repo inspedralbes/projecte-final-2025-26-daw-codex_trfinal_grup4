@@ -674,6 +674,10 @@
 
 /* ── Responsive: Mobile ────────────────────────────────────── */
 @media (max-width: 640px) {
+  .profile-guay {
+    padding-bottom: calc(var(--space-24) + env(safe-area-inset-bottom, 0px));
+  }
+
   .profile-guay__cover {
     height: 150px;
   }

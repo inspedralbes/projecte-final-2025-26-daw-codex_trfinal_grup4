@@ -107,7 +107,7 @@ export default function Feed({ feedType = "global", centerMode = false }) {
 
   // Scroll to top when tab changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, [activeTab]);
 
   const handleCreatePost = useCallback(

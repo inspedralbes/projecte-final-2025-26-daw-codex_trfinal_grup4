@@ -80,7 +80,12 @@ const AdminRoute = ({ children }) => {
 };
 
 export default function AppRouter() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
   return (
     <Suspense fallback={<PageLoader />}>
       <ScrollToTop />

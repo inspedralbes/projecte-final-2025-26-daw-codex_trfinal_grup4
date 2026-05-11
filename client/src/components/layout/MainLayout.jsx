@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
 import Sidebar from "./Sidebar";
@@ -18,11 +18,25 @@ export default function MainLayout() {
   const { unreadCount, unreadMessagesCount } = useSocket();
   const { theme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [adminNotification, setAdminNotification] = useState(null);
   const [globalToast, setGlobalToast] = useState(null);
   const [showCenterPrompt, setShowCenterPrompt] = useState(false);
   const [showTeacherModal, setShowTeacherModal] = useState(false);
   const [teacherModalLoading, setTeacherModalLoading] = useState(false);
+
+  // Prevent layout flash for unauthenticated users accessing protected routes
+  if (!user) {
+    const isPublicRoute = 
+      location.pathname.startsWith("/post/") || 
+      location.pathname.startsWith("/profile/") || 
+      location.pathname === "/explore";
+      
+    if (!isPublicRoute) {
+      // Just return Outlet so ProtectedRoute can handle the redirect without rendering layout
+      return <Outlet />;
+    }
+  }
 
   // Show center prompt modal after login if needed
   useEffect(() => {
