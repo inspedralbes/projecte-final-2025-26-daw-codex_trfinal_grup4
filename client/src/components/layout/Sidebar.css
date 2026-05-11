@@ -376,6 +376,7 @@
   }
 
   /* Hide specific items on mobile to make room for logout */
+  .sidebar__nav-item[href="/notifications"],
   .sidebar__nav-item[href="/explore"],
   .sidebar__nav-item[href="/profile"],
   .sidebar__nav-item[href^="/admin"] {

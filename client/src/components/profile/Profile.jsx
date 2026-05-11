@@ -493,9 +493,9 @@ export default function Profile({ username }) {
   return (
     <div className="profile-guay">
       <Helmet>
-        <title>{user.name} (@{user.username}) | Codex</title>
+        <title>{user.name} ({user.username}) | Codex</title>
         <meta name="description" content={user.bio || `Perfil de ${user.name} en Codex.`} />
-        <meta property="og:title" content={`${user.name} (@${user.username}) | Codex`} />
+        <meta property="og:title" content={`${user.name} (${user.username}) | Codex`} />
         <meta property="og:description" content={user.bio || `Perfil de ${user.name} en Codex.`} />
       </Helmet>
 
@@ -566,7 +566,7 @@ export default function Profile({ username }) {
               <h1 className="profile-guay__name">{user.name}</h1>
               <span className="profile-guay__role-badge">{roleName}</span>
             </div>
-            <p className="profile-guay__username">@{user.username}</p>
+            <p className="profile-guay__username">{user.username}</p>
           </div>
 
           {/* Points badge — visible on mobile, next to identity */}

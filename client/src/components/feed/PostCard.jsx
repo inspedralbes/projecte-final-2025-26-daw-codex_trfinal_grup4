@@ -376,7 +376,7 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
   const postType = targetPost.type || "news";
 
   return (
-    <article 
+    <article
       className={`post-card ${isReply ? "post-card--reply" : ""} ${className}`}
       onClick={() => navigate(`/post/${targetPost.id}`)}
       style={{ cursor: "pointer" }}
@@ -432,31 +432,48 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
               {isTargetVerified && <VerifiedIcon />}
             </span>
             <span className="post-card__handle">
-              <GlitchHover>@{targetAuthor.username || "user"}</GlitchHover>
+              <GlitchHover>{`@${targetAuthor.username || "user"}`}</GlitchHover>
             </span>
             {targetBadge && <span className="post-card__badge">{targetBadge}</span>}
             {/* Center post badge (visible when API marks it or center relation exists) */}
-            { (targetPost.is_center_post || targetPost.center) && (
-              <span className="post-card__center-badge">{targetPost.center?.name || 'Post del centro'}</span>
-            ) }
+            {(targetPost.is_center_post || targetPost.center) && (
+              <span className="post-card__center-badge">
+                {targetPost.center?.name || "Post del centro"}
+              </span>
+            )}
             <span className="post-card__dot">·</span>
             <span className="post-card__time">{relativeTime}</span>
           </div>
           <div className="post-card__menu-wrapper">
-            <button className="post-card__more" onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}>
+            <button
+              className="post-card__more"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
+            >
               <MoreIcon />
             </button>
             {showMenu && (
               <div className="post-card__dropdown">
                 {currentUser?.id === post.user?.id && (
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete();
+                    }}
                     className="post-card__dropdown-item post-card__dropdown-item--danger"
                   >
                     {t("common.delete")}
                   </button>
                 )}
-                <button onClick={(e) => { e.stopPropagation(); setShowMenu(false); }} className="post-card__dropdown-item">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                  }}
+                  className="post-card__dropdown-item"
+                >
                   {t("common.close")}
                 </button>
               </div>
@@ -526,7 +543,12 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
             {targetPost.tags.map((tag) => {
               const tagName = typeof tag === "string" ? tag : tag.name || tag.slug;
               return (
-                <a key={tagName} href="#" className="post-card__tag" onClick={(e) => e.stopPropagation()}>
+                <a
+                  key={tagName}
+                  href="#"
+                  className="post-card__tag"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   #<GlitchHover>{tagName}</GlitchHover>
                 </a>
               );

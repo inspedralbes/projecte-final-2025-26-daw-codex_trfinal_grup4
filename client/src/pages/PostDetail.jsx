@@ -75,7 +75,7 @@ function Comment({ comment, postAuthorId, onReply, onToggleSolution, level = 0 }
       {level > 0 && parentAuthor && (
         <div className="comment__replying-to">
           <ReplyIcon />
-          <span>{t("post.replying_to", { user: `@${parentAuthor}` })}</span>
+          <span>{t("post.replying_to", { user: `${parentAuthor}` })}</span>
         </div>
       )}
       
@@ -99,7 +99,7 @@ function Comment({ comment, postAuthorId, onReply, onToggleSolution, level = 0 }
           <div className="comment__header">
             <Link to={`/profile/${author.username}`} className="comment__author">
               <span className="comment__name">{author.name}</span>
-              <span className="comment__username">@{author.username}</span>
+              <span className="comment__username">{author.username}</span>
             </Link>
             <span className="comment__time">{formatTime(comment.created_at)}</span>
           </div>

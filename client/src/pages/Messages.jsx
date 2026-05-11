@@ -485,7 +485,7 @@ const NewConversationModal = ({ isOpen, onClose, onSelectUser, t }) => {
               <Avatar src={user.avatar} name={user.name} size={40} />
               <div className="msg__modal-user-info">
                 <span className="msg__modal-user-name">{user.name}</span>
-                <span className="msg__modal-user-username">@{user.username}</span>
+                <span className="msg__modal-user-username">{user.username}</span>
               </div>
               {user.is_mutual && (
                 <span className="msg__modal-mutual" title={t("messages.mutual_followers")}>
@@ -1208,7 +1208,7 @@ export default function Messages() {
                   <span className="msg__chat-username">
                     {isGroupActive
                       ? t("messages.group_chat", "Chat de grupo")
-                      : `@${partner?.username}`}
+                      : `${partner?.username}`}
                     {typing && !isGroupActive && (
                       <span className="msg__typing-indicator">{t("messages.typing")}</span>
                     )}

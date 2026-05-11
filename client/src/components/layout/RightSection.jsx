@@ -156,7 +156,7 @@ const TopContributors = () => {
                   <GlitchText>{user.name}</GlitchText>
                 </span>
                 <span className="user-item__handle">
-                  <GlitchText>@{user.username}</GlitchText>
+                  <GlitchText>{`@${user.username}`}</GlitchText>
                 </span>
               </div>
               <span className="user-item__points">{user.score} pts</span>
@@ -205,10 +205,10 @@ const RecentQuestions = () => {
               </span>
               <div className="question-item__content">
                 <span className="question-item__title">
-                  <GlitchText>{q.content?.slice(0, 30)}...</GlitchText>
+                  <GlitchText>{`${q.content?.slice(0, 30)}...`}</GlitchText>
                 </span>
                 <span className="question-item__author">
-                  <GlitchText>@{q.user?.username}</GlitchText>
+                  <GlitchText>{`@${q.user?.username}`}</GlitchText>
                 </span>
               </div>
             </button>
