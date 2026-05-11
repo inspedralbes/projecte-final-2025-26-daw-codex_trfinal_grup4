@@ -22,6 +22,7 @@ const CenterHub = React.lazy(() => import("@/pages/CenterHub"));
 const EmailVerification = React.lazy(() => import("@/pages/EmailVerification"));
 const ForgotPassword = React.lazy(() => import("@/pages/ForgotPassword"));
 const ResetPassword = React.lazy(() => import("@/pages/ResetPassword"));
+const LegalDocs = React.lazy(() => import("@/pages/LegalDocs"));
 
 // Admin Pages (Lazy Loaded)
 const AdminLayout = React.lazy(() => import("@/pages/admin/AdminLayout"));
@@ -88,6 +89,9 @@ export default function AppRouter() {
         {/* Password reset flow (public) */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+
+        {/* Legal policies */}
+        <Route path="/legal" element={<LegalDocs />} />
 
         {/* Email verification screen (authenticated but unverified) */}
         <Route element={<ProtectedRoute />}>

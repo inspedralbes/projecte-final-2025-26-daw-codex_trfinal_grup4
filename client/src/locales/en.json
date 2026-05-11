@@ -440,5 +440,14 @@
       "camera_off_peer": "has turned off their camera",
       "mic_off_peer": "has muted their mic"
     }
+  },
+  "legal": {
+    "title": "Legal & Privacy",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "cookies": "Cookies Policy",
+    "terms_content": "Welcome to Codex. By using our services, you accept these terms and conditions in full. Codex is an educational platform connecting students and teachers. We are not responsible for user-generated content. We reserve the right to suspend accounts that violate community guidelines.",
+    "privacy_content": "At Codex, we take your privacy very seriously. We collect basic information necessary for the service to function, such as your name, email, and educational center. We do not sell your data to third parties. You can request account deletion at any time by contacting us.",
+    "cookies_content": "We use essential cookies for the platform to function properly, such as keeping your session active and saving your theme preferences (light/dark). We do not use third-party advertising tracking cookies."
   }
 }
