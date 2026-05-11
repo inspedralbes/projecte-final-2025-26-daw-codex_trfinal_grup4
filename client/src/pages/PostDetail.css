@@ -37,6 +37,7 @@
     gap: var(--space-2);
     background: var(--color-background); /* Solid background to avoid transparency issues */
     border-bottom: 1px solid var(--border-default);
+    margin-bottom: var(--space-2);
   }
 
   .post-detail {

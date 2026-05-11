@@ -399,7 +399,10 @@
 }
 
 .notif__spinner {
-  animation: spinner-rotate 1s linear infinite;
+  animation: notif-spinner-rotate 0.8s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .notif__spinner svg {
@@ -415,7 +418,7 @@
   text-align: center;
 }
 
-@keyframes spinner-rotate {
+@keyframes notif-spinner-rotate {
   from {
     transform: rotate(0deg);
   }

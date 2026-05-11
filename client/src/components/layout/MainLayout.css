@@ -86,7 +86,10 @@
   .app-layout {
     grid-template-columns: 1fr;
     grid-template-rows: var(--mobile-header-height) 1fr;
-    padding-bottom: calc(var(--mobile-nav-height) + var(--safe-bottom));
+  }
+
+  .main-content {
+    padding-bottom: 100px !important;
   }
 
   /* Show mobile header */
