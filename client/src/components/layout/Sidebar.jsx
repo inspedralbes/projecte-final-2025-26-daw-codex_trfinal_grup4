@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
+import { useTheme } from "@/context/ThemeContext";
 import GlitchHover from "@/components/ui/GlitchHover";
 import "./Sidebar.css";
 
@@ -278,6 +279,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const { user, logout, centerCheck } = useAuth();
   const { unreadCount, unreadMessagesCount } = useSocket();
+  const { theme } = useTheme();
   console.log(`[Sidebar] Unread: notifs=${unreadCount}, msgs=${unreadMessagesCount}`);
 
   const [pageGlitch, setPageGlitch] = React.useState(false);
@@ -312,7 +314,7 @@ export default function Sidebar() {
         <NavLink to={user?.role === "admin" ? "/admin" : "/"} className="sidebar__logo">
           <span className="sidebar__logo-icon">
             <img
-              src="/logo-transparent.png"
+              src={theme === "dark" ? "/logo-white.png" : "/logo-black.png"}
               alt="XC Logo"
               className="sidebar__logo-img"
               style={{ width: "32px", height: "32px", objectFit: "contain" }}

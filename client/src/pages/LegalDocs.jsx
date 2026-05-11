@@ -123,8 +123,8 @@ export default function LegalDocs() {
             <div className="auth-card__divider"></div>
             
             <p className="auth-card__footer">
-              <Link to="/welcome" className="auth-card__link">
-                <GlitchText>{"< VOLVER_AL_INICIO"}</GlitchText>
+              <Link to="/settings" className="auth-card__link">
+                <GlitchText>{t("legal.back_to_settings")}</GlitchText>
               </Link>
             </p>
           </div>

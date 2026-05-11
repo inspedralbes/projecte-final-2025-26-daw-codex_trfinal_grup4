@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
 import Sidebar from "./Sidebar";
 import RightSection from "./RightSection";
+import { useTheme } from "@/context/ThemeContext";
 import GlobalCallHandler from "@/components/chat/GlobalCallHandler";
 import SymbolSea from "@/components/ui/SymbolSea";
 import CenterPromptModal from "@/components/center/CenterPromptModal";
@@ -15,6 +16,7 @@ import "./MainLayout.css";
 export default function MainLayout() {
   const { user, centerCheck, dismissCenterPrompt, refreshUser } = useAuth();
   const { unreadCount, unreadMessagesCount } = useSocket();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [adminNotification, setAdminNotification] = useState(null);
   const [globalToast, setGlobalToast] = useState(null);
@@ -172,7 +174,7 @@ export default function MainLayout() {
         <div className="mobile-header__logo" onClick={() => navigate("/")}>
           <span className="mobile-header__logo-icon">
             <img
-              src="/logo-transparent.png"
+              src={theme === "dark" ? "/logo-white.png" : "/logo-black.png"}
               alt="XC Logo"
               style={{ width: "24px", height: "24px", objectFit: "contain" }}
             />

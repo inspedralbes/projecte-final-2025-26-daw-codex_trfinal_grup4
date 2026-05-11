@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/context/ThemeContext";
 import profileService from "@/services/profileService";
@@ -162,6 +163,16 @@ export default function Settings() {
             </GlitchText>
           </button>
         </div>
+
+        {/* Footer Links */}
+        <footer className="settings-footer">
+          <div className="settings-footer__links">
+            <Link to="/legal?tab=terms"><GlitchText>{t("footer.terms")}</GlitchText></Link>
+            <Link to="/legal?tab=privacy"><GlitchText>{t("footer.privacy")}</GlitchText></Link>
+            <Link to="/legal?tab=cookies"><GlitchText>{t("footer.cookies")}</GlitchText></Link>
+          </div>
+          <p className="settings-footer__copyright">© 2026 Codex</p>
+        </footer>
       </div>
     </div>
   );

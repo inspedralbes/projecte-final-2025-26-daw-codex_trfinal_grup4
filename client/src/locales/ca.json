@@ -131,8 +131,7 @@
   "footer": {
     "terms": "Termes",
     "privacy": "Privadesa",
-    "cookies": "Cookies",
-    "help": "Ajuda"
+    "cookies": "Cookies"
   },
   "auth": {
     "login_success": "Sessió iniciada correctament! Benvingut de nou.",
@@ -448,6 +447,7 @@
     "cookies": "Política de Galetes",
     "terms_content": "Benvingut a Codex. En utilitzar els nostres serveis, acceptes aquests termes i condicions en la seva totalitat. Codex és una plataforma educativa per connectar estudiants i professors. No ens fem responsables del contingut generat pels usuaris. Ens reservem el dret de suspendre comptes que infringeixin les normes de la comunitat.",
     "privacy_content": "A Codex ens prenem molt seriosament la teva privacitat. Recopilem informació bàsica per al funcionament del servei, com el teu nom, correu electrònic i centre educatiu. No venem les teves dades a tercers. Pots sol·licitar l'eliminació del teu compte en qualsevol moment posant-te en contacte amb nosaltres.",
-    "cookies_content": "Utilitzem galetes essencials per al funcionament de la plataforma, com mantenir la teva sessió activa i desar les teves preferències de tema (clar/fosc). No utilitzem galetes de seguiment publicitari de tercers."
+    "cookies_content": "Utilitzem galetes essencials per al funcionament de la plataforma, com mantenir la teva sessió activa i desar les teves preferències de tema (clar/fosc). No utilitzem galetes de seguiment publicitari de tercers.",
+    "back_to_settings": "< TORNAR A CONFIGURACIÓ"
   }
 }

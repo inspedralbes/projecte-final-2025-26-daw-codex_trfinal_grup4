@@ -258,3 +258,43 @@ input:checked + .toggle-slider:before {
   transform: none !important;
   box-shadow: none !important;
 }
+
+/* ── Settings Footer ─────────────────────────────────────── */
+.settings-footer {
+  margin-top: var(--space-12);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.settings-footer__links {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.settings-footer__links a {
+  color: var(--ink-tertiary);
+  text-decoration: none;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: var(--font-mono);
+  transition: color var(--transition-fast);
+}
+
+.settings-footer__links a:hover {
+  color: var(--codex-coral);
+}
+
+.settings-footer__copyright {
+  font-size: var(--text-xs);
+  color: var(--ink-quaternary);
+  font-family: var(--font-mono);
+  margin: 0;
+}

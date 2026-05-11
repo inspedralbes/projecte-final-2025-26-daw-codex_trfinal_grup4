@@ -66,6 +66,7 @@
 .feed__posts {
   display: flex;
   flex-direction: column;
+  padding-top: var(--space-2);
 }
 
 /* ── Loading State ────────────────────────────────────────── */

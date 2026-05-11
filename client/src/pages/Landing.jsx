@@ -546,20 +546,7 @@ export default function Landing() {
         />
       )}
 
-      {/* Legal Links */}
-      <div className="landing__legal-links" style={{ position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", display: "flex", gap: "16px", zIndex: 1, fontFamily: "var(--landing-mono)", fontSize: "0.6rem" }}>
-        <Link to="/legal?tab=terms" style={{ color: "var(--landing-fg-ghost)", textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase" }} onMouseOver={(e) => e.target.style.color = "var(--landing-fg)"} onMouseOut={(e) => e.target.style.color = "var(--landing-fg-ghost)"}>
-          {t("legal.terms")}
-        </Link>
-        <span style={{ color: "var(--landing-fg-ghost)", opacity: 0.5 }}>|</span>
-        <Link to="/legal?tab=privacy" style={{ color: "var(--landing-fg-ghost)", textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase" }} onMouseOver={(e) => e.target.style.color = "var(--landing-fg)"} onMouseOut={(e) => e.target.style.color = "var(--landing-fg-ghost)"}>
-          {t("legal.privacy")}
-        </Link>
-        <span style={{ color: "var(--landing-fg-ghost)", opacity: 0.5 }}>|</span>
-        <Link to="/legal?tab=cookies" style={{ color: "var(--landing-fg-ghost)", textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase" }} onMouseOver={(e) => e.target.style.color = "var(--landing-fg)"} onMouseOut={(e) => e.target.style.color = "var(--landing-fg-ghost)"}>
-          {t("legal.cookies")}
-        </Link>
-      </div>
+
     </div>
   );
 }

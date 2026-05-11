@@ -174,13 +174,7 @@ export default function RightSection() {
         <TrendingTags />
         <TopContributors />
         <RecentQuestions />
-        <footer className="right-section__footer">
-          <a href="#"><GlitchText>{t("footer.terms")}</GlitchText></a>
-          <a href="#"><GlitchText>{t("footer.privacy")}</GlitchText></a>
-          <a href="#"><GlitchText>{t("footer.cookies")}</GlitchText></a>
-          <a href="#"><GlitchText>{t("footer.help")}</GlitchText></a>
-          <span>© 2026 Codex</span>
-        </footer>
+
       </div>
     </aside>
   );

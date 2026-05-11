@@ -376,7 +376,11 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
   const postType = targetPost.type || "news";
 
   return (
-    <article className={`post-card ${isReply ? "post-card--reply" : ""} ${className}`}>
+    <article 
+      className={`post-card ${isReply ? "post-card--reply" : ""} ${className}`}
+      onClick={() => navigate(`/post/${targetPost.id}`)}
+      style={{ cursor: "pointer" }}
+    >
       {/* Repost indicator */}
       {isRepost && originalPost && (
         <div className="post-card__repost-indicator">
@@ -439,20 +443,20 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
             <span className="post-card__time">{relativeTime}</span>
           </div>
           <div className="post-card__menu-wrapper">
-            <button className="post-card__more" onClick={() => setShowMenu(!showMenu)}>
+            <button className="post-card__more" onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}>
               <MoreIcon />
             </button>
             {showMenu && (
               <div className="post-card__dropdown">
                 {currentUser?.id === post.user?.id && (
                   <button
-                    onClick={handleDelete}
+                    onClick={(e) => { e.stopPropagation(); handleDelete(); }}
                     className="post-card__dropdown-item post-card__dropdown-item--danger"
                   >
                     {t("common.delete")}
                   </button>
                 )}
-                <button onClick={() => setShowMenu(false)} className="post-card__dropdown-item">
+                <button onClick={(e) => { e.stopPropagation(); setShowMenu(false); }} className="post-card__dropdown-item">
                   {t("common.close")}
                 </button>
               </div>
@@ -522,7 +526,7 @@ export default function PostCard({ post, className = "", onInteractionUpdate, on
             {targetPost.tags.map((tag) => {
               const tagName = typeof tag === "string" ? tag : tag.name || tag.slug;
               return (
-                <a key={tagName} href="#" className="post-card__tag">
+                <a key={tagName} href="#" className="post-card__tag" onClick={(e) => e.stopPropagation()}>
                   #<GlitchHover>{tagName}</GlitchHover>
                 </a>
               );
