@@ -4,9 +4,20 @@
  * Centralized route definitions for the application.
  * Import and register all page routes here.
  */
-import React, { Suspense } from "react";
-import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import React, { Suspense, useEffect } from "react";
+import { Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+
+// Scroll restoration component
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 // Pages (Lazy Loaded for SEO & Performance)
 const Home = React.lazy(() => import("@/pages/Home"));
@@ -72,6 +83,7 @@ export default function AppRouter() {
   const { user } = useAuth();
   return (
     <Suspense fallback={<PageLoader />}>
+      <ScrollToTop />
       <Routes>
         {/* Public landing page (only if not logged in) */}
         <Route

@@ -1079,7 +1079,12 @@
 
   /* If the app sets a mobile header height variable, make the sticky nav sit below it */
   .profile-guay__nav {
-    top: var(--mobile-header-height, 56px);
+    position: relative !important;
+    top: 0 !important;
+    background: var(--color-background);
+    backdrop-filter: none;
+    border-top: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-2);
   }
 
   /* Content section for all tabs */

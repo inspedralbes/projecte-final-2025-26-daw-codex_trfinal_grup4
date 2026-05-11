@@ -11,12 +11,12 @@ export default function Settings() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
-  
+
   const [isPrivate, setIsPrivate] = useState(user?.is_private || false);
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null); // 'success' | 'error' | null
-  
+
   // Track initial state to detect changes
   const [initialPrivate, setInitialPrivate] = useState(user?.is_private || false);
 
@@ -30,8 +30,6 @@ export default function Settings() {
 
   const hasChanges = isPrivate !== initialPrivate;
 
-
-
   const handleLanguageChange = (lang) => {
     i18n.changeLanguage(lang);
   };
@@ -42,11 +40,11 @@ export default function Settings() {
     try {
       await profileService.updateProfile({ is_private: isPrivate });
       setInitialPrivate(isPrivate); // Update initial state after success
-      setSaveStatus('success');
+      setSaveStatus("success");
       setTimeout(() => setSaveStatus(null), 2000);
     } catch (err) {
       console.error("Error saving settings:", err);
-      setSaveStatus('error');
+      setSaveStatus("error");
     } finally {
       setIsLoading(false);
     }
@@ -55,30 +53,36 @@ export default function Settings() {
   return (
     <div className="settings-page">
       <header className="settings-page__header">
-        <h1 className="settings-page__title"><GlitchText>{t("settings.title", "Ajustes")}</GlitchText></h1>
-        <p className="settings-page__subtitle"><GlitchText>{t("settings.description", "Personaliza tu experiencia.")}</GlitchText></p>
+        <h1 className="settings-page__title">
+          <GlitchText>{t("settings.title", "Ajustes")}</GlitchText>
+        </h1>
+        <p className="settings-page__subtitle">
+          <GlitchText>{t("settings.description", "Personaliza tu experiencia.")}</GlitchText>
+        </p>
       </header>
 
       <div className="settings-page__content">
         {/* Language Settings */}
         <section className="settings-section">
-          <h2 className="settings-section__title"><GlitchText>{t("settings.language", "Idioma")}</GlitchText></h2>
+          <h2 className="settings-section__title">
+            <GlitchText>{t("settings.language", "Idioma")}</GlitchText>
+          </h2>
           <div className="settings-group">
-            <button 
-              className={`settings-btn ${i18n.language === 'es' ? 'settings-btn--active' : ''}`}
-              onClick={() => handleLanguageChange('es')}
+            <button
+              className={`settings-btn ${i18n.language === "es" ? "settings-btn--active" : ""}`}
+              onClick={() => handleLanguageChange("es")}
             >
               Español
             </button>
-            <button 
-              className={`settings-btn ${i18n.language === 'en' ? 'settings-btn--active' : ''}`}
-              onClick={() => handleLanguageChange('en')}
+            <button
+              className={`settings-btn ${i18n.language === "en" ? "settings-btn--active" : ""}`}
+              onClick={() => handleLanguageChange("en")}
             >
               English
             </button>
-            <button 
-              className={`settings-btn ${i18n.language === 'ca' ? 'settings-btn--active' : ''}`}
-              onClick={() => handleLanguageChange('ca')}
+            <button
+              className={`settings-btn ${i18n.language === "ca" ? "settings-btn--active" : ""}`}
+              onClick={() => handleLanguageChange("ca")}
             >
               Català
             </button>
@@ -87,17 +91,19 @@ export default function Settings() {
 
         {/* Theme Settings */}
         <section className="settings-section">
-          <h2 className="settings-section__title"><GlitchText>{t("settings.theme", "Apariencia")}</GlitchText></h2>
+          <h2 className="settings-section__title">
+            <GlitchText>{t("settings.theme", "Apariencia")}</GlitchText>
+          </h2>
           <div className="settings-group">
-            <button 
-              className={`settings-btn ${theme === 'dark' ? 'settings-btn--active' : ''}`}
-              onClick={() => setTheme('dark')}
+            <button
+              className={`settings-btn ${theme === "dark" ? "settings-btn--active" : ""}`}
+              onClick={() => setTheme("dark")}
             >
               <GlitchText>{t("settings.dark_mode", "Modo Oscuro")}</GlitchText>
             </button>
-            <button 
-              className={`settings-btn ${theme === 'light' ? 'settings-btn--active' : ''}`}
-              onClick={() => setTheme('light')}
+            <button
+              className={`settings-btn ${theme === "light" ? "settings-btn--active" : ""}`}
+              onClick={() => setTheme("light")}
             >
               <GlitchText>{t("settings.light_mode", "Modo Claro")}</GlitchText>
             </button>
@@ -106,15 +112,30 @@ export default function Settings() {
 
         {/* Privacy Settings */}
         <section className="settings-section">
-          <h2 className="settings-section__title"><GlitchText>{t("settings.privacy", "Privacidad")}</GlitchText></h2>
+          <h2 className="settings-section__title">
+            <GlitchText>{t("settings.privacy", "Privacidad")}</GlitchText>
+          </h2>
           <div className="settings-toggle-group">
             <div className="settings-toggle-item">
               <div className="settings-toggle-info">
-                <strong><GlitchText>{t("settings.private_profile", "Perfil privado")}</GlitchText></strong>
-                <span><GlitchText>{t("settings.private_profile_desc", "Solo tus seguidores pueden ver tu actividad")}</GlitchText></span>
+                <strong>
+                  <GlitchText>{t("settings.private_profile", "Perfil privado")}</GlitchText>
+                </strong>
+                <span>
+                  <GlitchText>
+                    {t(
+                      "settings.private_profile_desc",
+                      "Solo tus seguidores pueden ver tu actividad",
+                    )}
+                  </GlitchText>
+                </span>
               </div>
               <label className="toggle-switch">
-                <input type="checkbox" checked={isPrivate} onChange={(e) => setIsPrivate(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  checked={isPrivate}
+                  onChange={(e) => setIsPrivate(e.target.checked)}
+                />
                 <span className="toggle-slider"></span>
               </label>
             </div>
@@ -123,43 +144,60 @@ export default function Settings() {
 
         {/* Account Settings */}
         <section className="settings-section settings-section--danger">
-          <h2 className="settings-section__title"><GlitchText>{t("settings.account", "Cuenta")}</GlitchText></h2>
-          
+          <h2 className="settings-section__title">
+            <GlitchText>{t("settings.account", "Cuenta")}</GlitchText>
+          </h2>
+
           <div className="settings-toggle-item">
             <div className="settings-toggle-info">
-              <strong><GlitchText>{t("settings.email_notifications", "Notificaciones por email")}</GlitchText></strong>
+              <strong>
+                <GlitchText>
+                  {t("settings.email_notifications", "Notificaciones por email")}
+                </GlitchText>
+              </strong>
             </div>
             <label className="toggle-switch">
-              <input type="checkbox" checked={emailNotifs} onChange={(e) => setEmailNotifs(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={emailNotifs}
+                onChange={(e) => setEmailNotifs(e.target.checked)}
+              />
               <span className="toggle-slider"></span>
             </label>
           </div>
 
           <div className="settings-action-item">
             <div className="settings-toggle-info">
-              <strong><GlitchText>{t("settings.delete_account", "Eliminar cuenta")}</GlitchText></strong>
-              <span><GlitchText>{t("settings.delete_account_desc", "Esta acción es irreversible.")}</GlitchText></span>
+              <strong>
+                <GlitchText>{t("settings.delete_account", "Eliminar cuenta")}</GlitchText>
+              </strong>
+              <span>
+                <GlitchText>
+                  {t("settings.delete_account_desc", "Esta acción es irreversible.")}
+                </GlitchText>
+              </span>
             </div>
-            <button className="settings-btn settings-btn--danger"><GlitchText>{t("settings.delete_account", "Eliminar cuenta")}</GlitchText></button>
+            <button className="settings-btn settings-btn--danger">
+              <GlitchText>{t("settings.delete_account", "Eliminar cuenta")}</GlitchText>
+            </button>
           </div>
         </section>
-        
+
         {/* Save Button */}
         <div className="settings-page__actions">
-          <button 
-            className={`settings-btn settings-btn--save ${!hasChanges && !isLoading && !saveStatus ? 'settings-btn--disabled' : ''} ${saveStatus === 'success' ? 'settings-btn--success' : ''}`}
+          <button
+            className={`settings-btn settings-btn--save ${!hasChanges && !isLoading && !saveStatus ? "settings-btn--disabled" : ""} ${saveStatus === "success" ? "settings-btn--success" : ""}`}
             onClick={handleSave}
             disabled={(!hasChanges && !saveStatus) || isLoading}
           >
             <GlitchText>
-              {isLoading 
-                ? t("settings.saving", "Guardando...") 
-                : saveStatus === 'success' 
-                  ? t("settings.saved", "¡Datos guardados!") 
-                  : !hasChanges 
+              {isLoading
+                ? t("settings.saving", "Guardando...")
+                : saveStatus === "success"
+                  ? t("settings.saved", "¡Datos guardados!")
+                  : !hasChanges
                     ? t("settings.no_changes", "Sin cambios")
-                    : t("settings.save", "Guardar cambios")
-              }
+                    : t("settings.save", "Guardar cambios")}
             </GlitchText>
           </button>
         </div>
@@ -167,9 +205,15 @@ export default function Settings() {
         {/* Footer Links */}
         <footer className="settings-footer">
           <div className="settings-footer__links">
-            <Link to="/legal?tab=terms"><GlitchText>{t("footer.terms")}</GlitchText></Link>
-            <Link to="/legal?tab=privacy"><GlitchText>{t("footer.privacy")}</GlitchText></Link>
-            <Link to="/legal?tab=cookies"><GlitchText>{t("footer.cookies")}</GlitchText></Link>
+            <Link to="/legal?tab=terms">
+              <GlitchText>{t("footer.terms")}</GlitchText>
+            </Link>
+            <Link to="/legal?tab=privacy">
+              <GlitchText>{t("footer.privacy")}</GlitchText>
+            </Link>
+            <Link to="/legal?tab=cookies">
+              <GlitchText>{t("footer.cookies")}</GlitchText>
+            </Link>
           </div>
           <p className="settings-footer__copyright">© 2026 Codex</p>
         </footer>
