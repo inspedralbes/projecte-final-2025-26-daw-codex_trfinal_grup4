@@ -10,6 +10,8 @@ const VideoCall = ({
   incomingSignal,
   callerInfo,
   onEnd,
+  onReject,
+  onAccept,
   isVideoCall = true,
   autoAnswer = false,
 }) => {
