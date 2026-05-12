@@ -574,11 +574,13 @@ export default function Messages() {
   const [isVideoCall, setIsVideoCall] = useState(true);
   const [incomingCall, setIncomingCall] = useState(null);
 
+  const autoAnsweredRef = useRef(false);
   // Handle incoming call from navigation state
   useEffect(() => {
-    if (location.state?.incomingCallData) {
+    if (location.state?.incomingCallData && !autoAnsweredRef.current) {
       const data = location.state.incomingCallData;
       console.log("[Messages] Auto-answering global incoming call:", data);
+      autoAnsweredRef.current = true;
       setIncomingCall(data);
       setIsVideoCall(data.isVideo);
       setActiveCall(true);

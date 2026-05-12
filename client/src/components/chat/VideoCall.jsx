@@ -392,6 +392,21 @@ const VideoCall = ({
               </button>
             </div>
           </div>
+        ) : connectionStatus === 'failed' ? (
+          <div className="vc-incoming">
+            <div className="vc-avatar" style={{ background: "#ef4444" }}>
+              <span>!</span>
+            </div>
+            <h3>Error de conexión</h3>
+            <p style={{ color: "#ef4444", maxWidth: "80%", margin: "0 auto 30px", fontSize: '0.9rem' }}>
+              No se pudo establecer la conexión directa. Esto suele ocurrir por restricciones de red (Firewall/NAT). Se requiere un servidor TURN para este entorno.
+            </p>
+            <div className="vc-actions">
+              <button className="vc-btn reject" onClick={onEnd}>
+                {t("common.close")}
+              </button>
+            </div>
+          </div>
         ) : isIncoming && !callAccepted ? (
           <div className="vc-incoming">
             <div className="vc-avatar">
