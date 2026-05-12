@@ -161,6 +161,9 @@ const VideoCall = ({
         console.log("[VideoCall] Remote description already set, ignoring duplicate answer");
         return;
       }
+      
+      // Mark as set immediately to prevent race conditions
+      remoteDescriptionSet.current = true;
       setCallAccepted(true);
       if (connectionRef.current) {
         try {
@@ -218,9 +221,13 @@ const VideoCall = ({
         { urls: "stun:stun4.l.google.com:19302" },
         { urls: "stun:global.stun.twilio.com:3478" },
         {
-          urls: "turn:numb.viagenie.ca",
-          username: "numb@viagenie.ca",
-          credential: "numb",
+          urls: [
+            "turn:openrelay.metered.ca:80",
+            "turn:openrelay.metered.ca:443",
+            "turn:openrelay.metered.ca:443?transport=tcp"
+          ],
+          username: "openrelayproject",
+          credential: "openrelayproject",
         }
       ],
     });
@@ -257,12 +264,15 @@ const VideoCall = ({
 
     peer.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log("[VideoCall] Sending ICE candidate to peer");
+        const type = event.candidate.candidate.split(' ')[7];
+        console.log(`[VideoCall] Sending ICE candidate (${type}) to peer`);
         socketService.sendIceCandidate({
           to: partnerId,
           from: user.id,
           candidate: event.candidate,
         });
+      } else {
+        console.log("[VideoCall] ICE candidate gathering complete");
       }
     };
 
