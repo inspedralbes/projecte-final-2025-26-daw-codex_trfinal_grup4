@@ -107,9 +107,40 @@ const VideoCall = ({
   }, [stream, callAccepted, isVideoCall, isVideoOff]);
 
   useEffect(() => {
-    if (userVideo.current && remoteStream) {
-      userVideo.current.srcObject = remoteStream;
-      userVideo.current.play().catch(e => console.log("[VideoCall] Error playing remote video:", e));
+    const videoElement = userVideo.current;
+    if (videoElement && remoteStream) {
+      console.log(`[VideoCall] Attaching remoteStream to ${isVideoCall ? "video" : "audio"} element. Tracks:`, 
+        remoteStream.getTracks().map(t => t.kind));
+      
+      if (videoElement.srcObject !== remoteStream) {
+        videoElement.srcObject = remoteStream;
+      }
+      
+      const playMedia = () => {
+        videoElement.play()
+          .then(() => console.log("[VideoCall] Playback started successfully"))
+          .catch(e => {
+            console.error("[VideoCall] Playback failed:", e);
+            // If it's an autoplay block, it will fail, but we can't do much without interaction
+          });
+      };
+
+      // Ensure it plays even if it was paused
+      playMedia();
+
+      // Some browsers need a nudge when tracks are added to the same stream
+      const handleTrackChange = () => {
+        console.log("[VideoCall] Track added/removed, restarting playback...");
+        playMedia();
+      };
+      
+      remoteStream.addEventListener("addtrack", handleTrackChange);
+      remoteStream.addEventListener("removetrack", handleTrackChange);
+      
+      return () => {
+        remoteStream.removeEventListener("addtrack", handleTrackChange);
+        remoteStream.removeEventListener("removetrack", handleTrackChange);
+      };
     }
   }, [remoteStream, callAccepted, isVideoCall, isPeerVideoOff]);
 
@@ -241,25 +272,31 @@ const VideoCall = ({
     peer.ontrack = (event) => {
       console.log("[VideoCall] Received remote track:", event.track.kind);
       
-      // We always create a new MediaStream or clone the existing one to force React to re-render
-      // and trigger the useEffect that attaches the stream to the video element.
-      setRemoteStream((prevStream) => {
-        if (prevStream) {
-          // Check if track is already there
-          if (prevStream.getTracks().find(t => t.id === event.track.id)) {
-            return prevStream;
+      if (event.streams && event.streams[0]) {
+        const stream = event.streams[0];
+        console.log("[VideoCall] Using stream from event. Tracks in stream:", stream.getTracks().length);
+        
+        // We set the stream. If it's the same object, React won't re-render, 
+        // but our useEffect will handle the already-attached srcObject.
+        // To ensure a re-render when the FIRST track arrives, we check if it's already set.
+        setRemoteStream((prev) => {
+          if (prev === stream) return prev;
+          return stream;
+        });
+      } else {
+        // Fallback for browsers that don't provide streams in the event
+        setRemoteStream((prevStream) => {
+          if (prevStream) {
+            if (prevStream.getTracks().find(t => t.id === event.track.id)) {
+              return prevStream;
+            }
+            const newStream = new MediaStream(prevStream.getTracks());
+            newStream.addTrack(event.track);
+            return newStream;
           }
-          const newStream = new MediaStream(prevStream.getTracks());
-          newStream.addTrack(event.track);
-          return newStream;
-        }
-        
-        if (event.streams && event.streams[0]) {
-          return new MediaStream(event.streams[0].getTracks());
-        }
-        
-        return new MediaStream([event.track]);
-      });
+          return new MediaStream([event.track]);
+        });
+      }
     };
 
     peer.onicecandidate = (event) => {

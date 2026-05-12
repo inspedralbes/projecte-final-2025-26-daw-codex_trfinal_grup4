@@ -606,11 +606,15 @@ export default function Messages() {
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const activeConversationRef = useRef(null);
+  const lastPartnerRef = useRef(null);
 
   // Keep ref in sync with state
   useEffect(() => {
     activeConversationRef.current = activeConversation;
-  }, [activeConversation]);
+    if (partner) {
+      lastPartnerRef.current = partner;
+    }
+  }, [activeConversation, partner]);
 
   // Get active conversation from URL
   const activeUserId = searchParams.get("user");
@@ -1416,12 +1420,12 @@ export default function Messages() {
           }}
         />
       )}
-      {activeCall && partner ? (
+      {activeCall && (partner || lastPartnerRef.current) ? (
         <VideoCall
-          partnerId={partner.id}
+          partnerId={partner?.id || lastPartnerRef.current?.id}
           isIncoming={!!incomingCall}
           incomingSignal={incomingCall?.signal}
-          callerInfo={incomingCall ? incomingCall.callerInfo : partner}
+          callerInfo={incomingCall ? incomingCall.callerInfo : (partner || lastPartnerRef.current)}
           isVideoCall={incomingCall ? incomingCall.isVideo : isVideoCall}
           autoAnswer={incomingCall ? incomingCall.autoAnswer : false}
           onEnd={() => {
@@ -1431,7 +1435,7 @@ export default function Messages() {
           }}
         />
       ) : (
-        activeCall && console.log("[Messages] Call active but partner is missing!")
+        activeCall && console.log("[Messages] Call active but partner is missing!", { partner, lastPartner: lastPartnerRef.current })
       )}
     </div>
   );
