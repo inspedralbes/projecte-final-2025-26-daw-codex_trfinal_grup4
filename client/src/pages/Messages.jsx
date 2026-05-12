@@ -1406,7 +1406,7 @@ export default function Messages() {
         <VideoCall
           partnerId={partner.id}
           isIncoming={!!incomingCall}
-          incomingSignal={incomingCall?.signalData}
+          incomingSignal={incomingCall?.signal}
           callerInfo={incomingCall ? incomingCall.callerInfo : partner}
           isVideoCall={incomingCall ? incomingCall.isVideo : isVideoCall}
           autoAnswer={incomingCall ? incomingCall.autoAnswer : false}

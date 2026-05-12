@@ -27,6 +27,8 @@ const VideoCall = ({
   const myVideo = useRef(null);
   const userVideo = useRef(null);
   const connectionRef = useRef(null);
+  const candidatesQueue = useRef([]);
+  const remoteDescriptionSet = useRef(false);
 
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(!isVideoCall);
@@ -96,20 +98,40 @@ const VideoCall = ({
     }
   }, [autoAnswer, isIncoming, mediaInitialized, callAccepted]);
 
+  const processCandidatesQueue = () => {
+    if (connectionRef.current && remoteDescriptionSet.current) {
+      console.log(`[VideoCall] Processing ${candidatesQueue.current.length} queued candidates`);
+      candidatesQueue.current.forEach((candidate) => {
+        connectionRef.current.addIceCandidate(candidate)
+          .catch((e) => console.error("Error adding queued ice candidate", e));
+      });
+      candidatesQueue.current = [];
+    }
+  };
+
+  const handleIceCandidate = (data) => {
+    const candidate = new RTCIceCandidate(data.candidate);
+    if (connectionRef.current && remoteDescriptionSet.current) {
+      connectionRef.current.addIceCandidate(candidate)
+        .catch((e) => console.error("Error adding ice candidate", e));
+    } else {
+      console.log("[VideoCall] Queuing ICE candidate");
+      candidatesQueue.current.push(candidate);
+    }
+  };
+
   useEffect(() => {
     // Listeners for WebRTC signaling
-    const handleAnswered = (data) => {
+    const handleAnswered = async (data) => {
       setCallAccepted(true);
       if (connectionRef.current) {
-        connectionRef.current.setRemoteDescription(new RTCSessionDescription(data.signal));
-      }
-    };
-
-    const handleIceCandidate = (data) => {
-      if (connectionRef.current) {
-        connectionRef.current
-          .addIceCandidate(new RTCIceCandidate(data.candidate))
-          .catch((e) => console.error("Error adding ice candidate", e));
+        try {
+          await connectionRef.current.setRemoteDescription(new RTCSessionDescription(data.signal));
+          remoteDescriptionSet.current = true;
+          processCandidatesQueue();
+        } catch (e) {
+          console.error("Error setting remote description on answer", e);
+        }
       }
     };
 
@@ -201,6 +223,9 @@ const VideoCall = ({
 
     try {
       await peer.setRemoteDescription(new RTCSessionDescription(incomingSignal));
+      remoteDescriptionSet.current = true;
+      processCandidatesQueue();
+      
       const answer = await peer.createAnswer();
       await peer.setLocalDescription(answer);
 
