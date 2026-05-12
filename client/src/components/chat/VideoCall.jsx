@@ -269,8 +269,19 @@ const VideoCall = ({
           ],
           username: "openrelayproject",
           credential: "openrelayproject",
+        },
+        {
+          urls: "turn:relay.metered.ca:80",
+          username: "openrelayproject",
+          credential: "openrelayproject",
+        },
+        {
+          urls: "turn:relay.metered.ca:443",
+          username: "openrelayproject",
+          credential: "openrelayproject",
         }
       ],
+      iceCandidatePoolSize: 10,
     });
 
     if (stream) {
@@ -323,11 +334,16 @@ const VideoCall = ({
       }
     };
 
+    peer.onicecandidateerror = (event) => {
+      console.warn("[VideoCall] ICE candidate error:", event.errorCode, event.errorText, event.url);
+    };
+
     peer.oniceconnectionstatechange = () => {
       console.log("[VideoCall] ICE Connection State:", peer.iceConnectionState);
       if (peer.iceConnectionState === "connected" || peer.iceConnectionState === "completed") {
         setConnectionStatus("connected");
       } else if (peer.iceConnectionState === "failed") {
+        console.error("[VideoCall] ICE Connection FAILED. This usually means a TURN server is needed and either missing or blocked.");
         setConnectionStatus("failed");
       } else if (peer.iceConnectionState === "disconnected") {
         setConnectionStatus("disconnected");
