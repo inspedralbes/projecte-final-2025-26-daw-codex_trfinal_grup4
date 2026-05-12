@@ -24,7 +24,15 @@ const VideoCall = ({
   const [callAccepted, setCallAccepted] = useState(false);
   const [callEnded, setCallEnded] = useState(false);
   const [permissionError, setPermissionError] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState("initializing"); // 'initializing', 'connecting', 'connected', 'failed', 'disconnected'
+  const [connectionStatus, setConnectionStatus] = useState("initializing");
+
+  const onEndRef = useRef(onEnd);
+  const onRejectRef = useRef(onReject);
+  const onAcceptRef = useRef(onAccept);
+
+  useEffect(() => { onEndRef.current = onEnd; }, [onEnd]);
+  useEffect(() => { onRejectRef.current = onReject; }, [onReject]);
+  useEffect(() => { onAcceptRef.current = onAccept; }, [onAccept]);
 
   const myVideo = useRef(null);
   const userVideo = useRef(null);
@@ -131,6 +139,9 @@ const VideoCall = ({
 
   const handleIceCandidate = (data) => {
     const candidate = new RTCIceCandidate(data.candidate);
+    const type = data.candidate.candidate.split(' ')[7]; // Simple way to get candidate type
+    console.log(`[VideoCall] Received ICE candidate (${type}) from peer`);
+    
     if (connectionRef.current && remoteDescriptionSet.current) {
       connectionRef.current.addIceCandidate(candidate)
         .then(() => console.log("[VideoCall] ICE candidate added successfully"))
@@ -144,6 +155,10 @@ const VideoCall = ({
   useEffect(() => {
     // Listeners for WebRTC signaling
     const handleAnswered = async (data) => {
+      if (remoteDescriptionSet.current) {
+        console.log("[VideoCall] Remote description already set, ignoring duplicate answer");
+        return;
+      }
       setCallAccepted(true);
       if (connectionRef.current) {
         try {
@@ -157,11 +172,13 @@ const VideoCall = ({
     };
 
     const handleEnded = () => {
+      console.log("[VideoCall] Received call-ended from peer");
       setCallEnded(true);
       endCall();
     };
 
     const handleRejected = () => {
+      console.log("[VideoCall] Received call-rejected from peer");
       setCallEnded(true);
       endCall();
     };
@@ -314,19 +331,29 @@ const VideoCall = ({
 
   const rejectCall = () => {
     socketService.rejectCall({ to: partnerId, from: user.id });
-    endCall();
+    if (onRejectRef.current) onRejectRef.current();
   };
 
   const endCall = () => {
+    console.log("[VideoCall] endCall triggered, callEnded state:", callEnded);
+    if (callEnded) return;
     setCallEnded(true);
-    socketService.endCall({ to: partnerId, from: user.id });
+    
     if (connectionRef.current) {
       connectionRef.current.close();
+      connectionRef.current = null;
     }
+    
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
     }
-    onEnd();
+    
+    socketService.endCall({ to: partnerId, from: user.id });
+    
+    setTimeout(() => {
+      console.log("[VideoCall] Calling onEndRef.current()");
+      if (onEndRef.current) onEndRef.current();
+    }, 1500);
   };
 
   const toggleMute = () => {
