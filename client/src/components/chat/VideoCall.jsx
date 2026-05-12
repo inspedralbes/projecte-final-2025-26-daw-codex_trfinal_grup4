@@ -171,21 +171,23 @@ const VideoCall = ({
     socketService.onCallEnded(handleEnded);
     socketService.onCallRejected(handleRejected);
 
-    socketService.onPeerVideoToggle((data) => {
-      setIsPeerVideoOff(data.isVideoOff);
-    });
+    const onVideoToggle = (data) => setIsPeerVideoOff(data.isVideoOff);
+    const onAudioToggle = (data) => setIsPeerMuted(data.isMuted);
 
-    socketService.onPeerAudioToggle((data) => {
-      setIsPeerMuted(data.isMuted);
-    });
+    socketService.onCallAnswered(handleAnswered);
+    socketService.onIceCandidate(handleIceCandidate);
+    socketService.onCallEnded(handleEnded);
+    socketService.onCallRejected(handleRejected);
+    socketService.onPeerVideoToggle(onVideoToggle);
+    socketService.onPeerAudioToggle(onAudioToggle);
 
     return () => {
       socketService.offCallAnswered(handleAnswered);
       socketService.offIceCandidate(handleIceCandidate);
       socketService.offCallEnded(handleEnded);
       socketService.offCallRejected(handleRejected);
-      socketService.offPeerVideoToggle();
-      socketService.offPeerAudioToggle();
+      socketService.offPeerVideoToggle(onVideoToggle);
+      socketService.offPeerAudioToggle(onAudioToggle);
     };
   }, []);
 
@@ -426,9 +428,11 @@ const VideoCall = ({
             </h3>
             <p>{isVideoCall ? t("messages.call.video_call") : t("messages.call.audio_call")}</p>
             <div className="vc-actions">
-              <button className="vc-btn accept" onClick={answerCall}>
-                {t("messages.call.accept")}
-              </button>
+              {!autoAnswer && (
+                <button className="vc-btn accept" onClick={answerCall}>
+                  {t("messages.call.accept")}
+                </button>
+              )}
               <button className="vc-btn reject" onClick={rejectCall}>
                 {t("messages.call.reject")}
               </button>
