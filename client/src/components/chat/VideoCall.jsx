@@ -23,7 +23,8 @@ const VideoCall = ({
   const [isPeerMuted, setIsPeerMuted] = useState(false);
   const [callAccepted, setCallAccepted] = useState(false);
   const [callEnded, setCallEnded] = useState(false);
-  const [permissionError, setPermissionError] = useState(null); // 'denied' | 'insecure' | null
+  const [permissionError, setPermissionError] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState("initializing"); // 'initializing', 'connecting', 'connected', 'failed', 'disconnected'
 
   const myVideo = useRef(null);
   const userVideo = useRef(null);
@@ -197,17 +198,46 @@ const VideoCall = ({
     }
 
     peer.ontrack = (event) => {
-      setRemoteStream(event.streams[0]);
+      console.log("[VideoCall] Received remote track:", event.track.kind);
+      if (event.streams && event.streams[0]) {
+        setRemoteStream(event.streams[0]);
+      } else {
+        setRemoteStream(prev => {
+          if (prev) {
+            prev.addTrack(event.track);
+            return new MediaStream(prev.getTracks()); // New reference to trigger update
+          }
+          return new MediaStream([event.track]);
+        });
+      }
     };
 
     peer.onicecandidate = (event) => {
       if (event.candidate) {
+        console.log("[VideoCall] Sending ICE candidate to peer");
         socketService.sendIceCandidate({
           to: partnerId,
           from: user.id,
           candidate: event.candidate,
         });
       }
+    };
+
+    peer.oniceconnectionstatechange = () => {
+      console.log("[VideoCall] ICE Connection State:", peer.iceConnectionState);
+      if (peer.iceConnectionState === "connected" || peer.iceConnectionState === "completed") {
+        setConnectionStatus("connected");
+      } else if (peer.iceConnectionState === "failed") {
+        setConnectionStatus("failed");
+      } else if (peer.iceConnectionState === "disconnected") {
+        setConnectionStatus("disconnected");
+      } else {
+        setConnectionStatus("connecting");
+      }
+    };
+
+    peer.onconnectionstatechange = () => {
+      console.log("[VideoCall] Connection State:", peer.connectionState);
     };
 
     return peer;
@@ -394,7 +424,12 @@ const VideoCall = ({
                       <video playsInline ref={userVideo} autoPlay style={{ display: isPeerVideoOff ? "none" : "block" }} />
                     </>
                   ) : (
-                    <div className="vc-waiting">{t("messages.call.calling")} {callerInfo?.name}...</div>
+                    <div className="vc-waiting">
+                      {t("messages.call.calling")} {callerInfo?.name}...
+                      <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '10px' }}>
+                        {connectionStatus === 'connecting' ? t("common.loading") : connectionStatus}
+                      </div>
+                    </div>
                   )}
                   {callAccepted && !callEnded && isPeerMuted && (
                     <div className="vc-peer-muted-indicator">
@@ -437,6 +472,9 @@ const VideoCall = ({
                 <h3>{callerInfo?.name}</h3>
                 <p className="vc-call-status">
                   {callAccepted ? t("messages.call.ongoing", "Llamada en curso...") : t("messages.call.calling")}
+                  {callAccepted && connectionStatus !== 'connected' && (
+                    <span style={{ display: 'block', fontSize: '0.8rem', opacity: 0.7 }}>({connectionStatus}...)</span>
+                  )}
                 </p>
                 {callAccepted && isPeerMuted && (
                   <div className="vc-audio-peer-muted">
