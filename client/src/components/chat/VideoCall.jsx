@@ -23,6 +23,7 @@ const VideoCall = ({
   const [isPeerMuted, setIsPeerMuted] = useState(false);
   const [callAccepted, setCallAccepted] = useState(false);
   const [callEnded, setCallEnded] = useState(false);
+  const [permissionError, setPermissionError] = useState(null); // 'denied' | 'insecure' | null
 
   const myVideo = useRef(null);
   const userVideo = useRef(null);
@@ -34,6 +35,12 @@ const VideoCall = ({
   const [isVideoOff, setIsVideoOff] = useState(!isVideoCall);
 
   useEffect(() => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setPermissionError("insecure");
+      setMediaInitialized(true);
+      return;
+    }
+
     // Get user media
     navigator.mediaDevices
       .getUserMedia({ video: isVideoCall, audio: true })
@@ -43,7 +50,14 @@ const VideoCall = ({
       })
       .catch((err) => {
         console.error("Failed to get local stream", err);
-        // Fallback to audio only if video fails
+        
+        if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+          setPermissionError("denied");
+          setMediaInitialized(true);
+          return;
+        }
+
+        // Fallback to audio only if video fails (other than permission)
         if (isVideoCall) {
           navigator.mediaDevices
             .getUserMedia({ video: false, audio: true })
@@ -54,6 +68,9 @@ const VideoCall = ({
             })
             .catch((e) => {
               console.error("Failed fallback audio stream", e);
+              if (e.name === "NotAllowedError" || e.name === "PermissionDeniedError") {
+                setPermissionError("denied");
+              }
               setMediaInitialized(true);
             });
         } else {
@@ -309,7 +326,24 @@ const VideoCall = ({
   return (
     <div className="vc-overlay">
       <div className="vc-container">
-        {isIncoming && !callAccepted ? (
+        {permissionError ? (
+          <div className="vc-incoming">
+            <div className="vc-avatar" style={{ background: "var(--codex-coral, #ff5f56)" }}>
+              <span>!</span>
+            </div>
+            <h3>{t("common.error_generic")}</h3>
+            <p style={{ color: "#ef4444", maxWidth: "80%", margin: "0 auto 30px" }}>
+              {permissionError === "denied" 
+                ? t("messages.call.permission_denied")
+                : t("messages.call.secure_context_required")}
+            </p>
+            <div className="vc-actions">
+              <button className="vc-btn reject" onClick={onEnd}>
+                {t("common.close")}
+              </button>
+            </div>
+          </div>
+        ) : isIncoming && !callAccepted ? (
           <div className="vc-incoming">
             <div className="vc-avatar">
               {callerInfo?.avatar ? (

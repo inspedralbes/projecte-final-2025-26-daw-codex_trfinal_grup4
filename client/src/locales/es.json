@@ -434,7 +434,9 @@
       "ongoing": "Llamada en curso...",
       "ended": "Llamada finalizada",
       "camera_off_peer": "ha apagado la cámara",
-      "mic_off_peer": "ha silenciado su micro"
+      "mic_off_peer": "ha silenciado su micro",
+      "permission_denied": "Acceso denegado a la cámara/micrófono. Por favor, actívalos en tu navegador para realizar llamadas.",
+      "secure_context_required": "La videollamada requiere una conexión segura (HTTPS). Verifica que tu URL comience por https://."
     }
   },
   "legal": {

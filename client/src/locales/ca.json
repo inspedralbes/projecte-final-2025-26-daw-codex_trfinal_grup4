@@ -437,7 +437,9 @@
       "ongoing": "Trucada en curs...",
       "ended": "Trucada finalitzada",
       "camera_off_peer": "ha apagat la càmera",
-      "mic_off_peer": "ha silenciat el seu micro"
+      "mic_off_peer": "ha silenciat el seu micro",
+      "permission_denied": "Accés denegat a la càmera/micròfon. Per favor, activa'ls al teu navegador per realitzar trucades.",
+      "secure_context_required": "La videollamada requereix una connexió segura (HTTPS). Verifica que la teva URL comenci per https://."
     }
   },
   "legal": {
