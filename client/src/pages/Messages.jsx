@@ -590,6 +590,18 @@ export default function Messages() {
     }
   }, [location.state, navigate, location.pathname, location.search]);
 
+  const handleStartAudioCall = () => {
+    console.log("[Messages] Manually starting audio call");
+    setIsVideoCall(false);
+    setActiveCall(true);
+  };
+
+  const handleStartVideoCall = () => {
+    console.log("[Messages] Manually starting video call");
+    setIsVideoCall(true);
+    setActiveCall(true);
+  };
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -1252,14 +1264,14 @@ export default function Messages() {
                   <>
                     <button
                       className="msg__header-btn"
-                      onClick={() => { setIsVideoCall(false); setActiveCall(true); }}
+                      onClick={handleStartAudioCall}
                       title={t("messages.call.audio_call", "Llamada de voz")}
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width: 20, height: 20}}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                     </button>
                     <button
                       className="msg__header-btn"
-                      onClick={() => { setIsVideoCall(true); setActiveCall(true); }}
+                      onClick={handleStartVideoCall}
                       title={t("messages.call.video_call", "Videollamada")}
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width: 20, height: 20}}><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
@@ -1404,7 +1416,7 @@ export default function Messages() {
           }}
         />
       )}
-      {activeCall && partner && (
+      {activeCall && partner ? (
         <VideoCall
           partnerId={partner.id}
           isIncoming={!!incomingCall}
@@ -1413,10 +1425,13 @@ export default function Messages() {
           isVideoCall={incomingCall ? incomingCall.isVideo : isVideoCall}
           autoAnswer={incomingCall ? incomingCall.autoAnswer : false}
           onEnd={() => {
+            console.log("[Messages] Call ended callback triggered");
             setActiveCall(false);
             setIncomingCall(null);
           }}
         />
+      ) : (
+        activeCall && console.log("[Messages] Call active but partner is missing!")
       )}
     </div>
   );

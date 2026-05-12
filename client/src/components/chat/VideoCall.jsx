@@ -175,14 +175,12 @@ const VideoCall = ({
 
     const handleEnded = () => {
       console.log("[VideoCall] Received call-ended from peer");
-      setCallEnded(true);
-      endCall();
+      endCall(true); // true means it was triggered by remote
     };
 
     const handleRejected = () => {
       console.log("[VideoCall] Received call-rejected from peer");
-      setCallEnded(true);
-      endCall();
+      endCall(true);
     };
 
     socketService.onCallAnswered(handleAnswered);
@@ -208,7 +206,7 @@ const VideoCall = ({
       socketService.offPeerVideoToggle(onVideoToggle);
       socketService.offPeerAudioToggle(onAudioToggle);
     };
-  }, []);
+  }, [partnerId]);
 
   const createPeerConnection = () => {
     const peer = new RTCPeerConnection({
@@ -336,8 +334,8 @@ const VideoCall = ({
     if (onRejectRef.current) onRejectRef.current();
   };
 
-  const endCall = () => {
-    console.log("[VideoCall] endCall triggered, callEnded state:", callEnded);
+  const endCall = (isRemote = false) => {
+    console.log(`[VideoCall] endCall triggered (isRemote: ${isRemote}), current callEnded: ${callEnded}`);
     if (callEnded) return;
     setCallEnded(true);
     
@@ -350,7 +348,10 @@ const VideoCall = ({
       stream.getTracks().forEach((track) => track.stop());
     }
     
-    socketService.endCall({ to: partnerId, from: user.id });
+    if (!isRemote) {
+      console.log("[VideoCall] Sending end-call to peer via socket");
+      socketService.endCall({ to: partnerId, from: user.id });
+    }
     
     setTimeout(() => {
       console.log("[VideoCall] Calling onEndRef.current()");
