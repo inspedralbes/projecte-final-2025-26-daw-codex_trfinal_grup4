@@ -109,8 +109,9 @@ const VideoCall = ({
   useEffect(() => {
     const videoElement = userVideo.current;
     if (videoElement && remoteStream) {
+      const tracks = remoteStream.getTracks();
       console.log(`[VideoCall] Attaching remoteStream to ${isVideoCall ? "video" : "audio"} element. Tracks:`, 
-        remoteStream.getTracks().map(t => t.kind));
+        tracks.map(t => `${t.kind} (${t.readyState}, enabled: ${t.enabled})`));
       
       if (videoElement.srcObject !== remoteStream) {
         videoElement.srcObject = remoteStream;
@@ -118,12 +119,25 @@ const VideoCall = ({
       
       const playMedia = () => {
         videoElement.play()
-          .then(() => console.log("[VideoCall] Playback started successfully"))
+          .then(() => {
+            console.log("[VideoCall] Playback started successfully");
+            if (isVideoCall && videoElement.videoWidth === 0) {
+              console.warn("[VideoCall] Video playing but width is 0. This might be why it is black.");
+            }
+          })
           .catch(e => {
             console.error("[VideoCall] Playback failed:", e);
-            // If it's an autoplay block, it will fail, but we can't do much without interaction
           });
       };
+
+      if (isVideoCall) {
+        videoElement.onloadedmetadata = () => {
+          console.log(`[VideoCall] Video metadata loaded: ${videoElement.videoWidth}x${videoElement.videoHeight}`);
+          playMedia();
+        };
+      } else {
+        playMedia();
+      }
 
       // Ensure it plays even if it was paused
       playMedia();
@@ -225,10 +239,6 @@ const VideoCall = ({
     const onVideoToggle = (data) => setIsPeerVideoOff(data.isVideoOff);
     const onAudioToggle = (data) => setIsPeerMuted(data.isMuted);
 
-    socketService.onCallAnswered(handleAnswered);
-    socketService.onIceCandidate(handleIceCandidate);
-    socketService.onCallEnded(handleEnded);
-    socketService.onCallRejected(handleRejected);
     socketService.onPeerVideoToggle(onVideoToggle);
     socketService.onPeerAudioToggle(onAudioToggle);
 
@@ -541,7 +551,18 @@ const VideoCall = ({
                           <p>{callerInfo?.name} {t("messages.call.camera_off_peer", "ha apagado la cámara")}</p>
                         </div>
                       )}
-                      <video playsInline ref={userVideo} autoPlay style={{ display: isPeerVideoOff ? "none" : "block" }} />
+                      <video 
+                        playsInline 
+                        ref={userVideo} 
+                        autoPlay 
+                        style={{ 
+                          display: isPeerVideoOff ? "none" : "block",
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          backgroundColor: '#000'
+                        }} 
+                      />
                     </>
                   ) : (
                     <div className="vc-waiting">
