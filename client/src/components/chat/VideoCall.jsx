@@ -99,6 +99,7 @@ const VideoCall = ({
   useEffect(() => {
     if (userVideo.current && remoteStream) {
       userVideo.current.srcObject = remoteStream;
+      userVideo.current.play().catch(e => console.log("[VideoCall] Error playing remote video:", e));
     }
   }, [remoteStream, callAccepted, isVideoCall, isPeerVideoOff]);
 
@@ -121,6 +122,7 @@ const VideoCall = ({
       console.log(`[VideoCall] Processing ${candidatesQueue.current.length} queued candidates`);
       candidatesQueue.current.forEach((candidate) => {
         connectionRef.current.addIceCandidate(candidate)
+          .then(() => console.log("[VideoCall] Queued ICE candidate added successfully"))
           .catch((e) => console.error("Error adding queued ice candidate", e));
       });
       candidatesQueue.current = [];
@@ -131,6 +133,7 @@ const VideoCall = ({
     const candidate = new RTCIceCandidate(data.candidate);
     if (connectionRef.current && remoteDescriptionSet.current) {
       connectionRef.current.addIceCandidate(candidate)
+        .then(() => console.log("[VideoCall] ICE candidate added successfully"))
         .catch((e) => console.error("Error adding ice candidate", e));
     } else {
       console.log("[VideoCall] Queuing ICE candidate");
@@ -188,7 +191,14 @@ const VideoCall = ({
 
   const createPeerConnection = () => {
     const peer = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:global.stun.twilio.com:3478" }],
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+        { urls: "stun:stun2.l.google.com:19302" },
+        { urls: "stun:stun3.l.google.com:19302" },
+        { urls: "stun:stun4.l.google.com:19302" },
+        { urls: "stun:global.stun.twilio.com:3478" }
+      ],
     });
 
     if (stream) {
@@ -199,17 +209,26 @@ const VideoCall = ({
 
     peer.ontrack = (event) => {
       console.log("[VideoCall] Received remote track:", event.track.kind);
-      if (event.streams && event.streams[0]) {
-        setRemoteStream(event.streams[0]);
-      } else {
-        setRemoteStream(prev => {
-          if (prev) {
-            prev.addTrack(event.track);
-            return new MediaStream(prev.getTracks()); // New reference to trigger update
+      
+      // We always create a new MediaStream or clone the existing one to force React to re-render
+      // and trigger the useEffect that attaches the stream to the video element.
+      setRemoteStream((prevStream) => {
+        if (prevStream) {
+          // Check if track is already there
+          if (prevStream.getTracks().find(t => t.id === event.track.id)) {
+            return prevStream;
           }
-          return new MediaStream([event.track]);
-        });
-      }
+          const newStream = new MediaStream(prevStream.getTracks());
+          newStream.addTrack(event.track);
+          return newStream;
+        }
+        
+        if (event.streams && event.streams[0]) {
+          return new MediaStream(event.streams[0].getTracks());
+        }
+        
+        return new MediaStream([event.track]);
+      });
     };
 
     peer.onicecandidate = (event) => {
