@@ -76,6 +76,9 @@ Route::get('/users/{user}/following', [FollowController::class, 'following']);
 // Search (public)
 Route::get('/search', [SearchController::class, 'index']);
 
+// Trending posts (public)
+Route::get('/trending', [PostController::class, 'trending']);
+
 // Leaderboard (public)
 Route::get('/leaderboard', [ProfileController::class, 'leaderboard']);
 

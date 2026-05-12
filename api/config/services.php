@@ -53,4 +53,12 @@ return [
         'critical_auto_ban' => env('AI_MODERATION_CRITICAL_AUTO_BAN', true),
     ],
 
+    'ai_content' => [
+        'enabled' => env('AI_CONTENT_ENABLED', false),
+        'url' => rtrim(env('AI_CONTENT_URL', env('AI_MODERATION_URL', 'http://ai-moderation:8088')), '/'),
+        'api_key' => env('AI_CONTENT_API_KEY', env('AI_MODERATION_API_KEY')),
+        'timeout_seconds' => (int) env('AI_CONTENT_TIMEOUT_SECONDS', 4),
+        'fail_open' => env('AI_CONTENT_FAIL_OPEN', true),
+    ],
+
 ];

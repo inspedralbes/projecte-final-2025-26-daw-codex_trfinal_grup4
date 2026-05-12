@@ -391,20 +391,6 @@ export default function Sidebar() {
               </NavLink>
             );
           })}
-          
-          {/* Mobile Logout Button */}
-          {user && (
-            <button 
-              className="sidebar__nav-item sidebar__nav-logout"
-              onClick={handleLogout}
-              title={t("common.logout")}
-            >
-              <span className="sidebar__nav-icon">
-                <LogoutIcon />
-              </span>
-              <span className="sidebar__nav-label"><GlitchText>{t("common.logout")}</GlitchText></span>
-            </button>
-          )}
         </nav>
 
         {/* User Profile or Login Button */}

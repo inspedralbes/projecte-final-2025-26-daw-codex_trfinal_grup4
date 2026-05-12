@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/context/ThemeContext";
 import profileService from "@/services/profileService";
@@ -9,8 +9,9 @@ import "./Settings.css";
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
 
   const [isPrivate, setIsPrivate] = useState(user?.is_private || false);
   const [emailNotifs, setEmailNotifs] = useState(true);
@@ -48,6 +49,11 @@ export default function Settings() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/welcome");
   };
 
   return (
@@ -199,6 +205,16 @@ export default function Settings() {
                     ? t("settings.no_changes", "Sin cambios")
                     : t("settings.save", "Guardar cambios")}
             </GlitchText>
+          </button>
+        </div>
+        {/* Logout Button */}
+        <div className="settings-page__actions" style={{ marginTop: "1rem" }}>
+          <button
+            className="settings-btn settings-btn--danger"
+            onClick={handleLogout}
+            style={{ width: "100%", justifyContent: "center" }}
+          >
+            <GlitchText>{t("common.logout", "Cerrar sesión")}</GlitchText>
           </button>
         </div>
 

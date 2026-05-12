@@ -8,8 +8,8 @@
 .msg {
   display: flex;
   position: relative;
-  height: calc(100vh - var(--header-height, 56px));
-  max-height: calc(100vh - var(--header-height, 56px));
+  height: 100vh;
+  max-height: 100vh;
   background: var(--color-background);
   overflow: hidden;
 }
@@ -925,8 +925,12 @@
 /* Mobile breakpoint */
 @media (max-width: 768px) {
   .msg {
-    height: calc(100vh - var(--mobile-nav-height, 56px) - var(--mobile-header-height, 52px));
-    height: calc(100dvh - var(--mobile-nav-height, 56px) - var(--mobile-header-height, 52px));
+    position: fixed;
+    top: var(--mobile-header-height, 52px);
+    bottom: var(--mobile-nav-height, 64px);
+    left: 0;
+    right: 0;
+    height: auto;
   }
 
   .msg__sidebar {

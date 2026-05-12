@@ -45,6 +45,7 @@ class PostResource extends JsonResource
             'id'            => $this->id,
             'type'          => $this->type,
             'content'       => $this->content,
+            'summary'       => $this->summary,
             'image_url'     => $this->image_url ? \Illuminate\Support\Facades\Storage::url($this->image_url) : null,
             'code_snippet'  => $this->code_snippet,
             'code_language' => $this->code_language,

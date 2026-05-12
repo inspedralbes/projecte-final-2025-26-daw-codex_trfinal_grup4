@@ -213,18 +213,15 @@ export default function Explore() {
     const fetchTrendingPosts = async () => {
       try {
         setLoadingTrending(true);
-        const response = await postsService.getFeed({ page: 1 });
+        const response = await postsService.getTrending(5);
         const data = response.data || response;
-        const posts = data.data || data || [];
-        // Sort by likes + comments and pick top 5
-        const sorted = [...posts]
-          .sort((a, b) => {
-            const scoreA = (a.likes_count || 0) + (a.comments_count || 0) * 2;
-            const scoreB = (b.likes_count || 0) + (b.comments_count || 0) * 2;
-            return scoreB - scoreA;
-          })
-          .slice(0, 5);
-        setTrendingPosts(sorted);
+        const items = data.data || [];
+        const posts = items.map((item) => ({
+          ...item.post,
+          trend_score: item.score,
+          trend_rank: item.rank,
+        }));
+        setTrendingPosts(posts);
       } catch (err) {
         console.error("Error fetching trending posts:", err);
         setTrendingPosts([]);
@@ -525,8 +522,8 @@ export default function Explore() {
                           {post.user?.name || t("common.anonymous")}
                         </span>
                         <p className="explore__hot-post-text">
-                          {post.content?.substring(0, 100) || post.title || t("feed.no_title")}
-                          {post.content?.length > 100 && "..."}
+                          {(post.summary || post.content)?.substring(0, 100) || post.title || t("feed.no_title")}
+                          {(post.summary || post.content)?.length > 100 && "..."}
                         </p>
                       </div>
                       <div className="explore__hot-post-stats">

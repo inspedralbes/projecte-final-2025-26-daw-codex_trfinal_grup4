@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/context/SocketContext";
 import chatService from "@/services/chatService";
@@ -8,6 +8,7 @@ import socketService from "@/services/socketService";
 import GlitchText from "@/components/ui/GlitchText";
 import NewGroupModal from "@/components/chat/NewGroupModal";
 import GroupSettingsModal from "@/components/chat/GroupSettingsModal";
+import VideoCall from "@/components/chat/VideoCall";
 import "./Messages.css";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -548,6 +549,7 @@ export default function Messages() {
     onGroupMemberChange,
   } = useSocket();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // State
@@ -566,6 +568,25 @@ export default function Messages() {
   const [groupDetails, setGroupDetails] = useState({ members: [] });
   const [typing, setTyping] = useState(false);
   const [mobileView, setMobileView] = useState("list"); // 'list' | 'chat'
+  
+  // Call state
+  const [activeCall, setActiveCall] = useState(false);
+  const [isVideoCall, setIsVideoCall] = useState(true);
+  const [incomingCall, setIncomingCall] = useState(null);
+
+  // Handle incoming call from navigation state
+  useEffect(() => {
+    if (location.state?.incomingCallData) {
+      const data = location.state.incomingCallData;
+      console.log("[Messages] Auto-answering global incoming call:", data);
+      setIncomingCall(data);
+      setIsVideoCall(data.isVideo);
+      setActiveCall(true);
+      
+      // Clear location state so it doesn't trigger again on refresh
+      navigate(location.pathname + location.search, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname, location.search]);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -1225,6 +1246,24 @@ export default function Messages() {
                     {t("messages.mutual")}
                   </span>
                 )}
+                {!isGroupActive && partner && (
+                  <>
+                    <button
+                      className="msg__header-btn"
+                      onClick={() => { setIsVideoCall(false); setActiveCall(true); }}
+                      title={t("messages.call.audio_call", "Llamada de voz")}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width: 20, height: 20}}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    </button>
+                    <button
+                      className="msg__header-btn"
+                      onClick={() => { setIsVideoCall(true); setActiveCall(true); }}
+                      title={t("messages.call.video_call", "Videollamada")}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width: 20, height: 20}}><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                    </button>
+                  </>
+                )}
                 {isGroupActive && (
                   <button
                     className="msg__header-btn"
@@ -1360,6 +1399,20 @@ export default function Messages() {
               }
               return updated;
             });
+          }}
+        />
+      )}
+      {activeCall && partner && (
+        <VideoCall
+          partnerId={partner.id}
+          isIncoming={!!incomingCall}
+          incomingSignal={incomingCall?.signalData}
+          callerInfo={incomingCall ? incomingCall.callerInfo : partner}
+          isVideoCall={incomingCall ? incomingCall.isVideo : isVideoCall}
+          autoAnswer={incomingCall ? incomingCall.autoAnswer : false}
+          onEnd={() => {
+            setActiveCall(false);
+            setIncomingCall(null);
           }}
         />
       )}

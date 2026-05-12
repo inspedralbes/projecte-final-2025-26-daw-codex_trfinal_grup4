@@ -1,0 +1,143 @@
+.global-msg-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  left: auto; /* Ensure it doesn't stick to left */
+  z-index: 10000; /* Above everything */
+  background: var(--color-surface, #1e1e24);
+  border: 1px solid var(--border-default, #333);
+  border-left: 4px solid var(--codex-coral, #ff5f56);
+  border-radius: var(--radius-md, 4px);
+  padding: var(--space-3, 12px) var(--space-4, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+  min-width: 300px;
+  max-width: 360px;
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.3s ease;
+  transform: translateX(120%);
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.global-msg-toast.show {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.global-msg-toast:hover {
+  border-color: var(--codex-coral, #ff5f56);
+  box-shadow: 0 0 15px rgba(255, 95, 86, 0.2);
+}
+
+.global-msg-toast__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
+  position: relative;
+}
+
+.global-msg-toast__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full, 50%);
+  overflow: hidden;
+  background: var(--depth-3, #2a2a35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text, #fff);
+  font-weight: 600;
+  font-size: 1rem;
+  border: 1px solid var(--border-subtle, #444);
+}
+
+.global-msg-toast__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.global-msg-toast__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.global-msg-toast__name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.global-msg-toast__type {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary, #888);
+}
+
+.global-msg-toast__close {
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary, #888);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0 var(--space-1, 4px);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.global-msg-toast__close:hover {
+  color: var(--codex-coral, #ff5f56);
+}
+
+.global-msg-toast__body {
+  padding-top: var(--space-1, 4px);
+}
+
+.global-msg-toast__text {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #ccc);
+  margin: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Scanline effect for brutalist feel */
+.global-msg-toast__scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--codex-coral, #ff5f56), transparent);
+  opacity: 0.5;
+  animation: scanline 2s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(120px); } /* Approximate height */
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .global-msg-toast {
+    bottom: calc(var(--mobile-nav-height, 64px) + 16px);
+    right: 16px;
+    left: 16px;
+    max-width: none;
+    min-width: auto;
+  }
+}

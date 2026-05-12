@@ -8,6 +8,8 @@ use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Models\TrendingPost;
+use App\Services\AiContentService;
 use App\Services\AiModerationService;
 use App\Services\ModerationEnforcementService;
 use App\Services\NotificationService;
@@ -25,7 +27,8 @@ class PostController extends Controller
         private readonly SanitizationService $sanitizer,
         private readonly NotificationService $notificationService,
         private readonly AiModerationService $aiModerationService,
-        private readonly ModerationEnforcementService $moderationEnforcementService
+        private readonly ModerationEnforcementService $moderationEnforcementService,
+        private readonly AiContentService $aiContentService
     ) {}
 
     /**
@@ -234,6 +237,18 @@ class PostController extends Controller
             $post->tags()->sync($tagIds);
         }
 
+        $analysis = $this->aiContentService->analyzePost(
+            $sanitizedContent,
+            $sanitizedCodeSnippet
+        );
+
+        if (!empty($analysis['summary']) || !empty($analysis['embedding'])) {
+            $post->update([
+                'summary' => $analysis['summary'] ?? null,
+                'embedding' => $analysis['embedding'] ?? null,
+            ]);
+        }
+
         $post->load(['user', 'center', 'tags', 'originalPost.user']);
         $post->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts']);
 
@@ -263,6 +278,44 @@ class PostController extends Controller
         $post->loadCount(['likedByUsers', 'comments', 'bookmarkedByUsers', 'reposts']);
 
         return $this->success(new PostResource($post));
+    }
+
+    /**
+     * GET /api/trending
+     * Return latest computed trending posts.
+     */
+    public function trending(Request $request): JsonResponse
+    {
+        $limit = (int) $request->input('limit', config('trending.limit', 10));
+
+        $latestComputed = TrendingPost::max('computed_at');
+        if (!$latestComputed) {
+            return response()->json([
+                'success' => true,
+                'message' => 'No trending posts computed yet',
+                'data' => [],
+            ]);
+        }
+
+        $trending = TrendingPost::where('computed_at', $latestComputed)
+            ->with(['post.user', 'post.center', 'post.tags', 'post.originalPost.user'])
+            ->orderBy('rank')
+            ->limit($limit)
+            ->get();
+
+        $data = $trending->map(function (TrendingPost $item) {
+            return [
+                'score' => $item->score,
+                'rank' => $item->rank,
+                'post' => new PostResource($item->post),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Trending posts retrieved successfully',
+            'data' => $data,
+        ]);
     }
 
     /**
@@ -321,6 +374,20 @@ class PostController extends Controller
 
         if (!empty($data)) {
             $post->update($data);
+        }
+
+        if ($request->hasAny(['content', 'code_snippet'])) {
+            $analysis = $this->aiContentService->analyzePost(
+                $data['content'] ?? $post->content,
+                $data['code_snippet'] ?? $post->code_snippet
+            );
+
+            if (!empty($analysis['summary']) || !empty($analysis['embedding'])) {
+                $post->update([
+                    'summary' => $analysis['summary'] ?? null,
+                    'embedding' => $analysis['embedding'] ?? null,
+                ]);
+            }
         }
 
         // Update tags if provided

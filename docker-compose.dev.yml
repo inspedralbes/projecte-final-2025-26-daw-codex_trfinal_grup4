@@ -44,6 +44,10 @@ services:
       - AI_MODERATION_ENABLED=true
       - AI_MODERATION_URL=http://ai-moderation:8088
       - AI_MODERATION_TIMEOUT_SECONDS=4
+      - AI_CONTENT_ENABLED=true
+      - AI_CONTENT_URL=http://ai-moderation:8088
+      - AI_CONTENT_TIMEOUT_SECONDS=30
+      - TRENDING_SCHEDULE_HOURS=24
     extra_hosts:
       - "mail.codex.daw.inspedralbes.cat:187.33.146.183"
     depends_on:
@@ -76,6 +80,12 @@ services:
       - AI_LLM_BASE_URL=${AI_LLM_BASE_URL:-https://api.openai.com/v1}
       - AI_LLM_API_KEY=${AI_LLM_API_KEY:-}
       - AI_LLM_MODEL=${AI_LLM_MODEL:-gpt-4o-mini}
+      - AI_SUMMARY_ENABLED=${AI_SUMMARY_ENABLED:-true}
+      - AI_SUMMARY_MODEL_ID=${AI_SUMMARY_MODEL_ID:-Xenova/distilbart-cnn-6-6}
+      - AI_SUMMARY_MAX_TOKENS=${AI_SUMMARY_MAX_TOKENS:-60}
+      - AI_SUMMARY_MIN_TOKENS=${AI_SUMMARY_MIN_TOKENS:-20}
+      - AI_EMBEDDING_ENABLED=${AI_EMBEDDING_ENABLED:-true}
+      - AI_EMBEDDING_MODEL_ID=${AI_EMBEDDING_MODEL_ID:-Xenova/all-MiniLM-L6-v2}
       - AI_BLOCK_THRESHOLD=0.72
       - AI_MEDIUM_THRESHOLD=0.45
       - AI_HIGH_THRESHOLD=0.65

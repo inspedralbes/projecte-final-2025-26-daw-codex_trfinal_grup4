@@ -46,6 +46,8 @@ class Post extends Model
         'type',
         'is_solved',
         'content',
+        'summary',
+        'embedding',
         'image_url',
         'code_snippet',
         'code_language',
@@ -56,6 +58,7 @@ class Post extends Model
         return [
             'type' => PostType::class,
             'is_solved' => 'boolean',
+            'embedding' => 'array',
         ];
     }
 

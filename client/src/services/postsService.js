@@ -114,6 +114,15 @@ const postsService = {
   getLikedPosts: async (page = 1) => {
     return api.get(`/liked?page=${page}`);
   },
+
+  /**
+   * Get trending posts
+   * @param {number} limit - Max number of posts
+   * @returns {Promise<Object>} Trending posts list
+   */
+  getTrending: async (limit = 10) => {
+    return api.get(`/trending?limit=${limit}`);
+  },
 };
 
 export default postsService;
