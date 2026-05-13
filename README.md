@@ -8,6 +8,15 @@
 | Iker Delgado | - |
 | Pol Díaz | - |
 
+## 📚 Documentació Tècnica
+Si ets un desenvolupador i vols saber com funciona el projecte per dins o vols contribuir-hi, consulta la nostra **[Documentació Tècnica](./doc/README.md)**.
+
+Aquí trobaràs:
+- [🏗️ Arquitectura](./doc/ARCHITECTURE.md)
+- [📡 API Reference](./doc/API.md)
+- [💻 Frontend](./doc/FRONTEND.md)
+- [🤝 Guia de Contribució](./doc/CONTRIBUTING.md)
+
 ## 📋 Descripció
 Projecte final del cicle DAW (Desenvolupament d'Aplicacions Web) – Curs 2025-26.
 Aplicació web full-stack amb arquitectura de microserveis containeritzada amb Docker.
