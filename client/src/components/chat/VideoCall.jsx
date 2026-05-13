@@ -274,13 +274,10 @@ const VideoCall = ({
   const createPeerConnection = () => {
     const peer = new RTCPeerConnection({
       iceServers: [
-        // STUN Servers (Free, no account needed)
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
-        { urls: "stun:stun2.l.google.com:19302" },
-        { urls: "stun:stun.voip-ac.com" },
-        
-        // TURN Servers (Relays for restrictive networks like 5G)
+        { urls: "stun:stun.cloudflare.com:3478" },
+        { urls: "stun:stun.nextcloud.com:443" },
         {
           urls: [
             "turn:openrelay.metered.ca:80",
@@ -291,22 +288,15 @@ const VideoCall = ({
           credential: "openrelayproject",
         },
         {
-          urls: [
-            "turn:relay.metered.ca:80",
-            "turn:relay.metered.ca:443",
-            "turn:relay.metered.ca:443?transport=tcp"
-          ],
-          username: "openrelayproject",
-          credential: "openrelayproject",
-        },
-        // Numb Viagenie (Reliable fallback)
-        {
           urls: "turn:numb.viagenie.ca",
           username: "numb@viagenie.ca",
           credential: "numb",
         }
       ],
       iceCandidatePoolSize: 10,
+      bundlePolicy: "max-bundle",
+      rtcpMuxPolicy: "require",
+      sdpSemantics: "unified-plan"
     });
 
     if (stream) {
@@ -364,16 +354,17 @@ const VideoCall = ({
     };
 
     peer.oniceconnectionstatechange = () => {
-      console.log("[VideoCall] ICE Connection State:", peer.iceConnectionState);
-      if (peer.iceConnectionState === "connected" || peer.iceConnectionState === "completed") {
+      const state = peer.iceConnectionState;
+      console.log(`[VideoCall][${instanceId.current}] ICE Connection State:`, state);
+      
+      if (state === "connected" || state === "completed") {
         setConnectionStatus("connected");
-      } else if (peer.iceConnectionState === "failed") {
-        console.error("[VideoCall] ICE Connection FAILED. This usually means a TURN server is needed and either missing or blocked.");
+      } else if (state === "failed") {
+        console.error(`[VideoCall][${instanceId.current}] ICE Connection FAILED.`);
         setConnectionStatus("failed");
-      } else if (peer.iceConnectionState === "disconnected") {
+        // Don't auto-end call here to allow user to see the error
+      } else if (state === "disconnected") {
         setConnectionStatus("disconnected");
-      } else {
-        setConnectionStatus("connecting");
       }
     };
 
