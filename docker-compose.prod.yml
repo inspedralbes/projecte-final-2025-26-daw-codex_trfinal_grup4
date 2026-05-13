@@ -220,6 +220,28 @@ services:
     networks:
       - tfg_network
 
+  # ---------------------------------------------------------
+  #  8. TURN Server (Coturn) - Private relay for WebRTC
+  # ---------------------------------------------------------
+  turn:
+    image: coturn/coturn:latest
+    container_name: tfg_turn_prod
+    restart: always
+    network_mode: "host"
+    volumes:
+      - ./docker/turn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+    command: 
+      - -c /etc/coturn/turnserver.conf
+      - --external-ip=178.104.176.32
+      - --user=codex_user:codex_turn_password_2024
+      - --realm=codex.daw.inspedralbes.cat
+      - --listening-port=3478
+      - --min-port=49152
+      - --max-port=65535
+      - --verbose
+    environment:
+      - DETECT_EXTERNAL_IP=yes
+
 volumes:
   mysql_data:
   redis_data:
