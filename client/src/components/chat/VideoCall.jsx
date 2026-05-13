@@ -43,13 +43,21 @@ const VideoCall = ({
   const remoteDescriptionSet = useRef(false);
   const isEnding = useRef(false);
   const isMounted = useRef(true);
+  const instanceId = useRef(Math.random().toString(36).substring(7));
 
   useEffect(() => {
     isMounted.current = true;
+    console.log(`[VideoCall][${instanceId.current}] Component mounted`);
     return () => {
+      console.log(`[VideoCall][${instanceId.current}] Component unmounting`);
       isMounted.current = false;
+      // If component unmounts without endCall being called, notify peer
+      if (!isEnding.current) {
+        console.log(`[VideoCall][${instanceId.current}] Unexpected unmount, sending end-call`);
+        socketService.endCall({ to: partnerId, from: user.id });
+      }
     };
-  }, []);
+  }, [partnerId, user.id]);
 
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(!isVideoCall);
@@ -215,6 +223,7 @@ const VideoCall = ({
   useEffect(() => {
     // Listeners for WebRTC signaling
     const handleAnswered = async (data) => {
+      if (isEnding.current) return;
       if (remoteDescriptionSet.current) {
         console.log("[VideoCall] Remote description already set, ignoring duplicate answer");
         return;
@@ -235,11 +244,13 @@ const VideoCall = ({
     };
 
     const handleEnded = () => {
+      if (isEnding.current) return;
       console.log("[VideoCall] Received call-ended from peer");
       endCall(true); // true means it was triggered by remote
     };
 
     const handleRejected = () => {
+      if (isEnding.current) return;
       console.log("[VideoCall] Received call-rejected from peer");
       endCall(true);
     };
@@ -271,25 +282,19 @@ const VideoCall = ({
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
         { urls: "stun:stun2.l.google.com:19302" },
-        { urls: "stun:stun3.l.google.com:19302" },
-        { urls: "stun:stun4.l.google.com:19302" },
         { urls: "stun:stun.services.mozilla.com" },
-        { urls: "stun:global.stun.twilio.com:3478" },
         {
-          urls: [
-            "turn:openrelay.metered.ca:80",
-            "turn:openrelay.metered.ca:443",
-            "turn:openrelay.metered.ca:443?transport=tcp"
-          ],
+          urls: "turn:openrelay.metered.ca:80",
           username: "openrelayproject",
           credential: "openrelayproject",
         },
         {
-          urls: [
-            "turn:relay.metered.ca:80",
-            "turn:relay.metered.ca:443",
-            "turn:relay.metered.ca:443?transport=tcp"
-          ],
+          urls: "turn:openrelay.metered.ca:443",
+          username: "openrelayproject",
+          credential: "openrelayproject",
+        },
+        {
+          urls: "turn:openrelay.metered.ca:443?transport=tcp",
           username: "openrelayproject",
           credential: "openrelayproject",
         }
@@ -421,13 +426,19 @@ const VideoCall = ({
   };
 
   const endCall = (isRemote = false) => {
-    // If called from onClick, isRemote is an event object. Treat as false (local end).
     const remote = typeof isRemote === 'boolean' ? isRemote : false;
 
-    console.log(`[VideoCall] endCall triggered (remote: ${remote}), current callEnded: ${callEnded}, isEnding: ${isEnding.current}`);
-    
-    if (callEnded || isEnding.current) return;
+    if (isEnding.current) return;
     isEnding.current = true;
+    
+    console.log(`[VideoCall][${instanceId.current}] endCall initiated (remote: ${remote})`);
+    
+    // 1. Immediately unsubscribe from signaling to prevent loops
+    socketService.offCallAnswered();
+    socketService.offIceCandidate();
+    socketService.offCallEnded();
+    socketService.offCallRejected();
+    
     setCallEnded(true);
     
     if (connectionRef.current) {
@@ -440,14 +451,13 @@ const VideoCall = ({
     }
     
     if (!remote) {
-      console.log("[VideoCall] Sending end-call to peer via socket");
+      console.log(`[VideoCall][${instanceId.current}] Sending end-call signal`);
       socketService.endCall({ to: partnerId, from: user.id });
     }
     
     setTimeout(() => {
-      console.log("[VideoCall] Calling onEndRef.current()");
       if (onEndRef.current) onEndRef.current();
-    }, 1200);
+    }, 1000);
   };
 
   const toggleMute = () => {
