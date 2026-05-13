@@ -51,13 +51,8 @@ const VideoCall = ({
     return () => {
       console.log(`[VideoCall][${instanceId.current}] Component unmounting`);
       isMounted.current = false;
-      // If component unmounts without endCall being called, notify peer
-      if (!isEnding.current) {
-        console.log(`[VideoCall][${instanceId.current}] Unexpected unmount, sending end-call`);
-        socketService.endCall({ to: partnerId, from: user.id });
-      }
     };
-  }, [partnerId, user.id]);
+  }, []);
 
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(!isVideoCall);
@@ -282,7 +277,12 @@ const VideoCall = ({
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
         { urls: "stun:stun2.l.google.com:19302" },
-        { urls: "stun:stun.services.mozilla.com" },
+        { urls: "stun:stun.voip-ac.com" },
+        {
+          urls: "turn:numb.viagenie.ca",
+          username: "numb@viagenie.ca",
+          credential: "numb",
+        },
         {
           urls: "turn:openrelay.metered.ca:80",
           username: "openrelayproject",
