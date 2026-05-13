@@ -41,6 +41,15 @@ const VideoCall = ({
   const connectionRef = useRef(null);
   const candidatesQueue = useRef([]);
   const remoteDescriptionSet = useRef(false);
+  const isEnding = useRef(false);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(!isVideoCall);
@@ -118,6 +127,8 @@ const VideoCall = ({
       }
       
       const playMedia = () => {
+        if (!isMounted.current) return;
+        
         videoElement.play()
           .then(() => {
             console.log("[VideoCall] Playback started successfully");
@@ -126,7 +137,9 @@ const VideoCall = ({
             }
           })
           .catch(e => {
-            console.error("[VideoCall] Playback failed:", e);
+            if (e.name !== "AbortError") {
+              console.error("[VideoCall] Playback failed:", e);
+            }
           });
       };
 
@@ -260,6 +273,7 @@ const VideoCall = ({
         { urls: "stun:stun2.l.google.com:19302" },
         { urls: "stun:stun3.l.google.com:19302" },
         { urls: "stun:stun4.l.google.com:19302" },
+        { urls: "stun:stun.services.mozilla.com" },
         { urls: "stun:global.stun.twilio.com:3478" },
         {
           urls: [
@@ -271,12 +285,11 @@ const VideoCall = ({
           credential: "openrelayproject",
         },
         {
-          urls: "turn:relay.metered.ca:80",
-          username: "openrelayproject",
-          credential: "openrelayproject",
-        },
-        {
-          urls: "turn:relay.metered.ca:443",
+          urls: [
+            "turn:relay.metered.ca:80",
+            "turn:relay.metered.ca:443",
+            "turn:relay.metered.ca:443?transport=tcp"
+          ],
           username: "openrelayproject",
           credential: "openrelayproject",
         }
@@ -408,8 +421,13 @@ const VideoCall = ({
   };
 
   const endCall = (isRemote = false) => {
-    console.log(`[VideoCall] endCall triggered (isRemote: ${isRemote}), current callEnded: ${callEnded}`);
-    if (callEnded) return;
+    // If called from onClick, isRemote is an event object. Treat as false (local end).
+    const remote = typeof isRemote === 'boolean' ? isRemote : false;
+
+    console.log(`[VideoCall] endCall triggered (remote: ${remote}), current callEnded: ${callEnded}, isEnding: ${isEnding.current}`);
+    
+    if (callEnded || isEnding.current) return;
+    isEnding.current = true;
     setCallEnded(true);
     
     if (connectionRef.current) {
@@ -421,7 +439,7 @@ const VideoCall = ({
       stream.getTracks().forEach((track) => track.stop());
     }
     
-    if (!isRemote) {
+    if (!remote) {
       console.log("[VideoCall] Sending end-call to peer via socket");
       socketService.endCall({ to: partnerId, from: user.id });
     }
@@ -429,7 +447,7 @@ const VideoCall = ({
     setTimeout(() => {
       console.log("[VideoCall] Calling onEndRef.current()");
       if (onEndRef.current) onEndRef.current();
-    }, 1500);
+    }, 1200);
   };
 
   const toggleMute = () => {
@@ -497,7 +515,7 @@ const VideoCall = ({
                 : t("messages.call.secure_context_required")}
             </p>
             <div className="vc-actions">
-              <button className="vc-btn reject" onClick={onEnd}>
+              <button className="vc-btn reject" onClick={() => endCall(false)}>
                 {t("common.close")}
               </button>
             </div>
@@ -512,7 +530,7 @@ const VideoCall = ({
               No se pudo establecer la conexión directa. Esto suele ocurrir por restricciones de red (Firewall/NAT). Se requiere un servidor TURN para este entorno.
             </p>
             <div className="vc-actions">
-              <button className="vc-btn reject" onClick={onEnd}>
+              <button className="vc-btn reject" onClick={() => endCall(false)}>
                 {t("common.close")}
               </button>
             </div>
@@ -536,7 +554,7 @@ const VideoCall = ({
                   {t("messages.call.accept")}
                 </button>
               )}
-              <button className="vc-btn reject" onClick={rejectCall}>
+              <button className="vc-btn reject" onClick={() => rejectCall()}>
                 {t("messages.call.reject")}
               </button>
             </div>
@@ -685,7 +703,7 @@ const VideoCall = ({
                 )}
               </button>
 
-              <button className="vc-control-btn hangup" onClick={endCall}>
+              <button className="vc-control-btn hangup" onClick={() => endCall(false)}>
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
