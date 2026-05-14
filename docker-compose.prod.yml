@@ -239,7 +239,6 @@ services:
       - --listening-port=3478
       - --min-port=49152
       - --max-port=65535
-      - --no-udp
       - --verbose
     environment:
       - DETECT_EXTERNAL_IP=yes

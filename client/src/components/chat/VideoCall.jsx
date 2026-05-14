@@ -275,39 +275,13 @@ const VideoCall = ({
   const createPeerConnection = () => {
     const peer = new RTCPeerConnection({
       iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" },
-        // OpenRelay (Metered) - free TURN on ports 80/443 (bypasses all firewalls)
-        {
-          urls: "stun:stun.relay.metered.ca:80",
-        },
-        {
-          urls: "turn:openrelay.metered.ca:80",
-          username: "openrelayproject",
-          credential: "openrelayproject",
-        },
-        {
-          urls: "turn:openrelay.metered.ca:80?transport=tcp",
-          username: "openrelayproject",
-          credential: "openrelayproject",
-        },
-        {
-          urls: "turn:openrelay.metered.ca:443",
-          username: "openrelayproject",
-          credential: "openrelayproject",
-        },
-        {
-          urls: "turns:openrelay.metered.ca:443?transport=tcp",
-          username: "openrelayproject",
-          credential: "openrelayproject",
-        },
-        // Self-hosted Coturn fallback (TCP only)
         {
           urls: "turn:c0dex.cat:3478?transport=tcp",
           username: "turnuser",
           credential: "turnpassword2025",
         },
       ],
+      iceTransportPolicy: "relay",
       iceCandidatePoolSize: 10,
       bundlePolicy: "max-bundle",
       rtcpMuxPolicy: "require",
