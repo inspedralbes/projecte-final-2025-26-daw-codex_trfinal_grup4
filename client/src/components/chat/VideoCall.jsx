@@ -286,6 +286,7 @@ const VideoCall = ({
           credential: "turnpassword2025",
         },
       ],
+      iceTransportPolicy: "relay",
       iceCandidatePoolSize: 10,
       bundlePolicy: "max-bundle",
       rtcpMuxPolicy: "require",
