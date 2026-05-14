@@ -73,7 +73,7 @@ const VideoCall = ({
       })
       .catch((err) => {
         console.error("Failed to get local stream", err);
-        
+
         if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
           setPermissionError("denied");
           setMediaInitialized(true);
@@ -122,16 +122,16 @@ const VideoCall = ({
     const videoElement = userVideo.current;
     if (videoElement && remoteStream) {
       const tracks = remoteStream.getTracks();
-      console.log(`[VideoCall] Attaching remoteStream to ${isVideoCall ? "video" : "audio"} element. Tracks:`, 
+      console.log(`[VideoCall] Attaching remoteStream to ${isVideoCall ? "video" : "audio"} element. Tracks:`,
         tracks.map(t => `${t.kind} (${t.readyState}, enabled: ${t.enabled})`));
-      
+
       if (videoElement.srcObject !== remoteStream) {
         videoElement.srcObject = remoteStream;
       }
-      
+
       const playMedia = () => {
         if (!isMounted.current) return;
-        
+
         videoElement.play()
           .then(() => {
             console.log("[VideoCall] Playback started successfully");
@@ -163,10 +163,10 @@ const VideoCall = ({
         console.log("[VideoCall] Track added/removed, restarting playback...");
         playMedia();
       };
-      
+
       remoteStream.addEventListener("addtrack", handleTrackChange);
       remoteStream.addEventListener("removetrack", handleTrackChange);
-      
+
       return () => {
         remoteStream.removeEventListener("addtrack", handleTrackChange);
         remoteStream.removeEventListener("removetrack", handleTrackChange);
@@ -204,7 +204,7 @@ const VideoCall = ({
     const candidate = new RTCIceCandidate(data.candidate);
     const type = data.candidate.candidate.split(' ')[7]; // Simple way to get candidate type
     console.log(`[VideoCall] Received ICE candidate (${type}) from peer`);
-    
+
     if (connectionRef.current && remoteDescriptionSet.current) {
       connectionRef.current.addIceCandidate(candidate)
         .then(() => console.log("[VideoCall] ICE candidate added successfully"))
@@ -223,7 +223,7 @@ const VideoCall = ({
         console.log("[VideoCall] Remote description already set, ignoring duplicate answer");
         return;
       }
-      
+
       // Mark as set immediately to prevent race conditions
       remoteDescriptionSet.current = true;
       setCallAccepted(true);
@@ -276,15 +276,14 @@ const VideoCall = ({
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
-        { urls: "stun:codex.daw.inspedralbes.cat:3478" },
         {
           urls: [
-            "turn:codex.daw.inspedralbes.cat:3478",
-            "turn:codex.daw.inspedralbes.cat:3478?transport=tcp"
+            "turn:c0dex.cat:3478",
+            "turn:c0dex.cat:3478?transport=tcp",
           ],
-          username: "codex_user",
-          credential: "codex_turn_password_2024",
-        }
+          username: "turnuser",
+          credential: "turnpassword2025",
+        },
       ],
       iceCandidatePoolSize: 10,
       bundlePolicy: "max-bundle",
@@ -300,11 +299,11 @@ const VideoCall = ({
 
     peer.ontrack = (event) => {
       console.log("[VideoCall] Received remote track:", event.track.kind);
-      
+
       if (event.streams && event.streams[0]) {
         const stream = event.streams[0];
         console.log("[VideoCall] Using stream from event. Tracks in stream:", stream.getTracks().length);
-        
+
         // We set the stream. If it's the same object, React won't re-render, 
         // but our useEffect will handle the already-attached srcObject.
         // To ensure a re-render when the FIRST track arrives, we check if it's already set.
@@ -349,7 +348,7 @@ const VideoCall = ({
     peer.oniceconnectionstatechange = () => {
       const state = peer.iceConnectionState;
       console.log(`[VideoCall][${instanceId.current}] ICE Connection State:`, state);
-      
+
       if (state === "connected" || state === "completed") {
         setConnectionStatus("connected");
       } else if (state === "failed") {
@@ -397,7 +396,7 @@ const VideoCall = ({
       await peer.setRemoteDescription(new RTCSessionDescription(incomingSignal));
       remoteDescriptionSet.current = true;
       processCandidatesQueue();
-      
+
       const answer = await peer.createAnswer();
       await peer.setLocalDescription(answer);
 
@@ -421,31 +420,31 @@ const VideoCall = ({
 
     if (isEnding.current) return;
     isEnding.current = true;
-    
+
     console.log(`[VideoCall][${instanceId.current}] endCall initiated (remote: ${remote})`);
-    
+
     // 1. Immediately unsubscribe from signaling to prevent loops
     socketService.offCallAnswered();
     socketService.offIceCandidate();
     socketService.offCallEnded();
     socketService.offCallRejected();
-    
+
     setCallEnded(true);
-    
+
     if (connectionRef.current) {
       connectionRef.current.close();
       connectionRef.current = null;
     }
-    
+
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
     }
-    
+
     if (!remote) {
       console.log(`[VideoCall][${instanceId.current}] Sending end-call signal`);
       socketService.endCall({ to: partnerId, from: user.id });
     }
-    
+
     setTimeout(() => {
       if (onEndRef.current) onEndRef.current();
     }, 1000);
@@ -456,7 +455,7 @@ const VideoCall = ({
       const audioTracks = stream.getAudioTracks();
       if (audioTracks.length > 0) {
         const newStatus = !audioTracks[0].enabled;
-        
+
         // Update all tracks in the local stream
         audioTracks.forEach(track => {
           track.enabled = newStatus;
@@ -511,7 +510,7 @@ const VideoCall = ({
             </div>
             <h3>{t("common.error_generic")}</h3>
             <p style={{ color: "#ef4444", maxWidth: "80%", margin: "0 auto 30px" }}>
-              {permissionError === "denied" 
+              {permissionError === "denied"
                 ? t("messages.call.permission_denied")
                 : t("messages.call.secure_context_required")}
             </p>
@@ -586,17 +585,17 @@ const VideoCall = ({
                           <p>{callerInfo?.name} {t("messages.call.camera_off_peer", "ha apagado la cámara")}</p>
                         </div>
                       )}
-                      <video 
-                        playsInline 
-                        ref={userVideo} 
-                        autoPlay 
-                        style={{ 
+                      <video
+                        playsInline
+                        ref={userVideo}
+                        autoPlay
+                        style={{
                           display: isPeerVideoOff ? "none" : "block",
                           width: '100%',
                           height: '100%',
                           objectFit: 'cover',
                           backgroundColor: '#000'
-                        }} 
+                        }}
                       />
                     </>
                   ) : (

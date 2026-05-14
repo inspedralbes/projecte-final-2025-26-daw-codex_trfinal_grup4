@@ -232,9 +232,8 @@ services:
       - ./docker/turn/turnserver.conf:/etc/coturn/turnserver.conf:ro
     command: 
       - -c /etc/coturn/turnserver.conf
-      - --external-ip=178.104.176.32
-      - --user=codex_user:codex_turn_password_2024
-      - --realm=codex.daw.inspedralbes.cat
+      - --user=turnuser:turnpassword2025
+      - --realm=c0dex.cat
       - --listening-port=3478
       - --min-port=49152
       - --max-port=65535
