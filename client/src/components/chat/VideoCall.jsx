@@ -44,6 +44,7 @@ const VideoCall = ({
   const isEnding = useRef(false);
   const isMounted = useRef(true);
   const instanceId = useRef(Math.random().toString(36).substring(7));
+  const disconnectTimeoutRef = useRef(null);
 
   useEffect(() => {
     isMounted.current = true;
@@ -349,14 +350,40 @@ const VideoCall = ({
       const state = peer.iceConnectionState;
       console.log(`[VideoCall][${instanceId.current}] ICE Connection State:`, state);
 
+      // Clear any pending disconnect timeout
+      if (disconnectTimeoutRef.current) {
+        clearTimeout(disconnectTimeoutRef.current);
+        disconnectTimeoutRef.current = null;
+      }
+
       if (state === "connected" || state === "completed") {
         setConnectionStatus("connected");
       } else if (state === "failed") {
-        console.error(`[VideoCall][${instanceId.current}] ICE Connection FAILED.`);
-        setConnectionStatus("failed");
-        // Don't auto-end call here to allow user to see the error
+        console.error(`[VideoCall][${instanceId.current}] ICE Connection FAILED. Attempting ICE restart...`);
+        // Try ICE restart before giving up
+        if (connectionRef.current && !isEnding.current) {
+          try {
+            connectionRef.current.restartIce();
+            setConnectionStatus("reconnecting");
+          } catch (e) {
+            console.error("[VideoCall] ICE restart failed:", e);
+            setConnectionStatus("failed");
+          }
+        } else {
+          setConnectionStatus("failed");
+        }
       } else if (state === "disconnected") {
-        setConnectionStatus("disconnected");
+        // "disconnected" is often transient (especially on mobile networks)
+        // Wait 8 seconds before declaring failure
+        setConnectionStatus("reconnecting");
+        disconnectTimeoutRef.current = setTimeout(() => {
+          if (!isMounted.current || isEnding.current) return;
+          const currentState = connectionRef.current?.iceConnectionState;
+          if (currentState === "disconnected" || currentState === "failed") {
+            console.error(`[VideoCall] Connection did not recover after 8s (state: ${currentState})`);
+            setConnectionStatus("failed");
+          }
+        }, 8000);
       }
     };
 
@@ -420,6 +447,12 @@ const VideoCall = ({
 
     if (isEnding.current) return;
     isEnding.current = true;
+
+    // Clear any pending disconnect timeout
+    if (disconnectTimeoutRef.current) {
+      clearTimeout(disconnectTimeoutRef.current);
+      disconnectTimeoutRef.current = null;
+    }
 
     console.log(`[VideoCall][${instanceId.current}] endCall initiated (remote: ${remote})`);
 
