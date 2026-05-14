@@ -277,16 +277,37 @@ const VideoCall = ({
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
+        // OpenRelay (Metered) - free TURN on ports 80/443 (bypasses all firewalls)
         {
-          urls: [
-            "turn:c0dex.cat:3478",
-            "turn:c0dex.cat:3478?transport=tcp",
-          ],
+          urls: "stun:stun.relay.metered.ca:80",
+        },
+        {
+          urls: "turn:global.relay.metered.ca:80",
+          username: "490355854938b84ce0750f26",
+          credential: "OvgLsuuN3inQtm9q",
+        },
+        {
+          urls: "turn:global.relay.metered.ca:80?transport=tcp",
+          username: "490355854938b84ce0750f26",
+          credential: "OvgLsuuN3inQtm9q",
+        },
+        {
+          urls: "turn:global.relay.metered.ca:443",
+          username: "490355854938b84ce0750f26",
+          credential: "OvgLsuuN3inQtm9q",
+        },
+        {
+          urls: "turns:global.relay.metered.ca:443?transport=tcp",
+          username: "490355854938b84ce0750f26",
+          credential: "OvgLsuuN3inQtm9q",
+        },
+        // Self-hosted Coturn fallback (TCP only)
+        {
+          urls: "turn:c0dex.cat:3478?transport=tcp",
           username: "turnuser",
           credential: "turnpassword2025",
         },
       ],
-      iceTransportPolicy: "relay",
       iceCandidatePoolSize: 10,
       bundlePolicy: "max-bundle",
       rtcpMuxPolicy: "require",

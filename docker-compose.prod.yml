@@ -233,11 +233,13 @@ services:
     command: 
       - -c /etc/coturn/turnserver.conf
       - --external-ip=178.104.176.32
+      - --relay-ip=178.104.176.32
       - --user=turnuser:turnpassword2025
       - --realm=c0dex.cat
       - --listening-port=3478
       - --min-port=49152
       - --max-port=65535
+      - --no-udp
       - --verbose
     environment:
       - DETECT_EXTERNAL_IP=yes
