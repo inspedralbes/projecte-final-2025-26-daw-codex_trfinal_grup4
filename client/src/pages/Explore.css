@@ -829,8 +829,8 @@
 
   .explore__header {
     position: sticky;
-    top: var(--mobile-header-height, 52px);
-    padding: var(--space-3);
+    top: 0;
+    padding: 0 var(--space-3) var(--space-3);
     z-index: var(--z-sticky, 100);
     width: 100%;
     box-sizing: border-box;

@@ -1,12 +1,12 @@
 .vc-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(10px);
-  z-index: 9999;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -124,6 +124,13 @@
   color: white;
   font-size: 20px;
   animation: pulse 1.5s infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  text-align: center;
 }
 
 .vc-peer-muted-indicator {
@@ -152,8 +159,8 @@
 
 .vc-local-video {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  top: 20px;
+  left: 20px;
   width: 150px;
   aspect-ratio: 16 / 9;
   background: #333;
@@ -371,11 +378,11 @@
   }
 
   .vc-container {
-    height: 100vh;
-    max-height: 100vh;
+    height: 100%;
+    max-height: 100%;
     border-radius: 0;
     box-shadow: none;
-    max-width: 100vw;
+    max-width: 100%;
   }
   
   .vc-video-container {
