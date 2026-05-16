@@ -10,7 +10,7 @@ const MODEL_ID = process.env.AI_MODEL_ID || 'Xenova/toxic-bert';
 const MODEL_ENABLED = process.env.AI_MODEL_ENABLED !== 'false';
 const ZERO_SHOT_ENABLED = process.env.AI_ZERO_SHOT_ENABLED !== 'false';
 const ZERO_SHOT_MODEL_ID = process.env.AI_ZERO_SHOT_MODEL_ID || 'MoritzLaurer/mDeBERTa-v3-base-mnli-xnli';
-const ZERO_SHOT_BLOCK_THRESHOLD = Number(process.env.AI_ZERO_SHOT_BLOCK_THRESHOLD || 0.52);
+const ZERO_SHOT_BLOCK_THRESHOLD = Number(process.env.AI_ZERO_SHOT_BLOCK_THRESHOLD || 0.75);
 const LLM_ENABLED = process.env.AI_LLM_ENABLED === 'true';
 const LLM_BASE_URL = (process.env.AI_LLM_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
 const LLM_API_KEY = process.env.AI_LLM_API_KEY || '';
@@ -23,10 +23,10 @@ const EMBEDDING_MODEL_ID = process.env.AI_EMBEDDING_MODEL_ID || 'Xenova/all-Mini
 const SUMMARY_MAX_TOKENS = Number(process.env.AI_SUMMARY_MAX_TOKENS || 60);
 const SUMMARY_MIN_TOKENS = Number(process.env.AI_SUMMARY_MIN_TOKENS || 20);
 
-const BLOCK_THRESHOLD = Number(process.env.AI_BLOCK_THRESHOLD || 0.72);
-const MEDIUM_THRESHOLD = Number(process.env.AI_MEDIUM_THRESHOLD || 0.45);
-const HIGH_THRESHOLD = Number(process.env.AI_HIGH_THRESHOLD || 0.65);
-const CRITICAL_THRESHOLD = Number(process.env.AI_CRITICAL_THRESHOLD || 0.85);
+const BLOCK_THRESHOLD = Number(process.env.AI_BLOCK_THRESHOLD || 0.85);
+const MEDIUM_THRESHOLD = Number(process.env.AI_MEDIUM_THRESHOLD || 0.60);
+const HIGH_THRESHOLD = Number(process.env.AI_HIGH_THRESHOLD || 0.80);
+const CRITICAL_THRESHOLD = Number(process.env.AI_CRITICAL_THRESHOLD || 0.92);
 
 let classifierPromise = null;
 let zeroShotPromise = null;
