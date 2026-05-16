@@ -23,12 +23,12 @@ export default function AdminPosts() {
             }
 
             const response = await api.get(`/admin/posts?${query.toString()}`);
-            const data = response.data || response;
-            setPosts(data.data || []);
-            setPagination(data.meta || {
-                current_page: data.current_page,
-                last_page: data.last_page,
-                total: data.total
+            // El API service ya devuelve el body del JSON
+            setPosts(response.data || []);
+            setPagination({
+                current_page: response.current_page,
+                last_page: response.last_page,
+                total: response.total
             });
         } catch (error) {
             console.error("Error fetching posts:", error);

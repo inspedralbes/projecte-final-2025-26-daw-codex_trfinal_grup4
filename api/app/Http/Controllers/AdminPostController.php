@@ -19,7 +19,7 @@ class AdminPostController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Post::with(['user', 'center', 'tags'])
-            ->withCount(['likedByUsers', 'comments', 'reposts'])
+            ->withCount(['likedByUsers', 'comments', 'reposts', 'bookmarkedByUsers'])
             ->latest();
 
         // Search by content or username
@@ -49,13 +49,11 @@ class AdminPostController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'All posts retrieved for admin',
-            'data'    => PostResource::collection($posts),
-            'meta'    => [
-                'current_page' => $posts->currentPage(),
-                'last_page'    => $posts->lastPage(),
-                'per_page'     => $posts->perPage(),
-                'total'        => $posts->total(),
-            ],
+            'data'    => PostResource::collection($posts->getCollection()),
+            'current_page' => $posts->currentPage(),
+            'last_page'    => $posts->lastPage(),
+            'per_page'     => $posts->perPage(),
+            'total'        => $posts->total(),
         ]);
     }
 }
