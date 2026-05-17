@@ -320,10 +320,13 @@ const VideoCall = ({
           ];
         }
 
-        iceServers.push({
-          urls,
-          username: import.meta.env.VITE_TURN_USERNAME || "turnuser",
-          credential: import.meta.env.VITE_TURN_CREDENTIAL || "turnpassword2025",
+        // Evitar bug de Chrome (Error 701) separando CADA url en su propio objeto
+        urls.forEach(url => {
+          iceServers.push({
+            urls: url,
+            username: import.meta.env.VITE_TURN_USERNAME || "turnuser",
+            credential: import.meta.env.VITE_TURN_CREDENTIAL || "turnpassword2025",
+          });
         });
       }
     }
