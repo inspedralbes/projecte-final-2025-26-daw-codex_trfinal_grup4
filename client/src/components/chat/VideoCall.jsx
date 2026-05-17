@@ -276,7 +276,7 @@ const VideoCall = ({
     // En desarrollo local (localhost), no necesitamos STUN/TURN
     // En producción, usamos STUN + TURN server privado
     const isDev = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    
+
     let iceServers = [];
 
     if (isDev) {
