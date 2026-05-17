@@ -126,6 +126,9 @@ services:
         - VITE_API_URL=${VITE_API_URL}
         - VITE_SOCKET_URL=${VITE_SOCKET_URL}
         - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+        - VITE_TURN_SERVER=${VITE_TURN_SERVER}
+        - VITE_TURN_USERNAME=${VITE_TURN_USERNAME}
+        - VITE_TURN_CREDENTIAL=${VITE_TURN_CREDENTIAL}
     container_name: tfg_client_prod
     restart: "no"
     volumes:
