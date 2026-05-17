@@ -324,7 +324,7 @@ class PostController extends Controller
      */
     public function destroy(Request $request, Post $post): JsonResponse
     {
-        if ($request->user()->id !== $post->user_id) {
+        if ($request->user()->id !== $post->user_id && !$request->user()->isAdmin()) {
             return $this->error('Unauthorized', 403);
         }
 

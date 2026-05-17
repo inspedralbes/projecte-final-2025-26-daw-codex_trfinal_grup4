@@ -42,6 +42,7 @@ const AdminUsers = React.lazy(() => import("@/pages/admin/AdminUsers"));
 const AdminModeration = React.lazy(() => import("@/pages/admin/AdminModeration"));
 const AdminCenters = React.lazy(() => import("@/pages/admin/AdminCenters"));
 const AdminRequests = React.lazy(() => import("@/pages/admin/AdminRequests"));
+const AdminPosts = React.lazy(() => import("@/pages/admin/AdminPosts"));
 
 // Layouts (Static import because they wrap everything immediately)
 import MainLayout from "@/components/layout/MainLayout";
@@ -142,10 +143,11 @@ export default function AppRouter() {
                   <Route index element={<AdminOverview />} />
                   <Route path="users" element={<AdminUsers />} />
                   <Route path="moderation" element={<AdminModeration />} />
-                  <Route path="centers" element={<AdminCenters />} />
-                  <Route path="requests" element={<AdminRequests />} />
-                </Route>
-              </Route>
+                   <Route path="centers" element={<AdminCenters />} />
+                   <Route path="requests" element={<AdminRequests />} />
+                   <Route path="posts" element={<AdminPosts />} />
+                 </Route>
+               </Route>
             </Route>
           </Route>
 

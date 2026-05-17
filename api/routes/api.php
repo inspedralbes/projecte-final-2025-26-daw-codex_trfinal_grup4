@@ -255,5 +255,8 @@ Route::middleware(['auth:sanctum', 'verified', 'not-blocked'])->group(function (
         Route::patch('/centers/{center}/approve', [CenterController::class, 'approve']);
         Route::patch('/centers/{center}/reject', [CenterController::class, 'reject']);
         Route::get('/centers/{center}/justificante', [CenterController::class, 'downloadJustificante']);
+
+        // Post management
+        Route::get('/admin/posts', [\App\Http\Controllers\AdminPostController::class, 'index']);
     });
 });

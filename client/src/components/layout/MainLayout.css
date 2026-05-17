@@ -94,9 +94,9 @@
 
   /* Show mobile header */
   .mobile-header {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: var(--z-fixed);
@@ -115,6 +115,7 @@
     background: var(--depth-3);
     cursor: pointer;
     flex-shrink: 0;
+    justify-self: start;
   }
 
   .mobile-header__avatar img {
@@ -128,6 +129,7 @@
     align-items: center;
     gap: var(--space-2);
     cursor: pointer;
+    justify-self: center;
   }
 
   .mobile-header__logo-icon {
@@ -151,6 +153,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    justify-self: end;
   }
 
   .mobile-header__action {

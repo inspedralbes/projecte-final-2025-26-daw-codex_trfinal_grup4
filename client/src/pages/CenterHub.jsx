@@ -82,6 +82,18 @@ const MessageIcon = () => (
   </svg>
 );
 
+const SchoolIcon = () => (
+  <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 21h18" />
+    <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16" />
+    <path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4" />
+    <line x1="9" y1="7" x2="9" y2="7.01" />
+    <line x1="15" y1="7" x2="15" y2="7.01" />
+    <line x1="9" y1="11" x2="9" y2="11.01" />
+    <line x1="15" y1="11" x2="15" y2="11.01" />
+  </svg>
+);
+
 // Map tag colors based on tag name patterns
 const getTagColor = (tagName) => {
   const name = tagName.toLowerCase();
@@ -921,7 +933,7 @@ function NoCenterView({ user, t, centerCheck, refreshUser }) {
   return (
     <div className="center-hub">
       <div className="center-hub__no-center">
-        <span className="center-hub__no-center-icon">🏫</span>
+        <span className="center-hub__no-center-icon"><SchoolIcon /></span>
 
         {isGeneric ? (
           <>
@@ -941,7 +953,7 @@ function NoCenterView({ user, t, centerCheck, refreshUser }) {
               className="center-hub__request-btn"
               onClick={() => setShowTeacherModal(true)}
             >
-              🏫 {t("center.request_center")}
+              <SchoolIcon /> {t("center.request_center")}
             </button>
           </>
         )}

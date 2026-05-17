@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTags } from "@/hooks/useTags";
 import profileService from "@/services/profileService";
 import postsService from "@/services/postsService";
@@ -222,7 +222,10 @@ const RecentQuestions = () => {
 export default function RightSection() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [pageGlitch, setPageGlitch] = useState(false);
+
+  const isExplorePage = location.pathname === "/explore";
 
   useEffect(() => {
     setPageGlitch(true);
@@ -242,18 +245,20 @@ export default function RightSection() {
       className={`right-section ${pageGlitch ? "right-section--glitch" : ""}`}
     >
       <div className="right-section__container">
-        <div className="search-box">
-          <span className="search-box__icon">
-            <SearchIcon />
-          </span>
-          <input
-            type="text"
-            className="search-box__input"
-            placeholder={t("common.search_placeholder_codex")}
-            onKeyDown={handleSearch}
-          />
-          <span className="search-box__shortcut">⌘K</span>
-        </div>
+        {!isExplorePage && (
+          <div className="search-box">
+            <span className="search-box__icon">
+              <SearchIcon />
+            </span>
+            <input
+              type="text"
+              className="search-box__input"
+              placeholder={t("common.search_placeholder_codex")}
+              onKeyDown={handleSearch}
+            />
+            <span className="search-box__shortcut">⌘K</span>
+          </div>
+        )}
         <TrendingTags />
         <TopContributors />
         <RecentQuestions />
