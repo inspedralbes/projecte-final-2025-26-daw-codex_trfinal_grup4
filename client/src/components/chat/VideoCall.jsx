@@ -292,36 +292,31 @@ const VideoCall = ({
         { urls: "stun:stun.services.mozilla.com:3478" },
       ];
 
-      // 🔥 MAGIA ANTI-FIREWALLS 🔥
-      // Usamos un TURN público y gratuito (OpenRelay) que corre por el puerto 443 TCP.
-      // Los firewalls de los institutos/empresas NUNCA bloquean el puerto 443 TCP (es el de HTTPS).
-      // Esto garantiza que la videollamada funcione aunque tu propio servidor Coturn falle.
-      iceServers.push({
-        urls: [
-          "turn:openrelay.metered.ca:80",
-          "turn:openrelay.metered.ca:80?transport=tcp",
-          "turn:openrelay.metered.ca:443",
-          "turn:openrelay.metered.ca:443?transport=tcp",
-          "turns:openrelay.metered.ca:443?transport=tcp"
-        ],
-        username: "openrelayproject",
-        credential: "openrelayproject",
-      });
-
       // Agregar TURN server privado si está configurado (como alternativa)
       if (import.meta.env.VITE_TURN_SERVER) {
         let urls = [];
+        const turnHost = import.meta.env.VITE_TURN_SERVER;
         
-        // Si han pegado una URL completa de Metered u otro proveedor
-        if (import.meta.env.VITE_TURN_SERVER.includes("turn:")) {
-          urls = [import.meta.env.VITE_TURN_SERVER];
-        } else {
-          // Si es solo una IP (tu propio servidor Coturn)
+        // Si han pegado una URL completa
+        if (turnHost.includes("turn:")) {
+          urls = [turnHost];
+        } 
+        // Si usan Metered.ca, forzamos puertos 443 TCP para saltar CUALQUIER firewall
+        else if (turnHost.includes("metered.ca")) {
           urls = [
-            `turn:${import.meta.env.VITE_TURN_SERVER}:3478`,
-            `turn:${import.meta.env.VITE_TURN_SERVER}:3478?transport=tcp`,
-            `turns:${import.meta.env.VITE_TURN_SERVER}:5349`,
-            `turns:${import.meta.env.VITE_TURN_SERVER}:5349?transport=tcp`,
+            `turn:${turnHost}:80`,
+            `turn:${turnHost}:80?transport=tcp`,
+            `turn:${turnHost}:443`,
+            `turns:${turnHost}:443?transport=tcp`
+          ];
+        } 
+        // Si es tu propio servidor Coturn (IP)
+        else {
+          urls = [
+            `turn:${turnHost}:3478`,
+            `turn:${turnHost}:3478?transport=tcp`,
+            `turns:${turnHost}:5349`,
+            `turns:${turnHost}:5349?transport=tcp`,
           ];
         }
 
