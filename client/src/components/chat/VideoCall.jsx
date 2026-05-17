@@ -273,20 +273,32 @@ const VideoCall = ({
   }, [partnerId]);
 
   const createPeerConnection = () => {
+    const iceServers = [
+      // STUN servers públicos (Google) - NO requieren credenciales
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+      { urls: "stun:stun2.l.google.com:19302" },
+      { urls: "stun:stun3.l.google.com:19302" },
+      { urls: "stun:stun4.l.google.com:19302" },
+    ];
+
+    // En PRODUCCIÓN: agregar el TURN server privado (coturn)
+    // El TURN server está en docker-compose.prod.yml
+    if (import.meta.env.VITE_TURN_SERVER) {
+      iceServers.push({
+        urls: [
+          `turn:${import.meta.env.VITE_TURN_SERVER}:3478`,
+          `turn:${import.meta.env.VITE_TURN_SERVER}:3478?transport=tcp`,
+          `turns:${import.meta.env.VITE_TURN_SERVER}:5349`,
+          `turns:${import.meta.env.VITE_TURN_SERVER}:5349?transport=tcp`,
+        ],
+        username: import.meta.env.VITE_TURN_USERNAME || "turnuser",
+        credential: import.meta.env.VITE_TURN_CREDENTIAL || "turnpassword2025",
+      });
+    }
+
     const peer = new RTCPeerConnection({
-      iceServers: [
-        // STUN servers (públicos, sin credenciales necesarias)
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" },
-        { urls: "stun:stun2.l.google.com:19302" },
-        { urls: "stun:stun3.l.google.com:19302" },
-        { urls: "stun:stun4.l.google.com:19302" },
-        // TURN servers (públicos, sin credenciales necesarias)
-        { urls: "turn:openrelay.metered.ca:80" },
-        { urls: "turn:openrelay.metered.ca:443" },
-        { urls: "turn:openrelay.metered.ca:80?transport=tcp" },
-        { urls: "turns:openrelay.metered.ca:443?transport=tcp" },
-      ],
+      iceServers,
       iceCandidatePoolSize: 10,
       bundlePolicy: "max-bundle",
       rtcpMuxPolicy: "require",
