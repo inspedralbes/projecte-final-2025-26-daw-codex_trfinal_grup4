@@ -275,28 +275,17 @@ const VideoCall = ({
   const createPeerConnection = () => {
     const peer = new RTCPeerConnection({
       iceServers: [
+        // STUN servers (públicos, sin credenciales necesarias)
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
-        {
-          urls: "turn:global.relay.metered.ca:80",
-          username: "490355854938b84ce0750f26",
-          credential: "OvgLsuuN3inQtm9q",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:80?transport=tcp",
-          username: "490355854938b84ce0750f26",
-          credential: "OvgLsuuN3inQtm9q",
-        },
-        {
-          urls: "turn:global.relay.metered.ca:443",
-          username: "490355854938b84ce0750f26",
-          credential: "OvgLsuuN3inQtm9q",
-        },
-        {
-          urls: "turns:global.relay.metered.ca:443?transport=tcp",
-          username: "490355854938b84ce0750f26",
-          credential: "OvgLsuuN3inQtm9q",
-        },
+        { urls: "stun:stun2.l.google.com:19302" },
+        { urls: "stun:stun3.l.google.com:19302" },
+        { urls: "stun:stun4.l.google.com:19302" },
+        // TURN servers (públicos, sin credenciales necesarias)
+        { urls: "turn:openrelay.metered.ca:80" },
+        { urls: "turn:openrelay.metered.ca:443" },
+        { urls: "turn:openrelay.metered.ca:80?transport=tcp" },
+        { urls: "turns:openrelay.metered.ca:443?transport=tcp" },
       ],
       iceCandidatePoolSize: 10,
       bundlePolicy: "max-bundle",
