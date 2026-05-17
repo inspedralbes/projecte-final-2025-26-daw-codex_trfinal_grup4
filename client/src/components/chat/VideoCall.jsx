@@ -301,8 +301,8 @@ const VideoCall = ({
         if (turnHost.includes("turn:")) {
           urls = [turnHost];
         } 
-        // Si usan Metered.ca, forzamos puertos 443 TCP para saltar CUALQUIER firewall
-        else if (turnHost.includes("metered.ca")) {
+        // Si usan Metered, forzamos puertos 443 TCP para saltar CUALQUIER firewall
+        else if (turnHost.includes("metered.ca") || turnHost.includes("metered.live")) {
           urls = [
             `turn:${turnHost}:80`,
             `turn:${turnHost}:80?transport=tcp`,
