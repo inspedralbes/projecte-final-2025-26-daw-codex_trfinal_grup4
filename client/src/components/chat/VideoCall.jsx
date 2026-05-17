@@ -274,16 +274,19 @@ const VideoCall = ({
 
   const createPeerConnection = () => {
     const iceServers = [
-      // STUN servers públicos (Google) - NO requieren credenciales
+      // STUN servers públicos confiables (sin credenciales necesarias)
+      // Múltiples proveedores para máxima compatibilidad
       { urls: "stun:stun.l.google.com:19302" },
-      { urls: "stun:stun1.l.google.com:19302" },
-      { urls: "stun:stun2.l.google.com:19302" },
-      { urls: "stun:stun3.l.google.com:19302" },
-      { urls: "stun:stun4.l.google.com:19302" },
+      { urls: "stun:stun.stunprotocol.org:3478" },
+      { urls: "stun:stun1.stunprotocol.org:3478" },
+      { urls: "stun:stun2.stunprotocol.org:3478" },
+      { urls: "stun:stun3.stunprotocol.org:3478" },
+      { urls: "stun:stun4.stunprotocol.org:3478" },
+      { urls: "stun:stunserver.stunprotocol.org:3478" },
+      { urls: "stun:stun.services.mozilla.com:3478" },
     ];
 
     // En PRODUCCIÓN: agregar el TURN server privado (coturn)
-    // El TURN server está en docker-compose.prod.yml
     if (import.meta.env.VITE_TURN_SERVER) {
       iceServers.push({
         urls: [
