@@ -273,31 +273,42 @@ const VideoCall = ({
   }, [partnerId]);
 
   const createPeerConnection = () => {
-    const iceServers = [
-      // STUN servers públicos confiables (sin credenciales necesarias)
-      // Múltiples proveedores para máxima compatibilidad
-      { urls: "stun:stun.l.google.com:19302" },
-      { urls: "stun:stun.stunprotocol.org:3478" },
-      { urls: "stun:stun1.stunprotocol.org:3478" },
-      { urls: "stun:stun2.stunprotocol.org:3478" },
-      { urls: "stun:stun3.stunprotocol.org:3478" },
-      { urls: "stun:stun4.stunprotocol.org:3478" },
-      { urls: "stun:stunserver.stunprotocol.org:3478" },
-      { urls: "stun:stun.services.mozilla.com:3478" },
-    ];
+    // En desarrollo local (localhost), no necesitamos STUN/TURN
+    // En producción, usamos STUN + TURN server privado
+    const isDev = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    
+    let iceServers = [];
 
-    // En PRODUCCIÓN: agregar el TURN server privado (coturn)
-    if (import.meta.env.VITE_TURN_SERVER) {
-      iceServers.push({
-        urls: [
-          `turn:${import.meta.env.VITE_TURN_SERVER}:3478`,
-          `turn:${import.meta.env.VITE_TURN_SERVER}:3478?transport=tcp`,
-          `turns:${import.meta.env.VITE_TURN_SERVER}:5349`,
-          `turns:${import.meta.env.VITE_TURN_SERVER}:5349?transport=tcp`,
-        ],
-        username: import.meta.env.VITE_TURN_USERNAME || "turnuser",
-        credential: import.meta.env.VITE_TURN_CREDENTIAL || "turnpassword2025",
-      });
+    if (isDev) {
+      // En LOCAL: la red Docker permite conexión directa entre contenedores
+      // No necesitamos servidores ICE
+      iceServers = [];
+    } else {
+      // En PRODUCCIÓN: agregar STUN servers públicos + TURN privado
+      iceServers = [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun.stunprotocol.org:3478" },
+        { urls: "stun:stun1.stunprotocol.org:3478" },
+        { urls: "stun:stun2.stunprotocol.org:3478" },
+        { urls: "stun:stun3.stunprotocol.org:3478" },
+        { urls: "stun:stun4.stunprotocol.org:3478" },
+        { urls: "stun:stunserver.stunprotocol.org:3478" },
+        { urls: "stun:stun.services.mozilla.com:3478" },
+      ];
+
+      // Agregar TURN server privado si está configurado
+      if (import.meta.env.VITE_TURN_SERVER) {
+        iceServers.push({
+          urls: [
+            `turn:${import.meta.env.VITE_TURN_SERVER}:3478`,
+            `turn:${import.meta.env.VITE_TURN_SERVER}:3478?transport=tcp`,
+            `turns:${import.meta.env.VITE_TURN_SERVER}:5349`,
+            `turns:${import.meta.env.VITE_TURN_SERVER}:5349?transport=tcp`,
+          ],
+          username: import.meta.env.VITE_TURN_USERNAME || "turnuser",
+          credential: import.meta.env.VITE_TURN_CREDENTIAL || "turnpassword2025",
+        });
+      }
     }
 
     const peer = new RTCPeerConnection({
