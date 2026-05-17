@@ -234,7 +234,7 @@ services:
       - -c /etc/coturn/turnserver.conf
       - --external-ip=178.104.176.32
       - --relay-ip=178.104.176.32
-      - --user=webrtc_user_c0dex:Kx9$mN2@pL7#wQ4$vR8&tY0!zU5*jP3^
+      - --user=${VITE_TURN_USERNAME}:${VITE_TURN_CREDENTIAL}
       - --realm=c0dex.cat
       - --listening-port=3478
       - --min-port=49152
