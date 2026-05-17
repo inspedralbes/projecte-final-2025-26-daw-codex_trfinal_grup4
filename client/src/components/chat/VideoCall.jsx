@@ -287,24 +287,46 @@ const VideoCall = ({
       // En PRODUCCIÓN: agregar STUN servers públicos + TURN privado
       iceServers = [
         { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun.stunprotocol.org:3478" },
-        { urls: "stun:stun1.stunprotocol.org:3478" },
-        { urls: "stun:stun2.stunprotocol.org:3478" },
-        { urls: "stun:stun3.stunprotocol.org:3478" },
-        { urls: "stun:stun4.stunprotocol.org:3478" },
-        { urls: "stun:stunserver.stunprotocol.org:3478" },
+        { urls: "stun:stun1.l.google.com:19302" },
+        { urls: "stun:stun2.l.google.com:19302" },
         { urls: "stun:stun.services.mozilla.com:3478" },
       ];
 
-      // Agregar TURN server privado si está configurado
+      // 🔥 MAGIA ANTI-FIREWALLS 🔥
+      // Usamos un TURN público y gratuito (OpenRelay) que corre por el puerto 443 TCP.
+      // Los firewalls de los institutos/empresas NUNCA bloquean el puerto 443 TCP (es el de HTTPS).
+      // Esto garantiza que la videollamada funcione aunque tu propio servidor Coturn falle.
+      iceServers.push({
+        urls: [
+          "turn:openrelay.metered.ca:80",
+          "turn:openrelay.metered.ca:80?transport=tcp",
+          "turn:openrelay.metered.ca:443",
+          "turn:openrelay.metered.ca:443?transport=tcp",
+          "turns:openrelay.metered.ca:443?transport=tcp"
+        ],
+        username: "openrelayproject",
+        credential: "openrelayproject",
+      });
+
+      // Agregar TURN server privado si está configurado (como alternativa)
       if (import.meta.env.VITE_TURN_SERVER) {
-        iceServers.push({
-          urls: [
+        let urls = [];
+        
+        // Si han pegado una URL completa de Metered u otro proveedor
+        if (import.meta.env.VITE_TURN_SERVER.includes("turn:")) {
+          urls = [import.meta.env.VITE_TURN_SERVER];
+        } else {
+          // Si es solo una IP (tu propio servidor Coturn)
+          urls = [
             `turn:${import.meta.env.VITE_TURN_SERVER}:3478`,
             `turn:${import.meta.env.VITE_TURN_SERVER}:3478?transport=tcp`,
             `turns:${import.meta.env.VITE_TURN_SERVER}:5349`,
             `turns:${import.meta.env.VITE_TURN_SERVER}:5349?transport=tcp`,
-          ],
+          ];
+        }
+
+        iceServers.push({
+          urls,
           username: import.meta.env.VITE_TURN_USERNAME || "turnuser",
           credential: import.meta.env.VITE_TURN_CREDENTIAL || "turnpassword2025",
         });
