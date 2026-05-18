@@ -113,6 +113,7 @@ Sistema de elevación con 6 niveles (`--surface-depth-0` a `--surface-depth-5`) 
 | `/notifications` | Notifications | Stream de actividad |
 | `/profile/:username` | Profile | Perfil de desarrollador |
 | `/messages` | Messages | Chat P2P responsive con restricciones de seguimiento |
+| `/admin/posts` | AdminPosts | Gestión global de publicaciones y moderación (Admin) |
 | `/auth/google/callback` | GoogleCallback | Callback OAuth de Google |
 | `/verify-email` | EmailVerification | Verificación de email pendiente |
 | `/forgot-password` | ForgotPassword | Solicitar enlace de recuperación de contraseña |
@@ -128,7 +129,13 @@ src/
 │   ├── Messages.jsx         # Chat P2P responsive
 │   ├── CenterHub.jsx        # Hub institucional
 │   ├── ForgotPassword.jsx   # Recuperar contraseña
-│   └── ResetPassword.jsx    # Restablecer contraseña
+│   ├── ResetPassword.jsx    # Restablecer contraseña
+│   └── admin/               # Panel de administración global
+│       ├── AdminOverview.jsx   # Vista de resumen/estadísticas
+│       ├── AdminUsers.jsx      # Gestión de usuarios y baneos
+│       ├── AdminPosts.jsx      # Moderación de posts
+│       ├── AdminCenters.jsx    # Gestión de centros
+│       └── AdminRequests.jsx   # Solicitudes de registro pendientes
 ├── components/
 │   ├── layout/
 │   │   ├── MainLayout.jsx   # Shell 3-columnas
@@ -187,6 +194,7 @@ Para detalles específicos sobre la implementación técnica de cada microservic
 - [x] Soporte multi-idioma completo (Catalán, Español, Inglés)
 - [x] Servidor de correo producción (Hestia + DKIM/SPF/DMARC)
 - [x] Emails en español para mejor entregabilidad
+- [x] Panel de administración para la moderación global de publicaciones (visualización, filtrado y eliminación por administradores)
 
 ### Pendiente 🔄
 - [ ] Panel de administración para gestionar centros pendientes

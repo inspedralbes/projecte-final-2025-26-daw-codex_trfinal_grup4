@@ -23,7 +23,7 @@ L'autenticació es gestiona amb **Laravel Sanctum**.
 | POST | `/api/posts` | Crea un nou post (requereix auth). |
 | GET | `/api/posts/{id}` | Mostra un post específic. |
 | PUT | `/api/posts/{id}` | Actualitza un post propi. |
-| DELETE | `/api/posts/{id}` | Elimina un post. |
+| DELETE | `/api/posts/{id}` | Elimina un post (propi o per part d'un admin). |
 | GET | `/api/posts/{id}/comments` | Llista els comentaris d'un post. |
 | POST | `/api/comments` | Afegeix un comentari a un post. |
 
@@ -58,6 +58,7 @@ L'autenticació es gestiona amb **Laravel Sanctum**.
 | --- | --- | --- |
 | GET | `/api/admin/stats` | Estadístiques globals del sistema. |
 | GET | `/api/admin/users` | Llistat d'usuaris per a gestió. |
+| GET | `/api/admin/posts` | Llistat global de posts per a moderació de continguts. |
 | POST | `/api/admin/users/{id}/ban` | Baneja un usuari. |
 | PATCH | `/api/center-requests/{id}/approve` | Aprova una sol·licitud de centre. |
 

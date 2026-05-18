@@ -21,9 +21,11 @@ El sistema es divideix en quatre components principals que s'executen en conteni
 - **Responsabilitat:** Gestió de la comunicació bidireccional en temps real (xat, notificacions instantànies).
 - **Adaptador:** Utilitza Redis com a adaptador per permetre la comunicació entre Laravel i el servidor de Sockets via Pub/Sub.
 
-### 4. AI Moderation (Opcional/Experimental)
-- **Tecnologia:** Python/Node.js (segons implementació).
-- **Responsabilitat:** Anàlisi de contingut per a la moderació automàtica de posts i comentaris.
+### 4. AI Moderation
+- **Tecnologia:** Node.js + @xenova/transformers (ONNX).
+- **Responsabilitat:** Moderació activa de publicacions/comentaris, resumització i generació de vectors (embeddings).
+- **Model de toxicitat:** `Xenova/toxic-bert` (bloqueja si el score supera **0.85**).
+- **Model semàntic:** `mDeBERTa-v3` per a Zero-Shot (bloqueja en categories de dany si el score supera **0.75**).
 
 ---
 
@@ -58,6 +60,7 @@ graph TD
 | `/api` | Codi font del backend (Laravel). |
 | `/client` | Codi font del frontend (React). |
 | `/socket` | Codi font del servidor de temps real (Node.js). |
+| `/ai-moderation` | Microservei de moderació, resumització i embeddings (Node.js + Transformers). |
 | `/docker` | Configuracions de Nginx, PHP i MySQL per a cada entorn. |
 | `/doc` | Documentació tècnica i funcional. |
 
