@@ -233,6 +233,7 @@ services:
     network_mode: "host"
     volumes:
       - ./docker/turn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     command: 
       - -c /etc/coturn/turnserver.conf
       - --external-ip=178.104.176.32
