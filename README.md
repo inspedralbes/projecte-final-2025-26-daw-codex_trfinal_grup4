@@ -1,5 +1,13 @@
 # Projecte Final DAW – Codex TRFinal Grup 4
 
+## 🔗 Enllaços Importants
+
+| Recurs | Enllaç |
+|---|---|
+| 📂 **Repositori Git** | https://github.com/inspedralbes/projecte-final-2025-26-daw-codex_trfinal_grup4.git |
+| 🌐 **Producció (Actiu)** | https://c0dex.cat/welcome |
+| 📊 **Taiga (Gestor de Tasques)** | https://tree.taiga.io/project/elpoldefinitivo-projectefinalgr3/taskboard/sprint-1-25845 |
+
 ## Integrants
 | Nom | GitHub |
 |---|---|
@@ -287,11 +295,18 @@ docker compose -f docker-compose.prod.yml exec -T certbot certbot renew
 0 0 1 * * cd /path/to/projecte && docker compose -f docker-compose.prod.yml exec -T certbot certbot renew
 ```
 
-### URLs de Producció
-- 🌐 **App:** https://vostre-dominio.com
-- 📡 **API:** https://vostre-dominio.com/api
-- 💬 **Socket.io:** wss://vostre-dominio.com/socket.io/
+### URLs de Producció (Actiu 100%)
+- 🌐 **App Principal:** https://c0dex.cat/welcome
+- 📡 **API:** https://c0dex.cat/api
+- 💬 **Socket.io:** wss://c0dex.cat/socket.io/
 - 🔒 **SSL:** Let's Encrypt (automàtic)
+
+---
+
+## 📊 Gestió del Projecte
+
+- **Gestor de Tasques:** [Taiga Project Management](https://tree.taiga.io/project/elpoldefinitivo-projectefinalgr3/taskboard/sprint-1-25845)
+- **Control de Versions:** [GitHub Repository](https://github.com/inspedralbes/projecte-final-2025-26-daw-codex_trfinal_grup4.git)
 
 ---
 
